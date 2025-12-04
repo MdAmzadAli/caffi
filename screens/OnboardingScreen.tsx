@@ -5,6 +5,7 @@ import {
   Dimensions,
   Pressable,
   Platform,
+  TextInput,
 } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -35,9 +36,11 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 type OnboardingStep =
+  | "name"
   | "age"
   | "weight"
   | "gender"
+  | "health"
   | "sensitivity"
   | "sleep"
   | "alcohol"
@@ -45,9 +48,11 @@ type OnboardingStep =
   | "summary";
 
 const STEPS: OnboardingStep[] = [
+  "name",
   "age",
   "weight",
   "gender",
+  "health",
   "sensitivity",
   "sleep",
   "alcohol",
@@ -56,9 +61,12 @@ const STEPS: OnboardingStep[] = [
 ];
 
 interface OnboardingData {
+  name?: string;
   age?: number;
   weight?: number;
   gender?: Gender;
+  isPregnant?: boolean;
+  hasHeartCondition?: boolean;
   caffeineSensitivity?: CaffeineSensitivity;
   sleepGoal?: SleepGoal;
   alcoholIntake?: AlcoholIntake;
@@ -104,6 +112,8 @@ export default function OnboardingScreen() {
       age: data.age,
       weight: data.weight,
       gender: data.gender,
+      isPregnant: data.isPregnant,
+      hasHeartCondition: data.hasHeartCondition,
       caffeineSensitivity: data.caffeineSensitivity,
       sleepGoal: data.sleepGoal,
       alcoholIntake: data.alcoholIntake,
@@ -113,9 +123,12 @@ export default function OnboardingScreen() {
     const { optimal, safe } = calculateOptimalCaffeine(calculationInputs);
 
     updateProfile({
+      name: data.name || "",
       age: data.age,
       weight: data.weight,
       gender: data.gender,
+      isPregnant: data.isPregnant || false,
+      hasHeartCondition: data.hasHeartCondition || false,
       caffeineSensitivity: data.caffeineSensitivity,
       sleepGoal: data.sleepGoal,
       alcoholIntake: data.alcoholIntake,
@@ -138,6 +151,15 @@ export default function OnboardingScreen() {
 
   const renderStep = () => {
     switch (STEPS[currentStep]) {
+      case "name":
+        return (
+          <NameStep
+            value={data.name}
+            onChange={(v) => updateData("name", v)}
+            onNext={handleNext}
+            onSkip={handleSkip}
+          />
+        );
       case "age":
         return (
           <AgeStep
@@ -161,6 +183,17 @@ export default function OnboardingScreen() {
           <GenderStep
             value={data.gender}
             onChange={(v) => updateData("gender", v)}
+            onNext={handleNext}
+            onSkip={handleSkip}
+          />
+        );
+      case "health":
+        return (
+          <HealthStep
+            isPregnant={data.isPregnant}
+            hasHeartCondition={data.hasHeartCondition}
+            onPregnantChange={(v) => updateData("isPregnant", v)}
+            onHeartConditionChange={(v) => updateData("hasHeartCondition", v)}
             onNext={handleNext}
             onSkip={handleSkip}
           />
@@ -256,6 +289,177 @@ interface StepProps<T> {
   onChange: (value: T) => void;
   onNext: () => void;
   onSkip: () => void;
+}
+
+function NameStep({ value, onChange, onNext, onSkip }: StepProps<string>) {
+  const { theme } = useTheme();
+  const [localValue, setLocalValue] = useState(value || "");
+
+  const handleConfirm = () => {
+    onChange(localValue);
+    onNext();
+  };
+
+  return (
+    <StepContainer icon="user" title="What's your name?" onSkip={onSkip}>
+      <View style={styles.inputContainer}>
+        <ThemedText type="body" muted style={styles.inputLabel}>
+          We'll use this to personalize your experience
+        </ThemedText>
+        <View
+          style={[
+            styles.textInputContainer,
+            { backgroundColor: theme.backgroundSecondary },
+          ]}
+        >
+          <Feather name="user" size={20} color={theme.textMuted} />
+          <View style={styles.textInputWrapper}>
+            <TextInput
+              style={[styles.textInput, { color: theme.text }]}
+              value={localValue}
+              onChangeText={setLocalValue}
+              placeholder="Enter your name"
+              placeholderTextColor={theme.textMuted}
+              autoFocus
+              returnKeyType="done"
+              onSubmitEditing={handleConfirm}
+            />
+          </View>
+        </View>
+      </View>
+      <ContinueButton onPress={handleConfirm} disabled={!localValue.trim()} />
+    </StepContainer>
+  );
+}
+
+interface HealthStepProps {
+  isPregnant: boolean | undefined;
+  hasHeartCondition: boolean | undefined;
+  onPregnantChange: (value: boolean) => void;
+  onHeartConditionChange: (value: boolean) => void;
+  onNext: () => void;
+  onSkip: () => void;
+}
+
+function HealthStep({
+  isPregnant,
+  hasHeartCondition,
+  onPregnantChange,
+  onHeartConditionChange,
+  onNext,
+  onSkip,
+}: HealthStepProps) {
+  const { theme } = useTheme();
+
+  return (
+    <StepContainer icon="heart" title="Health Status" onSkip={onSkip}>
+      <View style={styles.healthContainer}>
+        <ThemedText type="body" muted style={styles.healthSubtitle}>
+          This helps us calculate safe caffeine limits
+        </ThemedText>
+
+        <View style={styles.healthOptions}>
+          <HealthToggle
+            label="Pregnant or nursing"
+            description="Caffeine limits are lower during pregnancy"
+            icon="heart"
+            isActive={isPregnant || false}
+            onToggle={() => onPregnantChange(!isPregnant)}
+          />
+
+          <HealthToggle
+            label="Heart condition"
+            description="Some heart conditions are affected by caffeine"
+            icon="activity"
+            isActive={hasHeartCondition || false}
+            onToggle={() => onHeartConditionChange(!hasHeartCondition)}
+          />
+        </View>
+
+        <ThemedText type="caption" muted style={styles.healthNote}>
+          If neither applies, just continue
+        </ThemedText>
+      </View>
+      <ContinueButton onPress={onNext} />
+    </StepContainer>
+  );
+}
+
+interface HealthToggleProps {
+  label: string;
+  description: string;
+  icon: keyof typeof Feather.glyphMap;
+  isActive: boolean;
+  onToggle: () => void;
+}
+
+function HealthToggle({
+  label,
+  description,
+  icon,
+  isActive,
+  onToggle,
+}: HealthToggleProps) {
+  const { theme } = useTheme();
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <AnimatedPressable
+      onPress={onToggle}
+      onPressIn={() => {
+        scale.value = withSpring(0.97);
+      }}
+      onPressOut={() => {
+        scale.value = withSpring(1);
+      }}
+      style={[
+        styles.healthToggle,
+        {
+          backgroundColor: isActive
+            ? Colors.light.accent + "20"
+            : theme.backgroundSecondary,
+          borderColor: isActive ? Colors.light.accent : "transparent",
+        },
+        animatedStyle,
+      ]}
+    >
+      <View style={styles.healthToggleIcon}>
+        <Feather
+          name={icon}
+          size={24}
+          color={isActive ? Colors.light.accent : theme.textMuted}
+        />
+      </View>
+      <View style={styles.healthToggleText}>
+        <ThemedText
+          type="body"
+          style={{ color: isActive ? Colors.light.accent : theme.text }}
+        >
+          {label}
+        </ThemedText>
+        <ThemedText type="caption" muted>
+          {description}
+        </ThemedText>
+      </View>
+      <View
+        style={[
+          styles.healthToggleCheck,
+          {
+            backgroundColor: isActive ? Colors.light.accent : "transparent",
+            borderColor: isActive ? Colors.light.accent : theme.textMuted,
+          },
+        ]}
+      >
+        {isActive ? (
+          <Feather name="check" size={14} color="#FFFFFF" />
+        ) : null}
+      </View>
+    </AnimatedPressable>
+  );
 }
 
 function AgeStep({ value, onChange, onNext, onSkip }: StepProps<number>) {
@@ -763,9 +967,10 @@ function SliderButton({ icon, onPress }: SliderButtonProps) {
 
 interface ContinueButtonProps {
   onPress: () => void;
+  disabled?: boolean;
 }
 
-function ContinueButton({ onPress }: ContinueButtonProps) {
+function ContinueButton({ onPress, disabled = false }: ContinueButtonProps) {
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -774,16 +979,20 @@ function ContinueButton({ onPress }: ContinueButtonProps) {
 
   return (
     <AnimatedPressable
-      onPress={onPress}
+      onPress={disabled ? undefined : onPress}
       onPressIn={() => {
-        scale.value = withSpring(0.97);
+        if (!disabled) {
+          scale.value = withSpring(0.97);
+        }
       }}
       onPressOut={() => {
-        scale.value = withSpring(1);
+        if (!disabled) {
+          scale.value = withSpring(1);
+        }
       }}
       style={[
         styles.continueButton,
-        { backgroundColor: Colors.light.accent },
+        { backgroundColor: disabled ? Colors.light.textMuted : Colors.light.accent },
         animatedStyle,
       ]}
     >
@@ -976,5 +1185,68 @@ const styles = StyleSheet.create({
   finishButtonText: {
     color: "#FFFFFF",
     fontWeight: "600",
+  },
+  inputContainer: {
+    paddingTop: Spacing.lg,
+  },
+  inputLabel: {
+    textAlign: "center",
+    marginBottom: Spacing["2xl"],
+  },
+  textInputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
+    gap: Spacing.md,
+  },
+  textInputWrapper: {
+    flex: 1,
+  },
+  textInput: {
+    fontSize: 16,
+    paddingVertical: Spacing.sm,
+  },
+  healthContainer: {
+    paddingTop: Spacing.lg,
+  },
+  healthSubtitle: {
+    textAlign: "center",
+    marginBottom: Spacing["2xl"],
+  },
+  healthOptions: {
+    gap: Spacing.lg,
+  },
+  healthNote: {
+    textAlign: "center",
+    marginTop: Spacing["2xl"],
+  },
+  healthToggle: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.md,
+    borderWidth: 2,
+    gap: Spacing.md,
+  },
+  healthToggleIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  healthToggleText: {
+    flex: 1,
+    gap: 2,
+  },
+  healthToggleCheck: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

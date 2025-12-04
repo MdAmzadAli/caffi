@@ -86,6 +86,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       alcoholIntake: profile.alcoholIntake,
       medications: profile.medications,
       isPregnant: profile.isPregnant,
+      hasHeartCondition: profile.hasHeartCondition,
       onBirthControl: profile.onBirthControl,
     });
 
@@ -199,6 +200,23 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
               });
               updateProfile({
                 isPregnant: newIsPregnant,
+                optimalCaffeine: optimal,
+                safeCaffeine: safe,
+              });
+            }}
+          />
+          <View style={styles.divider} />
+          <ToggleRow
+            label="Heart Condition"
+            value={profile.hasHeartCondition}
+            onToggle={() => {
+              const newHasHeartCondition = !profile.hasHeartCondition;
+              const { optimal, safe } = calculateOptimalCaffeine({
+                ...profile,
+                hasHeartCondition: newHasHeartCondition,
+              });
+              updateProfile({
+                hasHeartCondition: newHasHeartCondition,
                 optimalCaffeine: optimal,
                 safeCaffeine: safe,
               });

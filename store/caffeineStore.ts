@@ -43,6 +43,7 @@ export interface UserProfile {
   optimalCaffeine: number;
   safeCaffeine: number;
   isPregnant: boolean;
+  hasHeartCondition: boolean;
   onBirthControl: boolean;
   hasCompletedOnboarding: boolean;
 }
@@ -56,6 +57,7 @@ export interface CaffeineCalculationInputs {
   alcoholIntake?: AlcoholIntake;
   medications?: Medication[];
   isPregnant?: boolean;
+  hasHeartCondition?: boolean;
   onBirthControl?: boolean;
 }
 
@@ -86,6 +88,11 @@ export function calculateOptimalCaffeine(inputs: CaffeineCalculationInputs): { o
     optimal = Math.min(optimal, 200);
     safe = Math.min(safe, 200);
     optimal *= 0.5;
+  }
+
+  if (inputs.hasHeartCondition) {
+    optimal = Math.min(optimal, 100);
+    safe = Math.min(safe, 200);
   }
 
   if (inputs.caffeineSensitivity) {
@@ -388,6 +395,7 @@ const DEFAULT_PROFILE: UserProfile = {
   wakeTime: "07:00",
   sleepTime: "23:00",
   isPregnant: false,
+  hasHeartCondition: false,
   onBirthControl: false,
   hasCompletedOnboarding: false,
 };
