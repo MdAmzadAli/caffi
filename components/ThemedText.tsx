@@ -6,7 +6,8 @@ import { Typography } from "@/constants/theme";
 export type ThemedTextProps = TextProps & {
   lightColor?: string;
   darkColor?: string;
-  type?: "h1" | "h2" | "h3" | "h4" | "body" | "small" | "link";
+  type?: "h1" | "h2" | "h3" | "h4" | "body" | "small" | "caption" | "link";
+  muted?: boolean;
 };
 
 export function ThemedText({
@@ -14,6 +15,7 @@ export function ThemedText({
   lightColor,
   darkColor,
   type = "body",
+  muted = false,
   ...rest
 }: ThemedTextProps) {
   const { theme, isDark } = useTheme();
@@ -25,6 +27,10 @@ export function ThemedText({
 
     if (!isDark && lightColor) {
       return lightColor;
+    }
+
+    if (muted) {
+      return theme.textMuted;
     }
 
     if (type === "link") {
@@ -48,6 +54,8 @@ export function ThemedText({
         return Typography.body;
       case "small":
         return Typography.small;
+      case "caption":
+        return Typography.caption;
       case "link":
         return Typography.link;
       default:

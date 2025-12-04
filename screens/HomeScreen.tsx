@@ -1,52 +1,241 @@
 import React from "react";
+import { View, StyleSheet, Pressable } from "react-native";
+import { Feather } from "@expo/vector-icons";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Card } from "@/components/Card";
-import { ScreenFlatList } from "@/components/ScreenFlatList";
-import Spacer from "@/components/Spacer";
-import { Spacing } from "@/constants/theme";
-
-type HomeStackParamList = {
-  Home: undefined;
-  Detail: undefined;
-};
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+  Easing,
+} from "react-native-reanimated";
+import { ScreenScrollView } from "@/components/ScreenScrollView";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { CaffeineRing } from "@/components/CaffeineRing";
+import { QuickStatCard } from "@/components/QuickStatCard";
+import { DrinkTimelineItem } from "@/components/DrinkTimelineItem";
+import { useCaffeineStore } from "@/store/caffeineStore";
+import { useTheme } from "@/hooks/useTheme";
+import { Colors, Spacing, BorderRadius } from "@/constants/theme";
+import type { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 
 type HomeScreenProps = {
   navigation: NativeStackNavigationProp<HomeStackParamList, "Home">;
 };
 
-interface CardData {
-  id: string;
-  elevation: number;
-}
-
-const CARD_DATA: CardData[] = [
-  { id: "1", elevation: 1 },
-  { id: "2", elevation: 2 },
-  { id: "3", elevation: 3 },
-  { id: "4", elevation: 1 },
-  { id: "5", elevation: 2 },
-  { id: "6", elevation: 3 },
-  { id: "7", elevation: 1 },
-  { id: "8", elevation: 2 },
-  { id: "9", elevation: 3 },
-];
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
-  const renderItem = ({ item }: { item: CardData }) => (
-    <>
-      <Card
-        elevation={item.elevation}
-        onPress={() => navigation.navigate("Detail")}
-      />
-      <Spacer height={Spacing.lg} />
-    </>
-  );
+  const { theme } = useTheme();
+  const {
+    profile,
+    getTodayEntries,
+    getTodayCaffeine,
+    getActiveCaffeine,
+    getLastDrink,
+    getSleepImpact,
+    deleteEntry,
+  } = useCaffeineStore();
+
+  const todayEntries = getTodayEntries();
+  const todayCaffeine = getTodayCaffeine();
+  const activeCaffeine = getActiveCaffeine();
+  const lastDrink = getLastDrink();
+  const sleepImpact = getSleepImpact();
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 17) return "Good afternoon";
+    return "Good evening";
+  };
+
+  const formatDate = () => {
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+    };
+    return new Date().toLocaleDateString("en-US", options);
+  };
+
+  const formatLastDrinkTime = () => {
+    if (!lastDrink) return "No drinks yet";
+    const timestamp = new Date(lastDrink.timestamp);
+    const now = new Date();
+    const diffMs = now.getTime() - timestamp.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins}m ago`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours}h ago`;
+    return timestamp.toLocaleDateString();
+  };
+
+  const percentage = Math.min((todayCaffeine / profile.dailyLimit) * 100, 100);
 
   return (
-    <ScreenFlatList
-      data={CARD_DATA}
-      renderItem={renderItem}
-      keyExtractor={(item) => item.id}
-    />
+    <ScreenScrollView>
+      <View style={styles.header}>
+        <ThemedText type="h4">{getGreeting()}</ThemedText>
+        <ThemedText type="small" muted>
+          {formatDate()}
+        </ThemedText>
+      </View>
+
+      <View style={styles.ringContainer}>
+        <CaffeineRing
+          percentage={percentage}
+          currentMg={todayCaffeine}
+          limitMg={profile.dailyLimit}
+        />
+      </View>
+
+      <View style={styles.statsRow}>
+        <QuickStatCard
+          icon="activity"
+          label="Active"
+          value={`${activeCaffeine} mg`}
+          sublabel="in blood"
+        />
+        <QuickStatCard
+          icon="coffee"
+          label="Last drink"
+          value={lastDrink?.name || "None"}
+          sublabel={formatLastDrinkTime()}
+        />
+        <QuickStatCard
+          icon="moon"
+          label="Sleep"
+          value={sleepImpact.message}
+          status={sleepImpact.level as "good" | "warning" | "danger"}
+        />
+      </View>
+
+      <View style={styles.actionsRow}>
+        <ActionButton
+          icon="bar-chart-2"
+          label="View Stats"
+          onPress={() => navigation.navigate("Statistics")}
+        />
+        <ActionButton
+          icon="list"
+          label="All Drinks"
+          onPress={() => navigation.navigate("DrinkDatabase")}
+        />
+      </View>
+
+      <View style={styles.timelineSection}>
+        <ThemedText type="h4" style={styles.sectionTitle}>
+          Today
+        </ThemedText>
+        {todayEntries.length === 0 ? (
+          <ThemedView elevation={1} style={styles.emptyState}>
+            <Feather name="coffee" size={32} color={theme.textMuted} />
+            <ThemedText muted style={styles.emptyText}>
+              You haven't added any drinks today
+            </ThemedText>
+            <ThemedText type="small" muted>
+              Tap the + button to add your first one
+            </ThemedText>
+          </ThemedView>
+        ) : (
+          todayEntries.map((entry) => (
+            <DrinkTimelineItem
+              key={entry.id}
+              entry={entry}
+              onDelete={() => deleteEntry(entry.id)}
+            />
+          ))
+        )}
+      </View>
+    </ScreenScrollView>
   );
 }
+
+interface ActionButtonProps {
+  icon: keyof typeof Feather.glyphMap;
+  label: string;
+  onPress: () => void;
+}
+
+function ActionButton({ icon, label, onPress }: ActionButtonProps) {
+  const { theme } = useTheme();
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <AnimatedPressable
+      onPress={onPress}
+      onPressIn={() => {
+        scale.value = withSpring(0.95);
+      }}
+      onPressOut={() => {
+        scale.value = withSpring(1);
+      }}
+      style={[
+        styles.actionButton,
+        { backgroundColor: theme.backgroundDefault },
+        animatedStyle,
+      ]}
+    >
+      <Feather name={icon} size={20} color={Colors.light.accent} />
+      <ThemedText type="small" style={styles.actionLabel}>
+        {label}
+      </ThemedText>
+    </AnimatedPressable>
+  );
+}
+
+const styles = StyleSheet.create({
+  header: {
+    marginBottom: Spacing.xl,
+  },
+  ringContainer: {
+    alignItems: "center",
+    marginBottom: Spacing["2xl"],
+  },
+  statsRow: {
+    flexDirection: "row",
+    gap: Spacing.sm,
+    marginBottom: Spacing.xl,
+  },
+  actionsRow: {
+    flexDirection: "row",
+    gap: Spacing.sm,
+    marginBottom: Spacing["2xl"],
+  },
+  actionButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: Spacing.sm,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.sm,
+  },
+  actionLabel: {
+    fontWeight: "500",
+  },
+  timelineSection: {
+    flex: 1,
+  },
+  sectionTitle: {
+    marginBottom: Spacing.md,
+  },
+  emptyState: {
+    alignItems: "center",
+    padding: Spacing["3xl"],
+    borderRadius: BorderRadius.md,
+    gap: Spacing.sm,
+  },
+  emptyText: {
+    marginTop: Spacing.sm,
+    textAlign: "center",
+  },
+});
