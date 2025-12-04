@@ -10,10 +10,51 @@ import Animated, {
 import { ScreenScrollView } from "@/components/ScreenScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { useCaffeineStore } from "@/store/caffeineStore";
+import {
+  useCaffeineStore,
+  calculateOptimalCaffeine,
+  Gender,
+  CaffeineSensitivity,
+  SleepGoal,
+  AlcoholIntake,
+  Medication,
+} from "@/store/caffeineStore";
 import { useTheme } from "@/hooks/useTheme";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import type { SettingsStackParamList } from "@/navigation/SettingsStackNavigator";
+
+const GENDER_LABELS: Record<Gender, string> = {
+  male: "Male",
+  female: "Female",
+  other: "Other",
+  prefer_not_to_say: "Prefer not to say",
+};
+
+const SENSITIVITY_LABELS: Record<CaffeineSensitivity, string> = {
+  low: "Low",
+  medium: "Medium",
+  high: "High",
+};
+
+const SLEEP_GOAL_LABELS: Record<SleepGoal, string> = {
+  good_sleep: "Good Sleep",
+  normal_sleep: "Normal Sleep",
+  insomnia_prone: "Insomnia-Prone",
+};
+
+const ALCOHOL_LABELS: Record<AlcoholIntake, string> = {
+  rare: "Rare",
+  sometimes: "Sometimes",
+  daily: "Daily",
+};
+
+const MEDICATION_LABELS: Record<Medication, string> = {
+  anxiety_meds: "Anxiety meds",
+  adhd_stimulants: "ADHD stimulants",
+  ssris: "SSRIs",
+  beta_blockers: "Beta-blockers",
+  none: "None",
+};
 
 type SettingsScreenProps = {
   navigation: NativeStackNavigationProp<SettingsStackParamList, "Settings">;
@@ -33,14 +74,38 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   const [sleepTime, setSleepTime] = useState(profile.sleepTime);
 
   const handleSave = () => {
+    const newAge = age ? parseInt(age) : undefined;
+    const newWeight = weight ? parseInt(weight) : undefined;
+    
+    const { optimal, safe } = calculateOptimalCaffeine({
+      age: newAge,
+      weight: newWeight,
+      gender: profile.gender,
+      caffeineSensitivity: profile.caffeineSensitivity,
+      sleepGoal: profile.sleepGoal,
+      alcoholIntake: profile.alcoholIntake,
+      medications: profile.medications,
+      isPregnant: profile.isPregnant,
+      onBirthControl: profile.onBirthControl,
+    });
+
     updateProfile({
       name,
-      age: age ? parseInt(age) : undefined,
-      weight: weight ? parseInt(weight) : undefined,
-      dailyLimit: parseInt(dailyLimit) || 400,
+      age: newAge,
+      weight: newWeight,
+      dailyLimit: parseInt(dailyLimit) || safe,
       wakeTime,
       sleepTime,
+      optimalCaffeine: optimal,
+      safeCaffeine: safe,
     });
+  };
+
+  const getMedicationsDisplay = () => {
+    if (!profile.medications || profile.medications.length === 0) {
+      return "Not set";
+    }
+    return profile.medications.map((m) => MEDICATION_LABELS[m]).join(", ");
   };
 
   const handleReset = () => {
@@ -64,6 +129,31 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
     <ScreenScrollView>
       <View style={styles.section}>
         <ThemedText type="small" muted style={styles.sectionLabel}>
+          YOUR CAFFEINE LIMITS
+        </ThemedText>
+        <ThemedView elevation={1} style={styles.limitsCard}>
+          <View style={styles.limitItem}>
+            <ThemedText type="caption" muted style={styles.limitLabel}>
+              Optimal Daily
+            </ThemedText>
+            <ThemedText type="h3" style={{ color: Colors.light.accent }}>
+              {profile.optimalCaffeine} mg
+            </ThemedText>
+          </View>
+          <View style={[styles.limitDivider, { backgroundColor: theme.backgroundSecondary }]} />
+          <View style={styles.limitItem}>
+            <ThemedText type="caption" muted style={styles.limitLabel}>
+              Safe Maximum
+            </ThemedText>
+            <ThemedText type="h3">
+              {profile.safeCaffeine} mg
+            </ThemedText>
+          </View>
+        </ThemedView>
+      </View>
+
+      <View style={styles.section}>
+        <ThemedText type="small" muted style={styles.sectionLabel}>
           PROFILE
         </ThemedText>
         <ThemedView elevation={1} style={styles.card}>
@@ -79,7 +169,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
             label="Age"
             value={age}
             onChangeText={setAge}
-            placeholder="Optional"
+            placeholder="Not set"
             keyboardType="number-pad"
             onBlur={handleSave}
           />
@@ -88,19 +178,84 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
             label="Weight (kg)"
             value={weight}
             onChangeText={setWeight}
-            placeholder="Optional"
+            placeholder="Not set"
             keyboardType="number-pad"
             onBlur={handleSave}
+          />
+          <View style={styles.divider} />
+          <SettingsDisplayRow
+            label="Gender"
+            value={profile.gender ? GENDER_LABELS[profile.gender] : "Not set"}
           />
           <View style={styles.divider} />
           <ToggleRow
             label="Pregnant / Nursing"
             value={profile.isPregnant}
             onToggle={() => {
-              updateProfile({ isPregnant: !profile.isPregnant });
+              const newIsPregnant = !profile.isPregnant;
+              const { optimal, safe } = calculateOptimalCaffeine({
+                ...profile,
+                isPregnant: newIsPregnant,
+              });
+              updateProfile({
+                isPregnant: newIsPregnant,
+                optimalCaffeine: optimal,
+                safeCaffeine: safe,
+              });
             }}
           />
+          {profile.gender === "female" && (
+            <>
+              <View style={styles.divider} />
+              <ToggleRow
+                label="On Birth Control"
+                value={profile.onBirthControl}
+                onToggle={() => {
+                  const newOnBirthControl = !profile.onBirthControl;
+                  const { optimal, safe } = calculateOptimalCaffeine({
+                    ...profile,
+                    onBirthControl: newOnBirthControl,
+                  });
+                  updateProfile({
+                    onBirthControl: newOnBirthControl,
+                    optimalCaffeine: optimal,
+                    safeCaffeine: safe,
+                  });
+                }}
+              />
+            </>
+          )}
         </ThemedView>
+      </View>
+
+      <View style={styles.section}>
+        <ThemedText type="small" muted style={styles.sectionLabel}>
+          HEALTH FACTORS
+        </ThemedText>
+        <ThemedView elevation={1} style={styles.card}>
+          <SettingsDisplayRow
+            label="Caffeine Sensitivity"
+            value={profile.caffeineSensitivity ? SENSITIVITY_LABELS[profile.caffeineSensitivity] : "Not set"}
+          />
+          <View style={styles.divider} />
+          <SettingsDisplayRow
+            label="Sleep Goal"
+            value={profile.sleepGoal ? SLEEP_GOAL_LABELS[profile.sleepGoal] : "Not set"}
+          />
+          <View style={styles.divider} />
+          <SettingsDisplayRow
+            label="Alcohol Intake"
+            value={profile.alcoholIntake ? ALCOHOL_LABELS[profile.alcoholIntake] : "Not set"}
+          />
+          <View style={styles.divider} />
+          <SettingsDisplayRow
+            label="Medications"
+            value={getMedicationsDisplay()}
+          />
+        </ThemedView>
+        <ThemedText type="caption" muted style={styles.hint}>
+          These factors affect your caffeine recommendations
+        </ThemedText>
       </View>
 
       <View style={styles.section}>
@@ -262,6 +417,24 @@ function ToggleRow({ label, value, onToggle }: ToggleRowProps) {
   );
 }
 
+interface SettingsDisplayRowProps {
+  label: string;
+  value: string;
+}
+
+function SettingsDisplayRow({ label, value }: SettingsDisplayRowProps) {
+  const { theme } = useTheme();
+
+  return (
+    <View style={styles.displayRow}>
+      <ThemedText type="body">{label}</ThemedText>
+      <ThemedText type="body" muted style={styles.displayValue}>
+        {value}
+      </ThemedText>
+    </View>
+  );
+}
+
 interface SettingsButtonProps {
   icon: keyof typeof Feather.glyphMap;
   label: string;
@@ -327,12 +500,44 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     overflow: "hidden",
   },
+  limitsCard: {
+    flexDirection: "row",
+    borderRadius: BorderRadius.md,
+    padding: Spacing.lg,
+    alignItems: "center",
+  },
+  limitItem: {
+    flex: 1,
+    alignItems: "center",
+  },
+  limitLabel: {
+    marginBottom: Spacing.xs,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    fontWeight: "500",
+  },
+  limitDivider: {
+    width: 1,
+    height: 40,
+    marginHorizontal: Spacing.lg,
+  },
   inputRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
+  },
+  displayRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+  },
+  displayValue: {
+    textAlign: "right",
+    maxWidth: "60%",
   },
   input: {
     textAlign: "right",
