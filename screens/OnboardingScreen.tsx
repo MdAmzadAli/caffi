@@ -6,7 +6,9 @@ import {
   Pressable,
   Platform,
   TextInput,
+  Modal,
 } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -551,33 +553,111 @@ function ScheduleStep({
   const insets = useSafeAreaInsets();
   const [localWakeTime, setLocalWakeTime] = useState(wakeTime || "07:00");
   const [localSleepTime, setLocalSleepTime] = useState(sleepTime || "23:00");
+  const [showWakePicker, setShowWakePicker] = useState(false);
+  const [showSleepPicker, setShowSleepPicker] = useState(false);
 
-  const wakeHour = parseInt(localWakeTime.split(":")[0]);
-  const sleepHour = parseInt(localSleepTime.split(":")[0]);
+  const timeStringToDate = (timeStr: string) => {
+    const [hours, minutes] = timeStr.split(":").map(Number);
+    const date = new Date();
+    date.setHours(hours, minutes, 0, 0);
+    return date;
+  };
 
-  const adjustTime = (current: string, delta: number, isWake: boolean) => {
-    const hour = parseInt(current.split(":")[0]);
-    let newHour = (hour + delta + 24) % 24;
-    const newTime = `${String(newHour).padStart(2, "0")}:00`;
-    if (isWake) {
-      setLocalWakeTime(newTime);
-    } else {
-      setLocalSleepTime(newTime);
+  const dateToTimeString = (date: Date) => {
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    return `${hours}:${minutes}`;
+  };
+
+  const formatTime = (time: string) => {
+    const [hourStr, minuteStr] = time.split(":");
+    const hour = parseInt(hourStr);
+    const minute = minuteStr || "00";
+    if (hour === 0) return `12:${minute} AM`;
+    if (hour === 12) return `12:${minute} PM`;
+    if (hour > 12) return `${hour - 12}:${minute} PM`;
+    return `${hour}:${minute} AM`;
+  };
+
+  const handleWakeTimeChange = (event: any, selectedDate?: Date) => {
+    if (Platform.OS === "android") {
+      setShowWakePicker(false);
+    }
+    if (selectedDate) {
+      setLocalWakeTime(dateToTimeString(selectedDate));
     }
   };
 
-  const formatHour = (time: string) => {
-    const hour = parseInt(time.split(":")[0]);
-    if (hour === 0) return "12:00 AM";
-    if (hour === 12) return "12:00 PM";
-    if (hour > 12) return `${hour - 12}:00 PM`;
-    return `${hour}:00 AM`;
+  const handleSleepTimeChange = (event: any, selectedDate?: Date) => {
+    if (Platform.OS === "android") {
+      setShowSleepPicker(false);
+    }
+    if (selectedDate) {
+      setLocalSleepTime(dateToTimeString(selectedDate));
+    }
   };
 
   const handleConfirm = () => {
     onWakeTimeChange(localWakeTime);
     onSleepTimeChange(localSleepTime);
     onNext();
+  };
+
+  const renderTimePicker = (
+    isWake: boolean,
+    show: boolean,
+    setShow: (show: boolean) => void,
+    value: string,
+    onChange: (event: any, date?: Date) => void
+  ) => {
+    if (!show) return null;
+
+    if (Platform.OS === "ios") {
+      return (
+        <Modal
+          transparent
+          animationType="slide"
+          visible={show}
+          onRequestClose={() => setShow(false)}
+        >
+          <View style={styles.pickerModalOverlay}>
+            <View style={[styles.pickerModalContent, { backgroundColor: theme.backgroundDefault }]}>
+              <View style={styles.pickerHeader}>
+                <ThemedText type="h3" style={styles.pickerTitle}>
+                  {isWake ? "Wake Up Time" : "Bedtime"}
+                </ThemedText>
+                <Pressable
+                  onPress={() => setShow(false)}
+                  style={styles.pickerDoneButton}
+                >
+                  <ThemedText type="body" style={{ color: Colors.light.accent, fontWeight: "600" }}>
+                    Done
+                  </ThemedText>
+                </Pressable>
+              </View>
+              <DateTimePicker
+                value={timeStringToDate(value)}
+                mode="time"
+                display="spinner"
+                onChange={onChange}
+                style={styles.timePicker}
+                textColor={theme.text}
+              />
+            </View>
+          </View>
+        </Modal>
+      );
+    }
+
+    return (
+      <DateTimePicker
+        value={timeStringToDate(value)}
+        mode="time"
+        is24Hour={false}
+        display="default"
+        onChange={onChange}
+      />
+    );
   };
 
   return (
@@ -607,13 +687,16 @@ function ScheduleStep({
             <ThemedText type="body" style={styles.scheduleLabel}>
               Wake up
             </ThemedText>
-            <View style={styles.timeSelector}>
-              <SliderButton icon="minus" onPress={() => adjustTime(localWakeTime, -1, true)} />
+            <Pressable
+              onPress={() => setShowWakePicker(true)}
+              style={[styles.timePickerButton, { backgroundColor: theme.backgroundSecondary }]}
+            >
+              <Feather name="clock" size={20} color={Colors.light.accent} />
               <ThemedText type="h3" style={styles.timeValue}>
-                {formatHour(localWakeTime)}
+                {formatTime(localWakeTime)}
               </ThemedText>
-              <SliderButton icon="plus" onPress={() => adjustTime(localWakeTime, 1, true)} />
-            </View>
+              <Feather name="chevron-right" size={20} color={theme.textMuted} />
+            </Pressable>
           </View>
 
           <View style={styles.scheduleItem}>
@@ -621,24 +704,30 @@ function ScheduleStep({
             <ThemedText type="body" style={styles.scheduleLabel}>
               Bedtime
             </ThemedText>
-            <View style={styles.timeSelector}>
-              <SliderButton icon="minus" onPress={() => adjustTime(localSleepTime, -1, false)} />
+            <Pressable
+              onPress={() => setShowSleepPicker(true)}
+              style={[styles.timePickerButton, { backgroundColor: theme.backgroundSecondary }]}
+            >
+              <Feather name="clock" size={20} color={Colors.light.accent} />
               <ThemedText type="h3" style={styles.timeValue}>
-                {formatHour(localSleepTime)}
+                {formatTime(localSleepTime)}
               </ThemedText>
-              <SliderButton icon="plus" onPress={() => adjustTime(localSleepTime, 1, false)} />
-            </View>
+              <Feather name="chevron-right" size={20} color={theme.textMuted} />
+            </Pressable>
           </View>
         </View>
 
         <ThemedText type="caption" muted style={styles.scheduleNote}>
-          This step is required for accurate recommendations
+          Tap a time to change it
         </ThemedText>
       </View>
 
       <View style={[styles.requiredButtonContainer, { paddingBottom: insets.bottom + Spacing.xl }]}>
         <ContinueButton onPress={handleConfirm} />
       </View>
+
+      {renderTimePicker(true, showWakePicker, setShowWakePicker, localWakeTime, handleWakeTimeChange)}
+      {renderTimePicker(false, showSleepPicker, setShowSleepPicker, localSleepTime, handleSleepTimeChange)}
     </View>
   );
 }
@@ -1105,5 +1194,44 @@ const styles = StyleSheet.create({
   },
   requiredButtonContainer: {
     paddingTop: Spacing.xl,
+  },
+  timePickerButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
+    borderRadius: BorderRadius.md,
+    gap: Spacing.md,
+    minWidth: 180,
+    justifyContent: "center",
+  },
+  pickerModalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
+  },
+  pickerModalContent: {
+    borderTopLeftRadius: BorderRadius.lg,
+    borderTopRightRadius: BorderRadius.lg,
+    paddingBottom: Spacing["3xl"],
+  },
+  pickerHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(0, 0, 0, 0.1)",
+  },
+  pickerTitle: {
+    fontWeight: "600",
+  },
+  pickerDoneButton: {
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+  },
+  timePicker: {
+    height: 200,
   },
 });
