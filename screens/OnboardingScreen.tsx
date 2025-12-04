@@ -38,7 +38,6 @@ type OnboardingStep =
   | "name"
   | "age"
   | "weight"
-  | "health"
   | "sensitivity"
   | "alcohol"
   | "medications"
@@ -48,7 +47,6 @@ const STEPS: OnboardingStep[] = [
   "name",
   "age",
   "weight",
-  "health",
   "sensitivity",
   "alcohol",
   "medications",
@@ -59,8 +57,6 @@ interface OnboardingData {
   name?: string;
   ageRange?: AgeRange;
   weight?: number;
-  isPregnant?: boolean;
-  hasHeartCondition?: boolean;
   caffeineSensitivity?: CaffeineSensitivity;
   alcoholIntake?: AlcoholIntake;
   medications?: Medication[];
@@ -104,8 +100,6 @@ export default function OnboardingScreen() {
     const calculationInputs = {
       ageRange: data.ageRange,
       weight: data.weight,
-      isPregnant: data.isPregnant,
-      hasHeartCondition: data.hasHeartCondition,
       caffeineSensitivity: data.caffeineSensitivity,
       alcoholIntake: data.alcoholIntake,
       medications: data.medications,
@@ -117,8 +111,8 @@ export default function OnboardingScreen() {
       name: data.name || "",
       ageRange: data.ageRange,
       weight: data.weight,
-      isPregnant: data.isPregnant || false,
-      hasHeartCondition: data.hasHeartCondition || false,
+      isPregnant: false,
+      hasHeartCondition: false,
       caffeineSensitivity: data.caffeineSensitivity,
       alcoholIntake: data.alcoholIntake,
       medications: data.medications,
@@ -163,17 +157,6 @@ export default function OnboardingScreen() {
           <WeightStep
             value={data.weight}
             onChange={(v) => updateData("weight", v)}
-            onNext={handleNext}
-            onSkip={handleSkip}
-          />
-        );
-      case "health":
-        return (
-          <HealthStep
-            isPregnant={data.isPregnant}
-            hasHeartCondition={data.hasHeartCondition}
-            onPregnantChange={(v) => updateData("isPregnant", v)}
-            onHeartConditionChange={(v) => updateData("hasHeartCondition", v)}
             onNext={handleNext}
             onSkip={handleSkip}
           />
@@ -300,136 +283,6 @@ function NameStep({ value, onChange, onNext, onSkip }: StepProps<string>) {
       </View>
       <ContinueButton onPress={handleConfirm} disabled={!localValue.trim()} />
     </StepContainer>
-  );
-}
-
-interface HealthStepProps {
-  isPregnant: boolean | undefined;
-  hasHeartCondition: boolean | undefined;
-  onPregnantChange: (value: boolean) => void;
-  onHeartConditionChange: (value: boolean) => void;
-  onNext: () => void;
-  onSkip: () => void;
-}
-
-function HealthStep({
-  isPregnant,
-  hasHeartCondition,
-  onPregnantChange,
-  onHeartConditionChange,
-  onNext,
-  onSkip,
-}: HealthStepProps) {
-  const { theme } = useTheme();
-
-  return (
-    <StepContainer icon="heart" title="Health Status" onSkip={onSkip}>
-      <View style={styles.healthContainer}>
-        <ThemedText type="body" muted style={styles.healthSubtitle}>
-          This helps us calculate safe caffeine limits
-        </ThemedText>
-
-        <View style={styles.healthOptions}>
-          <HealthToggle
-            label="Pregnant or nursing"
-            description="Caffeine limits are lower during pregnancy"
-            icon="heart"
-            isActive={isPregnant || false}
-            onToggle={() => onPregnantChange(!isPregnant)}
-          />
-
-          <HealthToggle
-            label="Heart condition"
-            description="Some heart conditions are affected by caffeine"
-            icon="activity"
-            isActive={hasHeartCondition || false}
-            onToggle={() => onHeartConditionChange(!hasHeartCondition)}
-          />
-        </View>
-
-        <ThemedText type="caption" muted style={styles.healthNote}>
-          If neither applies, just continue
-        </ThemedText>
-      </View>
-      <ContinueButton onPress={onNext} />
-    </StepContainer>
-  );
-}
-
-interface HealthToggleProps {
-  label: string;
-  description: string;
-  icon: keyof typeof Feather.glyphMap;
-  isActive: boolean;
-  onToggle: () => void;
-}
-
-function HealthToggle({
-  label,
-  description,
-  icon,
-  isActive,
-  onToggle,
-}: HealthToggleProps) {
-  const { theme } = useTheme();
-  const scale = useSharedValue(1);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-
-  return (
-    <AnimatedPressable
-      onPress={onToggle}
-      onPressIn={() => {
-        scale.value = withSpring(0.97);
-      }}
-      onPressOut={() => {
-        scale.value = withSpring(1);
-      }}
-      style={[
-        styles.healthToggle,
-        {
-          backgroundColor: isActive
-            ? Colors.light.accent + "20"
-            : theme.backgroundSecondary,
-          borderColor: isActive ? Colors.light.accent : "transparent",
-        },
-        animatedStyle,
-      ]}
-    >
-      <View style={styles.healthToggleIcon}>
-        <Feather
-          name={icon}
-          size={24}
-          color={isActive ? Colors.light.accent : theme.textMuted}
-        />
-      </View>
-      <View style={styles.healthToggleText}>
-        <ThemedText
-          type="body"
-          style={{ color: isActive ? Colors.light.accent : theme.text }}
-        >
-          {label}
-        </ThemedText>
-        <ThemedText type="caption" muted>
-          {description}
-        </ThemedText>
-      </View>
-      <View
-        style={[
-          styles.healthToggleCheck,
-          {
-            backgroundColor: isActive ? Colors.light.accent : "transparent",
-            borderColor: isActive ? Colors.light.accent : theme.textMuted,
-          },
-        ]}
-      >
-        {isActive ? (
-          <Feather name="check" size={14} color="#FFFFFF" />
-        ) : null}
-      </View>
-    </AnimatedPressable>
   );
 }
 
@@ -631,12 +484,10 @@ function MedicationsStep({
   };
 
   const options: { key: Medication; label: string; icon: keyof typeof Feather.glyphMap }[] = [
-    { key: "anxiety_panic", label: "Anxiety/Panic", icon: "heart" },
-    { key: "depression_treatment", label: "Depression treatment", icon: "activity" },
-    { key: "adhd_medication", label: "ADHD medication", icon: "zap" },
-    { key: "high_blood_pressure", label: "High blood pressure", icon: "shield" },
-    { key: "insomnia_medication", label: "Insomnia medication", icon: "moon" },
-    { key: "acid_reflux", label: "Acid reflux", icon: "thermometer" },
+    { key: "anxiety_panic", label: "Anxiety / Panic issues", icon: "heart" },
+    { key: "adhd_medication", label: "ADHD (focus medications)", icon: "zap" },
+    { key: "insomnia_medication", label: "Sleep issues / Insomnia medication", icon: "moon" },
+    { key: "acid_reflux", label: "Acid reflux / Stomach problems", icon: "thermometer" },
     { key: "none", label: "None / Skip", icon: "check" },
   ];
 
@@ -1095,46 +946,5 @@ const styles = StyleSheet.create({
   textInput: {
     fontSize: 16,
     paddingVertical: Spacing.sm,
-  },
-  healthContainer: {
-    paddingTop: Spacing.lg,
-  },
-  healthSubtitle: {
-    textAlign: "center",
-    marginBottom: Spacing["2xl"],
-  },
-  healthOptions: {
-    gap: Spacing.lg,
-  },
-  healthNote: {
-    textAlign: "center",
-    marginTop: Spacing["2xl"],
-  },
-  healthToggle: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: Spacing.lg,
-    borderRadius: BorderRadius.md,
-    borderWidth: 2,
-    gap: Spacing.md,
-  },
-  healthToggleIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  healthToggleText: {
-    flex: 1,
-    gap: 2,
-  },
-  healthToggleCheck: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    alignItems: "center",
-    justifyContent: "center",
   },
 });

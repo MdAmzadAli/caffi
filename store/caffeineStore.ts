@@ -27,7 +27,7 @@ export type CaffeineSensitivity = "low" | "medium" | "high";
 export type SleepGoal = "good_sleep" | "normal_sleep" | "insomnia_prone";
 export type AlcoholIntake = "rare" | "sometimes" | "daily";
 export type AgeRange = "under_18" | "18_to_60" | "over_60";
-export type Medication = "anxiety_panic" | "depression_treatment" | "adhd_medication" | "high_blood_pressure" | "insomnia_medication" | "acid_reflux" | "none";
+export type Medication = "anxiety_panic" | "adhd_medication" | "insomnia_medication" | "acid_reflux" | "none";
 
 export interface UserProfile {
   name: string;
@@ -118,9 +118,7 @@ export function calculateOptimalCaffeine(inputs: CaffeineCalculationInputs): { o
   if (inputs.medications && inputs.medications.length > 0 && !inputs.medications.includes("none")) {
     const medicationMultipliers: Record<Medication, number> = {
       anxiety_panic: 0.6,
-      depression_treatment: 0.7,
       adhd_medication: 0.6,
-      high_blood_pressure: 0.7,
       insomnia_medication: 0.6,
       acid_reflux: 0.75,
       none: 1,
