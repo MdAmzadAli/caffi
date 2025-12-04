@@ -41,6 +41,7 @@ type OnboardingStep =
   | "sensitivity"
   | "alcohol"
   | "medications"
+  | "schedule"
   | "summary";
 
 const STEPS: OnboardingStep[] = [
@@ -50,6 +51,7 @@ const STEPS: OnboardingStep[] = [
   "sensitivity",
   "alcohol",
   "medications",
+  "schedule",
   "summary",
 ];
 
@@ -60,6 +62,8 @@ interface OnboardingData {
   caffeineSensitivity?: CaffeineSensitivity;
   alcoholIntake?: AlcoholIntake;
   medications?: Medication[];
+  wakeTime?: string;
+  sleepTime?: string;
 }
 
 export default function OnboardingScreen() {
@@ -116,9 +120,11 @@ export default function OnboardingScreen() {
       caffeineSensitivity: data.caffeineSensitivity,
       alcoholIntake: data.alcoholIntake,
       medications: data.medications,
+      wakeTime: data.wakeTime || "07:00",
+      sleepTime: data.sleepTime || "23:00",
       optimalCaffeine: optimal,
       safeCaffeine: safe,
-      dailyLimit: safe,
+      dailyLimit: optimal,
       hasCompletedOnboarding: true,
     });
   }, [data, updateProfile]);
@@ -186,6 +192,16 @@ export default function OnboardingScreen() {
             onChange={(v) => updateData("medications", v)}
             onNext={handleNext}
             onSkip={handleSkip}
+          />
+        );
+      case "schedule":
+        return (
+          <ScheduleStep
+            wakeTime={data.wakeTime}
+            sleepTime={data.sleepTime}
+            onWakeTimeChange={(v) => updateData("wakeTime", v)}
+            onSleepTimeChange={(v) => updateData("sleepTime", v)}
+            onNext={handleNext}
           />
         );
       case "summary":
@@ -513,6 +529,117 @@ function MedicationsStep({
 
       <ContinueButton onPress={handleConfirm} />
     </StepContainer>
+  );
+}
+
+interface ScheduleStepProps {
+  wakeTime: string | undefined;
+  sleepTime: string | undefined;
+  onWakeTimeChange: (value: string) => void;
+  onSleepTimeChange: (value: string) => void;
+  onNext: () => void;
+}
+
+function ScheduleStep({
+  wakeTime,
+  sleepTime,
+  onWakeTimeChange,
+  onSleepTimeChange,
+  onNext,
+}: ScheduleStepProps) {
+  const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
+  const [localWakeTime, setLocalWakeTime] = useState(wakeTime || "07:00");
+  const [localSleepTime, setLocalSleepTime] = useState(sleepTime || "23:00");
+
+  const wakeHour = parseInt(localWakeTime.split(":")[0]);
+  const sleepHour = parseInt(localSleepTime.split(":")[0]);
+
+  const adjustTime = (current: string, delta: number, isWake: boolean) => {
+    const hour = parseInt(current.split(":")[0]);
+    let newHour = (hour + delta + 24) % 24;
+    const newTime = `${String(newHour).padStart(2, "0")}:00`;
+    if (isWake) {
+      setLocalWakeTime(newTime);
+    } else {
+      setLocalSleepTime(newTime);
+    }
+  };
+
+  const formatHour = (time: string) => {
+    const hour = parseInt(time.split(":")[0]);
+    if (hour === 0) return "12:00 AM";
+    if (hour === 12) return "12:00 PM";
+    if (hour > 12) return `${hour - 12}:00 PM`;
+    return `${hour}:00 AM`;
+  };
+
+  const handleConfirm = () => {
+    onWakeTimeChange(localWakeTime);
+    onSleepTimeChange(localSleepTime);
+    onNext();
+  };
+
+  return (
+    <View style={styles.stepContainer}>
+      <View style={styles.stepHeader}>
+        <View
+          style={[
+            styles.iconCircle,
+            { backgroundColor: `${Colors.light.accent}20` },
+          ]}
+        >
+          <Feather name="clock" size={32} color={Colors.light.accent} />
+        </View>
+        <ThemedText type="h2" style={styles.stepTitle}>
+          Your Sleep Schedule
+        </ThemedText>
+      </View>
+
+      <View style={styles.stepContent}>
+        <ThemedText type="body" muted style={styles.scheduleSubtitle}>
+          This helps us calculate when to stop caffeine
+        </ThemedText>
+
+        <View style={styles.scheduleContainer}>
+          <View style={styles.scheduleItem}>
+            <Feather name="sun" size={24} color={Colors.light.accent} />
+            <ThemedText type="body" style={styles.scheduleLabel}>
+              Wake up
+            </ThemedText>
+            <View style={styles.timeSelector}>
+              <SliderButton icon="minus" onPress={() => adjustTime(localWakeTime, -1, true)} />
+              <ThemedText type="h3" style={styles.timeValue}>
+                {formatHour(localWakeTime)}
+              </ThemedText>
+              <SliderButton icon="plus" onPress={() => adjustTime(localWakeTime, 1, true)} />
+            </View>
+          </View>
+
+          <View style={styles.scheduleItem}>
+            <Feather name="moon" size={24} color={Colors.light.accent} />
+            <ThemedText type="body" style={styles.scheduleLabel}>
+              Bedtime
+            </ThemedText>
+            <View style={styles.timeSelector}>
+              <SliderButton icon="minus" onPress={() => adjustTime(localSleepTime, -1, false)} />
+              <ThemedText type="h3" style={styles.timeValue}>
+                {formatHour(localSleepTime)}
+              </ThemedText>
+              <SliderButton icon="plus" onPress={() => adjustTime(localSleepTime, 1, false)} />
+            </View>
+          </View>
+        </View>
+
+        <ThemedText type="caption" muted style={styles.scheduleNote}>
+          This step is required for accurate recommendations
+        </ThemedText>
+      </View>
+
+      <View style={[styles.requiredButtonContainer, { paddingBottom: insets.bottom + Spacing.xl }]}>
+        <ContinueButton onPress={handleConfirm} />
+      </View>
+    </View>
   );
 }
 
@@ -948,5 +1075,35 @@ const styles = StyleSheet.create({
   textInput: {
     fontSize: 16,
     paddingVertical: Spacing.sm,
+  },
+  scheduleSubtitle: {
+    textAlign: "center",
+    marginBottom: Spacing["2xl"],
+  },
+  scheduleContainer: {
+    gap: Spacing.xl,
+  },
+  scheduleItem: {
+    alignItems: "center",
+    gap: Spacing.md,
+  },
+  scheduleLabel: {
+    fontWeight: "500",
+  },
+  timeSelector: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.lg,
+  },
+  timeValue: {
+    minWidth: 120,
+    textAlign: "center",
+  },
+  scheduleNote: {
+    textAlign: "center",
+    marginTop: Spacing["2xl"],
+  },
+  requiredButtonContainer: {
+    paddingTop: Spacing.xl,
   },
 });

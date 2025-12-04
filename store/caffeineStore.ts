@@ -1,4 +1,5 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export interface DrinkEntry {
   id: string;
@@ -391,6 +392,13 @@ export const DRINK_DATABASE: DrinkItem[] = [
   },
 ];
 
+const STORAGE_KEYS = {
+  PROFILE: "@caffi_profile",
+  ENTRIES: "@caffi_entries",
+  CUSTOM_DRINKS: "@caffi_custom_drinks",
+  FAVORITES: "@caffi_favorites",
+};
+
 const DEFAULT_PROFILE: UserProfile = {
   name: "",
   dailyLimit: 400,
@@ -408,10 +416,64 @@ let globalProfile: UserProfile = { ...DEFAULT_PROFILE };
 let globalCustomDrinks: DrinkItem[] = [];
 let globalFavorites: string[] = [];
 let globalListeners: (() => void)[] = [];
+let isInitialized = false;
 
 const notifyListeners = () => {
   globalListeners.forEach((listener) => listener());
 };
+
+const saveToStorage = async () => {
+  try {
+    await AsyncStorage.multiSet([
+      [STORAGE_KEYS.PROFILE, JSON.stringify(globalProfile)],
+      [STORAGE_KEYS.ENTRIES, JSON.stringify(globalEntries)],
+      [STORAGE_KEYS.CUSTOM_DRINKS, JSON.stringify(globalCustomDrinks)],
+      [STORAGE_KEYS.FAVORITES, JSON.stringify(globalFavorites)],
+    ]);
+  } catch (error) {
+    console.error("Error saving to storage:", error);
+  }
+};
+
+const loadFromStorage = async () => {
+  try {
+    const results = await AsyncStorage.multiGet([
+      STORAGE_KEYS.PROFILE,
+      STORAGE_KEYS.ENTRIES,
+      STORAGE_KEYS.CUSTOM_DRINKS,
+      STORAGE_KEYS.FAVORITES,
+    ]);
+
+    const profileData = results[0][1];
+    const entriesData = results[1][1];
+    const customDrinksData = results[2][1];
+    const favoritesData = results[3][1];
+
+    if (profileData) {
+      globalProfile = JSON.parse(profileData);
+    }
+    if (entriesData) {
+      globalEntries = JSON.parse(entriesData).map((entry: any) => ({
+        ...entry,
+        timestamp: new Date(entry.timestamp),
+      }));
+    }
+    if (customDrinksData) {
+      globalCustomDrinks = JSON.parse(customDrinksData);
+    }
+    if (favoritesData) {
+      globalFavorites = JSON.parse(favoritesData);
+    }
+
+    isInitialized = true;
+    notifyListeners();
+  } catch (error) {
+    console.error("Error loading from storage:", error);
+    isInitialized = true;
+  }
+};
+
+loadFromStorage();
 
 export function useCaffeineStore() {
   const [, setUpdate] = useState(0);
@@ -455,6 +517,7 @@ export function useCaffeineStore() {
         globalFavorites = [...globalFavorites, drink.id];
       }
       notifyListeners();
+      saveToStorage();
       return entry;
     },
     [],
@@ -463,11 +526,13 @@ export function useCaffeineStore() {
   const deleteEntry = useCallback((id: string) => {
     globalEntries = globalEntries.filter((e) => e.id !== id);
     notifyListeners();
+    saveToStorage();
   }, []);
 
   const updateProfile = useCallback((updates: Partial<UserProfile>) => {
     globalProfile = { ...globalProfile, ...updates };
     notifyListeners();
+    saveToStorage();
   }, []);
 
   const addCustomDrink = useCallback((drink: Omit<DrinkItem, "id">) => {
@@ -477,6 +542,7 @@ export function useCaffeineStore() {
     };
     globalCustomDrinks = [...globalCustomDrinks, newDrink];
     notifyListeners();
+    saveToStorage();
     return newDrink;
   }, []);
 
@@ -487,6 +553,7 @@ export function useCaffeineStore() {
       globalFavorites = [...globalFavorites, drinkId];
     }
     notifyListeners();
+    saveToStorage();
   }, []);
 
   const getTodayEntries = useCallback(() => {
@@ -586,6 +653,7 @@ export function useCaffeineStore() {
     globalCustomDrinks = [];
     globalFavorites = [];
     notifyListeners();
+    saveToStorage();
   }, []);
 
   return {
@@ -593,6 +661,7 @@ export function useCaffeineStore() {
     profile: globalProfile,
     customDrinks: globalCustomDrinks,
     favorites: globalFavorites,
+    isInitialized,
     addEntry,
     deleteEntry,
     updateProfile,

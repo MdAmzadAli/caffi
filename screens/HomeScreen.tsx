@@ -74,7 +74,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     return timestamp.toLocaleDateString();
   };
 
-  const percentage = Math.min((todayCaffeine / profile.dailyLimit) * 100, 100);
+  const percentage = Math.min((todayCaffeine / profile.optimalCaffeine) * 100, 100);
 
   return (
     <ScreenScrollView>
@@ -89,7 +89,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         <CaffeineRing
           percentage={percentage}
           currentMg={todayCaffeine}
-          limitMg={profile.dailyLimit}
+          limitMg={profile.optimalCaffeine}
         />
       </View>
 
