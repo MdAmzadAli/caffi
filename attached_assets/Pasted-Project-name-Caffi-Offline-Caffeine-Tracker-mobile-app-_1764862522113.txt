@@ -1,0 +1,196 @@
+Project name: Caffi — Offline Caffeine Tracker (mobile app)
+Goal: Produce a clear, friendly, privacy-first mobile UI/UX design (Android & iOS safe) for an offline caffeine-tracking app. Focus on discoverability and single-handed usability. Theme: white + light coffee; calm, health-forward, minimal. Deliver: full screen mockups (mobile 360×800 & 390×844), component library, color tokens, spacing scale, exportable assets, and an interactive prototype (tap-through). Provide developer handoff notes (CSS variables or tailwind tokens + sample layout grid).
+
+High-level design directions
+
+Primary visual mood: Clean, airy, reassuring. Minimal clutter, generous whitespace, warm coffee accents. Avoid heavy textures; use subtle shadows & soft rounded corners.
+
+Color palette (use these hex tokens):
+
+Background / white: #FFFFFF
+
+Light coffee (primary background accents): #F5EBDD (use for cards, subtle panels)
+
+Coffee accent (brand color): #C69C6D (buttons, progress ring accent)
+
+Dark coffee (primary text & icons): #6B4C3B
+
+Muted text: #5A5A5A
+
+Success / safe: #2F9E44
+
+Warning / approaching: #F2A43A
+
+Danger / over limit: #E85D4E
+
+Divider / subtle gray: #EFEFEF
+
+Typography: Use Inter (or Poppins if Inter unavailable). Sizes: Title 20–24, Subtitle 16, Body 14, Small 12. Line height comfortable.
+
+Corner radius & shadows: 12–16px radius for cards, 8px for buttons, subtle elevation (soft shadow: y 2–4 px, blur 8–12).
+
+Grid & spacing: 8pt baseline; horizontal padding 16px.
+
+Navigation & structure (must be obvious and easy)
+
+Primary nav: Bottom tab bar with 4 tabs — Home (Dashboard), Add (center FAB), History, Settings. Tabs: icons + label. Active tab color = coffee accent.
+
+Primary action: Floating Action Button (FAB) centered above tab bar for quick “Add Drink” (circular, coffee accent, white plus icon).
+
+Secondary navigation: Top-right contextual actions (search/filter on Database screen, sync/backup disabled/hidden – offline only).
+
+Back behavior: Standard mobile back gestures and header back button.
+
+Screens to design (detailed, each with states)
+
+Provide full mockups + empty / filled / error states:
+
+Onboarding (3 slides)
+
+Purpose: quick value props: Privacy (offline), Simple tracking, Sleep-friendly.
+
+CTA: “Get started” → Ask for basic info: Age (optional), Weight (optional), Typical wake/sleep hours (optional). Provide “Skip” for minimal friction.
+
+Visual: warm coffee gradient strip, simple illustrations (coffee cup, sleep moon).
+
+Home / Dashboard (main)
+
+Top header: Greeting (“Good morning, Amzad”) + date.
+
+Large circular Caffeine Ring in center showing % of daily limit (numeric mg inside, e.g., “120 mg / 400 mg”). Ring accent = coffee accent; ring background track = #EFEFEF.
+
+Below ring: small horizontal chips: “Today”, “24h”, “Week”.
+
+Quick stats row: “Active in blood” (mg), “Last drink” (name & time), “Sleep impact” (badge with recommendation).
+
+Quick actions row: Add Drink (FAB), Scan (not for MVP), Add Custom Drink, View Graph.
+
+Bottom: mini timeline of today’s drinks (time, small icon, mg). Each item expandable to edit/delete (swipe left to delete).
+
+Empty state: friendly copy “You haven’t added any drinks today — tap + to add your first one.”
+
+Add Drink (full screen modal / sheet)
+
+Trigger: FAB or Add button.
+
+Layout: top search box (“Search drinks or brands”), below categorized quick-pick cards (Coffee, Tea, Energy, Soda, Chocolate, Custom).
+
+Pre-defined Starbucks sizes drop-down: Tall, Grande, Venti, Short (with ml values). Selecting a brand auto-fills caffeine mg.
+
+Manual input: amount (ml) OR preset cup size (e.g., “1 cup”), and calculated mg preview that updates live.
+
+Option to add notes and toggle “Mark as favorite” (save to quick list).
+
+CTA: “Add to today” (primary) + “Cancel”.
+
+Validation: if mg > user daily limit show inline warning with color & suggested action (e.g., “Consider decaf or smaller size”).
+
+Drink Database / Search
+
+Left: search + filters (type chips). Show list grouped by category, each item shows icon, name, standard mg per 100ml, and one-tap add (plus icon) to add default size.
+
+Ability to long-press → view details modal (full mg per sizes, source).
+
+Empty search state: “No results. Try different word.”
+
+History / Timeline
+
+Calendar selector at top (Day / Week selector). Default: Today.
+
+Graph area: hourly bar/line showing mg over time; below, list of drink entries with edit/delete.
+
+Weekly view: weekly totals, average daily mg, sleep correlation card (if user provided sleep data).
+
+Export/Share not required (offline); Option to backup locally (file export) could be greyed out for future.
+
+Statistics / Caffeine-in-blood curve screen
+
+Show interactive curve with decay model. Toggle: “Show half-life” vs “Simplified”.
+
+Show predicted “Caffeine drop time” — when you’ll feel less jittery or when safe window for sleep begins.
+
+Custom Drink Editor
+
+Form: name, category, caffeine per 100ml or per serving, default serving size, save button. Show preview consumption values.
+
+Settings
+
+Profile: Age, Weight, Pregnancy toggle. Daily limit input (auto-suggest 400 mg).
+
+Theme toggle: Light only (but provide dark mode placeholder).
+
+Notifications: toggle scheduled alerts, sleep warning toggle, limit reached alert.
+
+Data: Export / Reset data (local only).
+
+Privacy: “Your data never leaves this device” message.
+
+About & Help.
+
+Snackbars / Toasts / Alerts
+
+Short success toast for “Drink added”.
+
+Undo for delete (snackbar with UNDO).
+
+Modal for critical warnings (over limit).
+
+Component library & element specs (deliverable)
+
+Buttons: Primary (filled coffee accent, 44–52px height), Secondary (outlined), Tertiary (text). Disabled state: 50% opacity.
+
+FAB: 64px circular, centered bottom, shadow.
+
+Inputs: 44–56px tall, left icon, rounded 10–12px.
+
+Cards: white background on light coffee panels, 12px radius, 12–16px padding.
+
+Icons: simple line + filled style. Provide icon set for: coffee, espresso, tea, energy drink, soda, chocolate, favorite, delete, edit, history, settings, plus.
+
+Chips: rounded pills for filters.
+
+Progress ring sizes: 220px (dashboard), 140px (compact).
+
+Microcopy guidance (UX copy snippets)
+
+Onboarding slide: “Your caffeine, your privacy. No accounts, no servers.” CTA: “Start tracking.”
+
+Add Drink empty: “Search or choose a drink — we’ll calculate the caffeine for you.”
+
+High caffeine warning: “You’ve hit 80% of your daily limit. Consider switching to decaf or a smaller cup.”
+
+Sleep warning: “Caffeine logged after 4 PM may affect sleep tonight.”
+
+Interactions & animations
+
+Subtle micro-animations: ring fills with ease-in-out; timeline entries fade/slide on add; small bounce on FAB press.
+
+Swipe actions in lists: swipe left to reveal Delete, swipe right for Edit/Details.
+
+Pull-to-refresh on Database and History.
+
+Smooth transitions for modal sheet (Add Drink): slide-up with backdrop dim.
+
+Accessibility & performance
+
+Maintain accessible contrast for body text (>=4.5:1 where possible). Use darker coffee #6B4C3B for headings.
+
+Tap targets >= 44×44 px.
+
+Support dynamic type scaling.
+
+Keep image sizes small; avoid heavy vector animations.
+
+Deliverables (what I expect from the design tool)
+
+Pixel-perfect screen mockups (mobile sizes: 360×800 & 390×844) for all screens above.
+
+An interactive prototype (tap-through) showing these flows: Onboarding → Dashboard → Add Drink → Confirm → History → Edit → Settings.
+
+Component library (buttons, inputs, icons, progress ring) with export-ready assets (SVG + PNG at 1x/2x).
+
+Color tokens & CSS/Tailwind variables (example: --color-coffee: #C69C6D).
+
+Layout specs (margins, paddings, font sizes) and a short developer handoff note explaining how to implement the ring and half-life curve (math snippet).
+
+JSON summary of initial caffeine_db (a short sample of 10 items) to include in assets folder.
