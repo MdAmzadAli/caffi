@@ -22,15 +22,115 @@ export interface DrinkItem {
   icon: string;
 }
 
+export type Gender = "male" | "female" | "other" | "prefer_not_to_say";
+export type CaffeineSensitivity = "low" | "medium" | "high";
+export type SleepGoal = "good_sleep" | "normal_sleep" | "insomnia_prone";
+export type AlcoholIntake = "rare" | "sometimes" | "daily";
+export type Medication = "anxiety_meds" | "adhd_stimulants" | "ssris" | "beta_blockers" | "none";
+
 export interface UserProfile {
   name: string;
   age?: number;
   weight?: number;
+  gender?: Gender;
+  caffeineSensitivity?: CaffeineSensitivity;
+  sleepGoal?: SleepGoal;
+  alcoholIntake?: AlcoholIntake;
+  medications?: Medication[];
   wakeTime: string;
   sleepTime: string;
   dailyLimit: number;
+  optimalCaffeine: number;
+  safeCaffeine: number;
   isPregnant: boolean;
+  onBirthControl: boolean;
   hasCompletedOnboarding: boolean;
+}
+
+export interface CaffeineCalculationInputs {
+  age?: number;
+  weight?: number;
+  gender?: Gender;
+  caffeineSensitivity?: CaffeineSensitivity;
+  sleepGoal?: SleepGoal;
+  alcoholIntake?: AlcoholIntake;
+  medications?: Medication[];
+  isPregnant?: boolean;
+  onBirthControl?: boolean;
+}
+
+export function calculateOptimalCaffeine(inputs: CaffeineCalculationInputs): { optimal: number; safe: number } {
+  let optimal = 200;
+  let safe = 400;
+
+  if (inputs.weight) {
+    optimal = inputs.weight * 3;
+    optimal = Math.min(optimal, 200);
+    safe = Math.min(inputs.weight * 6, 400);
+  }
+
+  if (inputs.age !== undefined) {
+    if (inputs.age > 60) {
+      optimal *= 0.8;
+    } else if (inputs.age < 18) {
+      optimal = 80;
+      safe = 100;
+    }
+  }
+
+  if (inputs.gender === "female" && inputs.onBirthControl) {
+    optimal *= 0.75;
+  }
+
+  if (inputs.isPregnant) {
+    optimal = Math.min(optimal, 200);
+    safe = Math.min(safe, 200);
+    optimal *= 0.5;
+  }
+
+  if (inputs.caffeineSensitivity) {
+    switch (inputs.caffeineSensitivity) {
+      case "low":
+        optimal *= 1.1;
+        break;
+      case "high":
+        optimal *= 0.5;
+        break;
+    }
+  }
+
+  if (inputs.sleepGoal) {
+    switch (inputs.sleepGoal) {
+      case "good_sleep":
+        optimal *= 0.6;
+        break;
+      case "insomnia_prone":
+        optimal *= 0.5;
+        break;
+    }
+  }
+
+  if (inputs.alcoholIntake) {
+    switch (inputs.alcoholIntake) {
+      case "sometimes":
+        optimal *= 0.9;
+        break;
+      case "daily":
+        optimal *= 0.85;
+        break;
+    }
+  }
+
+  if (inputs.medications && inputs.medications.length > 0 && !inputs.medications.includes("none")) {
+    optimal *= 0.6;
+  }
+
+  optimal = Math.round(optimal);
+  optimal = Math.max(optimal, 50);
+  optimal = Math.min(optimal, 200);
+  safe = Math.round(safe);
+
+  return { optimal, safe };
 }
 
 const CAFFEINE_HALF_LIFE_HOURS = 5;
@@ -283,9 +383,12 @@ export const DRINK_DATABASE: DrinkItem[] = [
 const DEFAULT_PROFILE: UserProfile = {
   name: "",
   dailyLimit: 400,
+  optimalCaffeine: 200,
+  safeCaffeine: 400,
   wakeTime: "07:00",
   sleepTime: "23:00",
   isPregnant: false,
+  onBirthControl: false,
   hasCompletedOnboarding: false,
 };
 

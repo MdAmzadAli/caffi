@@ -1,0 +1,172 @@
+Build a minimal, clean caffeine-tracker onboarding flow using my current UI theme.
+
+Design Goals:
+
+Ultra-minimal, easy, fast onboarding
+
+No long text, no paragraphs, no descriptions
+
+Only icons, labels, sliders, pickers
+
+Each section must have a Skip button
+
+If a user skips everything, default optimal caffeine = 200 mg
+
+Do not specify colors; use my existing theme
+
+Entire flow should feel like Apple Health / Zero fasting app onboarding (simple + elegant).
+
+Onboarding Steps (each step is one screen):
+
+Age
+
+Slider or number picker
+
+Skip option
+
+Weight (kg)
+
+Slider or number picker
+
+Skip option
+
+Gender
+
+Options: Male, Female, Other, Prefer not to say
+
+Skip option
+
+Caffeine Sensitivity
+
+Options: Low, Medium, High
+
+Skip option
+
+Sleep Goal
+
+Options: Good Sleep, Normal Sleep, Insomnia-Prone
+
+Skip option
+
+Alcohol Intake
+
+Options: Rare, Sometimes, Daily
+
+Skip option
+
+Medications Affecting Caffeine
+
+Options: Anxiety meds, ADHD stimulants, SSRIs, Beta-blockers, None
+
+Skip option
+
+Final Summary Screen
+
+Show estimated “Optimal Caffeine Limit”
+
+Show “Safe Maximum Limit”
+
+Button → Finish
+
+CALCULATION LOGIC FOR OPTIMAL CAFFEINE (implement this exactly)
+Base Values
+
+optimal = 200 (default if user skips all)
+
+safe = 400
+
+If user provides inputs, calculate optimal like this:
+
+1. Weight adjustment
+
+If weight provided:
+
+optimal = weight_kg * 3
+
+Cap: optimal = min(optimal, 200)
+
+Safe limit:
+
+safe = min(weight_kg * 6, 400)
+
+2. Age adjustment
+
+If age > 60 → optimal *= 0.8
+
+If age < 18 → optimal = 80 and safe = 100
+
+3. Gender adjustment
+
+If female + on birth control (optional later in settings) → optimal *= 0.75
+
+4. Sensitivity
+
+Low → optimal *= 1.1
+
+Medium → no change
+
+High → optimal *= 0.5
+
+5. Sleep Goal
+
+Good sleep → optimal *= 0.6
+
+Insomnia-prone → optimal *= 0.5
+
+Normal → no change
+
+6. Alcohol Intake
+
+Sometimes → optimal *= 0.9
+
+Daily → optimal *= 0.85
+
+7. Medications
+
+If user selects any affecting caffeine:
+
+optimal *= 0.6
+
+Post-Processing
+
+Ensure: optimal = round(optimal)
+
+Minimum allowed optimal: 50 mg
+
+Maximum allowed optimal: 200 mg
+
+Final Output Values
+
+optimal_caffeine_mg
+
+safe_caffeine_mg
+
+Display these on the final screen in a clean, minimal style.
+
+UI Requirements
+
+Each step = full-screen card with one input
+
+Large icon + title + input method
+
+Small “Skip” button at bottom
+
+Smooth transitions
+
+No color specification (use current app theme)
+
+Very minimal text
+
+Avoid complexity — keep every screen extremely simple
+
+Finally, generate:
+
+The full onboarding UI code using my theme
+
+The calculation function (calculateOptimalCaffeine(inputs))
+
+States and navigation structure
+
+Clean and reusable components
+
+Make the entire onboarding feel premium, light, and frictionless.
