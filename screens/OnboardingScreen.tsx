@@ -9,6 +9,7 @@ import {
   Modal,
   ScrollView,
 } from "react-native";
+import { TimePickerModal } from "react-native-paper-dates";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -555,54 +556,39 @@ function ScheduleStep({
   const [localSleepTime, setLocalSleepTime] = useState(sleepTime || "23:00");
   const [showWakePicker, setShowWakePicker] = useState(false);
   const [showSleepPicker, setShowSleepPicker] = useState(false);
-  const [tempHour, setTempHour] = useState(7);
-  const [tempMinute, setTempMinute] = useState(0);
-  const [tempPeriod, setTempPeriod] = useState<"AM" | "PM">("AM");
 
   const parseTime = (timeStr: string) => {
     const [hourStr, minuteStr] = timeStr.split(":");
-    const hour24 = parseInt(hourStr);
-    const minute = parseInt(minuteStr) || 0;
-    const period = hour24 >= 12 ? "PM" : "AM";
-    let hour12 = hour24 % 12;
-    if (hour12 === 0) hour12 = 12;
-    return { hour: hour12, minute, period };
+    const hours = parseInt(hourStr);
+    const minutes = parseInt(minuteStr) || 0;
+    return { hours, minutes };
   };
 
   const formatTime = (time: string) => {
-    const { hour, minute, period } = parseTime(time);
-    return `${hour}:${String(minute).padStart(2, "0")} ${period}`;
+    const { hours, minutes } = parseTime(time);
+    const period = hours >= 12 ? "PM" : "AM";
+    let hour12 = hours % 12;
+    if (hour12 === 0) hour12 = 12;
+    return `${hour12}:${String(minutes).padStart(2, "0")} ${period}`;
   };
 
-  const openPicker = (isWake: boolean) => {
-    const timeStr = isWake ? localWakeTime : localSleepTime;
-    const { hour, minute, period } = parseTime(timeStr);
-    setTempHour(hour);
-    setTempMinute(minute);
-    setTempPeriod(period as "AM" | "PM");
-    if (isWake) {
-      setShowWakePicker(true);
-    } else {
-      setShowSleepPicker(true);
-    }
-  };
-
-  const saveTime = (isWake: boolean) => {
-    let hour24 = tempHour;
-    if (tempPeriod === "PM" && tempHour !== 12) {
-      hour24 = tempHour + 12;
-    } else if (tempPeriod === "AM" && tempHour === 12) {
-      hour24 = 0;
-    }
-    const timeStr = `${String(hour24).padStart(2, "0")}:${String(tempMinute).padStart(2, "0")}`;
-    if (isWake) {
-      setLocalWakeTime(timeStr);
+  const onWakePickerConfirm = useCallback(
+    ({ hours, minutes }: { hours: number; minutes: number }) => {
       setShowWakePicker(false);
-    } else {
-      setLocalSleepTime(timeStr);
+      const timeStr = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+      setLocalWakeTime(timeStr);
+    },
+    []
+  );
+
+  const onSleepPickerConfirm = useCallback(
+    ({ hours, minutes }: { hours: number; minutes: number }) => {
       setShowSleepPicker(false);
-    }
-  };
+      const timeStr = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+      setLocalSleepTime(timeStr);
+    },
+    []
+  );
 
   const handleConfirm = () => {
     onWakeTimeChange(localWakeTime);
@@ -610,145 +596,8 @@ function ScheduleStep({
     onNext();
   };
 
-  const hours = [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
-  const minutes = [0, 15, 30, 45];
-
-  const renderTimePicker = (isWake: boolean, show: boolean) => {
-    if (!show) return null;
-
-    return (
-      <Modal
-        transparent
-        animationType="fade"
-        visible={show}
-        onRequestClose={() => isWake ? setShowWakePicker(false) : setShowSleepPicker(false)}
-      >
-        <Pressable
-          style={styles.pickerModalOverlay}
-          onPress={() => isWake ? setShowWakePicker(false) : setShowSleepPicker(false)}
-        >
-          <Pressable
-            style={[styles.pickerModalContent, { backgroundColor: theme.backgroundDefault }]}
-            onPress={(e) => e.stopPropagation()}
-          >
-            <View style={styles.pickerHeader}>
-              <ThemedText type="h3" style={styles.pickerTitle}>
-                {isWake ? "Wake Up Time" : "Bedtime"}
-              </ThemedText>
-              <Pressable
-                onPress={() => saveTime(isWake)}
-                style={styles.pickerDoneButton}
-              >
-                <ThemedText type="body" style={{ color: Colors.light.accent, fontWeight: "600" }}>
-                  Done
-                </ThemedText>
-              </Pressable>
-            </View>
-
-            <View style={styles.timePickerContainer}>
-              <View style={styles.timePickerColumn}>
-                <ThemedText type="caption" muted style={styles.timePickerLabel}>Hour</ThemedText>
-                <ScrollView style={styles.timePickerScroll} showsVerticalScrollIndicator={false}>
-                  {hours.map((h) => (
-                    <Pressable
-                      key={h}
-                      onPress={() => setTempHour(h)}
-                      style={[
-                        styles.timePickerItem,
-                        tempHour === h && { backgroundColor: Colors.light.accent },
-                      ]}
-                    >
-                      <ThemedText
-                        type="body"
-                        style={[
-                          styles.timePickerItemText,
-                          tempHour === h && { color: "#FFFFFF" },
-                        ]}
-                      >
-                        {h}
-                      </ThemedText>
-                    </Pressable>
-                  ))}
-                </ScrollView>
-              </View>
-
-              <View style={styles.timePickerColumn}>
-                <ThemedText type="caption" muted style={styles.timePickerLabel}>Min</ThemedText>
-                <ScrollView style={styles.timePickerScroll} showsVerticalScrollIndicator={false}>
-                  {minutes.map((m) => (
-                    <Pressable
-                      key={m}
-                      onPress={() => setTempMinute(m)}
-                      style={[
-                        styles.timePickerItem,
-                        tempMinute === m && { backgroundColor: Colors.light.accent },
-                      ]}
-                    >
-                      <ThemedText
-                        type="body"
-                        style={[
-                          styles.timePickerItemText,
-                          tempMinute === m && { color: "#FFFFFF" },
-                        ]}
-                      >
-                        {String(m).padStart(2, "0")}
-                      </ThemedText>
-                    </Pressable>
-                  ))}
-                </ScrollView>
-              </View>
-
-              <View style={styles.timePickerColumn}>
-                <ThemedText type="caption" muted style={styles.timePickerLabel}>Period</ThemedText>
-                <View style={styles.periodContainer}>
-                  <Pressable
-                    onPress={() => setTempPeriod("AM")}
-                    style={[
-                      styles.periodButton,
-                      tempPeriod === "AM" && { backgroundColor: Colors.light.accent },
-                    ]}
-                  >
-                    <ThemedText
-                      type="body"
-                      style={[
-                        styles.periodButtonText,
-                        tempPeriod === "AM" && { color: "#FFFFFF" },
-                      ]}
-                    >
-                      AM
-                    </ThemedText>
-                  </Pressable>
-                  <Pressable
-                    onPress={() => setTempPeriod("PM")}
-                    style={[
-                      styles.periodButton,
-                      tempPeriod === "PM" && { backgroundColor: Colors.light.accent },
-                    ]}
-                  >
-                    <ThemedText
-                      type="body"
-                      style={[
-                        styles.periodButtonText,
-                        tempPeriod === "PM" && { color: "#FFFFFF" },
-                      ]}
-                    >
-                      PM
-                    </ThemedText>
-                  </Pressable>
-                </View>
-              </View>
-            </View>
-
-            <View style={styles.previewContainer}>
-              <ThemedText type="h2" style={{ color: Colors.light.accent }}>
-                {tempHour}:{String(tempMinute).padStart(2, "0")} {tempPeriod}
-              </ThemedText>
-            </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
-    );
-  };
+  const wakeTimeParsed = parseTime(localWakeTime);
+  const sleepTimeParsed = parseTime(localSleepTime);
 
   return (
     <View style={styles.stepContainer}>
@@ -778,7 +627,7 @@ function ScheduleStep({
               Wake up
             </ThemedText>
             <Pressable
-              onPress={() => openPicker(true)}
+              onPress={() => setShowWakePicker(true)}
               style={[styles.timePickerButton, { backgroundColor: theme.backgroundSecondary }]}
             >
               <Feather name="clock" size={20} color={Colors.light.accent} />
@@ -795,7 +644,7 @@ function ScheduleStep({
               Bedtime
             </ThemedText>
             <Pressable
-              onPress={() => openPicker(false)}
+              onPress={() => setShowSleepPicker(true)}
               style={[styles.timePickerButton, { backgroundColor: theme.backgroundSecondary }]}
             >
               <Feather name="clock" size={20} color={Colors.light.accent} />
@@ -816,8 +665,25 @@ function ScheduleStep({
         <ContinueButton onPress={handleConfirm} />
       </View>
 
-      {renderTimePicker(true, showWakePicker)}
-      {renderTimePicker(false, showSleepPicker)}
+      <TimePickerModal
+        visible={showWakePicker}
+        onDismiss={() => setShowWakePicker(false)}
+        onConfirm={onWakePickerConfirm}
+        hours={wakeTimeParsed.hours}
+        minutes={wakeTimeParsed.minutes}
+        label="Wake Up Time"
+        locale="en"
+      />
+
+      <TimePickerModal
+        visible={showSleepPicker}
+        onDismiss={() => setShowSleepPicker(false)}
+        onConfirm={onSleepPickerConfirm}
+        hours={sleepTimeParsed.hours}
+        minutes={sleepTimeParsed.minutes}
+        label="Bedtime"
+        locale="en"
+      />
     </View>
   );
 }

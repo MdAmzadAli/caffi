@@ -5,6 +5,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
+import { PaperProvider } from "react-native-paper";
 
 import RootNavigator from "@/navigation/RootNavigator";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -12,7 +13,8 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 export default function App() {
   return (
   <ErrorBoundary>
-    <SafeAreaProvider>
+    <PaperProvider>
+      <SafeAreaProvider>
         <GestureHandlerRootView style={styles.root}>
           <KeyboardProvider>
             <NavigationContainer>
@@ -22,6 +24,7 @@ export default function App() {
           </KeyboardProvider>
         </GestureHandlerRootView>
       </SafeAreaProvider>
+    </PaperProvider>
   </ErrorBoundary>
   );
 }
