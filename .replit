@@ -1,8 +1,8 @@
 entrypoint = "README.md"
-modules = ["nodejs-22"]
+modules = ["nodejs-20", "web"]
 
 [nix]
-channel = "stable-24_05"
+channel = "stable-25_05"
 
 [[ports]]
 localPort = 8081
@@ -11,6 +11,10 @@ externalPort = 80
 [[ports]]
 localPort = 8082
 externalPort = 3000
+
+[[ports]]
+localPort = 36439
+externalPort = 3001
 
 [workflows]
 runButton = "Project"
@@ -68,6 +72,7 @@ ensurePreviewReachable = "/status"
 
 [agent]
 stack = "EXPO"
+expertMode = true
 
 [deployment]
 deploymentTarget = "static"
