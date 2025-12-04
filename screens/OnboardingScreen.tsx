@@ -488,6 +488,8 @@ function MedicationsStep({
     { key: "adhd_medication", label: "ADHD (focus medications)", icon: "zap" },
     { key: "insomnia_medication", label: "Sleep issues / Insomnia medication", icon: "moon" },
     { key: "acid_reflux", label: "Acid reflux / Stomach problems", icon: "thermometer" },
+    { key: "high_blood_pressure", label: "High blood pressure", icon: "activity" },
+    { key: "depression_treatment", label: "Depression treatment", icon: "shield" },
     { key: "none", label: "None / Skip", icon: "check" },
   ];
 
