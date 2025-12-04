@@ -41,7 +41,7 @@ Caffi is a privacy-first, offline caffeine tracking mobile app built with Expo R
 │   ├── ErrorBoundary.tsx       # App crash recovery
 │   └── ErrorFallback.tsx       # Error UI
 ├── store/               # State management
-│   └── caffeineStore.ts        # In-memory caffeine data store
+│   └── caffeineStore.ts        # AsyncStorage-backed caffeine data store
 ├── constants/           # Design tokens
 │   └── theme.ts                # Colors, spacing, typography
 └── hooks/               # Custom hooks
@@ -86,6 +86,11 @@ Caffi is a privacy-first, offline caffeine tracking mobile app built with Expo R
 - Alcohol intake: "Never" preferred over "Rare" label
 
 ## Recent Changes
+- December 4, 2025: Data persistence and schedule step
+  - Added AsyncStorage persistence for all app data
+  - Added non-skippable schedule step (wake/sleep times) to onboarding
+  - Home screen caffeine ring now shows personalized optimal limit
+
 - December 4, 2025: Custom onboarding flow
   - Replaced age slider with 3 options: Under 18, 18-60, Over 60
   - Changed weight input from slider to numeric text keyboard
@@ -113,15 +118,13 @@ Caffi is a privacy-first, offline caffeine tracking mobile app built with Expo R
   - Implemented FAB for quick drink adding
 
 ## Technical Notes
-- **State Management**: Custom hook-based store (no external library)
-- **Data Persistence**: In-memory only (prototype phase)
+- **State Management**: Custom hook-based store with global state and listeners
+- **Data Persistence**: AsyncStorage for profile, entries, custom drinks, favorites
 - **Navigation**: React Navigation 7 with bottom tabs
 - **Animations**: React Native Reanimated for smooth interactions
 - **Charts**: Custom SVG-based visualizations with react-native-svg
 
 ## Next Steps (Future)
-1. Add AsyncStorage for data persistence
-2. Implement onboarding flow
-3. Add dark mode support
-4. Create local backup/export feature
-5. Add notification system for limit warnings
+1. Add dark mode support
+2. Create local backup/export feature
+3. Add notification system for limit warnings
