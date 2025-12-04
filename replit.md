@@ -80,9 +80,30 @@ Caffi is a privacy-first, offline caffeine tracking mobile app built with Expo R
 - Daily limit: Default 400mg (customizable)
 
 ## User Preferences
-- No specific preferences documented yet
+- Age selection: Simple 3-option choice instead of precise age slider
+- Weight input: Numeric keyboard input instead of slider
+- Caffeine sensitivity: "Normal" preferred over "Medium" label
+- Alcohol intake: "Never" preferred over "Rare" label
 
 ## Recent Changes
+- December 4, 2025: Custom onboarding flow
+  - Replaced age slider with 3 options: Under 18, 18-60, Over 60
+  - Changed weight input from slider to numeric text keyboard
+  - Changed "Medium" sensitivity to "Normal"
+  - Changed "Rare" alcohol to "Never"
+  - Removed gender and sleep goal steps entirely
+  - Updated medications with 6 specific conditions + None option:
+    - Anxiety/Panic (0.6x reduction)
+    - Depression treatment (0.7x reduction)
+    - ADHD medication (0.6x reduction)
+    - High blood pressure (0.7x reduction)
+    - Insomnia medication (0.6x reduction)
+    - Acid reflux (0.75x reduction)
+  - Age-based caffeine limits:
+    - Under 18: optimal=80mg, safe=100mg fixed
+    - 18-60: full calculated amount
+    - Over 60: optimal multiplied by 0.8x
+
 - December 4, 2025: Initial MVP build
   - Created complete UI with 7 screens
   - Implemented caffeine ring with animated progress
