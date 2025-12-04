@@ -26,15 +26,14 @@ export type Gender = "male" | "female" | "other" | "prefer_not_to_say";
 export type CaffeineSensitivity = "low" | "medium" | "high";
 export type SleepGoal = "good_sleep" | "normal_sleep" | "insomnia_prone";
 export type AlcoholIntake = "rare" | "sometimes" | "daily";
-export type Medication = "anxiety_meds" | "adhd_stimulants" | "ssris" | "beta_blockers" | "none";
+export type AgeRange = "under_18" | "18_to_60" | "over_60";
+export type Medication = "anxiety_panic" | "depression_treatment" | "adhd_medication" | "high_blood_pressure" | "insomnia_medication" | "acid_reflux" | "none";
 
 export interface UserProfile {
   name: string;
-  age?: number;
+  ageRange?: AgeRange;
   weight?: number;
-  gender?: Gender;
   caffeineSensitivity?: CaffeineSensitivity;
-  sleepGoal?: SleepGoal;
   alcoholIntake?: AlcoholIntake;
   medications?: Medication[];
   wakeTime: string;
@@ -44,12 +43,12 @@ export interface UserProfile {
   safeCaffeine: number;
   isPregnant: boolean;
   hasHeartCondition: boolean;
-  onBirthControl: boolean;
   hasCompletedOnboarding: boolean;
 }
 
 export interface CaffeineCalculationInputs {
   age?: number;
+  ageRange?: AgeRange;
   weight?: number;
   gender?: Gender;
   caffeineSensitivity?: CaffeineSensitivity;
@@ -71,17 +70,16 @@ export function calculateOptimalCaffeine(inputs: CaffeineCalculationInputs): { o
     safe = Math.min(inputs.weight * 6, 400);
   }
 
-  if (inputs.age !== undefined) {
-    if (inputs.age > 60) {
-      optimal *= 0.8;
-    } else if (inputs.age < 18) {
-      optimal = 80;
-      safe = 100;
+  if (inputs.ageRange) {
+    switch (inputs.ageRange) {
+      case "over_60":
+        optimal *= 0.8;
+        break;
+      case "under_18":
+        optimal = 80;
+        safe = 100;
+        break;
     }
-  }
-
-  if (inputs.gender === "female" && inputs.onBirthControl) {
-    optimal *= 0.75;
   }
 
   if (inputs.isPregnant) {
@@ -106,17 +104,6 @@ export function calculateOptimalCaffeine(inputs: CaffeineCalculationInputs): { o
     }
   }
 
-  if (inputs.sleepGoal) {
-    switch (inputs.sleepGoal) {
-      case "good_sleep":
-        optimal *= 0.6;
-        break;
-      case "insomnia_prone":
-        optimal *= 0.5;
-        break;
-    }
-  }
-
   if (inputs.alcoholIntake) {
     switch (inputs.alcoholIntake) {
       case "sometimes":
@@ -129,7 +116,24 @@ export function calculateOptimalCaffeine(inputs: CaffeineCalculationInputs): { o
   }
 
   if (inputs.medications && inputs.medications.length > 0 && !inputs.medications.includes("none")) {
-    optimal *= 0.6;
+    const medicationMultipliers: Record<Medication, number> = {
+      anxiety_panic: 0.6,
+      depression_treatment: 0.7,
+      adhd_medication: 0.6,
+      high_blood_pressure: 0.7,
+      insomnia_medication: 0.6,
+      acid_reflux: 0.75,
+      none: 1,
+    };
+
+    let lowestMultiplier = 1;
+    inputs.medications.forEach((med) => {
+      const multiplier = medicationMultipliers[med] || 1;
+      if (multiplier < lowestMultiplier) {
+        lowestMultiplier = multiplier;
+      }
+    });
+    optimal *= lowestMultiplier;
   }
 
   optimal = Math.round(optimal);
@@ -396,7 +400,6 @@ const DEFAULT_PROFILE: UserProfile = {
   sleepTime: "23:00",
   isPregnant: false,
   hasHeartCondition: false,
-  onBirthControl: false,
   hasCompletedOnboarding: false,
 };
 

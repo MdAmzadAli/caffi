@@ -25,9 +25,8 @@ import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import {
   useCaffeineStore,
   calculateOptimalCaffeine,
-  Gender,
+  AgeRange,
   CaffeineSensitivity,
-  SleepGoal,
   AlcoholIntake,
   Medication,
 } from "@/store/caffeineStore";
@@ -39,10 +38,8 @@ type OnboardingStep =
   | "name"
   | "age"
   | "weight"
-  | "gender"
   | "health"
   | "sensitivity"
-  | "sleep"
   | "alcohol"
   | "medications"
   | "summary";
@@ -51,10 +48,8 @@ const STEPS: OnboardingStep[] = [
   "name",
   "age",
   "weight",
-  "gender",
   "health",
   "sensitivity",
-  "sleep",
   "alcohol",
   "medications",
   "summary",
@@ -62,13 +57,11 @@ const STEPS: OnboardingStep[] = [
 
 interface OnboardingData {
   name?: string;
-  age?: number;
+  ageRange?: AgeRange;
   weight?: number;
-  gender?: Gender;
   isPregnant?: boolean;
   hasHeartCondition?: boolean;
   caffeineSensitivity?: CaffeineSensitivity;
-  sleepGoal?: SleepGoal;
   alcoholIntake?: AlcoholIntake;
   medications?: Medication[];
 }
@@ -109,13 +102,11 @@ export default function OnboardingScreen() {
 
   const handleFinish = useCallback(() => {
     const calculationInputs = {
-      age: data.age,
+      ageRange: data.ageRange,
       weight: data.weight,
-      gender: data.gender,
       isPregnant: data.isPregnant,
       hasHeartCondition: data.hasHeartCondition,
       caffeineSensitivity: data.caffeineSensitivity,
-      sleepGoal: data.sleepGoal,
       alcoholIntake: data.alcoholIntake,
       medications: data.medications,
     };
@@ -124,13 +115,11 @@ export default function OnboardingScreen() {
 
     updateProfile({
       name: data.name || "",
-      age: data.age,
+      ageRange: data.ageRange,
       weight: data.weight,
-      gender: data.gender,
       isPregnant: data.isPregnant || false,
       hasHeartCondition: data.hasHeartCondition || false,
       caffeineSensitivity: data.caffeineSensitivity,
-      sleepGoal: data.sleepGoal,
       alcoholIntake: data.alcoholIntake,
       medications: data.medications,
       optimalCaffeine: optimal,
@@ -163,8 +152,8 @@ export default function OnboardingScreen() {
       case "age":
         return (
           <AgeStep
-            value={data.age}
-            onChange={(v) => updateData("age", v)}
+            value={data.ageRange}
+            onChange={(v) => updateData("ageRange", v)}
             onNext={handleNext}
             onSkip={handleSkip}
           />
@@ -174,15 +163,6 @@ export default function OnboardingScreen() {
           <WeightStep
             value={data.weight}
             onChange={(v) => updateData("weight", v)}
-            onNext={handleNext}
-            onSkip={handleSkip}
-          />
-        );
-      case "gender":
-        return (
-          <GenderStep
-            value={data.gender}
-            onChange={(v) => updateData("gender", v)}
             onNext={handleNext}
             onSkip={handleSkip}
           />
@@ -203,15 +183,6 @@ export default function OnboardingScreen() {
           <SensitivityStep
             value={data.caffeineSensitivity}
             onChange={(v) => updateData("caffeineSensitivity", v)}
-            onNext={handleNext}
-            onSkip={handleSkip}
-          />
-        );
-      case "sleep":
-        return (
-          <SleepStep
-            value={data.sleepGoal}
-            onChange={(v) => updateData("sleepGoal", v)}
             onNext={handleNext}
             onSkip={handleSkip}
           />
@@ -462,135 +433,22 @@ function HealthToggle({
   );
 }
 
-function AgeStep({ value, onChange, onNext, onSkip }: StepProps<number>) {
-  const { theme } = useTheme();
-  const [localValue, setLocalValue] = useState(value || 30);
-
-  const handleConfirm = () => {
-    onChange(localValue);
+function AgeStep({ value, onChange, onNext, onSkip }: StepProps<AgeRange>) {
+  const handleSelect = (ageRange: AgeRange) => {
+    onChange(ageRange);
     onNext();
   };
 
-  return (
-    <StepContainer
-      icon="user"
-      title="Your Age"
-      onSkip={onSkip}
-    >
-      <View style={styles.sliderContainer}>
-        <ThemedText type="h1" style={styles.valueDisplay}>
-          {localValue}
-        </ThemedText>
-        <ThemedText type="caption" muted style={styles.valueLabel}>
-          years old
-        </ThemedText>
-
-        <View style={styles.sliderRow}>
-          <SliderButton
-            icon="minus"
-            onPress={() => setLocalValue((v) => Math.max(13, v - 1))}
-          />
-          <View style={styles.sliderTrack}>
-            <View
-              style={[
-                styles.sliderFill,
-                {
-                  width: `${((localValue - 13) / (80 - 13)) * 100}%`,
-                  backgroundColor: Colors.light.accent,
-                },
-              ]}
-            />
-          </View>
-          <SliderButton
-            icon="plus"
-            onPress={() => setLocalValue((v) => Math.min(80, v + 1))}
-          />
-        </View>
-
-        <View style={styles.rangeLabels}>
-          <ThemedText type="caption" muted>13</ThemedText>
-          <ThemedText type="caption" muted>80</ThemedText>
-        </View>
-      </View>
-
-      <ContinueButton onPress={handleConfirm} />
-    </StepContainer>
-  );
-}
-
-function WeightStep({ value, onChange, onNext, onSkip }: StepProps<number>) {
-  const { theme } = useTheme();
-  const [localValue, setLocalValue] = useState(value || 70);
-
-  const handleConfirm = () => {
-    onChange(localValue);
-    onNext();
-  };
-
-  return (
-    <StepContainer
-      icon="activity"
-      title="Your Weight"
-      onSkip={onSkip}
-    >
-      <View style={styles.sliderContainer}>
-        <ThemedText type="h1" style={styles.valueDisplay}>
-          {localValue}
-        </ThemedText>
-        <ThemedText type="caption" muted style={styles.valueLabel}>
-          kg
-        </ThemedText>
-
-        <View style={styles.sliderRow}>
-          <SliderButton
-            icon="minus"
-            onPress={() => setLocalValue((v) => Math.max(30, v - 1))}
-          />
-          <View style={styles.sliderTrack}>
-            <View
-              style={[
-                styles.sliderFill,
-                {
-                  width: `${((localValue - 30) / (150 - 30)) * 100}%`,
-                  backgroundColor: Colors.light.accent,
-                },
-              ]}
-            />
-          </View>
-          <SliderButton
-            icon="plus"
-            onPress={() => setLocalValue((v) => Math.min(150, v + 1))}
-          />
-        </View>
-
-        <View style={styles.rangeLabels}>
-          <ThemedText type="caption" muted>30 kg</ThemedText>
-          <ThemedText type="caption" muted>150 kg</ThemedText>
-        </View>
-      </View>
-
-      <ContinueButton onPress={handleConfirm} />
-    </StepContainer>
-  );
-}
-
-function GenderStep({ value, onChange, onNext, onSkip }: StepProps<Gender>) {
-  const handleSelect = (gender: Gender) => {
-    onChange(gender);
-    onNext();
-  };
-
-  const options: { key: Gender; label: string; icon: keyof typeof Feather.glyphMap }[] = [
-    { key: "male", label: "Male", icon: "user" },
-    { key: "female", label: "Female", icon: "user" },
-    { key: "other", label: "Other", icon: "users" },
-    { key: "prefer_not_to_say", label: "Prefer not to say", icon: "user-x" },
+  const options: { key: AgeRange; label: string; description: string; icon: keyof typeof Feather.glyphMap }[] = [
+    { key: "under_18", label: "Under 18", description: "Teen or younger", icon: "user" },
+    { key: "18_to_60", label: "18 to 60", description: "Adult", icon: "user" },
+    { key: "over_60", label: "Over 60", description: "Senior", icon: "user" },
   ];
 
   return (
     <StepContainer
-      icon="users"
-      title="Gender"
+      icon="user"
+      title="Your Age Range"
       onSkip={onSkip}
     >
       <View style={styles.optionsContainer}>
@@ -604,6 +462,67 @@ function GenderStep({ value, onChange, onNext, onSkip }: StepProps<Gender>) {
           />
         ))}
       </View>
+    </StepContainer>
+  );
+}
+
+function WeightStep({ value, onChange, onNext, onSkip }: StepProps<number>) {
+  const { theme } = useTheme();
+  const [localValue, setLocalValue] = useState(value ? String(value) : "");
+
+  const handleConfirm = () => {
+    const weightValue = parseInt(localValue, 10);
+    if (weightValue && weightValue >= 20 && weightValue <= 300) {
+      onChange(weightValue);
+      onNext();
+    }
+  };
+
+  const handleTextChange = (text: string) => {
+    const numericText = text.replace(/[^0-9]/g, "");
+    setLocalValue(numericText);
+  };
+
+  const isValid = () => {
+    const weightValue = parseInt(localValue, 10);
+    return weightValue && weightValue >= 20 && weightValue <= 300;
+  };
+
+  return (
+    <StepContainer
+      icon="activity"
+      title="Your Weight"
+      onSkip={onSkip}
+    >
+      <View style={styles.inputContainer}>
+        <ThemedText type="body" muted style={styles.inputLabel}>
+          Enter your weight in kilograms
+        </ThemedText>
+        <View
+          style={[
+            styles.textInputContainer,
+            { backgroundColor: theme.backgroundSecondary },
+          ]}
+        >
+          <Feather name="activity" size={20} color={theme.textMuted} />
+          <View style={styles.textInputWrapper}>
+            <TextInput
+              style={[styles.textInput, { color: theme.text }]}
+              value={localValue}
+              onChangeText={handleTextChange}
+              placeholder="Enter weight (kg)"
+              placeholderTextColor={theme.textMuted}
+              keyboardType="number-pad"
+              autoFocus
+              returnKeyType="done"
+              onSubmitEditing={handleConfirm}
+              maxLength={3}
+            />
+          </View>
+          <ThemedText type="body" muted>kg</ThemedText>
+        </View>
+      </View>
+      <ContinueButton onPress={handleConfirm} disabled={!isValid()} />
     </StepContainer>
   );
 }
@@ -621,7 +540,7 @@ function SensitivityStep({
 
   const options: { key: CaffeineSensitivity; label: string; icon: keyof typeof Feather.glyphMap }[] = [
     { key: "low", label: "Low", icon: "coffee" },
-    { key: "medium", label: "Medium", icon: "coffee" },
+    { key: "medium", label: "Normal", icon: "coffee" },
     { key: "high", label: "High", icon: "alert-circle" },
   ];
 
@@ -629,39 +548,6 @@ function SensitivityStep({
     <StepContainer
       icon="zap"
       title="Caffeine Sensitivity"
-      onSkip={onSkip}
-    >
-      <View style={styles.optionsContainer}>
-        {options.map((option) => (
-          <OptionButton
-            key={option.key}
-            label={option.label}
-            icon={option.icon}
-            isSelected={value === option.key}
-            onPress={() => handleSelect(option.key)}
-          />
-        ))}
-      </View>
-    </StepContainer>
-  );
-}
-
-function SleepStep({ value, onChange, onNext, onSkip }: StepProps<SleepGoal>) {
-  const handleSelect = (sleepGoal: SleepGoal) => {
-    onChange(sleepGoal);
-    onNext();
-  };
-
-  const options: { key: SleepGoal; label: string; icon: keyof typeof Feather.glyphMap }[] = [
-    { key: "good_sleep", label: "Good Sleep", icon: "moon" },
-    { key: "normal_sleep", label: "Normal Sleep", icon: "sunset" },
-    { key: "insomnia_prone", label: "Insomnia-Prone", icon: "alert-triangle" },
-  ];
-
-  return (
-    <StepContainer
-      icon="moon"
-      title="Sleep Goal"
       onSkip={onSkip}
     >
       <View style={styles.optionsContainer}>
@@ -691,7 +577,7 @@ function AlcoholStep({
   };
 
   const options: { key: AlcoholIntake; label: string; icon: keyof typeof Feather.glyphMap }[] = [
-    { key: "rare", label: "Rare", icon: "check-circle" },
+    { key: "rare", label: "Never", icon: "check-circle" },
     { key: "sometimes", label: "Sometimes", icon: "clock" },
     { key: "daily", label: "Daily", icon: "repeat" },
   ];
@@ -745,11 +631,13 @@ function MedicationsStep({
   };
 
   const options: { key: Medication; label: string; icon: keyof typeof Feather.glyphMap }[] = [
-    { key: "anxiety_meds", label: "Anxiety meds", icon: "heart" },
-    { key: "adhd_stimulants", label: "ADHD stimulants", icon: "zap" },
-    { key: "ssris", label: "SSRIs", icon: "activity" },
-    { key: "beta_blockers", label: "Beta-blockers", icon: "shield" },
-    { key: "none", label: "None", icon: "check" },
+    { key: "anxiety_panic", label: "Anxiety/Panic", icon: "heart" },
+    { key: "depression_treatment", label: "Depression treatment", icon: "activity" },
+    { key: "adhd_medication", label: "ADHD medication", icon: "zap" },
+    { key: "high_blood_pressure", label: "High blood pressure", icon: "shield" },
+    { key: "insomnia_medication", label: "Insomnia medication", icon: "moon" },
+    { key: "acid_reflux", label: "Acid reflux", icon: "thermometer" },
+    { key: "none", label: "None / Skip", icon: "check" },
   ];
 
   return (
