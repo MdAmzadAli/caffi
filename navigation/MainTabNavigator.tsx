@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
@@ -8,6 +8,7 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
+import { useNavigation, NavigationProp, CommonActions } from "@react-navigation/native";
 import HomeStackNavigator from "@/navigation/HomeStackNavigator";
 import HistoryStackNavigator from "@/navigation/HistoryStackNavigator";
 import SettingsStackNavigator from "@/navigation/SettingsStackNavigator";
@@ -66,6 +67,13 @@ function FloatingActionButton({ onPress }: FABProps) {
 export default function MainTabNavigator() {
   const { theme, isDark } = useTheme();
   const [showAddModal, setShowAddModal] = useState(false);
+  const navigation = useNavigation<NavigationProp<MainTabParamList>>();
+
+  const handleNavigateToCustomDrink = () => {
+    navigation.navigate("SettingsTab", {
+      screen: "CustomDrink",
+    } as any);
+  };
 
   return (
     <>
@@ -151,6 +159,7 @@ export default function MainTabNavigator() {
       <AddDrinkModal
         visible={showAddModal}
         onClose={() => setShowAddModal(false)}
+        onNavigateToCustomDrink={handleNavigateToCustomDrink}
       />
     </>
   );

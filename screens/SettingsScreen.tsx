@@ -140,19 +140,6 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
       <View style={styles.section}>
         <ThemedText type="small" muted style={styles.sectionLabel}>
-          DRINKS
-        </ThemedText>
-        <ThemedView elevation={1} style={styles.card}>
-          <SettingsButton
-            icon="plus-circle"
-            label="Add Custom Drink"
-            onPress={() => navigation.navigate("CustomDrink")}
-          />
-        </ThemedView>
-      </View>
-
-      <View style={styles.section}>
-        <ThemedText type="small" muted style={styles.sectionLabel}>
           DATA
         </ThemedText>
         <ThemedView elevation={1} style={styles.card}>

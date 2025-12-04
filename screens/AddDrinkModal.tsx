@@ -31,6 +31,7 @@ const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 interface AddDrinkModalProps {
   visible: boolean;
   onClose: () => void;
+  onNavigateToCustomDrink?: () => void;
 }
 
 type Category = "coffee" | "tea" | "energy" | "soda" | "chocolate" | "custom";
@@ -43,10 +44,15 @@ const QUICK_CATEGORIES: { key: Category; label: string; icon: keyof typeof Feath
   { key: "chocolate", label: "Chocolate", icon: "square" },
 ];
 
-export default function AddDrinkModal({ visible, onClose }: AddDrinkModalProps) {
+export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrink }: AddDrinkModalProps) {
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const { addEntry, getAllDrinks, getFavoriteDrinks, profile } = useCaffeineStore();
+
+  const handleAddCustomDrink = () => {
+    handleClose();
+    onNavigateToCustomDrink?.();
+  };
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
@@ -148,6 +154,29 @@ export default function AddDrinkModal({ visible, onClose }: AddDrinkModalProps) 
               style={styles.scrollContent}
               showsVerticalScrollIndicator={false}
             >
+              {onNavigateToCustomDrink && (
+                <Pressable
+                  onPress={handleAddCustomDrink}
+                  style={[
+                    styles.customDrinkButton,
+                    { backgroundColor: theme.backgroundDefault },
+                  ]}
+                >
+                  <View style={styles.customDrinkIcon}>
+                    <Feather name="plus" size={20} color={Colors.light.accent} />
+                  </View>
+                  <View style={styles.customDrinkInfo}>
+                    <ThemedText type="body" style={styles.customDrinkLabel}>
+                      Add Custom Drink
+                    </ThemedText>
+                    <ThemedText type="caption" muted>
+                      Create your own drink
+                    </ThemedText>
+                  </View>
+                  <Feather name="chevron-right" size={20} color={theme.textMuted} />
+                </Pressable>
+              )}
+
               <View style={styles.searchContainer}>
                 <View
                   style={[
@@ -601,6 +630,29 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: Spacing.xl,
+  },
+  customDrinkButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: Spacing.md,
+    borderRadius: BorderRadius.sm,
+    marginBottom: Spacing.lg,
+    gap: Spacing.md,
+  },
+  customDrinkIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: `${Colors.light.accent}20`,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  customDrinkInfo: {
+    flex: 1,
+  },
+  customDrinkLabel: {
+    fontWeight: "500",
+    marginBottom: 2,
   },
   searchContainer: {
     marginBottom: Spacing.lg,

@@ -120,11 +120,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           label="View Stats"
           onPress={() => navigation.navigate("Statistics")}
         />
-        <ActionButton
-          icon="list"
-          label="All Drinks"
-          onPress={() => navigation.navigate("DrinkDatabase")}
-        />
       </View>
 
       <View style={styles.timelineSection}>
