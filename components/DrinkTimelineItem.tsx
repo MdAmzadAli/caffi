@@ -114,12 +114,10 @@ export function DrinkTimelineItem({
 
       <GestureDetector gesture={panGesture}>
         <Animated.View style={animatedStyle}>
-          <Pressable
-            onPress={showDelete ? resetSwipe : undefined}
-            style={({ pressed }) => [
+          <View
+            style={[
               styles.itemContainer,
               { backgroundColor: theme.backgroundDefault },
-              pressed && !showDelete && { opacity: 0.9 },
             ]}
           >
             <View style={styles.timeColumn}>
@@ -153,7 +151,14 @@ export function DrinkTimelineItem({
                 mg
               </ThemedText>
             </View>
-          </Pressable>
+            <Pressable
+              onPress={handleDelete}
+              style={styles.deleteIconButton}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Feather name="trash-2" size={16} color={theme.textMuted} />
+            </Pressable>
+          </View>
         </Animated.View>
       </GestureDetector>
     </View>
@@ -213,5 +218,9 @@ const styles = StyleSheet.create({
   },
   caffeineAmount: {
     fontWeight: "600",
+  },
+  deleteIconButton: {
+    padding: Spacing.xs,
+    marginLeft: Spacing.sm,
   },
 });
