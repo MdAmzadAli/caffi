@@ -193,7 +193,7 @@ export default function OnboardingScreen() {
           <MedicationsStep
             value={data.medications}
             onChange={(v) => updateData("medications", v)}
-            onGoToLastStep={() => animateToStep(STEPS.length - 1)}
+            onNext={handleNext}
             onSkip={handleSkip}
           />
         );
@@ -475,22 +475,31 @@ function AlcoholStep({
   );
 }
 
-interface MedicationsStepProps {
-  value: Medication[] | undefined;
-  onChange: (value: Medication[]) => void;
-  onGoToLastStep: () => void;
-  onSkip: () => void;
-}
-
 function MedicationsStep({
   value,
   onChange,
-  onGoToLastStep,
+  onNext,
   onSkip,
-}: MedicationsStepProps) {
-  const handleSelect = (medication: Medication) => {
-    onChange([medication]);
-    onGoToLastStep();
+}: StepProps<Medication[]>) {
+  const [selected, setSelected] = useState<Medication[]>(value || []);
+
+  const handleToggle = (medication: Medication) => {
+    if (medication === "none") {
+      setSelected(["none"]);
+    } else {
+      setSelected((prev) => {
+        const filtered = prev.filter((m) => m !== "none");
+        if (filtered.includes(medication)) {
+          return filtered.filter((m) => m !== medication);
+        }
+        return [...filtered, medication];
+      });
+    }
+  };
+
+  const handleConfirm = () => {
+    onChange(selected.length > 0 ? selected : ["none"]);
+    onNext();
   };
 
   const options: { key: Medication; label: string; icon: keyof typeof Feather.glyphMap }[] = [
@@ -515,11 +524,13 @@ function MedicationsStep({
             key={option.key}
             label={option.label}
             icon={option.icon}
-            isSelected={value?.includes(option.key) ?? false}
-            onPress={() => handleSelect(option.key)}
+            isSelected={selected.includes(option.key)}
+            onPress={() => handleToggle(option.key)}
           />
         ))}
       </View>
+
+      <ContinueButton onPress={handleConfirm} />
     </StepContainer>
   );
 }
