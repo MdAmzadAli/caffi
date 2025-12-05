@@ -46,9 +46,14 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return "Good morning";
-    if (hour < 17) return "Good afternoon";
-    return "Good evening";
+    let greeting = "Good evening";
+    if (hour < 12) greeting = "Good morning";
+    else if (hour < 17) greeting = "Good afternoon";
+    
+    if (profile.name && profile.name.trim()) {
+      return `${greeting}, ${profile.name}`;
+    }
+    return greeting;
   };
 
   const formatDate = () => {
