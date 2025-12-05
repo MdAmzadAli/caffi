@@ -11,7 +11,8 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { DrinkTimelineItem } from "@/components/DrinkTimelineItem";
 import { CaffeineChart } from "@/components/CaffeineChart";
-import { useCaffeineStore } from "@/store/caffeineStore";
+import EditDrinkModal from "@/components/EditDrinkModal";
+import { useCaffeineStore, DrinkEntry } from "@/store/caffeineStore";
 import { useTheme } from "@/hooks/useTheme";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 
@@ -24,6 +25,18 @@ export default function HistoryScreen() {
   const { entries, getEntriesForDateRange, deleteEntry, profile } =
     useCaffeineStore();
   const [timeRange, setTimeRange] = useState<TimeRange>("day");
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [selectedEntry, setSelectedEntry] = useState<DrinkEntry | null>(null);
+
+  const handleEditEntry = (entry: DrinkEntry) => {
+    setSelectedEntry(entry);
+    setEditModalVisible(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setEditModalVisible(false);
+    setSelectedEntry(null);
+  };
 
   const { filteredEntries, dateLabel, stats } = useMemo(() => {
     const now = new Date();
@@ -165,6 +178,7 @@ export default function HistoryScreen() {
                   key={entry.id}
                   entry={entry}
                   onDelete={() => deleteEntry(entry.id)}
+                  onEdit={() => handleEditEntry(entry)}
                   showDate={timeRange === "week"}
                 />
               ))}
@@ -172,6 +186,12 @@ export default function HistoryScreen() {
           ))
         )}
       </View>
+
+      <EditDrinkModal
+        visible={editModalVisible}
+        entry={selectedEntry}
+        onClose={handleCloseEditModal}
+      />
     </ScreenScrollView>
   );
 }

@@ -529,6 +529,17 @@ export function useCaffeineStore() {
     saveToStorage();
   }, []);
 
+  const updateEntry = useCallback((id: string, updates: Partial<DrinkEntry>) => {
+    globalEntries = globalEntries.map((entry) => {
+      if (entry.id === id) {
+        return { ...entry, ...updates };
+      }
+      return entry;
+    });
+    notifyListeners();
+    saveToStorage();
+  }, []);
+
   const updateProfile = useCallback((updates: Partial<UserProfile>) => {
     globalProfile = { ...globalProfile, ...updates };
     notifyListeners();
@@ -664,6 +675,7 @@ export function useCaffeineStore() {
     isInitialized,
     addEntry,
     deleteEntry,
+    updateEntry,
     updateProfile,
     addCustomDrink,
     toggleFavorite,

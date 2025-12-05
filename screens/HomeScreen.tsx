@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, StyleSheet, Pressable } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -15,7 +15,8 @@ import { ThemedView } from "@/components/ThemedView";
 import { CaffeineRing } from "@/components/CaffeineRing";
 import { QuickStatCard } from "@/components/QuickStatCard";
 import { DrinkTimelineItem } from "@/components/DrinkTimelineItem";
-import { useCaffeineStore } from "@/store/caffeineStore";
+import EditDrinkModal from "@/components/EditDrinkModal";
+import { useCaffeineStore, DrinkEntry } from "@/store/caffeineStore";
 import { useTheme } from "@/hooks/useTheme";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import type { HomeStackParamList } from "@/navigation/HomeStackNavigator";
@@ -30,6 +31,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const { theme } = useTheme();
   const {
     profile,
+    entries,
     getTodayEntries,
     getTodayCaffeine,
     getActiveCaffeine,
@@ -38,11 +40,24 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     deleteEntry,
   } = useCaffeineStore();
 
-  const todayEntries = getTodayEntries();
-  const todayCaffeine = getTodayCaffeine();
-  const activeCaffeine = getActiveCaffeine();
-  const lastDrink = getLastDrink();
-  const sleepImpact = getSleepImpact();
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [selectedEntry, setSelectedEntry] = useState<DrinkEntry | null>(null);
+
+  const todayEntries = React.useMemo(() => getTodayEntries(), [entries]);
+  const todayCaffeine = React.useMemo(() => getTodayCaffeine(), [entries]);
+  const activeCaffeine = React.useMemo(() => getActiveCaffeine(), [entries]);
+  const lastDrink = React.useMemo(() => getLastDrink(), [entries]);
+  const sleepImpact = React.useMemo(() => getSleepImpact(), [entries, profile]);
+
+  const handleEditEntry = (entry: DrinkEntry) => {
+    setSelectedEntry(entry);
+    setEditModalVisible(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setEditModalVisible(false);
+    setSelectedEntry(null);
+  };
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -147,10 +162,17 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
               key={entry.id}
               entry={entry}
               onDelete={() => deleteEntry(entry.id)}
+              onEdit={() => handleEditEntry(entry)}
             />
           ))
         )}
       </View>
+
+      <EditDrinkModal
+        visible={editModalVisible}
+        entry={selectedEntry}
+        onClose={handleCloseEditModal}
+      />
     </ScreenScrollView>
   );
 }
