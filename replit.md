@@ -33,7 +33,8 @@ Caffi is a privacy-first, offline caffeine tracking mobile app built with Expo R
 │   ├── CaffeineChart.tsx       # Bar chart for history
 │   ├── CaffeineDecayCurve.tsx  # Half-life decay curve
 │   ├── QuickStatCard.tsx       # Dashboard stat cards
-│   ├── DrinkTimelineItem.tsx   # Swipeable drink entry
+│   ├── DrinkTimelineItem.tsx   # Drink entry with delete icon
+│   ├── EditDrinkModal.tsx      # Edit drink modal
 │   ├── Button.tsx              # Primary/secondary/tertiary buttons
 │   ├── Card.tsx                # Elevation-based cards
 │   ├── ThemedText.tsx          # Typography component
@@ -86,6 +87,15 @@ Caffi is a privacy-first, offline caffeine tracking mobile app built with Expo R
 - Alcohol intake: "Never" preferred over "Rare" label
 
 ## Recent Changes
+- December 5, 2025: Real-time updates and edit functionality
+  - Fixed HomeScreen not updating in real-time when drinks are added/deleted
+  - Added visible delete icon on each drink entry (red trash icon)
+  - Simplified DrinkTimelineItem component for better touch handling
+  - Added EditDrinkModal for editing existing drink logs
+  - Added updateEntry function to caffeineStore for modifying entries
+  - Tapping a drink entry now opens edit modal to modify serving size, caffeine amount, or notes
+  - All changes (add, edit, delete) now reflect instantly on both Home and History screens
+
 - December 4, 2025: Data persistence and schedule step
   - Added AsyncStorage persistence for all app data
   - Added non-skippable schedule step (wake/sleep times) to onboarding
