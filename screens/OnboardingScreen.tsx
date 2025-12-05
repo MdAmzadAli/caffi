@@ -55,7 +55,6 @@ const STEPS: OnboardingStep[] = [
   "alcohol",
   "medications",
   "schedule",
-  "summary",
 ];
 
 interface OnboardingData {
@@ -103,7 +102,7 @@ export default function OnboardingScreen() {
     handleNext();
   }, [handleNext]);
 
-  const handleFinish = useCallback(() => {
+  const handleFinish = useCallback((wakeTimeOverride?: string, sleepTimeOverride?: string) => {
     const calculationInputs = {
       ageRange: data.ageRange,
       weight: data.weight,
@@ -123,8 +122,8 @@ export default function OnboardingScreen() {
       caffeineSensitivity: data.caffeineSensitivity,
       alcoholIntake: data.alcoholIntake,
       medications: data.medications,
-      wakeTime: data.wakeTime || "07:00",
-      sleepTime: data.sleepTime || "23:00",
+      wakeTime: wakeTimeOverride || data.wakeTime || "07:00",
+      sleepTime: sleepTimeOverride || data.sleepTime || "23:00",
       optimalCaffeine: optimal,
       safeCaffeine: safe,
       dailyLimit: optimal,
@@ -204,11 +203,10 @@ export default function OnboardingScreen() {
             sleepTime={data.sleepTime}
             onWakeTimeChange={(v) => updateData("wakeTime", v)}
             onSleepTimeChange={(v) => updateData("sleepTime", v)}
-            onNext={handleNext}
+            onFinish={handleFinish}
+            data={data}
           />
         );
-      case "summary":
-        return <SummaryStep data={data} onFinish={handleFinish} />;
       default:
         return null;
     }
@@ -481,24 +479,8 @@ function MedicationsStep({
   onNext,
   onSkip,
 }: StepProps<Medication[]>) {
-  const [selected, setSelected] = useState<Medication[]>(value || []);
-
-  const handleToggle = (medication: Medication) => {
-    if (medication === "none") {
-      setSelected(["none"]);
-    } else {
-      setSelected((prev) => {
-        const filtered = prev.filter((m) => m !== "none");
-        if (filtered.includes(medication)) {
-          return filtered.filter((m) => m !== medication);
-        }
-        return [...filtered, medication];
-      });
-    }
-  };
-
-  const handleConfirm = () => {
-    onChange(selected.length > 0 ? selected : ["none"]);
+  const handleSelect = (medication: Medication) => {
+    onChange([medication]);
     onNext();
   };
 
@@ -524,13 +506,11 @@ function MedicationsStep({
             key={option.key}
             label={option.label}
             icon={option.icon}
-            isSelected={selected.includes(option.key)}
-            onPress={() => handleToggle(option.key)}
+            isSelected={value?.includes(option.key) ?? false}
+            onPress={() => handleSelect(option.key)}
           />
         ))}
       </View>
-
-      <ContinueButton onPress={handleConfirm} />
     </StepContainer>
   );
 }
@@ -540,7 +520,8 @@ interface ScheduleStepProps {
   sleepTime: string | undefined;
   onWakeTimeChange: (value: string) => void;
   onSleepTimeChange: (value: string) => void;
-  onNext: () => void;
+  onFinish: (wakeTime: string, sleepTime: string) => void;
+  data: OnboardingData;
 }
 
 function ScheduleStep({
@@ -548,7 +529,8 @@ function ScheduleStep({
   sleepTime,
   onWakeTimeChange,
   onSleepTimeChange,
-  onNext,
+  onFinish,
+  data,
 }: ScheduleStepProps) {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
@@ -593,7 +575,7 @@ function ScheduleStep({
   const handleConfirm = () => {
     onWakeTimeChange(localWakeTime);
     onSleepTimeChange(localSleepTime);
-    onNext();
+    onFinish(localWakeTime, localSleepTime);
   };
 
   const wakeTimeParsed = parseTime(localWakeTime);
