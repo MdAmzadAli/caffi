@@ -8,8 +8,9 @@ import {
   Modal,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { Colors, Spacing, BorderRadius, Shadows } from "@/constants/theme";
+import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
 import { RecommendationResult } from "@/utils/recommendationEngine";
+import { useTheme } from "@/hooks/useTheme";
 
 interface RecommendationCardsProps {
   recommendations: RecommendationResult;
@@ -28,6 +29,7 @@ interface CardData {
 export function RecommendationCards({
   recommendations,
 }: RecommendationCardsProps) {
+  const { theme, isDark } = useTheme();
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedCard, setSelectedCard] = useState<CardData | null>(null);
 
@@ -43,7 +45,7 @@ export function RecommendationCards({
       subtitle: recommendations.noSafeDose
         ? "Limit reached"
         : "Small boost for concentration",
-      accentColor: Colors.light.accentGold,
+      accentColor: theme.accentGold,
       reasoning: recommendations.focusDoseReasoning,
     },
     {
@@ -55,7 +57,7 @@ export function RecommendationCards({
           ? "N/A"
           : `${recommendations.bestWindowStart} – ${recommendations.bestWindowEnd}`,
       subtitle: "Your ideal caffeine window",
-      accentColor: Colors.light.blue,
+      accentColor: theme.blue,
       reasoning: recommendations.bestTimeReasoning,
     },
     {
@@ -64,7 +66,7 @@ export function RecommendationCards({
       title: "Cutoff Time",
       value: `After ${recommendations.cutoffTime}`,
       subtitle: "Avoid for best sleep",
-      accentColor: Colors.light.green,
+      accentColor: theme.green,
       reasoning: recommendations.cutoffReasoning,
     },
   ];
@@ -87,8 +89,15 @@ export function RecommendationCards({
             key={card.id}
             style={({ pressed }) => [
               styles.card,
-              { borderLeftColor: card.accentColor },
-              pressed && styles.cardPressed,
+              { 
+                borderLeftColor: card.accentColor,
+                backgroundColor: theme.backgroundSecondary,
+                shadowColor: "#000",
+                shadowOpacity: isDark ? 0.3 : 0.08,
+                borderWidth: isDark ? 1 : 0,
+                borderColor: isDark ? theme.divider : "transparent",
+              },
+              pressed && { opacity: 0.8, transform: [{ scale: 0.98 }] },
             ]}
             onPress={() => handleCardPress(card)}
             accessibilityLabel={`${card.title}: ${card.value}. ${card.subtitle}`}
@@ -96,12 +105,12 @@ export function RecommendationCards({
           >
             <View style={styles.cardHeader}>
               <Feather name={card.icon} size={16} color={card.accentColor} />
-              <Text style={styles.cardTitle}>{card.title}</Text>
+              <Text style={[styles.cardTitle, { color: theme.mutedGrey }]}>{card.title}</Text>
             </View>
-            <Text style={styles.cardValue} numberOfLines={1}>
+            <Text style={[styles.cardValue, { color: theme.darkBrown }]} numberOfLines={1}>
               {card.value}
             </Text>
-            <Text style={styles.cardSubtitle} numberOfLines={1}>
+            <Text style={[styles.cardSubtitle, { color: theme.mutedGrey }]} numberOfLines={1}>
               {card.subtitle}
             </Text>
           </Pressable>
@@ -115,10 +124,10 @@ export function RecommendationCards({
         onRequestClose={() => setModalVisible(false)}
       >
         <Pressable
-          style={styles.modalOverlay}
+          style={[styles.modalOverlay, { backgroundColor: isDark ? "rgba(0, 0, 0, 0.7)" : "rgba(0, 0, 0, 0.5)" }]}
           onPress={() => setModalVisible(false)}
         >
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { backgroundColor: theme.backgroundDefault, shadowColor: isDark ? "#000" : "#000" }]}>
             {selectedCard && (
               <>
                 <View style={styles.modalHeader}>
@@ -134,16 +143,16 @@ export function RecommendationCards({
                       color={selectedCard.accentColor}
                     />
                   </View>
-                  <Text style={styles.modalTitle}>{selectedCard.title}</Text>
+                  <Text style={[styles.modalTitle, { color: theme.darkBrown }]}>{selectedCard.title}</Text>
                 </View>
-                <Text style={styles.modalValue}>{selectedCard.value}</Text>
-                <Text style={styles.modalReasoning}>{selectedCard.reasoning}</Text>
+                <Text style={[styles.modalValue, { color: theme.darkBrown }]}>{selectedCard.value}</Text>
+                <Text style={[styles.modalReasoning, { color: theme.mutedGrey }]}>{selectedCard.reasoning}</Text>
                 <Pressable
-                  style={styles.reminderButton}
+                  style={[styles.reminderButton, { backgroundColor: theme.accentGold }]}
                   onPress={() => setModalVisible(false)}
                 >
-                  <Feather name="bell" size={16} color="white" />
-                  <Text style={styles.reminderButtonText}>Schedule reminder</Text>
+                  <Feather name="bell" size={16} color={theme.bg} />
+                  <Text style={[styles.reminderButtonText, { color: theme.bg }]}>Schedule reminder</Text>
                 </Pressable>
               </>
             )}
@@ -163,17 +172,14 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   card: {
-    backgroundColor: Colors.light.white,
     borderRadius: BorderRadius.sm,
     padding: Spacing.md,
     minWidth: 140,
     maxWidth: 160,
     borderLeftWidth: 4,
-    ...Shadows.small,
-  },
-  cardPressed: {
-    opacity: 0.8,
-    transform: [{ scale: 0.98 }],
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 2,
   },
   cardHeader: {
     flexDirection: "row",
@@ -183,34 +189,32 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 11,
-    color: Colors.light.mutedGrey,
     fontWeight: "500",
     textTransform: "uppercase",
   },
   cardValue: {
     fontSize: 16,
     fontWeight: "700",
-    color: Colors.light.darkBrown,
     marginBottom: 2,
   },
   cardSubtitle: {
     fontSize: 11,
-    color: Colors.light.mutedGrey,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
     justifyContent: "center",
     alignItems: "center",
     padding: Spacing.xl,
   },
   modalContent: {
-    backgroundColor: Colors.light.white,
     borderRadius: BorderRadius.md,
     padding: Spacing.xl,
     width: "100%",
     maxWidth: 320,
-    ...Shadows.large,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 6,
   },
   modalHeader: {
     flexDirection: "row",
@@ -228,22 +232,18 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: Colors.light.darkBrown,
   },
   modalValue: {
     fontSize: 28,
     fontWeight: "700",
-    color: Colors.light.darkBrown,
     marginBottom: Spacing.sm,
   },
   modalReasoning: {
     fontSize: 14,
-    color: Colors.light.mutedGrey,
     lineHeight: 20,
     marginBottom: Spacing.xl,
   },
   reminderButton: {
-    backgroundColor: Colors.light.accentGold,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -252,7 +252,6 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.sm,
   },
   reminderButtonText: {
-    color: "white",
     fontWeight: "600",
     fontSize: 14,
   },

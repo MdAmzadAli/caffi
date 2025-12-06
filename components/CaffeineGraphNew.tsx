@@ -31,16 +31,40 @@ import {
   getSleepStatusMessage,
   parseBedtimeToMs,
 } from "@/utils/graphUtils";
-import { Colors } from "@/constants/theme";
 
-const GRAPH_COLORS = {
+interface GraphColors {
+  bg: string;
+  bgSecondary: string;
+  accentGold: string;
+  darkBrown: string;
+  darkBrown2: string;
+  green: string;
+  blue: string;
+  mutedGrey: string;
+  dangerRed: string;
+}
+
+const LIGHT_GRAPH_COLORS: GraphColors = {
   bg: "#FFFFFF",
+  bgSecondary: "#F5F5F5",
   accentGold: "#C9A36A",
   darkBrown: "#5C4A3B",
   darkBrown2: "#6A513B",
   green: "#53A451",
   blue: "#4DA3FF",
   mutedGrey: "#9E9E9E",
+  dangerRed: "#D9534F",
+};
+
+const DARK_GRAPH_COLORS: GraphColors = {
+  bg: "#1F1815",
+  bgSecondary: "#2A2420",
+  accentGold: "#C9A36A",
+  darkBrown: "#F5EBDD",
+  darkBrown2: "#E8DFD4",
+  green: "#53A451",
+  blue: "#4DA3FF",
+  mutedGrey: "#A0A0A0",
   dangerRed: "#D9534F",
 };
 
@@ -55,6 +79,7 @@ interface CaffeineGraphProps {
   bedtime: string;
   onScrollOffsetChange?: (isOffCenter: boolean) => void;
   scrollViewRef?: React.RefObject<ScrollView | null>;
+  isDark?: boolean;
 }
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -76,7 +101,10 @@ export function CaffeineGraphNew({
   bedtime,
   onScrollOffsetChange,
   scrollViewRef,
+  isDark = false,
 }: CaffeineGraphProps) {
+  const GRAPH_COLORS = isDark ? DARK_GRAPH_COLORS : LIGHT_GRAPH_COLORS;
+  
   const graphHeight = SCREEN_HEIGHT * 0.38;
   const chartHeight = graphHeight - X_AXIS_HEIGHT - GRAPH_PADDING_TOP - GRAPH_PADDING_BOTTOM;
   const scrollContentWidth = SCREEN_WIDTH * (viewWindowHours / 11);
@@ -204,9 +232,11 @@ export function CaffeineGraphNew({
     [onScrollOffsetChange, nowMs, startMs, endMs, scrollContentWidth]
   );
 
+  const gradientId = isDark ? "curveGradientDark" : "curveGradientLight";
+
   return (
-    <View style={[styles.container, { height: graphHeight }]}>
-      <View style={styles.yAxisContainer}>
+    <View style={[styles.container, { height: graphHeight, backgroundColor: GRAPH_COLORS.bg }]}>
+      <View style={[styles.yAxisContainer, { backgroundColor: GRAPH_COLORS.bg }]}>
         {yAxisTicks.map((mg) => (
           <View
             key={mg}
@@ -215,11 +245,11 @@ export function CaffeineGraphNew({
               { top: mgToY(mg) - 6 },
             ]}
           >
-            <Text style={styles.yAxisLabel}>{mg}</Text>
+            <Text style={[styles.yAxisLabel, { color: GRAPH_COLORS.mutedGrey }]}>{mg}</Text>
           </View>
         ))}
         <View style={[styles.sleepLabel, { top: sleepThresholdY - 8 }]}>
-          <Text style={styles.sleepLabelText}>Sleep unaffected</Text>
+          <Text style={[styles.sleepLabelText, { color: GRAPH_COLORS.green }]}>Sleep unaffected</Text>
         </View>
       </View>
 
@@ -239,8 +269,8 @@ export function CaffeineGraphNew({
           style={styles.svgChart}
         >
           <Defs>
-            <LinearGradient id="curveGradient" x1="0" y1="0" x2="0" y2="1">
-              <Stop offset="0%" stopColor={GRAPH_COLORS.accentGold} stopOpacity="0.6" />
+            <LinearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+              <Stop offset="0%" stopColor={GRAPH_COLORS.accentGold} stopOpacity={isDark ? "0.4" : "0.6"} />
               <Stop offset="100%" stopColor={GRAPH_COLORS.accentGold} stopOpacity="0.05" />
             </LinearGradient>
           </Defs>
@@ -253,7 +283,7 @@ export function CaffeineGraphNew({
               x2={scrollContentWidth - RIGHT_PADDING}
               y2={mgToY(mg)}
               stroke={GRAPH_COLORS.darkBrown}
-              strokeOpacity={0.08}
+              strokeOpacity={isDark ? 0.15 : 0.08}
               strokeWidth={1}
             />
           ))}
@@ -299,7 +329,7 @@ export function CaffeineGraphNew({
             strokeWidth={2}
           />
 
-          <Path d={areaPath} fill="url(#curveGradient)" />
+          <Path d={areaPath} fill={`url(#${gradientId})`} />
 
           <Path
             d={curvePath}
@@ -326,21 +356,22 @@ export function CaffeineGraphNew({
                   cx={marker.x}
                   cy={markerY + MARKER_SIZE / 2 + 8}
                   r={MARKER_SIZE / 2}
-                  fill="#FFF"
-                  stroke="#FFF"
+                  fill={GRAPH_COLORS.bgSecondary}
+                  stroke={GRAPH_COLORS.bgSecondary}
                   strokeWidth={2}
                 />
                 <Circle
                   cx={marker.x}
                   cy={markerY + MARKER_SIZE / 2 + 8}
                   r={MARKER_SIZE / 2 - 2}
-                  fill={GRAPH_COLORS.bg}
+                  fill={GRAPH_COLORS.bgSecondary}
                 />
                 <SvgText
                   x={marker.x}
                   y={markerY + MARKER_SIZE / 2 + 12}
                   fontSize={16}
                   textAnchor="middle"
+                  fill={GRAPH_COLORS.darkBrown}
                 >
                   ☕
                 </SvgText>
@@ -356,7 +387,7 @@ export function CaffeineGraphNew({
                       x={marker.x + 14}
                       y={markerY + MARKER_SIZE / 2 + 4}
                       fontSize={10}
-                      fill="#FFF"
+                      fill={GRAPH_COLORS.bg}
                       textAnchor="middle"
                       fontWeight="bold"
                     >
@@ -376,13 +407,13 @@ export function CaffeineGraphNew({
             return (
               <View key={tickMs} style={[styles.xAxisTick, { left: x - 20 }]}>
                 {showLabel && (
-                  <Text style={styles.xAxisLabel}>{formatTimeLabel(tickMs)}</Text>
+                  <Text style={[styles.xAxisLabel, { color: GRAPH_COLORS.mutedGrey }]}>{formatTimeLabel(tickMs)}</Text>
                 )}
               </View>
             );
           })}
           <View style={[styles.currentTimeLabel, { left: nowX - 30 }]}>
-            <Text style={styles.currentTimeLabelText}>
+            <Text style={[styles.currentTimeLabelText, { color: GRAPH_COLORS.darkBrown2 }]}>
               {formatCurrentTime(nowMs)}
             </Text>
           </View>
@@ -390,7 +421,7 @@ export function CaffeineGraphNew({
       </ScrollView>
 
       <View style={styles.activeValueContainer}>
-        <Text style={styles.activeValueText}>
+        <Text style={[styles.activeValueText, { color: GRAPH_COLORS.darkBrown2 }]}>
           {currentActiveMg.toFixed(1)} mg
         </Text>
         <Text style={[styles.activeValueSubtitle, { color: statusTextColor }]}>
@@ -403,7 +434,6 @@ export function CaffeineGraphNew({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: GRAPH_COLORS.bg,
     position: "relative",
   },
   yAxisContainer: {
@@ -413,7 +443,6 @@ const styles = StyleSheet.create({
     width: Y_AXIS_WIDTH,
     height: "100%",
     zIndex: 10,
-    backgroundColor: GRAPH_COLORS.bg,
   },
   yAxisTickRow: {
     position: "absolute",
@@ -424,7 +453,6 @@ const styles = StyleSheet.create({
   yAxisLabel: {
     fontSize: 12,
     fontWeight: "500",
-    color: GRAPH_COLORS.mutedGrey,
   },
   sleepLabel: {
     position: "absolute",
@@ -434,7 +462,6 @@ const styles = StyleSheet.create({
   sleepLabelText: {
     fontSize: 11,
     fontWeight: "500",
-    color: GRAPH_COLORS.green,
   },
   scrollView: {
     flex: 1,
@@ -455,7 +482,6 @@ const styles = StyleSheet.create({
   xAxisLabel: {
     fontSize: 10,
     fontWeight: "500",
-    color: GRAPH_COLORS.mutedGrey,
   },
   currentTimeLabel: {
     position: "absolute",
@@ -466,7 +492,6 @@ const styles = StyleSheet.create({
   currentTimeLabelText: {
     fontSize: 12,
     fontWeight: "600",
-    color: GRAPH_COLORS.darkBrown2,
   },
   activeValueContainer: {
     position: "absolute",
@@ -478,7 +503,6 @@ const styles = StyleSheet.create({
   activeValueText: {
     fontSize: 42,
     fontWeight: "700",
-    color: GRAPH_COLORS.darkBrown2,
   },
   activeValueSubtitle: {
     fontSize: 14,

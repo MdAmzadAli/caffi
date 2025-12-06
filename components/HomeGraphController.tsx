@@ -11,31 +11,38 @@ import { Feather } from "@expo/vector-icons";
 import { CaffeineGraphNew } from "./CaffeineGraphNew";
 import { CaffeineEvent, parseBedtimeToMs } from "@/utils/graphUtils";
 
-const GRAPH_COLORS = {
-  bg: "#FFFFFF",
-  darkBrown: "#5C4A3B",
-  darkBrown2: "#6A513B",
-  accentGold: "#C9A36A",
-};
-
 interface HomeGraphControllerProps {
   events: CaffeineEvent[];
   bedtime: string;
   halfLifeHours?: number;
   sleepThresholdMg?: number;
+  isDark?: boolean;
 }
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
+const LIGHT_COLORS = {
+  bg: "#FFFFFF",
+  darkBrown: "#5C4A3B",
+};
+
+const DARK_COLORS = {
+  bg: "#2A2420",
+  darkBrown: "#F5EBDD",
+};
 
 export function HomeGraphController({
   events,
   bedtime,
   halfLifeHours = 5.5,
   sleepThresholdMg = 100,
+  isDark = false,
 }: HomeGraphControllerProps) {
   const [isOffCenter, setIsOffCenter] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
   const buttonScale = useSharedValue(1);
+
+  const colors = isDark ? DARK_COLORS : LIGHT_COLORS;
 
   const now = useMemo(() => new Date().toISOString(), []);
 
@@ -81,13 +88,23 @@ export function HomeGraphController({
         viewWindowHours={24}
         onScrollOffsetChange={handleScrollOffsetChange}
         scrollViewRef={scrollViewRef}
+        isDark={isDark}
       />
 
       {isOffCenter && (
         <Animated.View style={[styles.jumpButtonContainer, jumpButtonStyle]}>
-          <Pressable style={styles.jumpButton} onPress={handleJumpToNow}>
-            <Feather name="chevrons-right" size={16} color={GRAPH_COLORS.darkBrown} />
-            <Text style={styles.jumpButtonText}>Now</Text>
+          <Pressable 
+            style={[
+              styles.jumpButton, 
+              { 
+                backgroundColor: colors.bg,
+                shadowColor: isDark ? "#000" : "#000",
+              }
+            ]} 
+            onPress={handleJumpToNow}
+          >
+            <Feather name="chevrons-right" size={16} color={colors.darkBrown} />
+            <Text style={[styles.jumpButtonText, { color: colors.darkBrown }]}>Now</Text>
           </Pressable>
         </Animated.View>
       )}
@@ -111,12 +128,10 @@ const styles = StyleSheet.create({
   jumpButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFF",
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
     gap: 6,
-    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 4,
@@ -125,7 +140,6 @@ const styles = StyleSheet.create({
   jumpButtonText: {
     fontSize: 14,
     fontWeight: "600",
-    color: GRAPH_COLORS.darkBrown,
   },
   edgeFadeLeft: {
     position: "absolute",

@@ -15,7 +15,8 @@ import {
   getHoursUntilBedtime,
 } from "@/utils/recommendationEngine";
 import { CaffeineEvent } from "@/utils/graphUtils";
-import { Colors, Spacing, BorderRadius, Shadows } from "@/constants/theme";
+import { Spacing } from "@/constants/theme";
+import { useTheme } from "@/hooks/useTheme";
 import type { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 
 type HomeScreenProps = {
@@ -24,6 +25,7 @@ type HomeScreenProps = {
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
   const insets = useSafeAreaInsets();
+  const { theme, isDark } = useTheme();
   const {
     profile,
     entries,
@@ -72,19 +74,19 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <View style={styles.header}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: theme.bg }]}>
+      <View style={[styles.header, { backgroundColor: theme.bg }]}>
         <View style={styles.headerLeft}>
-          <View style={styles.logoContainer}>
-            <Feather name="coffee" size={20} color={Colors.light.darkBrown} />
+          <View style={[styles.logoContainer, { backgroundColor: theme.backgroundTertiary, borderColor: theme.accentGold }]}>
+            <Feather name="coffee" size={20} color={theme.darkBrown} />
           </View>
-          <Text style={styles.appTitle}>Caffeine Clock</Text>
+          <Text style={[styles.appTitle, { color: theme.darkBrown }]}>Caffeine Clock</Text>
         </View>
         <Pressable
           style={styles.settingsButton}
           onPress={() => navigation.getParent()?.navigate("SettingsTab" as never)}
         >
-          <Feather name="settings" size={22} color={Colors.light.mutedGrey} />
+          <Feather name="settings" size={22} color={theme.mutedGrey} />
         </Pressable>
       </View>
 
@@ -92,31 +94,30 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
       >
-        <View style={styles.graphContainer}>
-          <HomeGraphController
-            events={caffeineEvents}
-            bedtime={profile.sleepTime}
-            sleepThresholdMg={100}
-            halfLifeHours={5.5}
+        <HomeGraphController
+          events={caffeineEvents}
+          bedtime={profile.sleepTime}
+          sleepThresholdMg={100}
+          halfLifeHours={5.5}
+          isDark={isDark}
+        />
+
+        <View style={styles.ringRow}>
+          <RingProgress
+            consumedTodayMg={todayCaffeine}
+            optimalDailyMg={profile.optimalCaffeine}
+            sizePx={72}
           />
         </View>
 
         <View style={styles.mainContent}>
-          <View style={styles.ringPositionContainer}>
-            <RingProgress
-              consumedTodayMg={todayCaffeine}
-              optimalDailyMg={profile.optimalCaffeine}
-              sizePx={72}
-            />
-          </View>
-
           <View style={styles.recommendationsSection}>
             <RecommendationCards recommendations={recommendations} />
           </View>
 
           <View style={styles.consumptionSection}>
-            <Text style={styles.sectionTitle}>My consumption</Text>
-            <Text style={styles.sectionSubtitle}>TODAY</Text>
+            <Text style={[styles.sectionTitle, { color: theme.darkBrown }]}>My consumption</Text>
+            <Text style={[styles.sectionSubtitle, { color: theme.mutedGrey }]}>TODAY</Text>
             <ConsumptionList
               entries={todayEntries}
               onEntryPress={handleEditEntry}
@@ -138,7 +139,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.light.white,
   },
   header: {
     flexDirection: "row",
@@ -146,7 +146,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
-    backgroundColor: Colors.light.white,
   },
   headerLeft: {
     flexDirection: "row",
@@ -157,16 +156,13 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: Colors.light.backgroundTertiary,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 2,
-    borderColor: Colors.light.accentGold,
   },
   appTitle: {
     fontSize: 20,
     fontWeight: "700",
-    color: Colors.light.darkBrown,
   },
   settingsButton: {
     padding: Spacing.sm,
@@ -177,24 +173,17 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 120,
   },
-  graphContainer: {
-    marginBottom: Spacing.md,
+  ringRow: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    paddingHorizontal: Spacing.lg,
+    marginTop: Spacing.md,
+    marginBottom: Spacing.lg,
   },
   mainContent: {
-    backgroundColor: Colors.light.white,
-    borderTopLeftRadius: BorderRadius.lg,
-    borderTopRightRadius: BorderRadius.lg,
     paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.xl,
     paddingBottom: Spacing.xl,
     minHeight: 400,
-    ...Shadows.medium,
-  },
-  ringPositionContainer: {
-    position: "absolute",
-    top: -36,
-    right: Spacing.xl,
-    zIndex: 10,
   },
   recommendationsSection: {
     marginBottom: Spacing.xl,
@@ -205,13 +194,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 22,
     fontWeight: "700",
-    color: Colors.light.darkBrown,
     marginBottom: Spacing.xs,
   },
   sectionSubtitle: {
     fontSize: 12,
     fontWeight: "600",
-    color: Colors.light.mutedGrey,
     marginBottom: Spacing.md,
     letterSpacing: 1,
   },
