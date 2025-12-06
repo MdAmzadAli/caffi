@@ -12,7 +12,7 @@ import { CaffeineGraphNew } from "./CaffeineGraphNew";
 import { CaffeineEvent, parseBedtimeToMs } from "@/utils/graphUtils";
 
 const GRAPH_COLORS = {
-  bg: "#FAF8F3",
+  bg: "#FFFFFF",
   darkBrown: "#5C4A3B",
   darkBrown2: "#6A513B",
   accentGold: "#C9A36A",

@@ -34,7 +34,7 @@ import {
 import { Colors } from "@/constants/theme";
 
 const GRAPH_COLORS = {
-  bg: "#FAF8F3",
+  bg: "#FFFFFF",
   accentGold: "#C9A36A",
   darkBrown: "#5C4A3B",
   darkBrown2: "#6A513B",

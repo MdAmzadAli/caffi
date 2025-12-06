@@ -2,7 +2,7 @@ import { Platform } from "react-native";
 
 export const Colors = {
   light: {
-    bg: "#FAF8F3",
+    bg: "#FFFFFF",
     accentGold: "#C9A36A",
     darkBrown: "#5C4A3B",
     darkBrown2: "#6A513B",
@@ -17,10 +17,10 @@ export const Colors = {
     tabIconDefault: "#9E9E9E",
     tabIconSelected: "#C9A36A",
     link: "#C9A36A",
-    backgroundRoot: "#FAF8F3",
-    backgroundDefault: "#FAF8F3",
+    backgroundRoot: "#FFFFFF",
+    backgroundDefault: "#FFFFFF",
     backgroundSecondary: "#FFFFFF",
-    backgroundTertiary: "#F5F0E8",
+    backgroundTertiary: "#F5F5F5",
     accent: "#C9A36A",
     success: "#53A451",
     warning: "#F2A43A",
