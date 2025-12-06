@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet, Pressable, TextInput, Alert } from "react-native";
+import { View, StyleSheet, Pressable, TextInput, Alert, TouchableOpacity } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import Animated, {
@@ -326,31 +326,75 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           <View style={styles.themeRow}>
             <ThemedText type="body">Theme</ThemedText>
             <View style={styles.themeOptions}>
-              {(["light", "dark", "system"] as ThemeMode[]).map((mode) => (
-                <Pressable
-                  key={mode}
-                  onPress={() => setThemeMode(mode)}
-                  style={[
-                    styles.themeOption,
-                    {
-                      backgroundColor:
-                        themeMode === mode
-                          ? Colors.light.accent
-                          : theme.backgroundTertiary,
-                    },
-                  ]}
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => setThemeMode("light")}
+                style={[
+                  styles.themeOption,
+                  {
+                    backgroundColor:
+                      themeMode === "light"
+                        ? Colors.light.accent
+                        : theme.backgroundTertiary,
+                  },
+                ]}
+              >
+                <ThemedText
+                  type="small"
+                  style={{
+                    color: themeMode === "light" ? "#FFFFFF" : theme.text,
+                    fontWeight: themeMode === "light" ? "600" : "400",
+                  }}
                 >
-                  <ThemedText
-                    type="small"
-                    style={{
-                      color: themeMode === mode ? "#FFFFFF" : theme.text,
-                      fontWeight: themeMode === mode ? "600" : "400",
-                    }}
-                  >
-                    {THEME_LABELS[mode]}
-                  </ThemedText>
-                </Pressable>
-              ))}
+                  Light
+                </ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => setThemeMode("dark")}
+                style={[
+                  styles.themeOption,
+                  {
+                    backgroundColor:
+                      themeMode === "dark"
+                        ? Colors.light.accent
+                        : theme.backgroundTertiary,
+                  },
+                ]}
+              >
+                <ThemedText
+                  type="small"
+                  style={{
+                    color: themeMode === "dark" ? "#FFFFFF" : theme.text,
+                    fontWeight: themeMode === "dark" ? "600" : "400",
+                  }}
+                >
+                  Dark
+                </ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => setThemeMode("system")}
+                style={[
+                  styles.themeOption,
+                  {
+                    backgroundColor:
+                      themeMode === "system"
+                        ? Colors.light.accent
+                        : theme.backgroundTertiary,
+                  },
+                ]}
+              >
+                <ThemedText
+                  type="small"
+                  style={{
+                    color: themeMode === "system" ? "#FFFFFF" : theme.text,
+                    fontWeight: themeMode === "system" ? "600" : "400",
+                  }}
+                >
+                  System
+                </ThemedText>
+              </TouchableOpacity>
             </View>
           </View>
         </ThemedView>
@@ -686,5 +730,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.xs,
+    minHeight: 36,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
