@@ -1,53 +1,65 @@
-import React, { useState } from "react";
-import { View, StyleSheet, Pressable } from "react-native";
+import React, { useState, useMemo } from "react";
+import { View, StyleSheet, Pressable, Text, Image } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-  withTiming,
-  Easing,
-} from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScreenScrollView } from "@/components/ScreenScrollView";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import { CaffeineRing } from "@/components/CaffeineRing";
-import { QuickStatCard } from "@/components/QuickStatCard";
-import { DrinkTimelineItem } from "@/components/DrinkTimelineItem";
+import { CaffeineGraph } from "@/components/CaffeineGraph";
+import { RingProgress } from "@/components/RingProgress";
+import { RecommendationCards } from "@/components/RecommendationCards";
+import { ConsumptionList } from "@/components/ConsumptionList";
 import EditDrinkModal from "@/components/EditDrinkModal";
 import { useCaffeineStore, DrinkEntry } from "@/store/caffeineStore";
-import { useTheme } from "@/hooks/useTheme";
-import { Colors, Spacing, BorderRadius } from "@/constants/theme";
+import {
+  calculateRecommendations,
+  getHoursUntilBedtime,
+  CaffeineEvent,
+} from "@/utils/recommendationEngine";
+import { Colors, Spacing, BorderRadius, Shadows } from "@/constants/theme";
 import type { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 
 type HomeScreenProps = {
   navigation: NativeStackNavigationProp<HomeStackParamList, "Home">;
 };
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-
 export default function HomeScreen({ navigation }: HomeScreenProps) {
-  const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const {
     profile,
     entries,
     getTodayEntries,
     getTodayCaffeine,
     getActiveCaffeine,
-    getLastDrink,
-    getSleepImpact,
     deleteEntry,
   } = useCaffeineStore();
 
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState<DrinkEntry | null>(null);
 
-  const todayEntries = React.useMemo(() => getTodayEntries(), [entries]);
-  const todayCaffeine = React.useMemo(() => getTodayCaffeine(), [entries]);
-  const activeCaffeine = React.useMemo(() => getActiveCaffeine(), [entries]);
-  const lastDrink = React.useMemo(() => getLastDrink(), [entries]);
-  const sleepImpact = React.useMemo(() => getSleepImpact(), [entries, profile]);
+  const todayEntries = useMemo(() => getTodayEntries(), [entries]);
+  const todayCaffeine = useMemo(() => getTodayCaffeine(), [entries]);
+  const activeCaffeine = useMemo(() => getActiveCaffeine(), [entries]);
+
+  const caffeineEvents: CaffeineEvent[] = useMemo(() => {
+    return entries.map((entry) => ({
+      id: entry.id,
+      name: entry.name,
+      mg: entry.caffeineAmount,
+      timestamp: new Date(entry.timestamp).toISOString(),
+    }));
+  }, [entries]);
+
+  const recommendations = useMemo(() => {
+    const hoursUntilBed = getHoursUntilBedtime(profile.sleepTime);
+    return calculateRecommendations({
+      consumedTodayMg: todayCaffeine,
+      upcomingHoursUntilBed: hoursUntilBed,
+      currentCaffeineMg: activeCaffeine,
+      optimalDailyMg: profile.optimalCaffeine,
+      halfLifeHours: 5.5,
+      sleepThresholdMg: 100,
+    });
+  }, [todayCaffeine, activeCaffeine, profile]);
 
   const handleEditEntry = (entry: DrinkEntry) => {
     setSelectedEntry(entry);
@@ -59,205 +71,149 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     setSelectedEntry(null);
   };
 
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    let greeting = "Good evening";
-    if (hour < 12) greeting = "Good morning";
-    else if (hour < 17) greeting = "Good afternoon";
-    
-    if (profile.name && profile.name.trim()) {
-      return `${greeting}, ${profile.name}`;
-    }
-    return greeting;
-  };
-
-  const formatDate = () => {
-    const options: Intl.DateTimeFormatOptions = {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-    };
-    return new Date().toLocaleDateString("en-US", options);
-  };
-
-  const formatLastDrinkTime = () => {
-    if (!lastDrink) return "No drinks yet";
-    const timestamp = new Date(lastDrink.timestamp);
-    const now = new Date();
-    const diffMs = now.getTime() - timestamp.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-
-    if (diffMins < 1) return "Just now";
-    if (diffMins < 60) return `${diffMins}m ago`;
-    const diffHours = Math.floor(diffMins / 60);
-    if (diffHours < 24) return `${diffHours}h ago`;
-    return timestamp.toLocaleDateString();
-  };
-
-  const percentage = Math.min((todayCaffeine / profile.optimalCaffeine) * 100, 100);
-
   return (
-    <ScreenScrollView>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.header}>
-        <ThemedText type="h4">{getGreeting()}</ThemedText>
-        <ThemedText type="small" muted>
-          {formatDate()}
-        </ThemedText>
+        <View style={styles.headerLeft}>
+          <View style={styles.logoContainer}>
+            <Feather name="coffee" size={20} color={Colors.light.darkBrown} />
+          </View>
+          <Text style={styles.appTitle}>Caffeine Clock</Text>
+        </View>
+        <Pressable
+          style={styles.settingsButton}
+          onPress={() => navigation.getParent()?.navigate("SettingsTab" as never)}
+        >
+          <Feather name="settings" size={22} color={Colors.light.mutedGrey} />
+        </Pressable>
       </View>
 
-      <View style={styles.ringContainer}>
-        <CaffeineRing
-          percentage={percentage}
-          currentMg={todayCaffeine}
-          limitMg={profile.optimalCaffeine}
-        />
-      </View>
+      <ScreenScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+      >
+        <View style={styles.graphContainer}>
+          <CaffeineGraph
+            events={caffeineEvents}
+            bedtime={profile.sleepTime}
+            optimalSleepThresholdMg={100}
+            halfLifeHours={5.5}
+          />
+        </View>
 
-      <View style={styles.statsRow}>
-        <QuickStatCard
-          icon="activity"
-          label="Active"
-          value={`${activeCaffeine} mg`}
-          sublabel="in blood"
-        />
-        <QuickStatCard
-          icon="coffee"
-          label="Last drink"
-          value={lastDrink?.name || "None"}
-          sublabel={formatLastDrinkTime()}
-        />
-        <QuickStatCard
-          icon="moon"
-          label="Sleep"
-          value={sleepImpact.message}
-          status={sleepImpact.level as "good" | "warning" | "danger"}
-        />
-      </View>
-
-      <View style={styles.actionsRow}>
-        <ActionButton
-          icon="bar-chart-2"
-          label="View Stats"
-          onPress={() => navigation.navigate("Statistics")}
-        />
-      </View>
-
-      <View style={styles.timelineSection}>
-        <ThemedText type="h4" style={styles.sectionTitle}>
-          Today
-        </ThemedText>
-        {todayEntries.length === 0 ? (
-          <ThemedView elevation={1} style={styles.emptyState}>
-            <Feather name="coffee" size={32} color={theme.textMuted} />
-            <ThemedText muted style={styles.emptyText}>
-              You haven't added any drinks today
-            </ThemedText>
-            <ThemedText type="small" muted>
-              Tap the + button to add your first one
-            </ThemedText>
-          </ThemedView>
-        ) : (
-          todayEntries.map((entry) => (
-            <DrinkTimelineItem
-              key={entry.id}
-              entry={entry}
-              onDelete={() => deleteEntry(entry.id)}
-              onEdit={() => handleEditEntry(entry)}
+        <View style={styles.mainContent}>
+          <View style={styles.ringPositionContainer}>
+            <RingProgress
+              consumedTodayMg={todayCaffeine}
+              optimalDailyMg={profile.optimalCaffeine}
+              sizePx={72}
             />
-          ))
-        )}
-      </View>
+          </View>
+
+          <View style={styles.recommendationsSection}>
+            <RecommendationCards recommendations={recommendations} />
+          </View>
+
+          <View style={styles.consumptionSection}>
+            <Text style={styles.sectionTitle}>My consumption</Text>
+            <Text style={styles.sectionSubtitle}>TODAY</Text>
+            <ConsumptionList
+              entries={todayEntries}
+              onEntryPress={handleEditEntry}
+              onDeleteEntry={deleteEntry}
+            />
+          </View>
+        </View>
+      </ScreenScrollView>
 
       <EditDrinkModal
         visible={editModalVisible}
         entry={selectedEntry}
         onClose={handleCloseEditModal}
       />
-    </ScreenScrollView>
-  );
-}
-
-interface ActionButtonProps {
-  icon: keyof typeof Feather.glyphMap;
-  label: string;
-  onPress: () => void;
-}
-
-function ActionButton({ icon, label, onPress }: ActionButtonProps) {
-  const { theme } = useTheme();
-  const scale = useSharedValue(1);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-
-  return (
-    <AnimatedPressable
-      onPress={onPress}
-      onPressIn={() => {
-        scale.value = withSpring(0.95);
-      }}
-      onPressOut={() => {
-        scale.value = withSpring(1);
-      }}
-      style={[
-        styles.actionButton,
-        { backgroundColor: theme.backgroundDefault },
-        animatedStyle,
-      ]}
-    >
-      <Feather name={icon} size={20} color={Colors.light.accent} />
-      <ThemedText type="small" style={styles.actionLabel}>
-        {label}
-      </ThemedText>
-    </AnimatedPressable>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  header: {
-    marginBottom: Spacing.xl,
-  },
-  ringContainer: {
-    alignItems: "center",
-    marginBottom: Spacing["2xl"],
-  },
-  statsRow: {
-    flexDirection: "row",
-    gap: Spacing.sm,
-    marginBottom: Spacing.xl,
-  },
-  actionsRow: {
-    flexDirection: "row",
-    gap: Spacing.sm,
-    marginBottom: Spacing["2xl"],
-  },
-  actionButton: {
+  container: {
     flex: 1,
+    backgroundColor: Colors.light.bg,
+  },
+  header: {
     flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    backgroundColor: Colors.light.bg,
+  },
+  headerLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+  },
+  logoContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.light.backgroundTertiary,
     alignItems: "center",
     justifyContent: "center",
-    gap: Spacing.sm,
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.sm,
+    borderWidth: 2,
+    borderColor: Colors.light.accentGold,
   },
-  actionLabel: {
-    fontWeight: "500",
+  appTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: Colors.light.darkBrown,
   },
-  timelineSection: {
+  settingsButton: {
+    padding: Spacing.sm,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 120,
+  },
+  graphContainer: {
+    paddingHorizontal: Spacing.lg,
+    marginBottom: Spacing.md,
+  },
+  mainContent: {
+    backgroundColor: Colors.light.white,
+    borderTopLeftRadius: BorderRadius.lg,
+    borderTopRightRadius: BorderRadius.lg,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.xl,
+    paddingBottom: Spacing.xl,
+    minHeight: 400,
+    ...Shadows.medium,
+  },
+  ringPositionContainer: {
+    position: "absolute",
+    top: -36,
+    right: Spacing.xl,
+    zIndex: 10,
+  },
+  recommendationsSection: {
+    marginBottom: Spacing.xl,
+  },
+  consumptionSection: {
     flex: 1,
   },
   sectionTitle: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: Colors.light.darkBrown,
+    marginBottom: Spacing.xs,
+  },
+  sectionSubtitle: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: Colors.light.mutedGrey,
     marginBottom: Spacing.md,
-  },
-  emptyState: {
-    alignItems: "center",
-    padding: Spacing["3xl"],
-    borderRadius: BorderRadius.md,
-    gap: Spacing.sm,
-  },
-  emptyText: {
-    marginTop: Spacing.sm,
-    textAlign: "center",
+    letterSpacing: 1,
   },
 });

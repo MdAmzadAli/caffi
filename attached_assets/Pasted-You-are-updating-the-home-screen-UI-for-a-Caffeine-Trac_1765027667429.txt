@@ -1,0 +1,192 @@
+You are updating the home screen UI for a Caffeine Tracker (mobile, React Native / Expo).  
+Goal: reproduce the provided reference screenshot exactly (cream + gold theme, graph top, consumption list bottom, center FAB, 5-icon bottom nav) and add two new minimal elements:
+
+  A. Circular ring (compact, non-intrusive) that shows: Today's total consumption ÷ Optimal daily caffeine (as percentage)  
+  B. Recommendation card row (3 small cards): 
+     Card 1 — Focus Dose : <X> mg 
+     Card 2 — Best Time : <start> – <end> 
+     Card 3 — Cutoff Time : Avoid after <time>
+
+Constraints:
+• Keep layout minimal and uncluttered. New elements must not obscure the graph.  
+• Use existing color palette (see color variables).  
+• Provide React Native (Expo) code output with functional components and hooks. Use react-native-svg for graph and ring. Use a charting lib like `victory-native` or custom `react-native-svg` path if needed.  
+• Provide a compact, easily testable recommendation algorithm (include formulas) and the props each component expects.
+
+------------------------------------------------------------
+STYLE & THEME (use these exact color tokens)
+------------------------------------------------------------
+--bg: #FAF8F3         (cream background)
+--accent-gold: #C9A36A
+--dark-brown: #5C4A3B
+--dark-brown-2: #6A513B
+--green: #53A451
+--blue: #4DA3FF
+--muted-grey: #9E9E9E
+
+Typography:
+• Headline: 28–32 px, weight 700, color --dark-brown  
+• Subtext/caption: 12–14 px, color --muted-grey
+• Large numeric (graph right): 42–48 px, color --dark-brown-2
+
+Spacing:
+• Comfortable whitespace; graph occupies top ~45–50% height. Consumption list area is a rounded white card with 24px radius.
+
+------------------------------------------------------------
+LAYOUT (structure)
+------------------------------------------------------------
+Header (top safe area)
+• Left: small logo & app title "Caffeine Clock"
+• Right: settings icon
+
+Main (top half) — Graph container
+• Full width, 45–50% of screen height
+• Y-axis mg scale (0–250)
+• X-axis: 24-hour timeline (hour ticks)
+• Reference lines:
+  - Horizontal green line (sleep threshold) — solid
+  - Vertical blue dashed line (user bedtime)
+  - Vertical dark-brown thin line (current time)
+• Caffeine decay curve (smooth, dark-brown-2)
+• Right side of graph (aligned vertically, not overlapping curve): current caffeine (big number) + small green subtitle "Your sleep should be unaffected."
+
+New element 1 — Circular ring (compact)
+• Position: Top-right corner of the consumption rounded card area (not inside the graph). If space is tight, place small ring inside top-right corner of the graph container but visually separate by floating on a cream backdrop with subtle shadow.
+• Size: 68–80 px diameter (small, glanceable)
+• Visual: ring progress = (today_consumed / optimal_daily_limit) * 100%
+  - Stroke width: 8px
+  - Fill center: white with a subtle text: "XX mg" (consumed) on top line and "of 200 mg" (optimal) bottom caption
+  - Ring color: gradient from --accent-gold (start) to --green (if <= 100%)/--red fallback (if >100% — use #D9534F)
+  - If >100% show a thin red outer glow and change small percentage label color to red.
+• Accessibility: Provide aria / accessibilityLabel text: "Today: 95 mg of 200 mg (48%)"
+
+New element 2 — Recommendation cards (dynamic)
+• Position: Directly above the consumption list or in a single horizontal scroll row between graph and consumption heading. Keep each card small (min-width 140 px), with rounded corners, icon, one-line title, and bold main value.
+• Cards:
+  - Card 1: Focus Dose — numeric mg (example 40 mg). Subtitle: "Small boost for concentration"
+  - Card 2: Best Time — "Your ideal caffeine window: 8:30 AM – 10:30 AM"
+  - Card 3: Cutoff Time — "Avoid after: 3:00 PM for best sleep"
+• Visual treatment:
+  - Card backgrounds: white, subtle shadow, border-radius 12px.
+  - Accent left border 4px colored: card1 = --accent-gold, card2 = --blue, card3 = --green.
+  - Text: title muted, value bold (--dark-brown).
+• Interactions: tapping a card opens a compact modal with reasoning and a "Schedule reminder" CTA.
+
+Bottom — Consumption list card (rounded)
+• Title "My consumption" and "TODAY"
+• List rows: left image avatar (rounded), name & time (muted grey), right aligned mg value bold.
+
+Bottom navigation & FAB
+• 5 icons (chat, stats, + center FAB, history, settings) — center FAB gold, elevated.
+
+------------------------------------------------------------
+DATA CONTRACTS & COMPONENTS (explicit)
+------------------------------------------------------------
+1) CaffeineGraph props:
+   - events: Array<{ id, name, mg, timestamp (ISO), iconUrl }>
+   - bedtime: ISO timestamp or hour (user preference)
+   - optimal_sleep_threshold_mg: number (e.g., 100)
+   - now: ISO timestamp (for testing)
+   - half_life_hours: number (default 5.5)
+   - Returns: renders curve, lines, current mg label
+
+2) RingProgress props:
+   - consumedTodayMg: number
+   - optimalDailyMg: number
+   - sizePx?: number (default 72)
+   - onPress?: () => void
+
+   Calculation:
+   - percent = clamp(consumedTodayMg / optimalDailyMg * 100, 0, 999)
+   - display mg text center = `${consumedTodayMg} mg`
+   - If percent > 100 => show overflow visuals (red ring) and subtitle "Over limit"
+
+3) RecommendationEngine (pure function)
+   Inputs:
+    - consumedTodayMg
+    - upcomingHoursUntilBed (from bedtime - now)
+    - currentCaffeineMg (calculated by decay formula from events)
+    - userSensitivityFactor (0.8–1.2, default 1.0) — lower number = more sensitive
+    - optimalDailyMg (default 200)
+    - halfLifeHours (default 5.5)
+
+   Returns:
+    - focusDoseMg (number)
+    - bestWindowStart (time)
+    - bestWindowEnd (time)
+    - cutoffTime (time)
+    - reasoning (string short)
+
+   Algorithm (pseudocode):
+    1. remainingSafeMg = max(0, optimalDailyMg * userSensitivityFactor - consumedTodayMg)
+    2. conservativeReserveMg = min(remainingSafeMg, 80) // reserve some so not to hit limit
+    3. focusDoseMg = roundTo5(min(40, conservativeReserveMg * 0.5)) // typical small focus dose = up to 40 mg
+    4. compute when a focusDose taken now would decay below sleep threshold by bedtime:
+       - Use decay formula: remaining_mg_at_time(t_hours_after) = dose * 0.5^(t_hours_after / halfLifeHours)
+       - Solve for latest start time where current_caffeine + remaining_mg_at_time(t) <= sleep_threshold_mg
+       - bestWindowEnd = bedtime - hours_needed_for_dose_to_decay_to_safe_level
+       - bestWindowStart = max(now + 0.5h, bestWindowEnd - 2h) // prefer a 2-hour window, start >= half hour from now
+    5. cutoffTime = bedtime - hours_needed_to_decay_currentCaffeine_to_sleep_threshold (rounded to nearest 15 minutes)
+    6. If remainingSafeMg <= 0 set focusDoseMg = 0 and show "No safe dose today" with reasoning.
+    7. Provide short reasoning strings for each card.
+
+   Example output for typical user:
+     focusDoseMg = 40
+     bestWindow = 8:30 AM – 10:30 AM
+     cutoffTime = 3:00 PM
+
+4) RecommendationCards component
+   - Renders the three cards using data from RecommendationEngine.
+   - Each card shows short reasoning when tapped.
+
+------------------------------------------------------------
+UI BEHAVIOR & ANIMATIONS
+------------------------------------------------------------
+• Graph updates in real-time (on event add) with smooth path animation.  
+• Ring progress animates from previous percent to new percent.  
+• Cards slide-in on first mount with slight fade.  
+• Use subtle shadows and maintain high contrast for numbers (WCAG AA).
+
+------------------------------------------------------------
+ACCESSIBILITY & LOCALIZATION
+------------------------------------------------------------
+• All text should support i18n (strings externalized).  
+• Provide accessibilityLabel on ring and cards with full textual values (e.g., "Focus dose 40 milligrams").  
+• Use readable font sizes and minimum touch targets (44px).
+
+------------------------------------------------------------
+DELIVERABLES (what to output)
+------------------------------------------------------------
+1. A full React Native (Expo) page component `HomeScreen.tsx` with the layout described above.  
+2. Separate components: `CaffeineGraph.tsx`, `RingProgress.tsx`, `RecommendationCards.tsx`, `ConsumptionList.tsx`, `BottomNav.tsx`.  
+3. A small `recommendationEngine.ts` file implementing the algorithm (commented and testable). Include sample unit tests / example inputs & outputs.  
+4. Styling (either Tailwind RN or StyleSheet) using the color tokens above.  
+5. A README block describing the props & how to simulate events for testing (e.g., `events` array), and how to adjust userSensitivityFactor and halfLifeHours.  
+6. Include sample mocked data (2–4 consumption events) so the UI in the simulator looks exactly like the screenshot.  
+7. Bonus: small snapshot tests for RecommendationEngine (jest) and a playground screen where you can tweak bedtime, halfLife, and sensitivity and see recommendations update.
+
+------------------------------------------------------------
+IMPLEMENTATION NOTES / TIPS
+------------------------------------------------------------
+• Use `react-native-svg` for ring and custom graph overlays (reference lines). For the curve, you can either:
+  - Compute decay points for each hour and draw a smooth path, or
+  - Use `victory-native` line chart and overlay custom vertical/horizontal lines using `react-native-svg`.
+• Keep the ring visually subtle — small size, crisp numbers. Do not place a second large progress meter near the graph; that will clutter the main visual.  
+• Recommendations must be conservative — prefer safer smaller doses than aggressive suggestions. Use `userSensitivityFactor` to tune per-user.
+• Use utility functions for time formatting & rounding to nearest 5/15 minutes.
+
+------------------------------------------------------------
+SAMPLE MOCK DATA (to include in Replit test file)
+------------------------------------------------------------
+const events = [
+  { id: 'e1', name: 'Drip coffee', mg: 95, timestamp: '2025-12-06T02:21:00Z', icon: '...' },
+  { id: 'e2', name: 'Bhn', mg: 10, timestamp: '2025-12-06T01:20:00Z', icon: '...' }
+];
+const bedtime = '2025-12-06T23:00:00'  // user bedtime
+const optimalDailyMg = 200
+const halfLifeHours = 5.5
+const userSensitivityFactor = 1.0
+
+------------------------------------------------------------
+Finish by generating the full React Native code for the components listed above and the `recommendationEngine.ts` function. Make the code modular and well-commented so it's easy to plug into the existing project.
+

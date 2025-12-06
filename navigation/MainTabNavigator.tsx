@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
@@ -8,16 +8,18 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
-import { useNavigation, NavigationProp, CommonActions } from "@react-navigation/native";
+import { useNavigation, NavigationProp } from "@react-navigation/native";
 import HomeStackNavigator from "@/navigation/HomeStackNavigator";
 import HistoryStackNavigator from "@/navigation/HistoryStackNavigator";
 import SettingsStackNavigator from "@/navigation/SettingsStackNavigator";
+import StatisticsScreen from "@/screens/StatisticsScreen";
 import AddDrinkModal from "@/screens/AddDrinkModal";
 import { useTheme } from "@/hooks/useTheme";
 import { Colors, Spacing, BorderRadius, Shadows } from "@/constants/theme";
 
 export type MainTabParamList = {
   HomeTab: undefined;
+  StatsTab: undefined;
   AddTab: undefined;
   HistoryTab: undefined;
   SettingsTab: undefined;
@@ -64,6 +66,10 @@ function FloatingActionButton({ onPress }: FABProps) {
   );
 }
 
+function StatsTabWrapper() {
+  return <StatisticsScreen />;
+}
+
 export default function MainTabNavigator() {
   const { theme, isDark } = useTheme();
   const [showAddModal, setShowAddModal] = useState(false);
@@ -106,6 +112,7 @@ export default function MainTabNavigator() {
             fontSize: 11,
             fontWeight: "500",
           },
+          tabBarShowLabel: false,
         }}
       >
         <Tab.Screen
@@ -114,7 +121,17 @@ export default function MainTabNavigator() {
           options={{
             title: "Home",
             tabBarIcon: ({ color, size }) => (
-              <Feather name="home" size={size} color={color} />
+              <Feather name="message-circle" size={size} color={color} />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="StatsTab"
+          component={StatsTabWrapper}
+          options={{
+            title: "Stats",
+            tabBarIcon: ({ color, size }) => (
+              <Feather name="bar-chart-2" size={size} color={color} />
             ),
           }}
         />
@@ -140,7 +157,7 @@ export default function MainTabNavigator() {
           options={{
             title: "History",
             tabBarIcon: ({ color, size }) => (
-              <Feather name="clock" size={size} color={color} />
+              <Feather name="layers" size={size} color={color} />
             ),
           }}
         />
