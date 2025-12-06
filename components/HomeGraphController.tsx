@@ -42,6 +42,7 @@ export function HomeGraphController({
   isDark = false,
 }: HomeGraphControllerProps) {
   const [isOffCenter, setIsOffCenter] = useState(false);
+  const [scrollDirection, setScrollDirection] = useState<'left' | 'right' | null>(null);
   const scrollViewRef = useRef<ScrollView>(null);
   const buttonScale = useSharedValue(1);
 
@@ -49,8 +50,9 @@ export function HomeGraphController({
 
   const now = useMemo(() => new Date().toISOString(), []);
 
-  const handleScrollOffsetChange = useCallback((offCenter: boolean) => {
+  const handleScrollOffsetChange = useCallback((offCenter: boolean, direction: 'left' | 'right' | null) => {
     setIsOffCenter(offCenter);
+    setScrollDirection(direction);
   }, []);
 
   const handleJumpToNow = useCallback(() => {
@@ -94,26 +96,39 @@ export function HomeGraphController({
         isDark={isDark}
       />
 
-      {isOffCenter && (
-        <Animated.View style={[styles.jumpButtonContainer, jumpButtonStyle]}>
+      {isOffCenter && scrollDirection === 'right' && (
+        <Animated.View style={[styles.arrowButtonRight, jumpButtonStyle]}>
           <Pressable 
             style={[
-              styles.jumpButton, 
+              styles.arrowButton, 
               { 
                 backgroundColor: colors.bg,
-                shadowColor: isDark ? "#000" : "#000",
+                shadowColor: "#000",
               }
             ]} 
             onPress={handleJumpToNow}
           >
-            <Feather name="chevrons-right" size={16} color={colors.darkBrown} />
-            <Text style={[styles.jumpButtonText, { color: colors.darkBrown }]}>Now</Text>
+            <Feather name="chevron-right" size={18} color={colors.darkBrown} />
           </Pressable>
         </Animated.View>
       )}
 
-      <View style={styles.edgeFadeLeft} pointerEvents="none" />
-      <View style={styles.edgeFadeRight} pointerEvents="none" />
+      {isOffCenter && scrollDirection === 'left' && (
+        <Animated.View style={[styles.arrowButtonLeft, jumpButtonStyle]}>
+          <Pressable 
+            style={[
+              styles.arrowButton, 
+              { 
+                backgroundColor: colors.bg,
+                shadowColor: "#000",
+              }
+            ]} 
+            onPress={handleJumpToNow}
+          >
+            <Feather name="chevron-left" size={18} color={colors.darkBrown} />
+          </Pressable>
+        </Animated.View>
+      )}
     </View>
   );
 }
@@ -122,43 +137,30 @@ const styles = StyleSheet.create({
   container: {
     position: "relative",
   },
-  jumpButtonContainer: {
+  arrowButtonRight: {
     position: "absolute",
-    bottom: 40,
-    alignSelf: "center",
+    right: 8,
+    top: "50%",
+    marginTop: -16,
     zIndex: 100,
   },
-  jumpButton: {
-    flexDirection: "row",
+  arrowButtonLeft: {
+    position: "absolute",
+    left: 8,
+    top: "50%",
+    marginTop: -16,
+    zIndex: 100,
+  },
+  arrowButton: {
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    gap: 6,
+    justifyContent: "center",
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 4,
     elevation: 4,
-  },
-  jumpButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  edgeFadeLeft: {
-    position: "absolute",
-    left: 24,
-    top: 0,
-    bottom: 24,
-    width: 16,
-    backgroundColor: "transparent",
-  },
-  edgeFadeRight: {
-    position: "absolute",
-    right: 0,
-    top: 0,
-    bottom: 24,
-    width: 16,
-    backgroundColor: "transparent",
   },
 });
 

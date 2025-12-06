@@ -75,7 +75,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top, backgroundColor: theme.bg }]}>
-      <View style={[styles.header, { backgroundColor: theme.bg }]}>
+      {/* <View style={[styles.header, { backgroundColor: theme.bg }]}>
         <View style={styles.headerLeft}>
           <View style={[styles.logoContainer, { backgroundColor: theme.backgroundTertiary, borderColor: theme.accentGold }]}>
             <Feather name="coffee" size={20} color={theme.darkBrown} />
@@ -88,7 +88,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         >
           <Feather name="settings" size={22} color={theme.mutedGrey} />
         </Pressable>
-      </View>
+      </View> */}
 
       <ScreenScrollView
         style={styles.scrollView}

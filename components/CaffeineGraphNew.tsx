@@ -83,7 +83,7 @@ interface CaffeineGraphProps {
   yMax?: number;
   sleepThresholdMg?: number;
   bedtime: string;
-  onScrollOffsetChange?: (isOffCenter: boolean) => void;
+  onScrollOffsetChange?: (isOffCenter: boolean, direction: 'left' | 'right' | null) => void;
   scrollViewRef?: React.RefObject<ScrollView | null>;
   isDark?: boolean;
 }
@@ -255,7 +255,10 @@ export function CaffeineGraphNew({
         const centerX = scrollX + SCREEN_WIDTH / 2;
         const nowPosition = ((nowMs - startMs) / (endMs - startMs)) * scrollContentWidth;
         const isOffCenter = Math.abs(centerX - nowPosition) > SCREEN_WIDTH * 0.1;
-        onScrollOffsetChange(isOffCenter);
+        const direction: 'left' | 'right' | null = isOffCenter 
+          ? (centerX < nowPosition ? 'right' : 'left') 
+          : null;
+        onScrollOffsetChange(isOffCenter, direction);
       }
     },
     [onScrollOffsetChange, nowMs, startMs, endMs, scrollContentWidth]
@@ -277,7 +280,7 @@ export function CaffeineGraphNew({
             <Text style={[styles.yAxisLabel, { color: GRAPH_COLORS.mutedGrey }]}>{mg}</Text>
           </View>
         ))}
-        <View style={[styles.sleepLabel, { top: sleepThresholdY - 6 }]}>
+        <View style={[styles.sleepLabel, { top: sleepThresholdY - 14 }]}>
           <Text style={[styles.sleepLabelText, { color: GRAPH_COLORS.green }]}>Sleep unaffected</Text>
         </View>
       </View>
@@ -491,7 +494,7 @@ const styles = StyleSheet.create({
   },
   yAxisContainer: {
     position: "absolute",
-    left: 2,
+    left: -14,
     top: 0,
     width: Y_AXIS_WIDTH,
     height: "100%",
@@ -541,7 +544,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: 36,
     alignItems: "center",
-    top: 2,
+    top: 12,
   },
   currentTimeLabelText: {
     fontSize: 8,
