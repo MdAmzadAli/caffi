@@ -42,6 +42,8 @@ interface GraphColors {
   blue: string;
   mutedGrey: string;
   dangerRed: string;
+  areaFill: string;
+  areaFillEnd: string;
 }
 
 const LIGHT_GRAPH_COLORS: GraphColors = {
@@ -54,6 +56,8 @@ const LIGHT_GRAPH_COLORS: GraphColors = {
   blue: "#4DA3FF",
   mutedGrey: "#9E9E9E",
   dangerRed: "#D9534F",
+  areaFill: "#E8DFD0",
+  areaFillEnd: "#F5F0E8",
 };
 
 const DARK_GRAPH_COLORS: GraphColors = {
@@ -66,6 +70,8 @@ const DARK_GRAPH_COLORS: GraphColors = {
   blue: "#4DA3FF",
   mutedGrey: "#A0A0A0",
   dangerRed: "#D9534F",
+  areaFill: "#3D3530",
+  areaFillEnd: "#2A2420",
 };
 
 interface CaffeineGraphProps {
@@ -83,19 +89,21 @@ interface CaffeineGraphProps {
 }
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
-const Y_AXIS_WIDTH = 48;
-const RIGHT_PADDING = 24;
-const X_AXIS_HEIGHT = 28;
-const GRAPH_PADDING_TOP = 12;
-const GRAPH_PADDING_BOTTOM = 12;
-const MARKER_SIZE = 36;
+const Y_AXIS_WIDTH = 28;
+const RIGHT_PADDING = 4;
+const X_AXIS_HEIGHT = 20;
+const GRAPH_PADDING_TOP = 8;
+const GRAPH_PADDING_BOTTOM = 8;
+const MARKER_SIZE = 28;
+const HOURS_VISIBLE = 11;
+const TOTAL_WINDOW_HOURS = 168;
 
 export function CaffeineGraphNew({
   events,
   now = new Date().toISOString(),
   halfLifeHours = 5.5,
   sampleResolutionMinutes = 5,
-  viewWindowHours = 24,
+  viewWindowHours = TOTAL_WINDOW_HOURS,
   yMax = 450,
   sleepThresholdMg = 100,
   bedtime,
@@ -105,9 +113,9 @@ export function CaffeineGraphNew({
 }: CaffeineGraphProps) {
   const GRAPH_COLORS = isDark ? DARK_GRAPH_COLORS : LIGHT_GRAPH_COLORS;
   
-  const graphHeight = SCREEN_HEIGHT * 0.38;
+  const graphHeight = SCREEN_HEIGHT * 0.32;
   const chartHeight = graphHeight - X_AXIS_HEIGHT - GRAPH_PADDING_TOP - GRAPH_PADDING_BOTTOM;
-  const scrollContentWidth = SCREEN_WIDTH * (viewWindowHours / 11);
+  const scrollContentWidth = SCREEN_WIDTH * (viewWindowHours / HOURS_VISIBLE);
   const chartWidth = scrollContentWidth - Y_AXIS_WIDTH - RIGHT_PADDING;
 
   const nowMs = Date.parse(now);
@@ -169,7 +177,8 @@ export function CaffeineGraphNew({
 
   const yAxisTicks = useMemo(() => {
     const ticks = [];
-    for (let mg = 0; mg <= yMax; mg += 50) {
+    const step = yMax <= 200 ? 50 : 100;
+    for (let mg = 0; mg <= yMax; mg += step) {
       ticks.push(mg);
     }
     return ticks;
@@ -190,12 +199,31 @@ export function CaffeineGraphNew({
     return ticks;
   }, [startMs, endMs]);
 
+  const dateMarkers = useMemo(() => {
+    const markers: { ms: number; label: string }[] = [];
+    const startDate = new Date(startMs);
+    startDate.setHours(0, 0, 0, 0);
+    let currentMs = startDate.getTime();
+    if (currentMs < startMs) {
+      currentMs += 24 * 3600000;
+    }
+    while (currentMs <= endMs) {
+      const date = new Date(currentMs);
+      const day = date.getDate();
+      const month = date.toLocaleDateString("en-US", { month: "short" });
+      const year = date.getFullYear().toString().slice(-2);
+      markers.push({ ms: currentMs, label: `${day} ${month}, ${year}` });
+      currentMs += 24 * 3600000;
+    }
+    return markers;
+  }, [startMs, endMs]);
+
   const eventMarkers = useMemo(() => {
     const relevantEvents = events.filter((e) => {
       const eventMs = Date.parse(e.timestampISO);
       return eventMs >= startMs && eventMs <= endMs;
     });
-    return getEventMarkersWithCollision(relevantEvents, timeToX, 28);
+    return getEventMarkersWithCollision(relevantEvents, timeToX, 22);
   }, [events, startMs, endMs, timeToX]);
 
   const nowX = timeToX(nowMs);
@@ -242,13 +270,13 @@ export function CaffeineGraphNew({
             key={mg}
             style={[
               styles.yAxisTickRow,
-              { top: mgToY(mg) - 6 },
+              { top: mgToY(mg) - 4 },
             ]}
           >
             <Text style={[styles.yAxisLabel, { color: GRAPH_COLORS.mutedGrey }]}>{mg}</Text>
           </View>
         ))}
-        <View style={[styles.sleepLabel, { top: sleepThresholdY - 8 }]}>
+        <View style={[styles.sleepLabel, { top: sleepThresholdY - 6 }]}>
           <Text style={[styles.sleepLabelText, { color: GRAPH_COLORS.green }]}>Sleep unaffected</Text>
         </View>
       </View>
@@ -270,8 +298,8 @@ export function CaffeineGraphNew({
         >
           <Defs>
             <LinearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-              <Stop offset="0%" stopColor={GRAPH_COLORS.accentGold} stopOpacity={isDark ? "0.4" : "0.6"} />
-              <Stop offset="100%" stopColor={GRAPH_COLORS.accentGold} stopOpacity="0.05" />
+              <Stop offset="0%" stopColor={GRAPH_COLORS.areaFill} stopOpacity="0.9" />
+              <Stop offset="100%" stopColor={GRAPH_COLORS.areaFillEnd} stopOpacity="0.2" />
             </LinearGradient>
           </Defs>
 
@@ -283,8 +311,8 @@ export function CaffeineGraphNew({
               x2={scrollContentWidth - RIGHT_PADDING}
               y2={mgToY(mg)}
               stroke={GRAPH_COLORS.darkBrown}
-              strokeOpacity={isDark ? 0.15 : 0.08}
-              strokeWidth={1}
+              strokeOpacity={isDark ? 0.12 : 0.06}
+              strokeWidth={0.5}
             />
           ))}
 
@@ -294,8 +322,35 @@ export function CaffeineGraphNew({
             x2={scrollContentWidth - RIGHT_PADDING}
             y2={sleepThresholdY}
             stroke={GRAPH_COLORS.green}
-            strokeWidth={1.5}
+            strokeWidth={1}
           />
+
+          {dateMarkers.map((marker) => {
+            const x = timeToX(marker.ms);
+            return (
+              <G key={`date-${marker.ms}`}>
+                <Line
+                  x1={x}
+                  y1={GRAPH_PADDING_TOP}
+                  x2={x}
+                  y2={chartHeight + GRAPH_PADDING_TOP}
+                  stroke={GRAPH_COLORS.mutedGrey}
+                  strokeWidth={0.5}
+                  strokeDasharray="3,3"
+                  strokeOpacity={0.4}
+                />
+                <SvgText
+                  x={x + 4}
+                  y={GRAPH_PADDING_TOP + 8}
+                  fontSize={7}
+                  fill={GRAPH_COLORS.mutedGrey}
+                  textAnchor="start"
+                >
+                  {marker.label}
+                </SvgText>
+              </G>
+            );
+          })}
 
           {bedtimeMs >= startMs && bedtimeMs <= endMs && (
             <>
@@ -305,13 +360,13 @@ export function CaffeineGraphNew({
                 x2={bedtimeX}
                 y2={chartHeight + GRAPH_PADDING_TOP}
                 stroke={GRAPH_COLORS.blue}
-                strokeWidth={2}
-                strokeDasharray="6,4"
+                strokeWidth={1.5}
+                strokeDasharray="4,3"
               />
               <SvgText
                 x={bedtimeX}
-                y={GRAPH_PADDING_TOP - 4}
-                fontSize={14}
+                y={GRAPH_PADDING_TOP - 2}
+                fontSize={10}
                 fill={GRAPH_COLORS.blue}
                 textAnchor="middle"
               >
@@ -326,7 +381,7 @@ export function CaffeineGraphNew({
             x2={nowX}
             y2={chartHeight + GRAPH_PADDING_TOP}
             stroke={GRAPH_COLORS.darkBrown2}
-            strokeWidth={2}
+            strokeWidth={1.5}
           />
 
           <Path d={areaPath} fill={`url(#${gradientId})`} />
@@ -334,7 +389,7 @@ export function CaffeineGraphNew({
           <Path
             d={curvePath}
             stroke={GRAPH_COLORS.darkBrown2}
-            strokeWidth={3}
+            strokeWidth={2}
             fill="none"
           />
 
@@ -349,27 +404,27 @@ export function CaffeineGraphNew({
                 <Circle
                   cx={marker.x}
                   cy={markerY}
-                  r={4}
+                  r={3}
                   fill={GRAPH_COLORS.darkBrown2}
                 />
                 <Circle
                   cx={marker.x}
-                  cy={markerY + MARKER_SIZE / 2 + 8}
+                  cy={markerY + MARKER_SIZE / 2 + 6}
                   r={MARKER_SIZE / 2}
                   fill={GRAPH_COLORS.bgSecondary}
                   stroke={GRAPH_COLORS.bgSecondary}
-                  strokeWidth={2}
+                  strokeWidth={1.5}
                 />
                 <Circle
                   cx={marker.x}
-                  cy={markerY + MARKER_SIZE / 2 + 8}
+                  cy={markerY + MARKER_SIZE / 2 + 6}
                   r={MARKER_SIZE / 2 - 2}
                   fill={GRAPH_COLORS.bgSecondary}
                 />
                 <SvgText
                   x={marker.x}
-                  y={markerY + MARKER_SIZE / 2 + 12}
-                  fontSize={16}
+                  y={markerY + MARKER_SIZE / 2 + 10}
+                  fontSize={12}
                   textAnchor="middle"
                   fill={GRAPH_COLORS.darkBrown}
                 >
@@ -378,15 +433,15 @@ export function CaffeineGraphNew({
                 {isClustered && (
                   <>
                     <Circle
-                      cx={marker.x + 14}
+                      cx={marker.x + 11}
                       cy={markerY + MARKER_SIZE / 2}
-                      r={10}
+                      r={8}
                       fill={GRAPH_COLORS.darkBrown2}
                     />
                     <SvgText
-                      x={marker.x + 14}
-                      y={markerY + MARKER_SIZE / 2 + 4}
-                      fontSize={10}
+                      x={marker.x + 11}
+                      y={markerY + MARKER_SIZE / 2 + 3}
+                      fontSize={7}
                       fill={GRAPH_COLORS.bg}
                       textAnchor="middle"
                       fontWeight="bold"
@@ -403,16 +458,13 @@ export function CaffeineGraphNew({
         <View style={[styles.xAxisContainer, { width: scrollContentWidth }]}>
           {xAxisTicks.map((tickMs, idx) => {
             const x = timeToX(tickMs);
-            const showLabel = idx % 2 === 0;
             return (
-              <View key={tickMs} style={[styles.xAxisTick, { left: x - 20 }]}>
-                {showLabel && (
-                  <Text style={[styles.xAxisLabel, { color: GRAPH_COLORS.mutedGrey }]}>{formatTimeLabel(tickMs)}</Text>
-                )}
+              <View key={tickMs} style={[styles.xAxisTick, { left: x - 14 }]}>
+                <Text style={[styles.xAxisLabel, { color: GRAPH_COLORS.mutedGrey }]}>{formatTimeLabel(tickMs)}</Text>
               </View>
             );
           })}
-          <View style={[styles.currentTimeLabel, { left: nowX - 30 }]}>
+          <View style={[styles.currentTimeLabel, { left: nowX - 22 }]}>
             <Text style={[styles.currentTimeLabelText, { color: GRAPH_COLORS.darkBrown2 }]}>
               {formatCurrentTime(nowMs)}
             </Text>
@@ -447,20 +499,20 @@ const styles = StyleSheet.create({
   yAxisTickRow: {
     position: "absolute",
     left: 0,
-    width: Y_AXIS_WIDTH - 4,
+    width: Y_AXIS_WIDTH - 2,
     alignItems: "flex-end",
   },
   yAxisLabel: {
-    fontSize: 12,
+    fontSize: 8,
     fontWeight: "500",
   },
   sleepLabel: {
     position: "absolute",
-    left: 4,
-    width: Y_AXIS_WIDTH + 60,
+    left: 2,
+    width: Y_AXIS_WIDTH + 50,
   },
   sleepLabelText: {
-    fontSize: 11,
+    fontSize: 7,
     fontWeight: "500",
   },
   scrollView: {
@@ -476,39 +528,39 @@ const styles = StyleSheet.create({
   },
   xAxisTick: {
     position: "absolute",
-    width: 40,
+    width: 28,
     alignItems: "center",
   },
   xAxisLabel: {
-    fontSize: 10,
+    fontSize: 7,
     fontWeight: "500",
   },
   currentTimeLabel: {
     position: "absolute",
-    width: 60,
+    width: 44,
     alignItems: "center",
-    bottom: 2,
+    bottom: 0,
   },
   currentTimeLabelText: {
-    fontSize: 12,
+    fontSize: 8,
     fontWeight: "600",
   },
   activeValueContainer: {
     position: "absolute",
-    top: GRAPH_PADDING_TOP + 20,
-    right: RIGHT_PADDING,
+    top: GRAPH_PADDING_TOP + 12,
+    right: RIGHT_PADDING + 4,
     alignItems: "flex-end",
     zIndex: 20,
   },
   activeValueText: {
-    fontSize: 42,
+    fontSize: 28,
     fontWeight: "700",
   },
   activeValueSubtitle: {
-    fontSize: 14,
+    fontSize: 10,
     fontWeight: "500",
-    marginTop: 4,
-    maxWidth: 160,
+    marginTop: 2,
+    maxWidth: 140,
     textAlign: "right",
   },
 });

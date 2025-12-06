@@ -31,6 +31,9 @@ const DARK_COLORS = {
   darkBrown: "#F5EBDD",
 };
 
+const HOURS_VISIBLE = 11;
+const TOTAL_WINDOW_HOURS = 168;
+
 export function HomeGraphController({
   events,
   bedtime,
@@ -58,12 +61,12 @@ export function HomeGraphController({
 
     if (scrollViewRef.current) {
       const nowMs = Date.now();
-      const viewWindowHours = 24;
+      const viewWindowHours = TOTAL_WINDOW_HOURS;
       const centerMs = nowMs;
       const halfWindowMs = (viewWindowHours / 2) * 3600000;
       const startMs = centerMs - halfWindowMs;
       const endMs = centerMs + halfWindowMs;
-      const scrollContentWidth = SCREEN_WIDTH * (viewWindowHours / 11);
+      const scrollContentWidth = SCREEN_WIDTH * (viewWindowHours / HOURS_VISIBLE);
 
       const nowPosition = ((nowMs - startMs) / (endMs - startMs)) * scrollContentWidth;
       const scrollX = Math.max(0, nowPosition - SCREEN_WIDTH / 2);
@@ -85,7 +88,7 @@ export function HomeGraphController({
         bedtime={bedtime}
         halfLifeHours={halfLifeHours}
         sleepThresholdMg={sleepThresholdMg}
-        viewWindowHours={24}
+        viewWindowHours={TOTAL_WINDOW_HOURS}
         onScrollOffsetChange={handleScrollOffsetChange}
         scrollViewRef={scrollViewRef}
         isDark={isDark}

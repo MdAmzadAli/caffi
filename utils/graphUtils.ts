@@ -83,7 +83,7 @@ export function formatTimeLabel(ms: number): string {
   const hours = date.getHours();
   const ampm = hours >= 12 ? "PM" : "AM";
   const hour12 = hours % 12 || 12;
-  return `${hour12} ${ampm}`;
+  return `${hour12}${ampm}`;
 }
 
 export function formatCurrentTime(ms: number): string {
@@ -93,7 +93,7 @@ export function formatCurrentTime(ms: number): string {
   const ampm = hours >= 12 ? "PM" : "AM";
   const hour12 = hours % 12 || 12;
   const minStr = minutes.toString().padStart(2, "0");
-  return `${hour12}:${minStr} ${ampm}`;
+  return `${hour12}:${minStr}${ampm}`;
 }
 
 export function parseBedtimeToMs(bedtimeStr: string, referenceDate: Date): number {
