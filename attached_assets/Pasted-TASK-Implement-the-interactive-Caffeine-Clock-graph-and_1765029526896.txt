@@ -1,0 +1,162 @@
+TASK: Implement the interactive Caffeine Clock graph and supporting logic (React Native / Expo).  
+Goal: reproduce the exact look, layout and behavior shown in the provided screenshots and descriptions, and implement a correct algorithm that computes the *active caffeine in blood* from all consumption events (not total consumed), draws a smooth decay curve, supports horizontal scrolling (shows ~11 hours at once on phone), and provides a "jump to now" arrow when the user scrolls away from the current time snapshot.
+
+DELIVERABLES:
+1. `CaffeineGraph.tsx` — main scrollable graph component with overlayed markers and reference lines.
+2. `graphUtils.ts` — utilities including caffeine decay math, sampling, and helpers.
+3. `HomeGraphController.tsx` — wrapper providing data, now/time controls, and "jump to now" arrow UI.
+4. Unit tests for `graphUtils` (jest) with sample events and expected active-mg outputs.
+5. README block explaining props, mock data and how to test behavior.
+
+ENV / LIBS:
+- React Native (Expo)
+- react-native-gesture-handler & react-native-reanimated (for smooth pan/scroll)
+- react-native-svg for drawing (paths, lines, ring markers)
+- Optional: victory-native for base axis layout but custom SVG overlay for reference lines + markers is required.
+- Use TypeScript.
+
+COLOR & THEME TOKENS (use exact values):
+--bg: #FAF8F3
+--accent-gold: #C9A36A
+--dark-brown: #5C4A3B
+--dark-brown-2: #6A513B
+--green: #53A451
+--blue: #4DA3FF
+--muted-grey: #9E9E9E
+--danger-red: #D9534F
+
+LAYOUT & TYPOGRAPHY DETAILS (pixel-exact guidance)
+- Graph container height: ~46% of viewport height on mobile (adjustable).  
+- Left Y-axis area width: 48 px reserved. Right padding: 24 px for big number text.  
+- X-axis tick row height: 28 px. X-axis tick font: 10 px, weight 500, color --muted-grey. (Small, legible at glance.)  
+- Y-axis label font: 12 px, weight 500, color --muted-grey. Labels at 0, +50, +100 ... up to 400 (so ticks 0,50,100,...,400).  
+- Major graph padding: 12 px top and bottom inner padding.  
+- Graph curve stroke: 3 px, stroke color --dark-brown-2. Fill: soft gradient from --accent-gold (top) to transparent at bottom, matching screenshot.  
+- Reference horizontal line (sleep unaffected): green (#53A451), 1.5 px solid, thin label left "Sleep unaffected" in small 12px green text aligned at that y coordinate.  
+- Reference vertical line (bedtime): dashed blue (#4DA3FF), 2 px, dashed style, small moon icon above the line (8–12 px).  
+- Current time vertical indicator: solid dark-brown (#6A513B), 2 px.  
+- X-axis visible span: show ~11 hours at once in default zoom (fit to screen). Tick spacing: compute to fit ~11 ticks across visible width (so approx 1-hour ticks but show only every n-th label if cramped).  
+- X-axis timezone/time format: localized 12-hour with AM/PM or user preference, small caps if needed.  
+- Big active caffeine value at right: 42–48 px bold, --dark-brown-2, with subtitle below in 16 px green text (or brown when risky) as in screenshot.
+
+DATA MODEL & CONTRACTS
+- Event shape:
+  {
+    id: string,
+    name: string,
+    mg: number,
+    timestampISO: string,   // ISO 8601 in user's timezone (must support offset)
+    iconUrl?: string
+  }
+- Graph props:
+  - events: Event[]
+  - now: ISO string (for deterministic testing; default = new Date().toISOString())
+  - halfLifeHours: number (default 5.5)
+  - sampleResolutionMinutes: number (default 5)  // how often we sample the curve
+  - viewWindowHours: number (default 11) // number of hours visible at once
+  - yMax: number (default 400)
+  - sleepThresholdMg: number (e.g., 100)
+  - bedtimeISO: string
+
+CAFFEINE DECAY ALGORITHM (exact math — implement in graphUtils.ts)
+- Model: single-compartment first-order elimination using half-life formula.
+- For a single dose of D mg administered at time t0, amount remaining at time t (hours since dose) is:
+    remaining_mg(t) = D * 0.5^(t / halfLifeHours)
+- For each sample timestamp T in the graph, active caffeine mg is:
+    active_mg(T) = sum_over_events( D_i * 0.5 ^ ( (T - t_i)_hours / halfLifeHours) ) for T >= t_i
+    If T < t_i (future event) treat contribution as 0 for the current time snapshot (unless you intentionally want to project future spikes — graph can optionally support future events with a different visual).
+- Implementation details:
+  1. Convert all timestamps to milliseconds since epoch in user's local timezone or work entirely in UTC but format axis in local time.
+  2. For each event e with timestamp t_e <= maxGraphTime:
+     - Precompute its decay contribution array for sampled times: for sample times S_k >= t_e, compute D_e * 0.5 ^ ((S_k - t_e)/3600000 / halfLifeHours).
+  3. For each sample S_k sum contributions from all events to produce active_mg[S_k].
+  4. Sampling resolution: default every 5 minutes (sampleResolutionMinutes). This produces smooth curves while remaining performant. For 24-hour view sampled every 5 min -> 288 samples; for 11-hour view ~132 samples — fine.
+  5. To draw curve: create an SVG path from sampled points using Catmull-Rom to Bezier or other smoothing algorithm to mimic screenshot smooth hump shapes.
+
+CURVE FEATURES & MARKERS
+- Event markers: small circular avatars placed at the sample coordinate where event's instantaneous peak occurs (usually at t = event timestamp). Icon container: 36 px circle with 2 px white border and shadow; place a small dot below to anchor to curve.
+- Multi-event cluster: when two events close together, show stacked/overlapped avatars with small "+N" badge as screenshot (implement via collision detection — if two markers < 28 px apart horizontally, collapse into composite with offset).
+- Hover/tap: tapping a marker shows a small tooltip / bubble with event name, time, mg and an option to edit.
+
+SCROLL, PAN, ZOOM & "JUMP TO NOW"
+- The graph is horizontally scrollable/pannable. Default viewport shows [now - 6hrs, now + 5hrs] (11 hours total) centered so current time vertical line is near center or slightly right as screenshot shows current around 6:27 PM label in center bottom. Make default window adjustable by prop viewWindowHours.
+- Use a horizontally scrolling transform (Animated.View or Reanimated) so that we can map scrollX to time range.
+- Implement inertia and snap-limit behavior (flick continues inertial).
+- While user scrolls/pans, if the center of the visible window moves more than X minutes away from `now` (e.g., > 2 minutes or > 1% of window), show a floating "Jump to now" affordance:
+    - Arrow button(s): two small arrow chevrons appear near bottom-center (or bottom-right) when off-center:
+        • Left arrow to quickly pan left to show earlier snapshot (optional if user panned right).
+        • Right arrow labeled "Now" (rounded pill with icon) to jump back to the current time snapshot.
+    - Visual: circular light background, icon color --dark-brown, drop shadow, subtle animation (bounce) when available.
+- "Jump to now" behavior:
+    - On press, animate scroll to position where `now` is centered (or at designated current time x position consistent with default).
+    - Hide arrow when view is within tolerance of now (<= 1 minute).
+    - Also show a small toast "Back to now" upon jump.
+- Small left/right arrow indicators at graph edges:
+    - If the graph is scrollable beyond leftmost or rightmost limits, show faint arrow gradient at edges to indicate more content.
+    - If user scrolls left, the right "Now" button appears. If user scrolls right beyond now into future region, show left arrow and a "Back to now" as needed.
+
+AXIS & GRID RULES
+- Y-axis ticks: 0, 50, 100, ... up to yMax (400). Place numeric labels left at 48px column, small font 12 px muted.
+- X-axis: display hour ticks; show labels for each hour but if labels overlap, show every 2nd or 3rd label. Use algorithm:
+    - availableTickCount = floor(viewportWidth / 48)
+    - desiredLabelStep = ceil(totalVisibleHours / availableTickCount)
+    - only render label for ticks where hour % desiredLabelStep === 0
+- Grid lines: horizontal grid at each 50 mg tick lightly colored (opacity 0.08 of dark-brown).
+
+CURRENT ACTIVE CAFFEINE VALUE (the big number)
+- Compute currentActiveMg = active_mg(nowSample).
+- Display large number at right: format with one decimal when > 10 mg, else 0.1 mg precision if < 1 mg? (Keep to one decimal as in screenshot: 21.7 mg).
+- Subtitle logic:
+    - If currentActiveMg <= sleepThresholdMg => "Your sleep should be unaffected." (green)
+    - If > sleepThresholdMg but <= sleepThresholdMg * 1.4 => "Your sleep might be disrupted." (brown text)
+    - If > sleepThresholdMg * 1.4 => "High caffeine — might cause major disruption." (red text)
+- Provide accessibilityLabel with textual status.
+
+PERFORMANCE & OPTIMIZATIONS
+- Precompute sample arrays in web worker or background JS microtask to avoid frame jank for many events. Recompute only when events, halfLife, or viewport range changes.
+- Use memoization keyed by events hash + halfLife + resolution.
+- Use `react-native-svg`'s path instead of many small circles to reduce native overhead.
+
+TIME & TIMEZONES
+- Always store events in ISO with timezone offset. Convert to user-local time for axis and formatting.
+- Use a single time library (date-fns-tz or dayjs with timezone) to handle conversions. For deterministic testing, allow `now` prop injection.
+
+INTERACTION DETAILS
+- Tap on the graph anywhere: show small vertical indicator and a snapshot card with active mg at that time and the list of events contributing (with percent contribution).
+- Long-press marker: show edit event modal.
+- Pinch-to-zoom (optional): double-tap to zoom in/out to show narrower window (e.g., 6 hrs, 3 hrs).
+
+EXAMPLE PSEUDOCODE (core sampling)
+```ts
+// graphUtils.ts
+function buildSampleTimes(centerTimeISO, viewWindowHours, resolutionMinutes) {
+  const centerMs = Date.parse(centerTimeISO);
+  const halfWindowMs = (viewWindowHours/2) * 3600000;
+  const startMs = centerMs - halfWindowMs;
+  const endMs = centerMs + halfWindowMs;
+  const stepMs = resolutionMinutes * 60 * 1000;
+  const samples = [];
+  for (let t = startMs; t <= endMs; t += stepMs) {
+    samples.push(t);
+  }
+  return { samples, startMs, endMs };
+}
+
+function remainingAfterHours(doseMg, hoursSinceDose, halfLifeHours) {
+  if (hoursSinceDose < 0) return 0;
+  return doseMg * Math.pow(0.5, hoursSinceDose / halfLifeHours);
+}
+
+function computeActiveCurve(events, samplesMs[], halfLifeHours) {
+  // For each sample time, sum contributions
+  return samplesMs.map(s => {
+    let total = 0;
+    for (const e of events) {
+      const dtHours = (s - Date.parse(e.timestampISO)) / 3600000;
+      if (dtHours >= 0) {
+        total += remainingAfterHours(e.mg, dtHours, halfLifeHours);
+      }
+    }
+    return { t: s, mg: total };
+  });
+}

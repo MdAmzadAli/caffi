@@ -4,7 +4,7 @@ import { Feather } from "@expo/vector-icons";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScreenScrollView } from "@/components/ScreenScrollView";
-import { CaffeineGraph } from "@/components/CaffeineGraph";
+import { HomeGraphController } from "@/components/HomeGraphController";
 import { RingProgress } from "@/components/RingProgress";
 import { RecommendationCards } from "@/components/RecommendationCards";
 import { ConsumptionList } from "@/components/ConsumptionList";
@@ -13,8 +13,8 @@ import { useCaffeineStore, DrinkEntry } from "@/store/caffeineStore";
 import {
   calculateRecommendations,
   getHoursUntilBedtime,
-  CaffeineEvent,
 } from "@/utils/recommendationEngine";
+import { CaffeineEvent } from "@/utils/graphUtils";
 import { Colors, Spacing, BorderRadius, Shadows } from "@/constants/theme";
 import type { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 
@@ -45,7 +45,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       id: entry.id,
       name: entry.name,
       mg: entry.caffeineAmount,
-      timestamp: new Date(entry.timestamp).toISOString(),
+      timestampISO: new Date(entry.timestamp).toISOString(),
     }));
   }, [entries]);
 
@@ -93,10 +93,10 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         contentContainerStyle={styles.scrollContent}
       >
         <View style={styles.graphContainer}>
-          <CaffeineGraph
+          <HomeGraphController
             events={caffeineEvents}
             bedtime={profile.sleepTime}
-            optimalSleepThresholdMg={100}
+            sleepThresholdMg={100}
             halfLifeHours={5.5}
           />
         </View>
@@ -178,7 +178,6 @@ const styles = StyleSheet.create({
     paddingBottom: 120,
   },
   graphContainer: {
-    paddingHorizontal: Spacing.lg,
     marginBottom: Spacing.md,
   },
   mainContent: {
