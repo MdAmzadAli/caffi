@@ -20,8 +20,15 @@ import {
   Medication,
 } from "@/store/caffeineStore";
 import { useTheme } from "@/hooks/useTheme";
+import { ThemeMode } from "@/store/themeStore";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import type { SettingsStackParamList } from "@/navigation/SettingsStackNavigator";
+
+const THEME_LABELS: Record<ThemeMode, string> = {
+  light: "Light",
+  dark: "Dark",
+  system: "System",
+};
 
 const GENDER_LABELS: Record<Gender, string> = {
   male: "Male",
@@ -63,7 +70,7 @@ type SettingsScreenProps = {
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export default function SettingsScreen({ navigation }: SettingsScreenProps) {
-  const { theme } = useTheme();
+  const { theme, isDark, themeMode, setThemeMode } = useTheme();
   const { profile, updateProfile, resetData } = useCaffeineStore();
 
   const [name, setName] = useState(profile.name);
@@ -309,6 +316,44 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
         <ThemedText type="caption" muted style={styles.hint}>
           Recommended daily limit: 400mg for adults, 200mg if pregnant
         </ThemedText>
+      </View>
+
+      <View style={styles.section}>
+        <ThemedText type="small" muted style={styles.sectionLabel}>
+          APPEARANCE
+        </ThemedText>
+        <ThemedView elevation={1} style={styles.card}>
+          <View style={styles.themeRow}>
+            <ThemedText type="body">Theme</ThemedText>
+            <View style={styles.themeOptions}>
+              {(["light", "dark", "system"] as ThemeMode[]).map((mode) => (
+                <Pressable
+                  key={mode}
+                  onPress={() => setThemeMode(mode)}
+                  style={[
+                    styles.themeOption,
+                    {
+                      backgroundColor:
+                        themeMode === mode
+                          ? Colors.light.accent
+                          : theme.backgroundTertiary,
+                    },
+                  ]}
+                >
+                  <ThemedText
+                    type="small"
+                    style={{
+                      color: themeMode === mode ? "#FFFFFF" : theme.text,
+                      fontWeight: themeMode === mode ? "600" : "400",
+                    }}
+                  >
+                    {THEME_LABELS[mode]}
+                  </ThemedText>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        </ThemedView>
       </View>
 
       <View style={styles.section}>
@@ -625,5 +670,21 @@ const styles = StyleSheet.create({
   },
   version: {
     textAlign: "center",
+  },
+  themeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+  },
+  themeOptions: {
+    flexDirection: "row",
+    gap: Spacing.xs,
+  },
+  themeOption: {
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.xs,
   },
 });

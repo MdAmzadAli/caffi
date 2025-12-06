@@ -1,16 +1,18 @@
 import React from "react";
-import { StyleSheet } from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
+import { StyleSheet, View } from "react-native";
+import { NavigationContainer, DefaultTheme, DarkTheme } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
-import { PaperProvider, MD3LightTheme } from "react-native-paper";
+import { PaperProvider, MD3LightTheme, MD3DarkTheme } from "react-native-paper";
 
 import RootNavigator from "@/navigation/RootNavigator";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { useTheme } from "@/hooks/useTheme";
+import { Colors } from "@/constants/theme";
 
-const caffiTheme = {
+const caffiLightTheme = {
   ...MD3LightTheme,
   colors: {
     ...MD3LightTheme.colors,
@@ -32,22 +34,78 @@ const caffiTheme = {
   },
 };
 
-export default function App() {
+const caffiDarkTheme = {
+  ...MD3DarkTheme,
+  colors: {
+    ...MD3DarkTheme.colors,
+    primary: "#C9A36A",
+    primaryContainer: "#2A2420",
+    onPrimaryContainer: "#F5EBDD",
+    secondary: "#C9A36A",
+    secondaryContainer: "#353030",
+    onSecondaryContainer: "#F5EBDD",
+    tertiary: "#C9A36A",
+    tertiaryContainer: "#2A2420",
+    surface: "#1F1815",
+    surfaceVariant: "#353030",
+    onSurface: "#F5EBDD",
+    onSurfaceVariant: "#A0A0A0",
+    outline: "#C9A36A",
+    background: "#1F1815",
+    onBackground: "#F5EBDD",
+  },
+};
+
+const navLightTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: Colors.light.bg,
+    card: Colors.light.backgroundSecondary,
+    text: Colors.light.text,
+    border: Colors.light.divider,
+    primary: Colors.light.accent,
+  },
+};
+
+const navDarkTheme = {
+  ...DarkTheme,
+  colors: {
+    ...DarkTheme.colors,
+    background: Colors.dark.bg,
+    card: Colors.dark.backgroundSecondary,
+    text: Colors.dark.text,
+    border: Colors.dark.divider,
+    primary: Colors.dark.accent,
+  },
+};
+
+function AppContent() {
+  const { isDark, theme } = useTheme();
+  
   return (
-  <ErrorBoundary>
-    <PaperProvider theme={caffiTheme}>
+    <PaperProvider theme={isDark ? caffiDarkTheme : caffiLightTheme}>
       <SafeAreaProvider>
         <GestureHandlerRootView style={styles.root}>
-          <KeyboardProvider>
-            <NavigationContainer>
-              <RootNavigator />
-            </NavigationContainer>
-            <StatusBar style="auto" />
-          </KeyboardProvider>
+          <View style={[styles.root, { backgroundColor: theme.bg }]}>
+            <KeyboardProvider>
+              <NavigationContainer theme={isDark ? navDarkTheme : navLightTheme}>
+                <RootNavigator />
+              </NavigationContainer>
+              <StatusBar style={isDark ? "light" : "dark"} />
+            </KeyboardProvider>
+          </View>
         </GestureHandlerRootView>
       </SafeAreaProvider>
     </PaperProvider>
-  </ErrorBoundary>
+  );
+}
+
+export default function App() {
+  return (
+    <ErrorBoundary>
+      <AppContent />
+    </ErrorBoundary>
   );
 }
 
