@@ -146,18 +146,18 @@ const styles = StyleSheet.create({
   },
   edgeFadeLeft: {
     position: "absolute",
-    left: 48,
+    left: 24,
     top: 0,
-    bottom: 28,
-    width: 20,
+    bottom: 24,
+    width: 16,
     backgroundColor: "transparent",
   },
   edgeFadeRight: {
     position: "absolute",
     right: 0,
     top: 0,
-    bottom: 28,
-    width: 20,
+    bottom: 24,
+    width: 16,
     backgroundColor: "transparent",
   },
 });

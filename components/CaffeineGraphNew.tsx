@@ -89,9 +89,10 @@ interface CaffeineGraphProps {
 }
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
-const Y_AXIS_WIDTH = 28;
-const RIGHT_PADDING = 4;
-const X_AXIS_HEIGHT = 20;
+const Y_AXIS_WIDTH = 24;
+const LEFT_PADDING = 0;
+const RIGHT_PADDING = 0;
+const X_AXIS_HEIGHT = 22;
 const GRAPH_PADDING_TOP = 8;
 const GRAPH_PADDING_BOTTOM = 8;
 const MARKER_SIZE = 28;
@@ -116,7 +117,7 @@ export function CaffeineGraphNew({
   const graphHeight = SCREEN_HEIGHT * 0.32;
   const chartHeight = graphHeight - X_AXIS_HEIGHT - GRAPH_PADDING_TOP - GRAPH_PADDING_BOTTOM;
   const scrollContentWidth = SCREEN_WIDTH * (viewWindowHours / HOURS_VISIBLE);
-  const chartWidth = scrollContentWidth - Y_AXIS_WIDTH - RIGHT_PADDING;
+  const chartWidth = scrollContentWidth;
 
   const nowMs = Date.parse(now);
   const nowDate = new Date(nowMs);
@@ -140,7 +141,7 @@ export function CaffeineGraphNew({
   const timeToX = useCallback(
     (ms: number): number => {
       const ratio = (ms - startMs) / (endMs - startMs);
-      return Y_AXIS_WIDTH + ratio * chartWidth;
+      return ratio * chartWidth;
     },
     [startMs, endMs, chartWidth]
   );
@@ -289,7 +290,7 @@ export function CaffeineGraphNew({
         onScroll={handleScroll}
         scrollEventThrottle={16}
         style={styles.scrollView}
-        contentContainerStyle={{ width: scrollContentWidth }}
+        contentContainerStyle={{ width: scrollContentWidth, flexDirection: 'column' }}
       >
         <Svg
           width={scrollContentWidth}
@@ -306,9 +307,9 @@ export function CaffeineGraphNew({
           {yAxisTicks.map((mg) => (
             <Line
               key={`grid-${mg}`}
-              x1={Y_AXIS_WIDTH}
+              x1={0}
               y1={mgToY(mg)}
-              x2={scrollContentWidth - RIGHT_PADDING}
+              x2={scrollContentWidth}
               y2={mgToY(mg)}
               stroke={GRAPH_COLORS.darkBrown}
               strokeOpacity={isDark ? 0.12 : 0.06}
@@ -317,9 +318,9 @@ export function CaffeineGraphNew({
           ))}
 
           <Line
-            x1={Y_AXIS_WIDTH}
+            x1={0}
             y1={sleepThresholdY}
-            x2={scrollContentWidth - RIGHT_PADDING}
+            x2={scrollContentWidth}
             y2={sleepThresholdY}
             stroke={GRAPH_COLORS.green}
             strokeWidth={1}
@@ -459,12 +460,12 @@ export function CaffeineGraphNew({
           {xAxisTicks.map((tickMs, idx) => {
             const x = timeToX(tickMs);
             return (
-              <View key={tickMs} style={[styles.xAxisTick, { left: x - 14 }]}>
+              <View key={tickMs} style={[styles.xAxisTick, { left: x - 12 }]}>
                 <Text style={[styles.xAxisLabel, { color: GRAPH_COLORS.mutedGrey }]}>{formatTimeLabel(tickMs)}</Text>
               </View>
             );
           })}
-          <View style={[styles.currentTimeLabel, { left: nowX - 22 }]}>
+          <View style={[styles.currentTimeLabel, { left: nowX - 18 }]}>
             <Text style={[styles.currentTimeLabelText, { color: GRAPH_COLORS.darkBrown2 }]}>
               {formatCurrentTime(nowMs)}
             </Text>
@@ -490,7 +491,7 @@ const styles = StyleSheet.create({
   },
   yAxisContainer: {
     position: "absolute",
-    left: 0,
+    left: 2,
     top: 0,
     width: Y_AXIS_WIDTH,
     height: "100%",
@@ -499,7 +500,7 @@ const styles = StyleSheet.create({
   yAxisTickRow: {
     position: "absolute",
     left: 0,
-    width: Y_AXIS_WIDTH - 2,
+    width: Y_AXIS_WIDTH - 4,
     alignItems: "flex-end",
   },
   yAxisLabel: {
@@ -508,8 +509,8 @@ const styles = StyleSheet.create({
   },
   sleepLabel: {
     position: "absolute",
-    left: 2,
-    width: Y_AXIS_WIDTH + 50,
+    left: 0,
+    width: Y_AXIS_WIDTH + 56,
   },
   sleepLabelText: {
     fontSize: 7,
@@ -517,7 +518,6 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    marginLeft: Y_AXIS_WIDTH,
   },
   svgChart: {
     backgroundColor: "transparent",
@@ -525,11 +525,13 @@ const styles = StyleSheet.create({
   xAxisContainer: {
     height: X_AXIS_HEIGHT,
     position: "relative",
+    marginTop: 2,
   },
   xAxisTick: {
     position: "absolute",
-    width: 28,
+    width: 24,
     alignItems: "center",
+    top: 0,
   },
   xAxisLabel: {
     fontSize: 7,
@@ -537,9 +539,9 @@ const styles = StyleSheet.create({
   },
   currentTimeLabel: {
     position: "absolute",
-    width: 44,
+    width: 36,
     alignItems: "center",
-    bottom: 0,
+    top: 2,
   },
   currentTimeLabelText: {
     fontSize: 8,
@@ -548,7 +550,7 @@ const styles = StyleSheet.create({
   activeValueContainer: {
     position: "absolute",
     top: GRAPH_PADDING_TOP + 12,
-    right: RIGHT_PADDING + 4,
+    right: 8,
     alignItems: "flex-end",
     zIndex: 20,
   },
