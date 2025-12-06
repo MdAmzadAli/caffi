@@ -138,7 +138,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.light.bg,
+    backgroundColor: Colors.light.white,
   },
   header: {
     flexDirection: "row",
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
-    backgroundColor: Colors.light.bg,
+    backgroundColor: Colors.light.white,
   },
   headerLeft: {
     flexDirection: "row",
