@@ -11,6 +11,7 @@ import RootNavigator from "@/navigation/RootNavigator";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { useTheme } from "@/hooks/useTheme";
 import { Colors } from "@/constants/theme";
+import { ThemeProvider } from "@/store/themeStore";
 
 const caffiLightTheme = {
   ...MD3LightTheme,
@@ -104,7 +105,9 @@ function AppContent() {
 export default function App() {
   return (
     <ErrorBoundary>
-      <AppContent />
+      <ThemeProvider>
+        <AppContent />
+      </ThemeProvider>
     </ErrorBoundary>
   );
 }

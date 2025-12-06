@@ -1,69 +1,67 @@
-import { useState, useCallback, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export type ThemeMode = "light" | "dark" | "system";
 
 const STORAGE_KEY = "@caffi_theme";
 
-let globalThemeMode: ThemeMode = "light";
-let globalListeners: (() => void)[] = [];
-let isInitialized = false;
+interface ThemeContextType {
+  themeMode: ThemeMode;
+  setThemeMode: (mode: ThemeMode) => void;
+  toggleTheme: () => void;
+  isInitialized: boolean;
+}
 
-const notifyListeners = () => {
-  globalListeners.forEach((listener) => listener());
-};
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-const saveToStorage = async () => {
-  try {
-    await AsyncStorage.setItem(STORAGE_KEY, globalThemeMode);
-  } catch (error) {
-    console.error("Error saving theme to storage:", error);
-  }
-};
-
-const loadFromStorage = async () => {
-  try {
-    const storedTheme = await AsyncStorage.getItem(STORAGE_KEY);
-    if (storedTheme && (storedTheme === "light" || storedTheme === "dark" || storedTheme === "system")) {
-      globalThemeMode = storedTheme as ThemeMode;
-    }
-    isInitialized = true;
-    notifyListeners();
-  } catch (error) {
-    console.error("Error loading theme from storage:", error);
-    isInitialized = true;
-  }
-};
-
-loadFromStorage();
-
-export function useThemeStore() {
-  const [, setUpdate] = useState(0);
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  const [themeMode, setThemeModeState] = useState<ThemeMode>("light");
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    const listener = () => setUpdate((n) => n + 1);
-    globalListeners.push(listener);
-    return () => {
-      globalListeners = globalListeners.filter((l) => l !== listener);
+    const loadTheme = async () => {
+      try {
+        const storedTheme = await AsyncStorage.getItem(STORAGE_KEY);
+        if (storedTheme && (storedTheme === "light" || storedTheme === "dark" || storedTheme === "system")) {
+          setThemeModeState(storedTheme as ThemeMode);
+        }
+      } catch (error) {
+        console.error("Error loading theme:", error);
+      }
+      setIsInitialized(true);
     };
+    loadTheme();
   }, []);
 
   const setThemeMode = useCallback((mode: ThemeMode) => {
-    globalThemeMode = mode;
-    notifyListeners();
-    saveToStorage();
+    console.log("Setting theme mode to:", mode);
+    setThemeModeState(mode);
+    AsyncStorage.setItem(STORAGE_KEY, mode).catch((error) => {
+      console.error("Error saving theme:", error);
+    });
   }, []);
 
   const toggleTheme = useCallback(() => {
-    globalThemeMode = globalThemeMode === "light" ? "dark" : "light";
-    notifyListeners();
-    saveToStorage();
-  }, []);
+    const newMode = themeMode === "light" ? "dark" : "light";
+    setThemeMode(newMode);
+  }, [themeMode, setThemeMode]);
 
-  return {
-    themeMode: globalThemeMode,
-    isInitialized,
-    setThemeMode,
-    toggleTheme,
-  };
+  return React.createElement(
+    ThemeContext.Provider,
+    { value: { themeMode, setThemeMode, toggleTheme, isInitialized } },
+    children
+  );
+}
+
+export function useThemeStore(): ThemeContextType {
+  const context = useContext(ThemeContext);
+  if (!context) {
+    return {
+      themeMode: "light",
+      setThemeMode: () => {},
+      toggleTheme: () => {},
+      isInitialized: false,
+    };
+  }
+  return context;
 }
