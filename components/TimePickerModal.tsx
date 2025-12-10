@@ -17,11 +17,14 @@ import Animated, {
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { DatePickerModal, TimePickerModal as PaperTimePickerModal } from "react-native-paper-dates";
-import { Provider as PaperProvider, MD3DarkTheme, MD3LightTheme } from "react-native-paper";
+import { Calendar, TimePickerModal as PaperTimePickerModal, registerTranslation, en } from "react-native-paper-dates";
+import { Button, Provider as PaperProvider, MD3DarkTheme, MD3LightTheme } from "react-native-paper";
+
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
+
+registerTranslation('en', en);
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 const MODAL_HEIGHT = SCREEN_HEIGHT * 0.45;
@@ -138,13 +141,21 @@ export function TimePickerModal({ visible, onClose, onSelectTime, initialDate }:
     closeModal();
   };
 
-  const onDateConfirm = (params: { date: Date | undefined }) => {
-    setShowDatePicker(false);
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState<Date | undefined>(undefined);
+
+  const onCalendarChange = (params: { date: Date | undefined }) => {
     if (params.date) {
+      setSelectedCalendarDate(params.date);
+    }
+  };
+
+  const onDateConfirm = () => {
+    setShowDatePicker(false);
+    if (selectedCalendarDate) {
       const newDate = new Date(customDate);
-      newDate.setFullYear(params.date.getFullYear());
-      newDate.setMonth(params.date.getMonth());
-      newDate.setDate(params.date.getDate());
+      newDate.setFullYear(selectedCalendarDate.getFullYear());
+      newDate.setMonth(selectedCalendarDate.getMonth());
+      newDate.setDate(selectedCalendarDate.getDate());
       setCustomDate(newDate);
       setSelectedPreset("");
       onSelectTime(newDate, formatDateTime(newDate));
@@ -266,16 +277,46 @@ export function TimePickerModal({ visible, onClose, onSelectTime, initialDate }:
           </GestureDetector>
         </View>
 
-        <DatePickerModal
-          locale="en"
-          mode="single"
-          visible={showDatePicker}
-          onDismiss={() => setShowDatePicker(false)}
-          date={customDate}
-          onConfirm={onDateConfirm}
-          label="Select Date"
-          saveLabel="Confirm"
-        />
+        {showDatePicker && (
+          <Modal
+            visible={showDatePicker}
+            transparent
+            statusBarTranslucent
+            animationType="fade"
+            onRequestClose={() => setShowDatePicker(false)}
+          >
+            <View style={styles.centeredOverlay}>
+              <Pressable style={styles.backdrop} onPress={() => setShowDatePicker(false)} />
+              <View style={[styles.calendarModal, { backgroundColor: theme.backgroundRoot }]}>
+                <View style={styles.calendarHeader}>
+                  <ThemedText type="h4" style={styles.calendarTitle}>Select Date</ThemedText>
+                </View>
+                <Calendar
+                  locale="en"
+                  mode="single"
+                  date={selectedCalendarDate || customDate}
+                  onChange={onCalendarChange}
+                />
+                <View style={styles.calendarActions}>
+                  <Button
+                    mode="text"
+                    onPress={() => setShowDatePicker(false)}
+                    textColor={theme.textMuted}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    mode="contained"
+                    onPress={onDateConfirm}
+                    buttonColor={accentColor}
+                  >
+                    Confirm
+                  </Button>
+                </View>
+              </View>
+            </View>
+          </Modal>
+        )}
 
         <PaperTimePickerModal
           visible={showTimePicker}
@@ -296,9 +337,41 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "flex-end",
   },
+  centeredOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  calendarModal: {
+    borderRadius: BorderRadius.xl,
+    overflow: "hidden",
+    maxWidth: 400,
+    width: "90%",
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    paddingBottom: Spacing.md,
+  },
+  calendarHeader: {
+    paddingHorizontal: Spacing.xl,
+    paddingTop: Spacing.lg,
+    paddingBottom: Spacing.sm,
+  },
+  calendarTitle: {
+    fontWeight: "600",
+  },
+  calendarActions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.md,
   },
   modalContent: {
     maxHeight: MODAL_HEIGHT,
