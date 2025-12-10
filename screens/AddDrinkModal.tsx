@@ -256,7 +256,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
 
             <View style={styles.header}>
               {isExpanded ? (
-                <Pressable onPress={collapseToNormal} style={styles.backButton}>
+                <Pressable onPress={handleClose} style={styles.backButton}>
                   <Feather name="arrow-left" size={24} color={theme.text} />
                 </Pressable>
               ) : null}
