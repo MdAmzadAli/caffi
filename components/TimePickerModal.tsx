@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   View,
   StyleSheet,
@@ -6,7 +6,6 @@ import {
   Pressable,
   ScrollView,
   Dimensions,
-  Platform,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import Animated, {
@@ -18,7 +17,8 @@ import Animated, {
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import { DatePickerModal, TimePickerModal as PaperTimePickerModal } from "react-native-paper-dates";
+import { Provider as PaperProvider, MD3DarkTheme, MD3LightTheme } from "react-native-paper";
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
@@ -43,7 +43,7 @@ const PRESET_OPTIONS = [
 ];
 
 export function TimePickerModal({ visible, onClose, onSelectTime, initialDate }: TimePickerModalProps) {
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
 
   const [selectedPreset, setSelectedPreset] = useState<string>("now");
@@ -53,6 +53,40 @@ export function TimePickerModal({ visible, onClose, onSelectTime, initialDate }:
 
   const translateY = useSharedValue(MODAL_HEIGHT);
   const startY = useSharedValue(0);
+
+  const accentColor = isDark ? Colors.dark.accent : Colors.light.accent;
+  
+  const paperTheme = useMemo(() => {
+    const baseTheme = isDark ? MD3DarkTheme : MD3LightTheme;
+    const themeColors = isDark ? Colors.dark : Colors.light;
+    return {
+      ...baseTheme,
+      colors: {
+        ...baseTheme.colors,
+        primary: accentColor,
+        primaryContainer: isDark ? themeColors.backgroundSecondary : `${accentColor}20`,
+        onPrimaryContainer: isDark ? themeColors.text : accentColor,
+        secondary: accentColor,
+        secondaryContainer: isDark ? themeColors.backgroundSecondary : `${accentColor}15`,
+        onSecondaryContainer: themeColors.text,
+        surface: themeColors.backgroundRoot,
+        surfaceVariant: isDark ? themeColors.backgroundSecondary : themeColors.backgroundTertiary,
+        onSurface: themeColors.text,
+        onSurfaceVariant: themeColors.textMuted,
+        outline: themeColors.divider,
+        background: themeColors.backgroundRoot,
+        onBackground: themeColors.text,
+        elevation: {
+          level0: "transparent",
+          level1: themeColors.backgroundDefault,
+          level2: themeColors.backgroundSecondary,
+          level3: themeColors.backgroundTertiary,
+          level4: themeColors.backgroundTertiary,
+          level5: themeColors.backgroundTertiary,
+        },
+      },
+    };
+  }, [isDark, accentColor]);
 
   useEffect(() => {
     if (visible) {
@@ -104,29 +138,27 @@ export function TimePickerModal({ visible, onClose, onSelectTime, initialDate }:
     closeModal();
   };
 
-  const handleDateChange = (event: any, selectedDate?: Date) => {
+  const onDateConfirm = (params: { date: Date | undefined }) => {
     setShowDatePicker(false);
-    if (selectedDate) {
+    if (params.date) {
       const newDate = new Date(customDate);
-      newDate.setFullYear(selectedDate.getFullYear());
-      newDate.setMonth(selectedDate.getMonth());
-      newDate.setDate(selectedDate.getDate());
+      newDate.setFullYear(params.date.getFullYear());
+      newDate.setMonth(params.date.getMonth());
+      newDate.setDate(params.date.getDate());
       setCustomDate(newDate);
       setSelectedPreset("");
       onSelectTime(newDate, formatDateTime(newDate));
     }
   };
 
-  const handleTimeChange = (event: any, selectedTime?: Date) => {
+  const onTimeConfirm = ({ hours, minutes }: { hours: number; minutes: number }) => {
     setShowTimePicker(false);
-    if (selectedTime) {
-      const newDate = new Date(customDate);
-      newDate.setHours(selectedTime.getHours());
-      newDate.setMinutes(selectedTime.getMinutes());
-      setCustomDate(newDate);
-      setSelectedPreset("");
-      onSelectTime(newDate, formatDateTime(newDate));
-    }
+    const newDate = new Date(customDate);
+    newDate.setHours(hours);
+    newDate.setMinutes(minutes);
+    setCustomDate(newDate);
+    setSelectedPreset("");
+    onSelectTime(newDate, formatDateTime(newDate));
   };
 
   const formatDate = (date: Date) => {
@@ -152,139 +184,110 @@ export function TimePickerModal({ visible, onClose, onSelectTime, initialDate }:
   if (!visible) return null;
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      statusBarTranslucent
-      animationType="fade"
-      onRequestClose={closeModal}
-    >
-      <View style={styles.overlay}>
-        <Pressable style={styles.backdrop} onPress={closeModal} />
+    <PaperProvider theme={paperTheme}>
+      <Modal
+        visible={visible}
+        transparent
+        statusBarTranslucent
+        animationType="fade"
+        onRequestClose={closeModal}
+      >
+        <View style={styles.overlay}>
+          <Pressable style={styles.backdrop} onPress={closeModal} />
 
-        <GestureDetector gesture={panGesture}>
-          <Animated.View
-            style={[
-              styles.modalContent,
-              sheetStyle,
-              {
-                backgroundColor: theme.backgroundRoot,
-                paddingBottom: insets.bottom + Spacing.lg,
-              },
-            ]}
-          >
-            <View style={styles.handleContainer}>
-              <View style={[styles.handle, { backgroundColor: Colors.light.accent }]} />
-            </View>
-
-            <View style={styles.content}>
-              <ThemedText type="body" style={styles.sectionTitle}>Preset</ThemedText>
-              
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.presetContainer}
-              >
-                {PRESET_OPTIONS.map((preset) => (
-                  <Pressable
-                    key={preset.label}
-                    onPress={() => handlePresetSelect(preset)}
-                    style={[
-                      styles.presetChip,
-                      selectedPreset === preset.label
-                        ? { backgroundColor: Colors.light.accent }
-                        : { backgroundColor: theme.backgroundSecondary },
-                    ]}
-                  >
-                    <ThemedText
-                      type="body"
-                      style={[
-                        styles.presetText,
-                        selectedPreset === preset.label && { color: "#FFFFFF" },
-                      ]}
-                    >
-                      {preset.label}
-                    </ThemedText>
-                  </Pressable>
-                ))}
-              </ScrollView>
-
-              <ThemedText type="body" style={styles.sectionTitle}>Custom</ThemedText>
-
-              <View style={styles.customRow}>
-                <Pressable
-                  onPress={() => setShowDatePicker(true)}
-                  style={[styles.customButton, { backgroundColor: theme.backgroundSecondary }]}
-                >
-                  <Feather name="calendar" size={20} color={theme.textMuted} />
-                  <ThemedText type="body">{formatDate(customDate)}</ThemedText>
-                </Pressable>
-
-                <Pressable
-                  onPress={() => setShowTimePicker(true)}
-                  style={[styles.customButton, { backgroundColor: theme.backgroundSecondary }]}
-                >
-                  <Feather name="clock" size={20} color={theme.textMuted} />
-                  <ThemedText type="body">{formatTime(customDate)}</ThemedText>
-                </Pressable>
+          <GestureDetector gesture={panGesture}>
+            <Animated.View
+              style={[
+                styles.modalContent,
+                sheetStyle,
+                {
+                  backgroundColor: theme.backgroundRoot,
+                  paddingBottom: insets.bottom + Spacing.lg,
+                },
+              ]}
+            >
+              <View style={styles.handleContainer}>
+                <View style={[styles.handle, { backgroundColor: accentColor }]} />
               </View>
 
-              {(showDatePicker || showTimePicker) && Platform.OS !== "web" && (
-                <DateTimePicker
-                  value={customDate}
-                  mode={showDatePicker ? "date" : "time"}
-                  display="default"
-                  onChange={showDatePicker ? handleDateChange : handleTimeChange}
-                />
-              )}
+              <View style={styles.content}>
+                <ThemedText type="body" style={styles.sectionTitle}>Preset</ThemedText>
+                
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.presetContainer}
+                >
+                  {PRESET_OPTIONS.map((preset) => (
+                    <Pressable
+                      key={preset.label}
+                      onPress={() => handlePresetSelect(preset)}
+                      style={[
+                        styles.presetChip,
+                        selectedPreset === preset.label
+                          ? { backgroundColor: Colors.light.accent }
+                          : { backgroundColor: theme.backgroundSecondary },
+                      ]}
+                    >
+                      <ThemedText
+                        type="body"
+                        style={[
+                          styles.presetText,
+                          selectedPreset === preset.label && { color: "#FFFFFF" },
+                        ]}
+                      >
+                        {preset.label}
+                      </ThemedText>
+                    </Pressable>
+                  ))}
+                </ScrollView>
 
-              {Platform.OS === "web" && showDatePicker && (
-                <View style={styles.webPickerContainer}>
-                  <input
-                    type="date"
-                    value={customDate.toISOString().split("T")[0]}
-                    onChange={(e) => {
-                      const newDate = new Date(e.target.value);
-                      if (!isNaN(newDate.getTime())) {
-                        const updated = new Date(customDate);
-                        updated.setFullYear(newDate.getFullYear());
-                        updated.setMonth(newDate.getMonth());
-                        updated.setDate(newDate.getDate());
-                        setCustomDate(updated);
-                        setSelectedPreset("");
-                        onSelectTime(updated, formatDateTime(updated));
-                      }
-                      setShowDatePicker(false);
-                    }}
-                    style={styles.webInput as any}
-                  />
-                </View>
-              )}
+                <ThemedText type="body" style={styles.sectionTitle}>Custom</ThemedText>
 
-              {Platform.OS === "web" && showTimePicker && (
-                <View style={styles.webPickerContainer}>
-                  <input
-                    type="time"
-                    value={`${customDate.getHours().toString().padStart(2, "0")}:${customDate.getMinutes().toString().padStart(2, "0")}`}
-                    onChange={(e) => {
-                      const [hours, minutes] = e.target.value.split(":").map(Number);
-                      const updated = new Date(customDate);
-                      updated.setHours(hours);
-                      updated.setMinutes(minutes);
-                      setCustomDate(updated);
-                      setSelectedPreset("");
-                      onSelectTime(updated, formatDateTime(updated));
-                      setShowTimePicker(false);
-                    }}
-                    style={styles.webInput as any}
-                  />
+                <View style={styles.customRow}>
+                  <Pressable
+                    onPress={() => setShowDatePicker(true)}
+                    style={[styles.customButton, { backgroundColor: theme.backgroundSecondary }]}
+                  >
+                    <Feather name="calendar" size={20} color={theme.accent} />
+                    <ThemedText type="body">{formatDate(customDate)}</ThemedText>
+                  </Pressable>
+
+                  <Pressable
+                    onPress={() => setShowTimePicker(true)}
+                    style={[styles.customButton, { backgroundColor: theme.backgroundSecondary }]}
+                  >
+                    <Feather name="clock" size={20} color={theme.accent} />
+                    <ThemedText type="body">{formatTime(customDate)}</ThemedText>
+                  </Pressable>
                 </View>
-              )}
-            </View>
-          </Animated.View>
-        </GestureDetector>
-      </View>
-    </Modal>
+              </View>
+            </Animated.View>
+          </GestureDetector>
+        </View>
+
+        <DatePickerModal
+          locale="en"
+          mode="single"
+          visible={showDatePicker}
+          onDismiss={() => setShowDatePicker(false)}
+          date={customDate}
+          onConfirm={onDateConfirm}
+          label="Select Date"
+          saveLabel="Confirm"
+        />
+
+        <PaperTimePickerModal
+          visible={showTimePicker}
+          onDismiss={() => setShowTimePicker(false)}
+          onConfirm={onTimeConfirm}
+          hours={customDate.getHours()}
+          minutes={customDate.getMinutes()}
+          label="Select Time"
+          locale="en"
+        />
+      </Modal>
+    </PaperProvider>
   );
 }
 
@@ -344,16 +347,5 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.lg,
     borderRadius: BorderRadius.md,
-  },
-  webPickerContainer: {
-    marginTop: Spacing.md,
-  },
-  webInput: {
-    padding: 12,
-    fontSize: 16,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    width: "100%",
   },
 });
