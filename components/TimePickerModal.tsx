@@ -291,12 +291,14 @@ export function TimePickerModal({ visible, onClose, onSelectTime, initialDate }:
                 <View style={styles.calendarHeader}>
                   <ThemedText type="h4" style={styles.calendarTitle}>Select Date</ThemedText>
                 </View>
-                <Calendar
-                  locale="en"
-                  mode="single"
-                  date={selectedCalendarDate || customDate}
-                  onChange={onCalendarChange}
-                />
+                <View style={styles.calendarWrapper}>
+                  <Calendar
+                    locale="en"
+                    mode="single"
+                    date={selectedCalendarDate || customDate}
+                    onChange={onCalendarChange}
+                  />
+                </View>
                 <View style={styles.calendarActions}>
                   <Button
                     mode="text"
@@ -357,6 +359,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     paddingBottom: Spacing.md,
+  },
+  calendarWrapper: {
+    minHeight: 340,
+    justifyContent: "flex-start",
   },
   calendarHeader: {
     paddingHorizontal: Spacing.xl,
