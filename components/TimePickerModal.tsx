@@ -27,7 +27,7 @@ import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 registerTranslation('en', en);
 
 const BOTTOM_SHEET_HEIGHT_RATIO = 0.45;
-const CALENDAR_HEADER_OFFSET = 60;
+const CALENDAR_HEADER_OFFSET = 100;
 
 interface TimePickerModalProps {
   visible: boolean;
@@ -368,7 +368,8 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.md,
   },
   calendarWrapper: {
-    overflow: "hidden",
+    overflow: "visible",
+    paddingBottom: Spacing.sm,
   },
   calendarHeader: {
     paddingHorizontal: Spacing.xl,
