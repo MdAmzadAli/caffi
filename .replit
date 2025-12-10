@@ -5,6 +5,10 @@ modules = ["nodejs-20", "web"]
 channel = "stable-25_05"
 
 [[ports]]
+localPort = 5000
+externalPort = 80
+
+[[ports]]
 localPort = 8081
 externalPort = 80
 
@@ -33,16 +37,16 @@ localPort = 38793
 externalPort = 3002
 
 [[ports]]
+localPort = 39411
+externalPort = 6800
+
+[[ports]]
 localPort = 40797
 externalPort = 5000
 
 [[ports]]
 localPort = 44611
 externalPort = 6000
-
-[[ports]]
-localPort = 5000
-externalPort = 80
 
 [workflows]
 runButton = "Project"

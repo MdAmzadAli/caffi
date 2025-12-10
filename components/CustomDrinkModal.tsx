@@ -7,6 +7,7 @@ import {
   Pressable,
   ScrollView,
   Dimensions,
+  Image,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import Animated, {
@@ -20,6 +21,7 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import { ImagePickerModal } from "@/components/ImagePickerModal";
 import { useCaffeineStore } from "@/store/caffeineStore";
 import { useTheme } from "@/hooks/useTheme";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
@@ -48,6 +50,8 @@ export function CustomDrinkModal({ visible, onClose, onAdd }: CustomDrinkModalPr
   const [showUnitPicker, setShowUnitPicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [timeToFinish, setTimeToFinish] = useState("10 minutes");
+  const [showImagePicker, setShowImagePicker] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const translateY = useSharedValue(MODAL_HEIGHT);
   const startY = useSharedValue(0);
@@ -81,6 +85,11 @@ export function CustomDrinkModal({ visible, onClose, onAdd }: CustomDrinkModalPr
     setSelectedUnit("cup");
     setCaffeineMg("10");
     setTimeToFinish("10 minutes");
+    setSelectedImage(null);
+  };
+
+  const handleSelectImage = (imageUri: string) => {
+    setSelectedImage(imageUri);
   };
 
   useEffect(() => {
@@ -179,9 +188,24 @@ export function CustomDrinkModal({ visible, onClose, onAdd }: CustomDrinkModalPr
               keyboardShouldPersistTaps="handled"
             >
               <View style={styles.topSection}>
-                <Pressable style={[styles.chooseIconBox, { backgroundColor: theme.backgroundSecondary }]}>
-                  <Feather name="plus" size={28} color={theme.textMuted} />
-                  <ThemedText type="caption" muted>Choose</ThemedText>
+                <Pressable 
+                  onPress={() => setShowImagePicker(true)}
+                  style={[styles.chooseIconBox, { backgroundColor: theme.backgroundSecondary }]}
+                >
+                  {selectedImage ? (
+                    selectedImage.startsWith("preset:") ? (
+                      <View style={styles.selectedPresetIcon}>
+                        <Feather name="coffee" size={32} color={Colors.light.accent} />
+                      </View>
+                    ) : (
+                      <Image source={{ uri: selectedImage }} style={styles.selectedImage} />
+                    )
+                  ) : (
+                    <>
+                      <Feather name="plus" size={28} color={theme.textMuted} />
+                      <ThemedText type="caption" muted>Choose</ThemedText>
+                    </>
+                  )}
                 </Pressable>
 
                 <View style={styles.nameInputSection}>
@@ -351,6 +375,12 @@ export function CustomDrinkModal({ visible, onClose, onAdd }: CustomDrinkModalPr
           </Animated.View>
         </GestureDetector>
       </View>
+
+      <ImagePickerModal
+        visible={showImagePicker}
+        onClose={() => setShowImagePicker(false)}
+        onSelectImage={handleSelectImage}
+      />
     </Modal>
   );
 }
@@ -391,6 +421,18 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: BorderRadius.md,
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+  },
+  selectedImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: BorderRadius.md,
+  },
+  selectedPresetIcon: {
+    width: "100%",
+    height: "100%",
     alignItems: "center",
     justifyContent: "center",
     gap: 4,
