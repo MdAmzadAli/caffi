@@ -93,11 +93,12 @@ name = "Start application"
 author = "agent"
 
 [workflows.workflow.metadata]
-outputType = "console"
+outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npm run dev --tunnel"
+args = "npm run dev"
+waitForPort = 5000
 
 [agent]
 stack = "EXPO"
