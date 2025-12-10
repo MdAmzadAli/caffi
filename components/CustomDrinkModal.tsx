@@ -22,6 +22,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { ImagePickerModal } from "@/components/ImagePickerModal";
+import { TimePickerModal } from "@/components/TimePickerModal";
 import { useCaffeineStore } from "@/store/caffeineStore";
 import { useTheme } from "@/hooks/useTheme";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
@@ -52,6 +53,9 @@ export function CustomDrinkModal({ visible, onClose, onAdd }: CustomDrinkModalPr
   const [timeToFinish, setTimeToFinish] = useState("10 minutes");
   const [showImagePicker, setShowImagePicker] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [showStartTimePicker, setShowStartTimePicker] = useState(false);
+  const [startTime, setStartTime] = useState<Date>(new Date());
+  const [startTimeLabel, setStartTimeLabel] = useState("now");
 
   const translateY = useSharedValue(MODAL_HEIGHT);
   const startY = useSharedValue(0);
@@ -86,10 +90,17 @@ export function CustomDrinkModal({ visible, onClose, onAdd }: CustomDrinkModalPr
     setCaffeineMg("10");
     setTimeToFinish("10 minutes");
     setSelectedImage(null);
+    setStartTime(new Date());
+    setStartTimeLabel("now");
   };
 
   const handleSelectImage = (imageUri: string) => {
     setSelectedImage(imageUri);
+  };
+
+  const handleSelectStartTime = (date: Date, label: string) => {
+    setStartTime(date);
+    setStartTimeLabel(label);
   };
 
   useEffect(() => {
@@ -294,9 +305,12 @@ export function CustomDrinkModal({ visible, onClose, onAdd }: CustomDrinkModalPr
 
               <View style={styles.timeRow}>
                 <ThemedText type="body">Started drinking:</ThemedText>
-                <Pressable style={[styles.timeChip, { borderColor: Colors.light.accent }]}>
+                <Pressable 
+                  onPress={() => setShowStartTimePicker(true)}
+                  style={[styles.timeChip, { borderColor: Colors.light.accent }]}
+                >
                   <Feather name="calendar" size={14} color={Colors.light.accent} />
-                  <ThemedText type="small" style={{ color: Colors.light.accent }}>now</ThemedText>
+                  <ThemedText type="small" style={{ color: Colors.light.accent }}>{startTimeLabel}</ThemedText>
                 </Pressable>
               </View>
 
@@ -380,6 +394,13 @@ export function CustomDrinkModal({ visible, onClose, onAdd }: CustomDrinkModalPr
         visible={showImagePicker}
         onClose={() => setShowImagePicker(false)}
         onSelectImage={handleSelectImage}
+      />
+
+      <TimePickerModal
+        visible={showStartTimePicker}
+        onClose={() => setShowStartTimePicker(false)}
+        onSelectTime={handleSelectStartTime}
+        initialDate={startTime}
       />
     </Modal>
   );
