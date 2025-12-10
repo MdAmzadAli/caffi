@@ -22,13 +22,14 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import { CustomDrinkModal } from "@/components/CustomDrinkModal";
 import { useCaffeineStore, DrinkItem } from "@/store/caffeineStore";
 import { useTheme } from "@/hooks/useTheme";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
-const INITIAL_HEIGHT = SCREEN_HEIGHT * 0.7;
+const INITIAL_HEIGHT = SCREEN_HEIGHT * 0.8;
 const EXPANDED_HEIGHT = SCREEN_HEIGHT;
 
 interface AddDrinkModalProps {
@@ -51,9 +52,16 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const { addEntry, getAllDrinks, getFavoriteDrinks, profile } = useCaffeineStore();
+  
+  const [showCustomDrinkModal, setShowCustomDrinkModal] = useState(false);
 
   const handleAddCustomDrink = () => {
-    handleCloseAnimated(() => onNavigateToCustomDrink?.());
+    setShowCustomDrinkModal(true);
+  };
+
+  const handleCustomDrinkAdded = () => {
+    setShowCustomDrinkModal(false);
+    handleCloseAnimated();
   };
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -535,6 +543,12 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
           </Animated.View>
         </GestureDetector>
       </View>
+
+      <CustomDrinkModal
+        visible={showCustomDrinkModal}
+        onClose={() => setShowCustomDrinkModal(false)}
+        onAdd={handleCustomDrinkAdded}
+      />
     </Modal>
   );
 }
