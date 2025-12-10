@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import {
   View,
   StyleSheet,
   Modal,
   Pressable,
   ScrollView,
-  Dimensions,
+  useWindowDimensions,
   Image,
   Alert,
 } from "react-native";
@@ -24,10 +24,6 @@ import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 
-const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get("window");
-const MODAL_HEIGHT = SCREEN_HEIGHT * 0.7;
-const IMAGE_SIZE = (SCREEN_WIDTH - Spacing.xl * 2 - Spacing.md) / 2;
-
 interface ImagePickerModalProps {
   visible: boolean;
   onClose: () => void;
@@ -35,39 +31,28 @@ interface ImagePickerModalProps {
 }
 
 const PRESET_IMAGES = [
-  { id: "latte", name: "Latte", icon: "coffee" },
-  { id: "cappuccino", name: "Cappuccino", icon: "coffee" },
-  { id: "espresso", name: "Espresso", icon: "coffee" },
-  { id: "mocha", name: "Mocha", icon: "coffee" },
-  { id: "americano", name: "Americano", icon: "coffee" },
-  { id: "macchiato", name: "Macchiato", icon: "coffee" },
-  { id: "french-press", name: "French Press", icon: "coffee" },
-  { id: "matcha", name: "Matcha", icon: "coffee" },
-  { id: "chocolate", name: "Hot Chocolate", icon: "coffee" },
-  { id: "tea", name: "Tea", icon: "coffee" },
-];
-
-const PRESET_COLORS = [
-  "#8B4513",
-  "#D2691E",
-  "#A0522D",
-  "#CD853F",
-  "#DEB887",
-  "#F4A460",
-  "#D2B48C",
-  "#BC8F8F",
-  "#8FBC8F",
-  "#556B2F",
+  { id: "latte", name: "Latte", image: require("@/assets/images/drinks/latte.jpg") },
+  { id: "coffee-cup", name: "Coffee Cup", image: require("@/assets/images/drinks/coffee-cup.jpg") },
+  { id: "cappuccino", name: "Cappuccino", image: require("@/assets/images/drinks/cappuccino.jpg") },
+  { id: "takeaway", name: "Takeaway", image: require("@/assets/images/drinks/takeaway.jpg") },
+  { id: "mocha", name: "Mocha", image: require("@/assets/images/drinks/mocha.jpg") },
+  { id: "french-press", name: "French Press", image: require("@/assets/images/drinks/french-press.jpg") },
+  { id: "chocolate", name: "Chocolate", image: require("@/assets/images/drinks/chocolate.jpg") },
+  { id: "matcha", name: "Matcha", image: require("@/assets/images/drinks/matcha.jpg") },
 ];
 
 export function ImagePickerModal({ visible, onClose, onSelectImage }: ImagePickerModalProps) {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
+  const { height: windowHeight, width: windowWidth } = useWindowDimensions();
+
+  const MODAL_HEIGHT = windowHeight * 0.9;
+  const IMAGE_SIZE = (windowWidth - Spacing.xl * 2 - Spacing.md) / 2;
 
   const translateY = useSharedValue(MODAL_HEIGHT);
   const startY = useSharedValue(0);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (visible) {
       translateY.value = MODAL_HEIGHT;
       setTimeout(() => {
@@ -76,7 +61,7 @@ export function ImagePickerModal({ visible, onClose, onSelectImage }: ImagePicke
     } else {
       translateY.value = MODAL_HEIGHT;
     }
-  }, [visible, translateY]);
+  }, [visible, translateY, MODAL_HEIGHT]);
 
   const closeModal = () => {
     translateY.value = withTiming(MODAL_HEIGHT, { duration: 200 }, () => {
@@ -158,6 +143,7 @@ export function ImagePickerModal({ visible, onClose, onSelectImage }: ImagePicke
               {
                 backgroundColor: theme.backgroundRoot,
                 paddingBottom: insets.bottom + Spacing.lg,
+                maxHeight: MODAL_HEIGHT,
               },
             ]}
           >
@@ -174,21 +160,37 @@ export function ImagePickerModal({ visible, onClose, onSelectImage }: ImagePicke
             >
               <Pressable
                 onPress={handleUploadCustom}
-                style={[styles.imageCard, styles.uploadCard, { backgroundColor: theme.backgroundSecondary }]}
+                style={[
+                  styles.imageCard,
+                  { 
+                    width: IMAGE_SIZE, 
+                    height: IMAGE_SIZE,
+                    backgroundColor: theme.backgroundSecondary,
+                  }
+                ]}
               >
                 <Feather name="upload" size={32} color={theme.textMuted} />
                 <ThemedText type="small" muted style={styles.uploadText}>Upload custom</ThemedText>
               </Pressable>
 
-              {PRESET_IMAGES.map((preset, index) => (
+              {PRESET_IMAGES.map((preset) => (
                 <Pressable
                   key={preset.id}
                   onPress={() => handleSelectPreset(preset.id)}
-                  style={[styles.imageCard, { backgroundColor: theme.backgroundSecondary }]}
+                  style={[
+                    styles.imageCard,
+                    { 
+                      width: IMAGE_SIZE, 
+                      height: IMAGE_SIZE,
+                      backgroundColor: theme.backgroundSecondary,
+                    }
+                  ]}
                 >
-                  <View style={[styles.presetImagePlaceholder, { backgroundColor: PRESET_COLORS[index % PRESET_COLORS.length] + "30" }]}>
-                    <Feather name="coffee" size={48} color={PRESET_COLORS[index % PRESET_COLORS.length]} />
-                  </View>
+                  <Image 
+                    source={preset.image} 
+                    style={styles.presetImage}
+                    resizeMode="contain"
+                  />
                 </Pressable>
               ))}
             </ScrollView>
@@ -209,7 +211,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContent: {
-    maxHeight: MODAL_HEIGHT,
     borderTopLeftRadius: BorderRadius.xl,
     borderTopRightRadius: BorderRadius.xl,
   },
@@ -236,22 +237,17 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.xl,
   },
   imageCard: {
-    width: IMAGE_SIZE,
-    height: IMAGE_SIZE,
     borderRadius: BorderRadius.md,
     overflow: "hidden",
-  },
-  uploadCard: {
     alignItems: "center",
     justifyContent: "center",
-    gap: Spacing.sm,
   },
   uploadText: {
     textAlign: "center",
+    marginTop: Spacing.sm,
   },
-  presetImagePlaceholder: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+  presetImage: {
+    width: "85%",
+    height: "85%",
   },
 });
