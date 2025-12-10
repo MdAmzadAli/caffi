@@ -8,7 +8,6 @@ import {
   ScrollView,
   Dimensions,
   Image,
-  Keyboard,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import Animated, {
@@ -307,10 +306,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd }: CustomDrinkModalPr
               <View style={styles.timeRow}>
                 <ThemedText type="body">Started drinking:</ThemedText>
                 <Pressable 
-                  onPress={() => {
-                    Keyboard.dismiss();
-                    setTimeout(() => setShowStartTimePicker(true), 100);
-                  }}
+                  onPress={() => setShowStartTimePicker(true)}
                   style={[styles.timeChip, { borderColor: Colors.light.accent }]}
                 >
                   <Feather name="calendar" size={14} color={Colors.light.accent} />
@@ -412,14 +408,17 @@ export function CustomDrinkModal({ visible, onClose, onAdd }: CustomDrinkModalPr
 
 const styles = StyleSheet.create({
   overlay: {
-    flex: 1,
-    justifyContent: "flex-end",
+    ...StyleSheet.absoluteFillObject,
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0, 0, 0, 0.4)",
   },
   modalContent: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
     maxHeight: MODAL_HEIGHT,
     borderTopLeftRadius: BorderRadius.xl,
     borderTopRightRadius: BorderRadius.xl,
