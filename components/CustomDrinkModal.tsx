@@ -221,13 +221,38 @@ export function CustomDrinkModal({ visible, onClose, onAdd }: CustomDrinkModalPr
               <View style={[styles.divider, { backgroundColor: theme.divider }]} />
 
               <View style={styles.unitCaffeineRow}>
-                <Pressable
-                  onPress={() => setShowUnitPicker(!showUnitPicker)}
-                  style={styles.unitSelector}
-                >
-                  <Feather name="chevron-down" size={16} color={theme.textMuted} />
-                  <ThemedText type="body">{selectedUnit}</ThemedText>
-                </Pressable>
+                <View style={styles.unitSelectorContainer}>
+                  <Pressable
+                    onPress={() => {
+                      setShowUnitPicker(!showUnitPicker);
+                      setShowTimePicker(false);
+                    }}
+                    style={styles.unitSelector}
+                  >
+                    <Feather name="chevron-down" size={16} color={theme.textMuted} />
+                    <ThemedText type="body">{selectedUnit}</ThemedText>
+                  </Pressable>
+
+                  {showUnitPicker && (
+                    <View style={[styles.unitPickerDropdown, { backgroundColor: theme.backgroundSecondary }]}>
+                      {UNITS.map((unit) => (
+                        <Pressable
+                          key={unit}
+                          onPress={() => {
+                            setSelectedUnit(unit);
+                            setShowUnitPicker(false);
+                          }}
+                          style={[
+                            styles.pickerItem,
+                            selectedUnit === unit && { backgroundColor: `${Colors.light.accent}20` },
+                          ]}
+                        >
+                          <ThemedText type="body">{unit}</ThemedText>
+                        </Pressable>
+                      ))}
+                    </View>
+                  )}
+                </View>
 
                 <View style={styles.caffeineInputWrapper}>
                   <TextInput
@@ -240,26 +265,6 @@ export function CustomDrinkModal({ visible, onClose, onAdd }: CustomDrinkModalPr
                   <ThemedText type="body" muted> mg</ThemedText>
                 </View>
               </View>
-
-              {showUnitPicker && (
-                <View style={[styles.pickerDropdown, { backgroundColor: theme.backgroundSecondary }]}>
-                  {UNITS.map((unit) => (
-                    <Pressable
-                      key={unit}
-                      onPress={() => {
-                        setSelectedUnit(unit);
-                        setShowUnitPicker(false);
-                      }}
-                      style={[
-                        styles.pickerItem,
-                        selectedUnit === unit && { backgroundColor: `${Colors.light.accent}20` },
-                      ]}
-                    >
-                      <ThemedText type="body">{unit}</ThemedText>
-                    </Pressable>
-                  ))}
-                </View>
-              )}
 
               <View style={[styles.divider, { backgroundColor: theme.divider }]} />
 
@@ -431,11 +436,30 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingVertical: Spacing.sm,
+    zIndex: 10,
+  },
+  unitSelectorContainer: {
+    position: "relative",
+    zIndex: 10,
   },
   unitSelector: {
     flexDirection: "row",
     alignItems: "center",
     gap: Spacing.xs,
+  },
+  unitPickerDropdown: {
+    position: "absolute",
+    top: "100%",
+    left: 0,
+    minWidth: 100,
+    borderRadius: BorderRadius.sm,
+    marginTop: 4,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 5,
   },
   caffeineInputWrapper: {
     flexDirection: "row",
