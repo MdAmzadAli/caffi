@@ -23,6 +23,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { ImagePickerModal } from "@/components/ImagePickerModal";
 import { TimePickerModal } from "@/components/TimePickerModal";
+import { TimeToFinishModal } from "@/components/TimeToFinishModal";
 import { useCaffeineStore } from "@/store/caffeineStore";
 import { useTheme } from "@/hooks/useTheme";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
@@ -34,7 +35,6 @@ interface CustomDrinkModalProps {
 }
 
 const UNITS = ["cup", "shot", "ml", "oz"];
-const TIME_OPTIONS = ["5 minutes", "10 minutes", "15 minutes", "30 minutes", "1 hour"];
 
 export function CustomDrinkModal({ visible, onClose, onAdd }: CustomDrinkModalProps) {
   const { theme } = useTheme();
@@ -49,8 +49,8 @@ export function CustomDrinkModal({ visible, onClose, onAdd }: CustomDrinkModalPr
   const [selectedUnit, setSelectedUnit] = useState("cup");
   const [caffeineMg, setCaffeineMg] = useState("10");
   const [showUnitPicker, setShowUnitPicker] = useState(false);
-  const [showTimePicker, setShowTimePicker] = useState(false);
-  const [timeToFinish, setTimeToFinish] = useState("10 minutes");
+  const [showTimeToFinishModal, setShowTimeToFinishModal] = useState(false);
+  const [timeToFinishMinutes, setTimeToFinishMinutes] = useState(10);
   const [showImagePicker, setShowImagePicker] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [showStartTimePicker, setShowStartTimePicker] = useState(false);
@@ -88,7 +88,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd }: CustomDrinkModalPr
     setQuantity(1);
     setSelectedUnit("cup");
     setCaffeineMg("10");
-    setTimeToFinish("10 minutes");
+    setTimeToFinishMinutes(10);
     setSelectedImage(null);
     setStartTime(new Date());
     setStartTimeLabel("now");
@@ -261,7 +261,6 @@ export function CustomDrinkModal({ visible, onClose, onAdd }: CustomDrinkModalPr
                   <Pressable
                     onPress={() => {
                       setShowUnitPicker(!showUnitPicker);
-                      setShowTimePicker(false);
                     }}
                     style={styles.unitSelector}
                   >
@@ -320,33 +319,13 @@ export function CustomDrinkModal({ visible, onClose, onAdd }: CustomDrinkModalPr
               <View style={styles.timeRow}>
                 <ThemedText type="body">Time to finish:</ThemedText>
                 <Pressable
-                  onPress={() => setShowTimePicker(!showTimePicker)}
+                  onPress={() => setShowTimeToFinishModal(true)}
                   style={[styles.timeChip, { borderColor: Colors.light.accent }]}
                 >
                   <Feather name="clock" size={14} color={Colors.light.accent} />
-                  <ThemedText type="small" style={{ color: Colors.light.accent }}>{timeToFinish}</ThemedText>
+                  <ThemedText type="small" style={{ color: Colors.light.accent }}>{timeToFinishMinutes} minutes</ThemedText>
                 </Pressable>
               </View>
-
-              {showTimePicker && (
-                <View style={[styles.pickerDropdown, { backgroundColor: theme.backgroundSecondary }]}>
-                  {TIME_OPTIONS.map((time) => (
-                    <Pressable
-                      key={time}
-                      onPress={() => {
-                        setTimeToFinish(time);
-                        setShowTimePicker(false);
-                      }}
-                      style={[
-                        styles.pickerItem,
-                        timeToFinish === time && { backgroundColor: `${Colors.light.accent}20` },
-                      ]}
-                    >
-                      <ThemedText type="body">{time}</ThemedText>
-                    </Pressable>
-                  ))}
-                </View>
-              )}
 
               <View style={[styles.divider, { backgroundColor: theme.divider }]} />
 
@@ -402,6 +381,13 @@ export function CustomDrinkModal({ visible, onClose, onAdd }: CustomDrinkModalPr
         onClose={() => setShowStartTimePicker(false)}
         onSelectTime={handleSelectStartTime}
         initialDate={startTime}
+      />
+
+      <TimeToFinishModal
+        visible={showTimeToFinishModal}
+        onClose={() => setShowTimeToFinishModal(false)}
+        onSelectTime={(minutes) => setTimeToFinishMinutes(minutes)}
+        initialMinutes={timeToFinishMinutes}
       />
     </Modal>
   );
