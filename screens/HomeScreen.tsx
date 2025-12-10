@@ -16,6 +16,7 @@ import { RingProgress } from "@/components/RingProgress";
 import { CollapsibleInfoCards, ExpandButton } from "@/components/CollapsibleInfoCards";
 import { StickyConsumptionTitle } from "@/components/StickyConsumptionTitle";
 import { StickyDateHeader } from "@/components/StickyDateHeader";
+import { CaffeineLogPopup } from "@/components/CaffeineLogPopup";
 import EditDrinkModal from "@/components/EditDrinkModal";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { useCaffeineStore, DrinkEntry } from "@/store/caffeineStore";
@@ -100,8 +101,11 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     getTodayCaffeine,
     getActiveCaffeine,
     deleteEntry,
+    addEntry,
+    getAllDrinks,
   } = useCaffeineStore();
 
+  const [popupVisible, setPopupVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState<DrinkEntry | null>(null);
   const [currentStickyDate, setCurrentStickyDate] = useState<string>("");
@@ -199,13 +203,41 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     }
   }, [sections, currentStickyDate]);
 
-  const handleEditEntry = (entry: DrinkEntry) => {
+  const handleSelectEntry = (entry: DrinkEntry) => {
     setSelectedEntry(entry);
-    setEditModalVisible(true);
+    setPopupVisible(true);
+  };
+
+  const handleClosePopup = () => {
+    setPopupVisible(false);
+    setSelectedEntry(null);
   };
 
   const handleCloseEditModal = () => {
     setEditModalVisible(false);
+    setSelectedEntry(null);
+  };
+
+  const handleEditEntry = (entry: DrinkEntry) => {
+    setPopupVisible(false);
+    setTimeout(() => {
+      setEditModalVisible(true);
+    }, 200);
+  };
+
+  const handleDuplicateEntry = (entry: DrinkEntry) => {
+    const allDrinks = getAllDrinks();
+    const drink = allDrinks.find((d) => d.id === entry.drinkId);
+    if (drink) {
+      addEntry(drink, entry.servingSize, entry.notes, entry.isFavorite);
+    }
+    setPopupVisible(false);
+    setSelectedEntry(null);
+  };
+
+  const handleDeleteEntry = (entry: DrinkEntry) => {
+    deleteEntry(entry.id);
+    setPopupVisible(false);
     setSelectedEntry(null);
   };
 
@@ -266,7 +298,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           },
           pressed && { backgroundColor: theme.backgroundTertiary },
         ]}
-        onPress={() => handleEditEntry(item)}
+        onPress={() => handleSelectEntry(item)}
       >
         <View style={[styles.iconContainer, { backgroundColor: theme.backgroundTertiary }]}>
           {CATEGORY_IMAGES[item.category] ? (
@@ -461,6 +493,15 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           />
         </View>
       </SafeAreaView>
+
+      <CaffeineLogPopup
+        visible={popupVisible}
+        entry={selectedEntry}
+        onClose={handleClosePopup}
+        onEdit={handleEditEntry}
+        onDuplicate={handleDuplicateEntry}
+        onDelete={handleDeleteEntry}
+      />
 
       <EditDrinkModal
         visible={editModalVisible}

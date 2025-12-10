@@ -37,32 +37,86 @@ type CaffeineLogPopupProps = {
 };
 
 // Build a simple decay curve for the single entry to mirror home graph color
+const CAFFEINE_HALF_LIFE_HOURS = 5;
+
+function calculateCaffeineStats(entry: DrinkEntry | null) {
+  if (!entry) {
+    return {
+      peakMg: 0,
+      currentMg: 0,
+      totalMg: 0,
+      peakTimeLabel: "",
+      currentTimeLabel: "",
+      hoursElapsed: 0,
+    };
+  }
+
+  const now = new Date();
+  const entryTime = new Date(entry.timestamp);
+  const hoursElapsed = (now.getTime() - entryTime.getTime()) / (1000 * 60 * 60);
+  
+  const totalMg = entry.caffeineAmount;
+  const peakMg = entry.caffeineAmount;
+  
+  const remainingFactor = Math.pow(0.5, hoursElapsed / CAFFEINE_HALF_LIFE_HOURS);
+  const currentMg = totalMg * remainingFactor;
+  
+  const peakTimeLabel = entryTime.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+  
+  const currentTimeLabel = now.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+
+  return {
+    peakMg: Math.round(peakMg * 10) / 10,
+    currentMg: Math.round(currentMg * 10) / 10,
+    totalMg: Math.round(totalMg * 10) / 10,
+    peakTimeLabel,
+    currentTimeLabel,
+    hoursElapsed,
+  };
+}
+
 function useDecayPath(entry: DrinkEntry | null, curveColor: string) {
   const width = Dimensions.get("window").width - Spacing.lg * 2;
   const height = 220;
 
-  const { path, area, peak, peakTimeLabel } = useMemo(() => {
+  const caffeineStats = useMemo(() => calculateCaffeineStats(entry), [entry]);
+
+  const { path, area, peak, peakTimeLabel, timeLabels } = useMemo(() => {
     if (!entry) {
-      return { path: "", area: "", peak: { x: 0, y: height }, peakTimeLabel: "" };
+      return { path: "", area: "", peak: { x: 0, y: height }, peakTimeLabel: "", timeLabels: [] };
     }
-    // Create a smooth cubic path: fast rise, slow decay
-    const peakMg = entry.caffeineAmount || 1;
+    
+    const entryTime = new Date(entry.timestamp);
+    const now = new Date();
+    const hoursElapsed = (now.getTime() - entryTime.getTime()) / (1000 * 60 * 60);
+    const hoursToShow = Math.max(12, hoursElapsed + 2);
+    
     const startX = 0;
     const startY = height;
     const peakX = width * 0.08;
-    const peakY = height * 0.25;
+    const peakY = height * 0.15;
+    
+    const nowX = Math.min((hoursElapsed / hoursToShow) * width, width * 0.95);
+    const decayFactor = Math.pow(0.5, hoursElapsed / CAFFEINE_HALF_LIFE_HOURS);
+    const nowY = height * 0.15 + (height * 0.7) * (1 - decayFactor);
+    
     const endX = width;
-    const endY = height * 0.7;
+    const endDecayFactor = Math.pow(0.5, hoursToShow / CAFFEINE_HALF_LIFE_HOURS);
+    const endY = height * 0.15 + (height * 0.7) * (1 - endDecayFactor);
 
     const cp1x = width * 0.02;
-    const cp1y = height * 0.15;
+    const cp1y = height * 0.1;
     const cp2x = width * 0.12;
     const cp2y = height * 0.05;
 
     const cp3x = width * 0.35;
-    const cp3y = height * 0.4;
-    const cp4x = width * 0.65;
-    const cp4y = height * 0.55;
+    const cp3y = height * 0.35;
 
     const pathStr = `M ${startX} ${startY} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${peakX} ${peakY} S ${cp3x} ${cp3y}, ${endX} ${endY}`;
     const areaStr = `${pathStr} L ${endX} ${height} L ${startX} ${height} Z`;
@@ -73,15 +127,31 @@ function useDecayPath(entry: DrinkEntry | null, curveColor: string) {
       minute: "2-digit",
     });
 
+    const startLabel = new Date(entryTime.getTime() - 1000 * 60 * 60).toLocaleTimeString("en-US", { hour: "numeric" });
+    const endLabel = new Date(entryTime.getTime() + hoursToShow * 1000 * 60 * 60).toLocaleTimeString("en-US", { hour: "numeric" });
+    
+    const midHours = [2, 4, 6, 8, 10];
+    const labels = midHours
+      .filter(h => h < hoursToShow)
+      .map(h => ({
+        x: (h / hoursToShow) * width,
+        label: new Date(entryTime.getTime() + h * 1000 * 60 * 60).toLocaleTimeString("en-US", { hour: "numeric" }),
+      }));
+
     return {
       path: pathStr,
       area: areaStr,
       peak: { x: peakX, y: peakY },
       peakTimeLabel: timeLabel,
+      timeLabels: [
+        { x: 0, label: startLabel },
+        ...labels,
+        { x: width, label: endLabel },
+      ],
     };
   }, [entry, height, width]);
 
-  return { width, height, path, area, peak, peakTimeLabel, curveColor };
+  return { width, height, path, area, peak, peakTimeLabel, curveColor, caffeineStats, timeLabels };
 }
 
 export function CaffeineLogPopup({
@@ -101,7 +171,7 @@ export function CaffeineLogPopup({
   const areaStart = isDark ? theme.backgroundTertiary : theme.accentGold + "1A";
   const areaEnd = isDark ? theme.backgroundSecondary : theme.accentGold + "0D";
 
-  const { width, height, path, area, peak, peakTimeLabel } = useDecayPath(entry, curveColor);
+  const { width, height, path, area, peak, peakTimeLabel, caffeineStats, timeLabels } = useDecayPath(entry, curveColor);
   const startY = useSharedValue(0);
 
   useEffect(() => {
@@ -193,7 +263,7 @@ export function CaffeineLogPopup({
 
                 {/* Graph */}
                 <View style={styles.graphWrap}>
-                  <Svg width={width} height={height}>
+                  <Svg width={width} height={height + 30}>
                     <Defs>
                       <LinearGradient id="decayArea" x1="0" y1="0" x2="0" y2="1">
                         <Stop offset="0" stopColor={areaStart} stopOpacity="0.6" />
@@ -214,10 +284,29 @@ export function CaffeineLogPopup({
                     >
                       {peakTimeLabel}
                     </SvgText>
+
+                    {/* X-axis time labels */}
+                    {timeLabels.map((item, idx) => (
+                      <SvgText
+                        key={idx}
+                        x={item.x}
+                        y={height + 20}
+                        fontSize={11}
+                        fill={theme.mutedGrey}
+                        textAnchor={idx === 0 ? "start" : idx === timeLabels.length - 1 ? "end" : "middle"}
+                      >
+                        {item.label}
+                      </SvgText>
+                    ))}
                   </Svg>
                   <View style={styles.graphRightText}>
-                    <Text style={[styles.addsText, { color: theme.darkBrown }]}>adds 0.7 mg</Text>
+                    <Text style={[styles.addsText, { color: theme.darkBrown }]}>adds {caffeineStats.currentMg} mg</Text>
                     <Text style={[styles.nowText, { color: theme.mutedGrey }]}>now</Text>
+                  </View>
+                  {/* Start/End time labels */}
+                  <View style={styles.graphTimeRow}>
+                    <Text style={[styles.graphTimeLabel, { color: theme.mutedGrey }]}>{caffeineStats.peakTimeLabel}</Text>
+                    <Text style={[styles.graphTimeLabel, { color: theme.mutedGrey }]}>{caffeineStats.currentTimeLabel}</Text>
                   </View>
                 </View>
 
@@ -227,9 +316,9 @@ export function CaffeineLogPopup({
                     Drink contribution to caffeine levels
                   </Text>
                   <View style={[styles.divider, { borderBottomColor: theme.divider }]} />
-                  <Row label="At peak (7:27 PM)" value="8.6 mg" themeColor={theme} />
-                  <Row label="Now" value="0.7 mg" themeColor={theme} />
-                  <Row label="In total (over time)" value="10.0 mg" themeColor={theme} />
+                  <Row label={`At peak (${caffeineStats.peakTimeLabel})`} value={`${caffeineStats.peakMg} mg`} themeColor={theme} />
+                  <Row label="Now" value={`${caffeineStats.currentMg} mg`} themeColor={theme} />
+                  <Row label="In total (over time)" value={`${caffeineStats.totalMg} mg`} themeColor={theme} />
                 </View>
 
                 {/* Actions */}
@@ -416,6 +505,14 @@ const styles = StyleSheet.create({
   actionLabel: {
     fontSize: 13,
     fontWeight: "600",
+  },
+  graphTimeRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: Spacing.xs,
+  },
+  graphTimeLabel: {
+    fontSize: 11,
   },
 });
 
