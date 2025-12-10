@@ -26,6 +26,8 @@ import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
+const INITIAL_HEIGHT = SCREEN_HEIGHT * 0.7;
+const EXPANDED_HEIGHT = SCREEN_HEIGHT;
 
 interface AddDrinkModalProps {
   visible: boolean;
@@ -119,7 +121,9 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
 
   const translateY = useSharedValue(SCREEN_HEIGHT);
   const backdropOpacity = useSharedValue(0);
+  const currentHeight = useSharedValue(INITIAL_HEIGHT);
   const [isClosing, setIsClosing] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const handleCloseAnimated = useCallback(
     (after?: () => void) => {
@@ -130,6 +134,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
         runOnJS(resetState)();
         runOnJS(onClose)();
         runOnJS(setIsClosing)(false);
+        runOnJS(setIsExpanded)(false);
         if (after) runOnJS(after)();
       });
     },
@@ -140,15 +145,17 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
     if (visible) {
       translateY.value = SCREEN_HEIGHT;
       backdropOpacity.value = 0;
+      currentHeight.value = INITIAL_HEIGHT;
+      setIsExpanded(false);
       translateY.value = withTiming(0, { duration: 220 });
       backdropOpacity.value = withTiming(1, { duration: 160 });
     } else {
       translateY.value = SCREEN_HEIGHT;
       backdropOpacity.value = 0;
     }
-  }, [visible, backdropOpacity, translateY]);
+  }, [visible, backdropOpacity, translateY, currentHeight]);
 
-  const expandedOffset = Math.max(-(SCREEN_HEIGHT * 0.92 - insets.top), -SCREEN_HEIGHT + insets.top + 32);
+  const expandedOffset = -(EXPANDED_HEIGHT - INITIAL_HEIGHT - insets.top);
 
   const onGestureEvent = useCallback(
     (event: PanGestureHandlerGestureEvent) => {
@@ -157,23 +164,28 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
       translateY.value = clampedY;
 
       if (state === 5 /* END */) {
-        const shouldClose = translationY > 140 || velocityY > 900;
-        const shouldExpand = translationY < -100 || velocityY < -900;
+        const shouldClose = translationY > 100 || velocityY > 600;
+        const shouldExpand = translationY < -60 || velocityY < -600;
 
         if (shouldClose) {
           handleCloseAnimated();
         } else if (shouldExpand) {
+          currentHeight.value = withSpring(EXPANDED_HEIGHT - insets.top, { damping: 18, stiffness: 280 });
           translateY.value = withSpring(expandedOffset, { damping: 18, stiffness: 280 });
+          runOnJS(setIsExpanded)(true);
         } else {
+          currentHeight.value = withSpring(INITIAL_HEIGHT, { damping: 18, stiffness: 280 });
           translateY.value = withSpring(0, { damping: 18, stiffness: 280 });
+          runOnJS(setIsExpanded)(false);
         }
       }
     },
-    [expandedOffset, handleCloseAnimated, translateY],
+    [expandedOffset, handleCloseAnimated, translateY, currentHeight, insets.top],
   );
 
   const sheetStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.value }],
+    height: currentHeight.value,
   }));
 
   const backdropStyle = useAnimatedStyle(() => ({
@@ -201,8 +213,6 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
               {
                 backgroundColor: theme.backgroundRoot,
                 paddingBottom: insets.bottom + Spacing.lg,
-                height: SCREEN_HEIGHT - insets.top,
-                maxHeight: SCREEN_HEIGHT - insets.top,
               },
             ]}
           >
@@ -210,9 +220,11 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
 
             <View style={styles.header}>
               <ThemedText type="h4">Add Drink</ThemedText>
-              <Pressable onPress={() => handleCloseAnimated()} style={styles.closeButton}>
-                <Feather name="x" size={24} color={theme.text} />
-              </Pressable>
+              {onNavigateToCustomDrink && (
+                <Pressable onPress={handleAddCustomDrink} style={styles.addCustomButton}>
+                  <Feather name="plus" size={24} color={Colors.light.accent} />
+                </Pressable>
+              )}
             </View>
 
             {!selectedDrink ? (
@@ -220,29 +232,6 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
                 style={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
               >
-              {onNavigateToCustomDrink && (
-                <Pressable
-                  onPress={handleAddCustomDrink}
-                  style={[
-                    styles.customDrinkButton,
-                    { backgroundColor: theme.backgroundDefault },
-                  ]}
-                >
-                  <View style={styles.customDrinkIcon}>
-                    <Feather name="plus" size={20} color={Colors.light.accent} />
-                  </View>
-                  <View style={styles.customDrinkInfo}>
-                    <ThemedText type="body" style={styles.customDrinkLabel}>
-                      Add Custom Drink
-                    </ThemedText>
-                    <ThemedText type="caption" muted>
-                      Create your own drink
-                    </ThemedText>
-                  </View>
-                  <Feather name="chevron-right" size={20} color={theme.textMuted} />
-                </Pressable>
-              )}
-
               <View style={styles.searchContainer}>
                 <View
                   style={[
@@ -672,10 +661,10 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContent: {
-    maxHeight: SCREEN_HEIGHT * 0.9,
     borderTopLeftRadius: BorderRadius.lg,
     borderTopRightRadius: BorderRadius.lg,
     paddingTop: Spacing.sm,
+    overflow: "hidden",
   },
   handle: {
     width: 36,
@@ -692,8 +681,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xl,
     paddingBottom: Spacing.md,
   },
-  closeButton: {
-    padding: Spacing.xs,
+  addCustomButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: `${Colors.light.accent}15`,
+    alignItems: "center",
+    justifyContent: "center",
   },
   scrollContent: {
     paddingHorizontal: Spacing.xl,
