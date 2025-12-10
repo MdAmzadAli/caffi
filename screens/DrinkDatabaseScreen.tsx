@@ -14,6 +14,7 @@ import Animated, {
   FadeIn,
 } from "react-native-reanimated";
 import { ScreenScrollView } from "@/components/ScreenScrollView";
+import { ScreenHeader } from "@/components/ScreenHeader";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useCaffeineStore, DrinkItem, DRINK_DATABASE } from "@/store/caffeineStore";
@@ -99,7 +100,7 @@ export default function DrinkDatabaseScreen() {
   };
 
   return (
-    <ScreenScrollView>
+    <ScreenScrollView header={<ScreenHeader title="Drink Database" showBackButton={true} />}>
       <View style={styles.searchContainer}>
         <View
           style={[styles.searchBox, { backgroundColor: theme.backgroundDefault }]}

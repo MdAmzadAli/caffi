@@ -8,6 +8,7 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import { ScreenScrollView } from "@/components/ScreenScrollView";
+import { ScreenHeader } from "@/components/ScreenHeader";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import {
@@ -134,7 +135,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   };
 
   return (
-    <ScreenScrollView>
+    <ScreenScrollView header={<ScreenHeader title="Settings" />}>
       <View style={styles.section}>
         <ThemedText type="small" muted style={styles.sectionLabel}>
           YOUR CAFFEINE LIMITS

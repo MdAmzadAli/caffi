@@ -17,6 +17,7 @@ interface HomeGraphControllerProps {
   halfLifeHours?: number;
   sleepThresholdMg?: number;
   isDark?: boolean;
+  onHeight?: (height: number) => void;
 }
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -40,6 +41,7 @@ export function HomeGraphController({
   halfLifeHours = 5.5,
   sleepThresholdMg = 100,
   isDark = false,
+  onHeight,
 }: HomeGraphControllerProps) {
   const [isOffCenter, setIsOffCenter] = useState(false);
   const [scrollDirection, setScrollDirection] = useState<'left' | 'right' | null>(null);
@@ -83,7 +85,10 @@ export function HomeGraphController({
   }));
 
   return (
-    <View style={styles.container}>
+    <View
+      style={styles.container}
+      onLayout={(e) => onHeight?.(e.nativeEvent.layout.height)}
+    >
       <CaffeineGraphNew
         events={events}
         now={now}

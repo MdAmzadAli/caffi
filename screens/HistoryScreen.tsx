@@ -7,6 +7,7 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import { ScreenScrollView } from "@/components/ScreenScrollView";
+import { ScreenHeader } from "@/components/ScreenHeader";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { DrinkTimelineItem } from "@/components/DrinkTimelineItem";
@@ -95,7 +96,7 @@ export default function HistoryScreen() {
   }, [filteredEntries]);
 
   return (
-    <ScreenScrollView>
+    <ScreenScrollView header={<ScreenHeader title="History" />}>
       <View style={styles.toggleRow}>
         <ToggleButton
           label="Day"

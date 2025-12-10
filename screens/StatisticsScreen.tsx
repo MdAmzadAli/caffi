@@ -7,6 +7,7 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import { ScreenScrollView } from "@/components/ScreenScrollView";
+import { ScreenHeader } from "@/components/ScreenHeader";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { CaffeineDecayCurve } from "@/components/CaffeineDecayCurve";
@@ -86,7 +87,7 @@ export default function StatisticsScreen() {
   };
 
   return (
-    <ScreenScrollView>
+    <ScreenScrollView header={<ScreenHeader title="Statistics" />}>
       <ThemedView elevation={1} style={styles.mainCard}>
         <View style={styles.currentCaffeine}>
           <ThemedText type="caption" muted>

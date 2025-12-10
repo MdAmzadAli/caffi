@@ -8,6 +8,7 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import { ScreenKeyboardAwareScrollView } from "@/components/ScreenKeyboardAwareScrollView";
+import { ScreenHeader } from "@/components/ScreenHeader";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useCaffeineStore, DrinkItem } from "@/store/caffeineStore";
@@ -78,7 +79,7 @@ export default function CustomDrinkScreen({
   };
 
   return (
-    <ScreenKeyboardAwareScrollView>
+    <ScreenKeyboardAwareScrollView header={<ScreenHeader title="Add Custom Drink" showBackButton={true} />}>
       <View style={styles.section}>
         <ThemedText type="small" muted style={styles.sectionLabel}>
           DRINK NAME

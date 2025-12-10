@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useCallback, useLayoutEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -7,21 +7,20 @@ import {
   Pressable,
   ScrollView,
   Dimensions,
-  Platform,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { BlurView } from "expo-blur";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-  FadeIn,
-  SlideInDown,
+  withTiming,
+  runOnJS,
 } from "react-native-reanimated";
+import { PanGestureHandler, PanGestureHandlerGestureEvent, PanGestureHandlerProps } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { useCaffeineStore, DrinkItem, DRINK_DATABASE } from "@/store/caffeineStore";
+import { useCaffeineStore, DrinkItem } from "@/store/caffeineStore";
 import { useTheme } from "@/hooks/useTheme";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 
@@ -50,8 +49,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
   const { addEntry, getAllDrinks, getFavoriteDrinks, profile } = useCaffeineStore();
 
   const handleAddCustomDrink = () => {
-    handleClose();
-    onNavigateToCustomDrink?.();
+    handleCloseAnimated(() => onNavigateToCustomDrink?.());
   };
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -106,54 +104,122 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
   const handleAdd = () => {
     if (selectedDrink && selectedSize) {
       addEntry(selectedDrink, selectedSize, notes || undefined, isFavorite);
-      handleClose();
+      handleCloseAnimated();
     }
   };
 
-  const handleClose = () => {
+  const resetState = () => {
     setSearchQuery("");
     setSelectedCategory(null);
     setSelectedDrink(null);
     setSelectedSize(null);
     setNotes("");
     setIsFavorite(false);
-    onClose();
   };
+
+  const translateY = useSharedValue(SCREEN_HEIGHT);
+  const backdropOpacity = useSharedValue(0);
+  const [isClosing, setIsClosing] = useState(false);
+
+  const handleCloseAnimated = useCallback(
+    (after?: () => void) => {
+      if (isClosing) return;
+      setIsClosing(true);
+      translateY.value = withSpring(SCREEN_HEIGHT, { damping: 18, stiffness: 180 });
+      backdropOpacity.value = withTiming(0, { duration: 160 }, () => {
+        runOnJS(resetState)();
+        runOnJS(onClose)();
+        runOnJS(setIsClosing)(false);
+        if (after) runOnJS(after)();
+      });
+    },
+    [backdropOpacity, isClosing, onClose, translateY],
+  );
+
+  useLayoutEffect(() => {
+    if (visible) {
+      translateY.value = SCREEN_HEIGHT;
+      backdropOpacity.value = 0;
+      translateY.value = withTiming(0, { duration: 220 });
+      backdropOpacity.value = withTiming(1, { duration: 160 });
+    } else {
+      translateY.value = SCREEN_HEIGHT;
+      backdropOpacity.value = 0;
+    }
+  }, [visible, backdropOpacity, translateY]);
+
+  const expandedOffset = Math.max(-(SCREEN_HEIGHT * 0.92 - insets.top), -SCREEN_HEIGHT + insets.top + 32);
+
+  const onGestureEvent = useCallback(
+    (event: PanGestureHandlerGestureEvent) => {
+      const { translationY, velocityY, state } = event.nativeEvent;
+      const clampedY = Math.min(Math.max(translationY, expandedOffset), SCREEN_HEIGHT);
+      translateY.value = clampedY;
+
+      if (state === 5 /* END */) {
+        const shouldClose = translationY > 140 || velocityY > 900;
+        const shouldExpand = translationY < -100 || velocityY < -900;
+
+        if (shouldClose) {
+          handleCloseAnimated();
+        } else if (shouldExpand) {
+          translateY.value = withSpring(expandedOffset, { damping: 18, stiffness: 280 });
+        } else {
+          translateY.value = withSpring(0, { damping: 18, stiffness: 280 });
+        }
+      }
+    },
+    [expandedOffset, handleCloseAnimated, translateY],
+  );
+
+  const sheetStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  const backdropStyle = useAnimatedStyle(() => ({
+    opacity: backdropOpacity.value,
+  }));
+
+  const handleClose = () => handleCloseAnimated();
 
   return (
     <Modal
-      visible={visible}
-      animationType="slide"
+      visible={visible || isClosing}
       transparent
-      onRequestClose={handleClose}
+      statusBarTranslucent
+      animationType="none"
+      onRequestClose={() => handleCloseAnimated()}
     >
       <View style={styles.modalOverlay}>
-        <Pressable style={styles.backdrop} onPress={handleClose} />
+        <AnimatedPressable style={[styles.backdrop, backdropStyle]} onPress={() => handleCloseAnimated()} />
 
-        <Animated.View
-          entering={SlideInDown.springify().damping(20)}
-          style={[
-            styles.modalContent,
-            {
-              backgroundColor: theme.backgroundRoot,
-              paddingBottom: insets.bottom + Spacing.lg,
-            },
-          ]}
-        >
-          <View style={styles.handle} />
+        <PanGestureHandler onGestureEvent={onGestureEvent}>
+          <Animated.View
+            style={[
+              styles.modalContent,
+              sheetStyle,
+              {
+                backgroundColor: theme.backgroundRoot,
+                paddingBottom: insets.bottom + Spacing.lg,
+                height: SCREEN_HEIGHT - insets.top,
+                maxHeight: SCREEN_HEIGHT - insets.top,
+              },
+            ]}
+          >
+            <View style={styles.handle} />
 
-          <View style={styles.header}>
-            <ThemedText type="h4">Add Drink</ThemedText>
-            <Pressable onPress={handleClose} style={styles.closeButton}>
-              <Feather name="x" size={24} color={theme.text} />
-            </Pressable>
-          </View>
+            <View style={styles.header}>
+              <ThemedText type="h4">Add Drink</ThemedText>
+              <Pressable onPress={() => handleCloseAnimated()} style={styles.closeButton}>
+                <Feather name="x" size={24} color={theme.text} />
+              </Pressable>
+            </View>
 
-          {!selectedDrink ? (
-            <ScrollView
-              style={styles.scrollContent}
-              showsVerticalScrollIndicator={false}
-            >
+            {!selectedDrink ? (
+              <ScrollView
+                style={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
+              >
               {onNavigateToCustomDrink && (
                 <Pressable
                   onPress={handleAddCustomDrink}
@@ -243,12 +309,12 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
                   />
                 ))}
               </View>
-            </ScrollView>
-          ) : (
-            <ScrollView
-              style={styles.scrollContent}
-              showsVerticalScrollIndicator={false}
-            >
+              </ScrollView>
+            ) : (
+              <ScrollView
+                style={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
+              >
               <Pressable
                 onPress={() => setSelectedDrink(null)}
                 style={styles.backButton}
@@ -430,8 +496,9 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
                 </Pressable>
               </View>
             </ScrollView>
-          )}
-        </Animated.View>
+            )}
+          </Animated.View>
+        </PanGestureHandler>
       </View>
     </Modal>
   );

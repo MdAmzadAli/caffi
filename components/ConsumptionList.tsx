@@ -1,7 +1,7 @@
-import React from "react";
-import { View, StyleSheet, Text, Image, Pressable } from "react-native";
+import React, { useMemo } from "react";
+import { View, StyleSheet, Text, Image, Pressable, SectionList } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { Spacing, BorderRadius } from "@/constants/theme";
+import { Spacing } from "@/constants/theme";
 import { DrinkEntry } from "@/store/caffeineStore";
 import { useTheme } from "@/hooks/useTheme";
 
@@ -9,6 +9,12 @@ interface ConsumptionListProps {
   entries: DrinkEntry[];
   onEntryPress?: (entry: DrinkEntry) => void;
   onDeleteEntry?: (id: string) => void;
+}
+
+interface SectionData {
+  title: string;
+  data: DrinkEntry[];
+  dateKey: string;
 }
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -24,6 +30,42 @@ const CATEGORY_IMAGES: Record<string, any> = {
   coffee: require("@/attached_assets/generated_images/caffi_app_icon_coffee_cup.png"),
 };
 
+function formatDateHeader(date: Date): string {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  
+  const entryDate = new Date(date);
+  entryDate.setHours(0, 0, 0, 0);
+  
+  if (entryDate.getTime() === today.getTime()) {
+    return "Today";
+  } else if (entryDate.getTime() === yesterday.getTime()) {
+    return "Yesterday";
+  } else {
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const dayName = days[entryDate.getDay()];
+    const day = entryDate.getDate().toString().padStart(2, "0");
+    const month = (entryDate.getMonth() + 1).toString().padStart(2, "0");
+    const year = entryDate.getFullYear();
+    return `${dayName.toUpperCase()}, ${day}/${month}/${year}`;
+  }
+}
+
+function formatTime(timestamp: Date): string {
+  const date = new Date(timestamp);
+  return date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
+function getEntryIcon(category: string): string {
+  return CATEGORY_ICONS[category] || "☕";
+}
+
 export function ConsumptionList({
   entries,
   onEntryPress,
@@ -31,85 +73,144 @@ export function ConsumptionList({
 }: ConsumptionListProps) {
   const { theme } = useTheme();
 
-  const formatTime = (timestamp: Date) => {
-    const date = new Date(timestamp);
-    return date.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
+  const sections = useMemo(() => {
+    if (entries.length === 0) return [];
+
+    // Group entries by date
+    const grouped = new Map<string, DrinkEntry[]>();
+    
+    entries.forEach((entry) => {
+      const entryDate = new Date(entry.timestamp);
+      entryDate.setHours(0, 0, 0, 0);
+      const dateKey = entryDate.toISOString();
+      
+      if (!grouped.has(dateKey)) {
+        grouped.set(dateKey, []);
+      }
+      grouped.get(dateKey)!.push(entry);
     });
+
+    // Convert to sections array and sort by date (newest first)
+    const sectionsArray: SectionData[] = Array.from(grouped.entries())
+      .map(([dateKey, data]) => {
+        // Sort entries within each section by time (newest first)
+        const sortedData = [...data].sort(
+          (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        );
+        return {
+          title: formatDateHeader(new Date(dateKey)),
+          data: sortedData,
+          dateKey,
+        };
+      })
+      .sort((a, b) => {
+        // Sort sections by date (newest first)
+        return new Date(b.dateKey).getTime() - new Date(a.dateKey).getTime();
+      });
+
+    return sectionsArray;
+  }, [entries]);
+
+  const renderItem = ({ item }: { item: DrinkEntry }) => {
+    return (
+      <Pressable
+        style={({ pressed }) => [
+          styles.entryRow,
+          {
+            backgroundColor: theme.backgroundSecondary,
+          },
+          pressed && { backgroundColor: theme.backgroundTertiary },
+        ]}
+        onPress={() => onEntryPress?.(item)}
+      >
+        <View style={[styles.iconContainer, { backgroundColor: theme.backgroundTertiary }]}>
+          {CATEGORY_IMAGES[item.category] ? (
+            <Image
+              source={CATEGORY_IMAGES[item.category]}
+              style={styles.entryImage}
+            />
+          ) : (
+            <Text style={styles.entryEmoji}>{getEntryIcon(item.category)}</Text>
+          )}
+        </View>
+
+        <View style={styles.entryInfo}>
+          <Text style={[styles.entryName, { color: theme.darkBrown }]}>
+            {item.name}
+          </Text>
+          <Text style={[styles.entryTime, { color: theme.mutedGrey }]}>
+            {formatTime(item.timestamp)}
+          </Text>
+        </View>
+
+        <Text style={[styles.entryMg, { color: theme.darkBrown }]}>
+          {item.caffeineAmount} mg
+        </Text>
+      </Pressable>
+    );
   };
 
-  const getEntryIcon = (category: string) => {
-    return CATEGORY_ICONS[category] || "☕";
+  const renderSectionHeader = ({ section }: { section: SectionData }) => {
+    return (
+      <View style={[styles.sectionHeader, { backgroundColor: theme.bg }]}>
+        <Text style={[styles.sectionHeaderText, { color: theme.mutedGrey }]}>
+          {section.title}
+        </Text>
+      </View>
+    );
   };
 
   if (entries.length === 0) {
     return (
       <View style={[styles.emptyContainer, { backgroundColor: theme.backgroundDefault }]}>
         <Feather name="coffee" size={32} color={theme.mutedGrey} />
-        <Text style={[styles.emptyText, { color: theme.mutedGrey }]}>No drinks logged today</Text>
+        <Text style={[styles.emptyText, { color: theme.mutedGrey }]}>No drinks logged</Text>
         <Text style={[styles.emptySubtext, { color: theme.mutedGrey }]}>Tap + to add your first drink</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      {entries.map((entry) => (
-        <Pressable
-          key={entry.id}
-          style={({ pressed }) => [
-            styles.entryRow, 
-            { 
-              backgroundColor: theme.backgroundSecondary,
-              borderWidth: 1,
-              borderColor: theme.divider,
-            },
-            pressed && { backgroundColor: theme.backgroundTertiary }
-          ]}
-          onPress={() => onEntryPress?.(entry)}
-        >
-          <View style={[styles.iconContainer, { backgroundColor: theme.backgroundTertiary }]}>
-            {CATEGORY_IMAGES[entry.category] ? (
-              <Image
-                source={CATEGORY_IMAGES[entry.category]}
-                style={styles.entryImage}
-              />
-            ) : (
-              <Text style={styles.entryEmoji}>{getEntryIcon(entry.category)}</Text>
-            )}
-          </View>
-
-          <View style={styles.entryInfo}>
-            <Text style={[styles.entryName, { color: theme.darkBrown }]}>
-              {entry.name}, {entry.servingSize}ml
-            </Text>
-            <Text style={[styles.entryTime, { color: theme.mutedGrey }]}>{formatTime(entry.timestamp)}</Text>
-          </View>
-
-          <Text style={[styles.entryMg, { color: theme.darkBrown }]}>{entry.caffeineAmount} mg</Text>
-        </Pressable>
-      ))}
-    </View>
+    <SectionList
+      sections={sections}
+      renderItem={renderItem}
+      renderSectionHeader={renderSectionHeader}
+      keyExtractor={(item) => item.id}
+      stickySectionHeadersEnabled={true}
+      contentContainerStyle={styles.listContent}
+      style={styles.list}
+      showsVerticalScrollIndicator={false}
+    />
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    gap: Spacing.xs,
+  list: {
+    flex: 1,
+  },
+  listContent: {
+    paddingBottom: Spacing.xl,
+  },
+  sectionHeader: {
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
+  },
+  sectionHeaderText: {
+    fontSize: 12,
+    fontWeight: "600",
+    letterSpacing: 0.5,
   },
   entryRow: {
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.sm,
-    borderRadius: BorderRadius.sm,
+    paddingHorizontal: Spacing.lg,
+    width: "100%",
   },
   iconContainer: {
     width: 44,
     height: 44,
-    borderRadius: 22,
+    borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
     marginRight: Spacing.md,
@@ -118,7 +219,7 @@ const styles = StyleSheet.create({
   entryImage: {
     width: 44,
     height: 44,
-    borderRadius: 22,
+    borderRadius: 8,
   },
   entryEmoji: {
     fontSize: 22,
@@ -128,11 +229,12 @@ const styles = StyleSheet.create({
   },
   entryName: {
     fontSize: 15,
-    fontWeight: "500",
+    fontWeight: "700",
     marginBottom: 2,
   },
   entryTime: {
     fontSize: 12,
+    fontWeight: "400",
   },
   entryMg: {
     fontSize: 16,

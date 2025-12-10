@@ -144,12 +144,6 @@ export default function MainTabNavigator() {
               <FloatingActionButton onPress={() => setShowAddModal(true)} />
             ),
           }}
-          listeners={{
-            tabPress: (e) => {
-              e.preventDefault();
-              setShowAddModal(true);
-            },
-          }}
         />
         <Tab.Screen
           name="HistoryTab"
