@@ -6,7 +6,7 @@ import {
   TextInput,
   Pressable,
   ScrollView,
-  Dimensions,
+  useWindowDimensions,
   Image,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
@@ -27,9 +27,6 @@ import { useCaffeineStore } from "@/store/caffeineStore";
 import { useTheme } from "@/hooks/useTheme";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 
-const { height: SCREEN_HEIGHT } = Dimensions.get("window");
-const MODAL_HEIGHT = SCREEN_HEIGHT * 0.75;
-
 interface CustomDrinkModalProps {
   visible: boolean;
   onClose: () => void;
@@ -43,6 +40,9 @@ export function CustomDrinkModal({ visible, onClose, onAdd }: CustomDrinkModalPr
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const { addEntry, profile } = useCaffeineStore();
+  const { height: windowHeight } = useWindowDimensions();
+  
+  const MODAL_HEIGHT = windowHeight * 0.75;
 
   const [drinkName, setDrinkName] = useState("");
   const [quantity, setQuantity] = useState(1);
@@ -186,6 +186,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd }: CustomDrinkModalPr
               {
                 backgroundColor: theme.backgroundRoot,
                 paddingBottom: insets.bottom + Spacing.lg,
+                maxHeight: MODAL_HEIGHT,
               },
             ]}
           >
@@ -419,7 +420,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    maxHeight: MODAL_HEIGHT,
     borderTopLeftRadius: BorderRadius.xl,
     borderTopRightRadius: BorderRadius.xl,
   },
