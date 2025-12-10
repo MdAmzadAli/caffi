@@ -15,8 +15,10 @@ import Animated, {
   withSpring,
   withTiming,
   runOnJS,
+  interpolate,
+  Extrapolation,
 } from "react-native-reanimated";
-import { PanGestureHandler, PanGestureHandlerGestureEvent, PanGestureHandlerProps } from "react-native-gesture-handler";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -119,77 +121,110 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
     setIsFavorite(false);
   };
 
-  const translateY = useSharedValue(SCREEN_HEIGHT);
-  const backdropOpacity = useSharedValue(0);
-  const currentHeight = useSharedValue(INITIAL_HEIGHT);
+  const translateY = useSharedValue(INITIAL_HEIGHT);
+  const sheetHeight = useSharedValue(INITIAL_HEIGHT);
+  const startY = useSharedValue(0);
+  const startHeight = useSharedValue(INITIAL_HEIGHT);
+  const borderRadius = useSharedValue(BorderRadius.lg);
   const [isClosing, setIsClosing] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+
+  const maxExpandedHeight = SCREEN_HEIGHT - insets.top;
 
   const handleCloseAnimated = useCallback(
     (after?: () => void) => {
       if (isClosing) return;
       setIsClosing(true);
-      translateY.value = withSpring(SCREEN_HEIGHT, { damping: 18, stiffness: 180 });
-      backdropOpacity.value = withTiming(0, { duration: 160 }, () => {
+      translateY.value = withTiming(INITIAL_HEIGHT, { duration: 180 }, () => {
         runOnJS(resetState)();
         runOnJS(onClose)();
         runOnJS(setIsClosing)(false);
         runOnJS(setIsExpanded)(false);
         if (after) runOnJS(after)();
       });
+      sheetHeight.value = withTiming(INITIAL_HEIGHT, { duration: 180 });
+      borderRadius.value = withTiming(BorderRadius.lg, { duration: 180 });
     },
-    [backdropOpacity, isClosing, onClose, translateY],
+    [isClosing, onClose, translateY, sheetHeight, borderRadius],
   );
+
+  const collapseToNormal = useCallback(() => {
+    sheetHeight.value = withSpring(INITIAL_HEIGHT, { damping: 18, stiffness: 200 });
+    translateY.value = withSpring(0, { damping: 18, stiffness: 200 });
+    borderRadius.value = withSpring(BorderRadius.lg, { damping: 18, stiffness: 200 });
+    setIsExpanded(false);
+  }, [sheetHeight, translateY, borderRadius]);
 
   useLayoutEffect(() => {
     if (visible) {
-      translateY.value = SCREEN_HEIGHT;
-      backdropOpacity.value = 0;
-      currentHeight.value = INITIAL_HEIGHT;
+      translateY.value = INITIAL_HEIGHT;
+      sheetHeight.value = INITIAL_HEIGHT;
+      borderRadius.value = BorderRadius.lg;
       setIsExpanded(false);
-      translateY.value = withTiming(0, { duration: 220 });
-      backdropOpacity.value = withTiming(1, { duration: 160 });
+      setTimeout(() => {
+        translateY.value = withSpring(0, { damping: 16, stiffness: 200 });
+      }, 0);
     } else {
-      translateY.value = SCREEN_HEIGHT;
-      backdropOpacity.value = 0;
+      translateY.value = INITIAL_HEIGHT;
+      sheetHeight.value = INITIAL_HEIGHT;
     }
-  }, [visible, backdropOpacity, translateY, currentHeight]);
+  }, [visible, translateY, sheetHeight, borderRadius]);
 
-  const expandedOffset = -(EXPANDED_HEIGHT - INITIAL_HEIGHT - insets.top);
-
-  const onGestureEvent = useCallback(
-    (event: PanGestureHandlerGestureEvent) => {
-      const { translationY, velocityY, state } = event.nativeEvent;
-      const clampedY = Math.min(Math.max(translationY, expandedOffset), SCREEN_HEIGHT);
-      translateY.value = clampedY;
-
-      if (state === 5 /* END */) {
-        const shouldClose = translationY > 100 || velocityY > 600;
-        const shouldExpand = translationY < -60 || velocityY < -600;
-
+  const panGesture = Gesture.Pan()
+    .onStart(() => {
+      startY.value = translateY.value;
+      startHeight.value = sheetHeight.value;
+    })
+    .onUpdate((event) => {
+      const { translationY } = event;
+      
+      if (translationY > 0) {
+        const nextY = Math.min(startY.value + translationY, INITIAL_HEIGHT);
+        translateY.value = nextY;
+      } else {
+        const heightIncrease = Math.abs(translationY);
+        const newHeight = Math.min(startHeight.value + heightIncrease, maxExpandedHeight);
+        sheetHeight.value = newHeight;
+        
+        const progress = (newHeight - INITIAL_HEIGHT) / (maxExpandedHeight - INITIAL_HEIGHT);
+        borderRadius.value = interpolate(progress, [0, 1], [BorderRadius.lg, 0], Extrapolation.CLAMP);
+      }
+    })
+    .onEnd((event) => {
+      const { translationY, velocityY } = event;
+      
+      if (translationY > 0) {
+        const shouldClose = translateY.value > INITIAL_HEIGHT * 0.4 || velocityY > 800;
         if (shouldClose) {
-          handleCloseAnimated();
-        } else if (shouldExpand) {
-          currentHeight.value = withSpring(EXPANDED_HEIGHT - insets.top, { damping: 18, stiffness: 280 });
-          translateY.value = withSpring(expandedOffset, { damping: 18, stiffness: 280 });
+          translateY.value = withTiming(INITIAL_HEIGHT, { duration: 180 }, () => {
+            runOnJS(resetState)();
+            runOnJS(onClose)();
+            runOnJS(setIsClosing)(false);
+            runOnJS(setIsExpanded)(false);
+          });
+          sheetHeight.value = withTiming(INITIAL_HEIGHT, { duration: 180 });
+        } else {
+          translateY.value = withSpring(0, { damping: 16, stiffness: 200 });
+        }
+      } else {
+        const shouldExpand = sheetHeight.value > INITIAL_HEIGHT + 60 || velocityY < -600;
+        if (shouldExpand) {
+          sheetHeight.value = withSpring(maxExpandedHeight, { damping: 18, stiffness: 200 });
+          borderRadius.value = withSpring(0, { damping: 18, stiffness: 200 });
           runOnJS(setIsExpanded)(true);
         } else {
-          currentHeight.value = withSpring(INITIAL_HEIGHT, { damping: 18, stiffness: 280 });
-          translateY.value = withSpring(0, { damping: 18, stiffness: 280 });
+          sheetHeight.value = withSpring(INITIAL_HEIGHT, { damping: 18, stiffness: 200 });
+          borderRadius.value = withSpring(BorderRadius.lg, { damping: 18, stiffness: 200 });
           runOnJS(setIsExpanded)(false);
         }
       }
-    },
-    [expandedOffset, handleCloseAnimated, translateY, currentHeight, insets.top],
-  );
+    });
 
   const sheetStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.value }],
-    height: currentHeight.value,
-  }));
-
-  const backdropStyle = useAnimatedStyle(() => ({
-    opacity: backdropOpacity.value,
+    height: sheetHeight.value,
+    borderTopLeftRadius: borderRadius.value,
+    borderTopRightRadius: borderRadius.value,
   }));
 
   const handleClose = () => handleCloseAnimated();
@@ -203,9 +238,9 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
       onRequestClose={() => handleCloseAnimated()}
     >
       <View style={styles.modalOverlay}>
-        <AnimatedPressable style={[styles.backdrop, backdropStyle]} onPress={() => handleCloseAnimated()} />
+        <Pressable style={styles.backdrop} onPress={() => handleCloseAnimated()} />
 
-        <PanGestureHandler onGestureEvent={onGestureEvent}>
+        <GestureDetector gesture={panGesture}>
           <Animated.View
             style={[
               styles.modalContent,
@@ -213,14 +248,25 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
               {
                 backgroundColor: theme.backgroundRoot,
                 paddingBottom: insets.bottom + Spacing.lg,
+                paddingTop: isExpanded ? insets.top : Spacing.sm,
               },
             ]}
           >
-            <View style={styles.handle} />
+            {!isExpanded && <View style={styles.handle} />}
 
             <View style={styles.header}>
-              <ThemedText type="h4">Add Drink</ThemedText>
-              {onNavigateToCustomDrink && (
+              {isExpanded ? (
+                <Pressable onPress={collapseToNormal} style={styles.backButton}>
+                  <Feather name="arrow-left" size={24} color={theme.text} />
+                </Pressable>
+              ) : null}
+              <ThemedText type="h4" style={isExpanded ? styles.expandedTitle : undefined}>Add Drink</ThemedText>
+              {onNavigateToCustomDrink && !isExpanded && (
+                <Pressable onPress={handleAddCustomDrink} style={styles.addCustomButton}>
+                  <Feather name="plus" size={24} color={Colors.light.accent} />
+                </Pressable>
+              )}
+              {isExpanded && onNavigateToCustomDrink && (
                 <Pressable onPress={handleAddCustomDrink} style={styles.addCustomButton}>
                   <Feather name="plus" size={24} color={Colors.light.accent} />
                 </Pressable>
@@ -306,7 +352,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
               >
               <Pressable
                 onPress={() => setSelectedDrink(null)}
-                style={styles.backButton}
+                style={styles.backToDrinksButton}
               >
                 <Feather name="arrow-left" size={20} color={Colors.light.accent} />
                 <ThemedText type="body" style={{ color: Colors.light.accent }}>
@@ -487,7 +533,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
             </ScrollView>
             )}
           </Animated.View>
-        </PanGestureHandler>
+        </GestureDetector>
       </View>
     </Modal>
   );
@@ -681,6 +727,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xl,
     paddingBottom: Spacing.md,
   },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: Spacing.sm,
+  },
+  expandedTitle: {
+    flex: 1,
+  },
   addCustomButton: {
     width: 40,
     height: 40,
@@ -778,7 +835,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     marginBottom: 2,
   },
-  backButton: {
+  backToDrinksButton: {
     flexDirection: "row",
     alignItems: "center",
     gap: Spacing.sm,
