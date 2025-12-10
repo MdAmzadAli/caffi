@@ -6,7 +6,7 @@ import {
   TextInput,
   Pressable,
   ScrollView,
-  Dimensions,
+  useWindowDimensions,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import Animated, {
@@ -28,9 +28,6 @@ import { useTheme } from "@/hooks/useTheme";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-const { height: SCREEN_HEIGHT } = Dimensions.get("window");
-const INITIAL_HEIGHT = SCREEN_HEIGHT * 0.8;
-const EXPANDED_HEIGHT = SCREEN_HEIGHT;
 
 interface AddDrinkModalProps {
   visible: boolean;
@@ -51,7 +48,11 @@ const QUICK_CATEGORIES: { key: Category; label: string; icon: keyof typeof Feath
 export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrink }: AddDrinkModalProps) {
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
   const { addEntry, getAllDrinks, getFavoriteDrinks, profile } = useCaffeineStore();
+
+  const INITIAL_HEIGHT = windowHeight * 0.8;
+  const maxExpandedHeight = windowHeight - insets.top;
   
   const [showCustomDrinkModal, setShowCustomDrinkModal] = useState(false);
 
@@ -136,8 +137,6 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
   const borderRadius = useSharedValue(BorderRadius.lg);
   const [isClosing, setIsClosing] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-
-  const maxExpandedHeight = SCREEN_HEIGHT - insets.top;
 
   const handleCloseAnimated = useCallback(
     (after?: () => void) => {
