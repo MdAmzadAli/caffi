@@ -5,7 +5,7 @@ import {
   Modal,
   Pressable,
   ScrollView,
-  Dimensions,
+  useWindowDimensions,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import Animated, {
@@ -26,8 +26,8 @@ import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 
 registerTranslation('en', en);
 
-const { height: SCREEN_HEIGHT } = Dimensions.get("window");
-const MODAL_HEIGHT = SCREEN_HEIGHT * 0.45;
+const BOTTOM_SHEET_HEIGHT_RATIO = 0.45;
+const CALENDAR_HEADER_OFFSET = 60;
 
 interface TimePickerModalProps {
   visible: boolean;
@@ -48,14 +48,20 @@ const PRESET_OPTIONS = [
 export function TimePickerModal({ visible, onClose, onSelectTime, initialDate }: TimePickerModalProps) {
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
 
   const [selectedPreset, setSelectedPreset] = useState<string>("now");
   const [customDate, setCustomDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
 
+  const MODAL_HEIGHT = windowHeight * BOTTOM_SHEET_HEIGHT_RATIO;
   const translateY = useSharedValue(MODAL_HEIGHT);
   const startY = useSharedValue(0);
+
+  const calendarModalWidth = Math.min(windowWidth * 0.9, 400);
+  const calendarCellSize = calendarModalWidth / 7;
+  const calendarFixedHeight = (calendarCellSize * 6) + CALENDAR_HEADER_OFFSET;
 
   const accentColor = isDark ? Colors.dark.accent : Colors.light.accent;
   
@@ -214,6 +220,7 @@ export function TimePickerModal({ visible, onClose, onSelectTime, initialDate }:
                 {
                   backgroundColor: theme.backgroundRoot,
                   paddingBottom: insets.bottom + Spacing.lg,
+                  maxHeight: MODAL_HEIGHT,
                 },
               ]}
             >
@@ -291,7 +298,7 @@ export function TimePickerModal({ visible, onClose, onSelectTime, initialDate }:
                 <View style={styles.calendarHeader}>
                   <ThemedText type="h4" style={styles.calendarTitle}>Select Date</ThemedText>
                 </View>
-                <View style={styles.calendarWrapper}>
+                <View style={[styles.calendarWrapper, { height: calendarFixedHeight }]}>
                   <Calendar
                     locale="en"
                     mode="single"
@@ -361,8 +368,7 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.md,
   },
   calendarWrapper: {
-    minHeight: 340,
-    justifyContent: "flex-start",
+    overflow: "hidden",
   },
   calendarHeader: {
     paddingHorizontal: Spacing.xl,
@@ -380,7 +386,6 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.md,
   },
   modalContent: {
-    maxHeight: MODAL_HEIGHT,
     borderTopLeftRadius: BorderRadius.xl,
     borderTopRightRadius: BorderRadius.xl,
   },
