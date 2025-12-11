@@ -329,11 +329,10 @@ export function CustomDrinkModal({ visible, onClose, onAdd }: CustomDrinkModalPr
 
               <View style={[styles.divider, { backgroundColor: theme.divider }]} />
 
-              <ThemedView
-                elevation={1}
+              <View
                 style={[
                   styles.peakInfoCard,
-                  willDisruptSleep && { backgroundColor: `${Colors.light.warning}10` },
+                  { backgroundColor: `${Colors.light.accent}15` },
                 ]}
               >
                 <View style={styles.peakInfoHeader}>
@@ -342,7 +341,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd }: CustomDrinkModalPr
                   </ThemedText>
                   <ThemedText
                     type="h3"
-                    style={{ color: willDisruptSleep ? Colors.light.warning : Colors.light.accent }}
+                    style={{ color: Colors.light.accent }}
                   >
                     {totalCaffeine} mg
                   </ThemedText>
@@ -353,7 +352,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd }: CustomDrinkModalPr
                     ? "This may disrupt your sleep time."
                     : "This won't disrupt your sleep time."}
                 </ThemedText>
-              </ThemedView>
+              </View>
 
               <Pressable
                 onPress={handleAdd}
@@ -552,7 +551,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     marginTop: Spacing.md,
     marginBottom: Spacing.lg,
-    minHeight: 90,
+    height: 90,
   },
   peakInfoHeader: {
     flexDirection: "row",
