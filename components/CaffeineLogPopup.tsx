@@ -83,7 +83,7 @@ function calculateCaffeineStats(entry: DrinkEntry | null) {
 
 function useDecayPath(entry: DrinkEntry | null, curveColor: string) {
   const width = Dimensions.get("window").width - Spacing.lg * 2;
-  const height = 220;
+  const height = 160;
 
   const caffeineStats = useMemo(() => calculateCaffeineStats(entry), [entry]);
 
@@ -422,18 +422,18 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   iconWrap: {
-    width: 64,
-    height: 64,
-    borderRadius: 16,
+    width: 52,
+    height: 52,
+    borderRadius: 14,
     justifyContent: "center",
     alignItems: "center",
     marginRight: Spacing.md,
     overflow: "hidden",
   },
   icon: {
-    width: 64,
-    height: 64,
-    borderRadius: 16,
+    width: 52,
+    height: 52,
+    borderRadius: 14,
   },
   headerTextWrap: {
     flex: 1,
@@ -443,12 +443,12 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   title: {
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: "800",
     marginTop: 2,
   },
   graphWrap: {
-    marginBottom: Spacing["2xl"],
+    marginBottom: Spacing.lg,
   },
   graphRightText: {
     position: "absolute",
@@ -457,7 +457,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
   },
   addsText: {
-    fontSize: 26,
+    fontSize: 20,
     fontWeight: "800",
   },
   nowText: {
@@ -465,12 +465,12 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   section: {
-    marginBottom: Spacing["2xl"],
+    marginBottom: Spacing.lg,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "700",
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.sm,
   },
   divider: {
     borderBottomWidth: StyleSheet.hairlineWidth,
@@ -480,13 +480,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: Spacing.sm,
+    paddingVertical: Spacing.xs,
   },
   rowLabel: {
-    fontSize: 16,
+    fontSize: 14,
   },
   rowValue: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "800",
   },
   actionsRow: {
@@ -496,11 +496,11 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     flex: 1,
-    height: 76,
-    borderRadius: 16,
+    height: 64,
+    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
-    gap: 6,
+    gap: 4,
   },
   actionLabel: {
     fontSize: 13,
