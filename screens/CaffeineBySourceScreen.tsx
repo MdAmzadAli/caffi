@@ -14,12 +14,13 @@ import { useCaffeineStore } from "@/store/caffeineStore";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import Svg, { G, Path, Circle, Text as SvgText } from "react-native-svg";
+import { DateRangePickerModal, DateRangeOption } from "@/components/DateRangePickerModal";
 
 type ViewMode = "item" | "category";
 
-interface DateOption {
-  label: string;
-  getValue: () => { start: Date; end: Date };
+interface DateRange {
+  start: Date;
+  end: Date;
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -44,6 +45,56 @@ const ITEM_COLORS = [
   "#FF5722",
 ];
 
+const DATE_OPTION_LABELS: Record<DateRangeOption, string> = {
+  today: "Today",
+  yesterday: "Yesterday",
+  last30: "Last 30 days",
+  last90: "Last 90 days",
+  custom: "Custom",
+};
+
+function getDateRange(option: DateRangeOption, customRange?: DateRange): DateRange {
+  const now = new Date();
+  
+  switch (option) {
+    case "today": {
+      const start = new Date(now);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(now);
+      end.setHours(23, 59, 59, 999);
+      return { start, end };
+    }
+    case "yesterday": {
+      const start = new Date(now);
+      start.setDate(start.getDate() - 1);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(start);
+      end.setHours(23, 59, 59, 999);
+      return { start, end };
+    }
+    case "last30": {
+      const start = new Date(now);
+      start.setDate(start.getDate() - 30);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(now);
+      end.setHours(23, 59, 59, 999);
+      return { start, end };
+    }
+    case "last90": {
+      const start = new Date(now);
+      start.setDate(start.getDate() - 90);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(now);
+      end.setHours(23, 59, 59, 999);
+      return { start, end };
+    }
+    case "custom":
+      return customRange || { start: now, end: now };
+    default:
+      return { start: now, end: now };
+  }
+}
+
 export default function CaffeineBySourceScreen() {
   const { theme } = useTheme();
   const navigation = useNavigation();
@@ -51,62 +102,31 @@ export default function CaffeineBySourceScreen() {
   const { entries } = useCaffeineStore();
   const [viewMode, setViewMode] = useState<ViewMode>("item");
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [selectedDateIndex, setSelectedDateIndex] = useState(0);
+  const [selectedDateOption, setSelectedDateOption] = useState<DateRangeOption>("today");
+  const [customDateRange, setCustomDateRange] = useState<DateRange | undefined>(undefined);
 
-  const dateOptions: DateOption[] = useMemo(() => {
-    const now = new Date();
-    return [
-      {
-        label: "Today",
-        getValue: () => {
-          const start = new Date(now);
-          start.setHours(0, 0, 0, 0);
-          const end = new Date(now);
-          end.setHours(23, 59, 59, 999);
-          return { start, end };
-        },
-      },
-      {
-        label: "Yesterday",
-        getValue: () => {
-          const start = new Date(now);
-          start.setDate(start.getDate() - 1);
-          start.setHours(0, 0, 0, 0);
-          const end = new Date(start);
-          end.setHours(23, 59, 59, 999);
-          return { start, end };
-        },
-      },
-      {
-        label: "This Week",
-        getValue: () => {
-          const start = new Date(now);
-          start.setDate(start.getDate() - start.getDay());
-          start.setHours(0, 0, 0, 0);
-          const end = new Date(now);
-          end.setHours(23, 59, 59, 999);
-          return { start, end };
-        },
-      },
-      {
-        label: "This Month",
-        getValue: () => {
-          const start = new Date(now.getFullYear(), now.getMonth(), 1);
-          const end = new Date(now);
-          end.setHours(23, 59, 59, 999);
-          return { start, end };
-        },
-      },
-    ];
-  }, []);
+  const currentDateRange = useMemo(() => {
+    return getDateRange(selectedDateOption, customDateRange);
+  }, [selectedDateOption, customDateRange]);
+
+  const dateButtonLabel = useMemo(() => {
+    if (selectedDateOption === "custom" && customDateRange) {
+      const formatDate = (date: Date) => date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
+      return `${formatDate(customDateRange.start)} - ${formatDate(customDateRange.end)}`;
+    }
+    return DATE_OPTION_LABELS[selectedDateOption];
+  }, [selectedDateOption, customDateRange]);
 
   const filteredEntries = useMemo(() => {
-    const { start, end } = dateOptions[selectedDateIndex].getValue();
+    const { start, end } = currentDateRange;
     return entries.filter((e) => {
       const t = new Date(e.timestamp);
       return t >= start && t <= end;
     });
-  }, [entries, selectedDateIndex, dateOptions]);
+  }, [entries, currentDateRange]);
 
   const chartData = useMemo(() => {
     if (filteredEntries.length === 0) {
@@ -174,6 +194,15 @@ export default function CaffeineBySourceScreen() {
       return { items, total };
     }
   }, [filteredEntries, viewMode]);
+
+  const handleDateRangeSelect = (option: DateRangeOption, range: DateRange) => {
+    setSelectedDateOption(option);
+    if (option === "custom") {
+      setCustomDateRange(range);
+    } else {
+      setCustomDateRange(undefined);
+    }
+  };
 
   const CHART_SIZE = Dimensions.get("window").width * 0.5;
   const CENTER = CHART_SIZE / 2;
@@ -326,10 +355,10 @@ export default function CaffeineBySourceScreen() {
         <View style={styles.controlsRow}>
           <Pressable
             style={[styles.dateButton, { borderColor: theme.divider }]}
-            onPress={() => setShowDatePicker(!showDatePicker)}
+            onPress={() => setShowDatePicker(true)}
           >
             <Text style={[styles.dateButtonText, { color: theme.text }]}>
-              {dateOptions[selectedDateIndex].label}
+              {dateButtonLabel}
             </Text>
             <Feather name="chevron-down" size={16} color={theme.text} />
           </Pressable>
@@ -344,33 +373,6 @@ export default function CaffeineBySourceScreen() {
             </Text>
           </Pressable>
         </View>
-
-        {showDatePicker && (
-          <View style={[styles.datePickerDropdown, { backgroundColor: theme.backgroundSecondary, borderColor: theme.divider }]}>
-            {dateOptions.map((option, index) => (
-              <Pressable
-                key={option.label}
-                style={[
-                  styles.datePickerOption,
-                  index === selectedDateIndex && { backgroundColor: theme.accentGold + "20" },
-                ]}
-                onPress={() => {
-                  setSelectedDateIndex(index);
-                  setShowDatePicker(false);
-                }}
-              >
-                <Text
-                  style={[
-                    styles.datePickerOptionText,
-                    { color: index === selectedDateIndex ? theme.accentGold : theme.text },
-                  ]}
-                >
-                  {option.label}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-        )}
 
         {renderDonutChart()}
 
@@ -418,6 +420,14 @@ export default function CaffeineBySourceScreen() {
           </View>
         )}
       </ScrollView>
+
+      <DateRangePickerModal
+        visible={showDatePicker}
+        onClose={() => setShowDatePicker(false)}
+        onSelectRange={handleDateRangeSelect}
+        selectedOption={selectedDateOption}
+        customRange={customDateRange}
+      />
     </View>
   );
 }
@@ -495,20 +505,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     color: "#FFFFFF",
-  },
-  datePickerDropdown: {
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    marginBottom: Spacing.lg,
-    overflow: "hidden",
-  },
-  datePickerOption: {
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-  },
-  datePickerOptionText: {
-    fontSize: 14,
-    fontWeight: "500",
   },
   chartContainer: {
     flexDirection: "row",
