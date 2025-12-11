@@ -78,7 +78,7 @@ export default function CaffeineIntakeDetailScreen() {
     };
 
     if (selectedPeriod === "day") {
-      for (let i = 29; i >= 0; i--) {
+      for (let i = 364; i >= 0; i--) {
         const date = new Date(now);
         date.setDate(now.getDate() - i);
         const label = date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
