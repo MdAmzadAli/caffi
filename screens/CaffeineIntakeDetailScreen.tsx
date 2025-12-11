@@ -15,7 +15,7 @@ import { useCaffeineStore } from "@/store/caffeineStore";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Typography } from "@/constants/theme";
 
-type TimePeriod = "week" | "month" | "year";
+type TimePeriod = "week" | "month";
 
 interface BarData {
   label: string;
@@ -77,19 +77,6 @@ export default function CaffeineIntakeDetailScreen() {
         const label = date.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
         data.push({ label, value: getMonthTotal(date) });
       }
-    } else {
-      for (let i = 4; i >= 0; i--) {
-        const year = now.getFullYear() - i;
-        const startOfYear = new Date(year, 0, 1);
-        const endOfYear = new Date(year, 11, 31, 23, 59, 59, 999);
-        const yearTotal = entries
-          .filter((e) => {
-            const t = new Date(e.timestamp);
-            return t >= startOfYear && t <= endOfYear;
-          })
-          .reduce((sum, e) => sum + e.caffeineAmount, 0);
-        data.push({ label: year.toString(), value: yearTotal });
-      }
     }
 
     const totalValue = data.reduce((sum, d) => sum + d.value, 0);
@@ -110,8 +97,6 @@ export default function CaffeineIntakeDetailScreen() {
         return "Weekly average";
       case "month":
         return "Monthly average";
-      case "year":
-        return "Yearly average";
     }
   };
 
@@ -142,12 +127,12 @@ export default function CaffeineIntakeDetailScreen() {
         <View style={styles.titleSection}>
           <Text style={[styles.title, { color: theme.text }]}>Caffeine intake</Text>
           <Text style={[styles.description, { color: theme.mutedGrey }]}>
-            Track your caffeine consumption patterns over time. View weekly, monthly, or yearly trends to understand your intake habits.
+            Track your caffeine consumption patterns over time. View weekly or monthly trends to understand your intake habits.
           </Text>
         </View>
 
         <View style={styles.periodSelector}>
-          {(["week", "month", "year"] as TimePeriod[]).map((period) => (
+          {(["week", "month"] as TimePeriod[]).map((period) => (
             <Pressable
               key={period}
               style={[
