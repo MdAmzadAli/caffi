@@ -133,12 +133,8 @@ export default function CaffeineIntakeDetailScreen() {
         >
           <Feather name="arrow-left" size={24} color={theme.text} />
         </Pressable>
-        <View style={styles.headerTitleContainer}>
-          <View style={[styles.logoIcon, { borderColor: theme.accentGold }]}>
-            <View style={[styles.logoMoon, { backgroundColor: theme.accentGold }]} />
-          </View>
-          <Text style={[styles.headerTitle, { color: theme.text }]}>Analytics</Text>
-        </View>
+        <Text style={[styles.headerTitle, { color: theme.text }]}>Analytics</Text>
+        <View style={styles.headerSpacer} />
       </View>
 
       <ScrollView
@@ -242,35 +238,20 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: Spacing.lg,
     paddingBottom: Spacing.lg,
-    gap: Spacing.md,
   },
   backButton: {
-    marginRight: Spacing.sm,
-  },
-  headerTitleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.sm,
-  },
-  logoIcon: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    borderWidth: 2,
-    justifyContent: "center",
-    alignItems: "flex-start",
-    paddingLeft: 4,
-  },
-  logoMoon: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: 24,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: "600",
+    textAlign: "center",
+  },
+  headerSpacer: {
+    width: 24,
   },
   scrollView: {
     flex: 1,
