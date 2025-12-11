@@ -219,10 +219,10 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   };
 
   const handleEditEntry = (entry: DrinkEntry) => {
-    setPopupVisible(false);
+    setEditModalVisible(true);
     setTimeout(() => {
-      setEditModalVisible(true);
-    }, 200);
+      setPopupVisible(false);
+    }, 50);
   };
 
   const handleDuplicateEntry = (entry: DrinkEntry) => {
