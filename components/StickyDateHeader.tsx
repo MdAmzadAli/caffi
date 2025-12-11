@@ -41,19 +41,18 @@ export function StickyDateHeader({
     }
 
     const titleHeightValue = titleHeight ?? 28; // measured height fallback
-    const dateOffset = stickyOffset + titleHeightValue + Spacing.xs;
+    const dateOffset = stickyOffset + titleHeightValue;
 
     return {
       position: "absolute" as const,
       top: dateOffset,
-      left: Spacing.lg,
-      right: Spacing.lg,
+      left: 0,
+      right: 0,
       zIndex: 9,
       backgroundColor: theme.bg,
       paddingTop: 0,
       paddingBottom: Spacing.sm,
-      marginTop: 0,
-      marginBottom: 0,
+      paddingHorizontal: Spacing.lg,
       opacity: interpolate(
         progress,
         [0.8, 1],
