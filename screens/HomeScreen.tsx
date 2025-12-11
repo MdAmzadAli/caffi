@@ -225,6 +225,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const handleEditEntry = (entry: DrinkEntry) => {
     setIsEditingFromPopup(true);
     setEditModalVisible(true);
+    setTimeout(() => setPopupVisible(false), 50);
   };
 
   const handleDuplicateEntry = (entry: DrinkEntry) => {
