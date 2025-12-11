@@ -15,7 +15,7 @@ import { useCaffeineStore } from "@/store/caffeineStore";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Typography } from "@/constants/theme";
 
-type TimePeriod = "week" | "month";
+type TimePeriod = "day" | "week" | "month";
 
 interface BarData {
   label: string;
@@ -27,7 +27,7 @@ export default function CaffeineIntakeDetailScreen() {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { entries } = useCaffeineStore();
-  const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("week");
+  const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("day");
 
   const chartScrollRef = useRef<ScrollView>(null);
   const CHART_HEIGHT = Dimensions.get("window").height * 0.25;
@@ -64,7 +64,27 @@ export default function CaffeineIntakeDetailScreen() {
         .reduce((sum, e) => sum + e.caffeineAmount, 0);
     };
 
-    if (selectedPeriod === "week") {
+    const getDayTotal = (date: Date): number => {
+      const startOfDay = new Date(date);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999);
+      return entries
+        .filter((e) => {
+          const t = new Date(e.timestamp);
+          return t >= startOfDay && t <= endOfDay;
+        })
+        .reduce((sum, e) => sum + e.caffeineAmount, 0);
+    };
+
+    if (selectedPeriod === "day") {
+      for (let i = 29; i >= 0; i--) {
+        const date = new Date(now);
+        date.setDate(now.getDate() - i);
+        const label = date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+        data.push({ label, value: getDayTotal(date) });
+      }
+    } else if (selectedPeriod === "week") {
       for (let i = 51; i >= 0; i--) {
         const weekEnd = new Date(now);
         weekEnd.setDate(now.getDate() - i * 7);
@@ -93,6 +113,8 @@ export default function CaffeineIntakeDetailScreen() {
 
   const getAverageLabel = () => {
     switch (selectedPeriod) {
+      case "day":
+        return "Daily average";
       case "week":
         return "Weekly average";
       case "month":
@@ -127,12 +149,12 @@ export default function CaffeineIntakeDetailScreen() {
         <View style={styles.titleSection}>
           <Text style={[styles.title, { color: theme.text }]}>Caffeine intake</Text>
           <Text style={[styles.description, { color: theme.mutedGrey }]}>
-            Track your caffeine consumption patterns over time. View weekly or monthly trends to understand your intake habits.
+            Track your caffeine consumption patterns over time. View daily, weekly, or monthly trends to understand your intake habits.
           </Text>
         </View>
 
         <View style={styles.periodSelector}>
-          {(["week", "month"] as TimePeriod[]).map((period) => (
+          {(["day", "week", "month"] as TimePeriod[]).map((period) => (
             <Pressable
               key={period}
               style={[
