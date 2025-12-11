@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useRef } from "react";
 import {
   View,
   StyleSheet,
@@ -6,6 +6,7 @@ import {
   Pressable,
   ScrollView,
   Platform,
+  Dimensions,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -28,35 +29,14 @@ export default function CaffeineIntakeDetailScreen() {
   const { entries } = useCaffeineStore();
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("week");
 
+  const chartScrollRef = useRef<ScrollView>(null);
+  const CHART_HEIGHT = Dimensions.get("window").height * 0.25;
+  const BAR_WIDTH = 50;
+
   const { chartData, average } = useMemo(() => {
     const now = new Date();
     now.setHours(23, 59, 59, 999);
     let data: BarData[] = [];
-
-    const getDateLabel = (date: Date, period: TimePeriod): string => {
-      if (period === "week") {
-        return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-      } else if (period === "month") {
-        const day = date.getDate();
-        const month = date.toLocaleDateString("en-US", { month: "short" });
-        return `${month} ${day}`;
-      } else {
-        return date.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
-      }
-    };
-
-    const getDayTotal = (date: Date): number => {
-      const startOfDay = new Date(date);
-      startOfDay.setHours(0, 0, 0, 0);
-      const endOfDay = new Date(date);
-      endOfDay.setHours(23, 59, 59, 999);
-      return entries
-        .filter((e) => {
-          const t = new Date(e.timestamp);
-          return t >= startOfDay && t <= endOfDay;
-        })
-        .reduce((sum, e) => sum + e.caffeineAmount, 0);
-    };
 
     const getWeekTotal = (endDate: Date): number => {
       const startOfWeek = new Date(endDate);
@@ -84,22 +64,18 @@ export default function CaffeineIntakeDetailScreen() {
         .reduce((sum, e) => sum + e.caffeineAmount, 0);
     };
 
-    if (selectedPeriod === "week") {
-      for (let i = 6; i >= 0; i--) {
-        const date = new Date(now);
-        date.setDate(now.getDate() - i);
-        data.push({ label: getDateLabel(date, "week"), value: getDayTotal(date) });
-      }
-    } else if (selectedPeriod === "month") {
-      for (let i = 3; i >= 0; i--) {
+    if (selectedPeriod === "week" || selectedPeriod === "month") {
+      for (let i = 51; i >= 0; i--) {
         const weekEnd = new Date(now);
         weekEnd.setDate(now.getDate() - i * 7);
-        data.push({ label: getDateLabel(weekEnd, "month"), value: getWeekTotal(weekEnd) });
+        const label = weekEnd.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+        data.push({ label, value: getWeekTotal(weekEnd) });
       }
     } else {
       for (let i = 11; i >= 0; i--) {
         const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        data.push({ label: getDateLabel(date, "year"), value: getMonthTotal(date) });
+        const label = date.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
+        data.push({ label, value: getMonthTotal(date) });
       }
     }
 
@@ -186,48 +162,48 @@ export default function CaffeineIntakeDetailScreen() {
           ))}
         </View>
 
-        <View style={styles.chartSection}>
-          <View style={styles.chartContainer}>
-            <View style={[styles.gridLine, { borderTopColor: theme.divider }]} />
-            <View style={[styles.gridLineMiddle, { borderTopColor: theme.divider }]} />
-            <View style={[styles.gridLineBottom, { borderTopColor: theme.divider }]} />
-            
-            <View style={styles.barsContainer}>
-              {chartData.map((item, idx) => (
-                <View key={idx} style={styles.barColumn}>
-                  <View style={styles.barWrapper}>
-                    {item.value > 0 && (
-                      <>
-                        <Text style={[styles.barLabel, { color: theme.text }]}>
-                          {item.value}
-                        </Text>
-                        <View
-                          style={[
-                            styles.bar,
-                            {
-                              height: Math.max((item.value / maxValue) * 140, 4),
-                              backgroundColor: theme.accentGold,
-                            },
-                          ]}
-                        />
-                      </>
-                    )}
-                    {item.value === 0 && (
+        <View style={[styles.chartSection, { height: CHART_HEIGHT }]}>
+          <ScrollView
+            ref={chartScrollRef}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.chartScrollContent}
+            onContentSizeChange={() => chartScrollRef.current?.scrollToEnd({ animated: false })}
+          >
+            {chartData.map((item, idx) => (
+              <View key={idx} style={[styles.barColumn, { width: BAR_WIDTH }]}>
+                <View style={styles.barWrapper}>
+                  {item.value > 0 && (
+                    <>
+                      <Text style={[styles.barLabel, { color: theme.text }]}>
+                        {item.value}
+                      </Text>
                       <View
                         style={[
-                          styles.barEmpty,
-                          { backgroundColor: theme.divider },
+                          styles.bar,
+                          {
+                            height: Math.max((item.value / maxValue) * (CHART_HEIGHT - 50), 4),
+                            backgroundColor: theme.accentGold,
+                          },
                         ]}
                       />
-                    )}
-                  </View>
-                  <Text style={[styles.xAxisLabel, { color: theme.mutedGrey }]}>
-                    {item.label}
-                  </Text>
+                    </>
+                  )}
+                  {item.value === 0 && (
+                    <View
+                      style={[
+                        styles.barEmpty,
+                        { backgroundColor: theme.divider },
+                      ]}
+                    />
+                  )}
                 </View>
-              ))}
-            </View>
-          </View>
+                <Text style={[styles.xAxisLabel, { color: theme.mutedGrey }]}>
+                  {item.label}
+                </Text>
+              </View>
+            ))}
+          </ScrollView>
         </View>
 
         <View style={styles.averageSection}>
@@ -312,44 +288,12 @@ const styles = StyleSheet.create({
   chartSection: {
     marginBottom: Spacing["3xl"],
   },
-  chartContainer: {
-    flex: 1,
-    height: 200,
-    position: "relative",
-  },
-  gridLine: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    borderTopWidth: 1,
-    borderStyle: "dashed",
-  },
-  gridLineMiddle: {
-    position: "absolute",
-    top: "50%",
-    left: 0,
-    right: 0,
-    borderTopWidth: 1,
-    borderStyle: "dashed",
-  },
-  gridLineBottom: {
-    position: "absolute",
-    bottom: 24,
-    left: 0,
-    right: 0,
-    borderTopWidth: 1,
-  },
-  barsContainer: {
-    flex: 1,
+  chartScrollContent: {
     flexDirection: "row",
-    justifyContent: "space-around",
     alignItems: "flex-end",
-    paddingBottom: 24,
-    height: "100%",
+    paddingHorizontal: Spacing.sm,
   },
   barColumn: {
-    flex: 1,
     alignItems: "center",
   },
   barWrapper: {
