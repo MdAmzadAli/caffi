@@ -178,6 +178,13 @@ export function CustomDrinkModal({ visible, onClose, onAdd }: CustomDrinkModalPr
       <View style={styles.overlay}>
         <Pressable style={styles.backdrop} onPress={closeModal} />
 
+        {showUnitPicker && (
+          <Pressable
+            style={[StyleSheet.absoluteFillObject, { zIndex: 5 }]}
+            onPress={() => setShowUnitPicker(false)}
+          />
+        )}
+
         <GestureDetector gesture={panGesture}>
           <Animated.View
             style={[
