@@ -5,7 +5,7 @@ Caffi is a privacy-first, offline caffeine tracking mobile app built with Expo R
 
 ## Current State
 - **Status**: MVP Complete - Functional prototype with all core features
-- **Last Updated**: December 4, 2025
+- **Last Updated**: December 11, 2025
 - **Platform**: Expo React Native (iOS, Android, Web)
 
 ## Project Architecture
@@ -19,12 +19,14 @@ Caffi is a privacy-first, offline caffeine tracking mobile app built with Expo R
 │   ├── MainTabNavigator.tsx     # Bottom tabs with FAB
 │   ├── HomeStackNavigator.tsx   # Home tab screens
 │   ├── HistoryStackNavigator.tsx # History tab screens
-│   └── SettingsStackNavigator.tsx # Settings tab screens
+│   ├── SettingsStackNavigator.tsx # Settings tab screens
+│   └── StatsStackNavigator.tsx  # Stats tab screens
 ├── screens/             # Screen components
 │   ├── HomeScreen.tsx           # Dashboard with caffeine ring
 │   ├── HistoryScreen.tsx        # Timeline and stats
 │   ├── SettingsScreen.tsx       # Profile & preferences
-│   ├── StatisticsScreen.tsx     # Decay curve visualization
+│   ├── StatisticsScreen.tsx     # Analytics overview
+│   ├── CaffeineIntakeDetailScreen.tsx # Caffeine intake bar chart
 │   ├── DrinkDatabaseScreen.tsx  # Drink browser
 │   ├── CustomDrinkScreen.tsx    # Add custom drinks
 │   └── AddDrinkModal.tsx        # Quick add drink modal
@@ -87,6 +89,15 @@ Caffi is a privacy-first, offline caffeine tracking mobile app built with Expo R
 - Alcohol intake: "Never" preferred over "Rare" label
 
 ## Recent Changes
+- December 11, 2025: Caffeine Intake Analytics Detail Screen
+  - Added CaffeineIntakeDetailScreen with interactive bar chart
+  - Week/Month/Year period selector for viewing consumption patterns
+  - Date range navigator with arrows to browse previous/next periods
+  - Bar graph shows daily intake (week), weekly totals (month), or monthly totals (year)
+  - Average calculation displayed below chart
+  - Created StatsStackNavigator for navigation from StatisticsScreen
+  - Clickable "Daily caffeine intake" card in Analytics navigates to detail view
+
 - December 5, 2025: Real-time updates and edit functionality
   - Fixed HomeScreen not updating in real-time when drinks are added/deleted
   - Added visible delete icon on each drink entry (red trash icon)
