@@ -108,6 +108,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [popupVisible, setPopupVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState<DrinkEntry | null>(null);
+  const [isEditingFromPopup, setIsEditingFromPopup] = useState(false);
   const [currentStickyDate, setCurrentStickyDate] = useState<string>("");
   const [headerHeight, setHeaderHeight] = useState(0);
   const [graphHeight, setGraphHeight] = useState(0);
@@ -210,17 +211,20 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 
   const handleClosePopup = () => {
     setPopupVisible(false);
-    setSelectedEntry(null);
+    if (!isEditingFromPopup) {
+      setSelectedEntry(null);
+    }
   };
 
   const handleCloseEditModal = () => {
     setEditModalVisible(false);
+    setIsEditingFromPopup(false);
     setSelectedEntry(null);
   };
 
   const handleEditEntry = (entry: DrinkEntry) => {
+    setIsEditingFromPopup(true);
     setEditModalVisible(true);
-    setPopupVisible(false);
   };
 
   const handleDuplicateEntry = (entry: DrinkEntry) => {

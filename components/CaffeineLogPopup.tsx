@@ -326,7 +326,10 @@ export function CaffeineLogPopup({
                   <ActionButton
                     label="Edit"
                     icon="edit-3"
-                    onPress={() => onEdit?.(entry)}
+                    onPress={() => {
+                      onEdit?.(entry);
+                      closeSheet();
+                    }}
                     themeColor={theme.text}
                     bg={theme.backgroundSecondary}
                   />
