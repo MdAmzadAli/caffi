@@ -34,7 +34,7 @@ interface CustomDrinkModalProps {
   onAdd?: () => void;
 }
 
-const UNITS = ["cup", "shot", "ml", "oz"];
+const UNITS = ["cup", "shot", "ml", "oz", "teaspoon", "tablespoon", "glass", "can", "bottle", "scoop", "pint", "liter", "fl oz", "mug"];
 
 export function CustomDrinkModal({ visible, onClose, onAdd }: CustomDrinkModalProps) {
   const { theme } = useTheme();
@@ -552,6 +552,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     marginTop: Spacing.md,
     marginBottom: Spacing.lg,
+    minHeight: 90,
   },
   peakInfoHeader: {
     flexDirection: "row",

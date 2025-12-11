@@ -327,15 +327,30 @@ export function TimePickerModal({ visible, onClose, onSelectTime, initialDate }:
           </Modal>
         )}
 
-        <PaperTimePickerModal
-          visible={showTimePicker}
-          onDismiss={() => setShowTimePicker(false)}
-          onConfirm={onTimeConfirm}
-          hours={customDate.getHours()}
-          minutes={customDate.getMinutes()}
-          label="Select Time"
-          locale="en"
-        />
+        {showTimePicker && (
+          <Modal
+            visible={showTimePicker}
+            transparent
+            statusBarTranslucent
+            animationType="fade"
+            onRequestClose={() => setShowTimePicker(false)}
+          >
+            <View style={styles.centeredOverlay}>
+              <Pressable style={styles.backdrop} onPress={() => setShowTimePicker(false)} />
+              <View>
+                <PaperTimePickerModal
+                  visible={showTimePicker}
+                  onDismiss={() => setShowTimePicker(false)}
+                  onConfirm={onTimeConfirm}
+                  hours={customDate.getHours()}
+                  minutes={customDate.getMinutes()}
+                  label="Select Time"
+                  locale="en"
+                />
+              </View>
+            </View>
+          </Modal>
+        )}
       </Modal>
     </PaperProvider>
   );
