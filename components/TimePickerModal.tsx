@@ -327,20 +327,21 @@ export function TimePickerModal({ visible, onClose, onSelectTime, initialDate }:
           </Modal>
         )}
 
-        <Portal>
-          <PaperTimePickerModal
-            visible={showTimePicker}
-            onDismiss={() => setShowTimePicker(false)}
-            onConfirm={onTimeConfirm}
-            hours={customDate.getHours()}
-            minutes={customDate.getMinutes()}
-            label="Select Time"
-            locale="en"
-            cancelLabel="Cancel"
-            confirmLabel="OK"
-          />
-        </Portal>
       </Modal>
+
+      <Portal>
+        <PaperTimePickerModal
+          visible={showTimePicker}
+          onDismiss={() => setShowTimePicker(false)}
+          onConfirm={onTimeConfirm}
+          hours={customDate.getHours()}
+          minutes={customDate.getMinutes()}
+          label="Select Time"
+          locale="en"
+          cancelLabel="Cancel"
+          confirmLabel="OK"
+        />
+      </Portal>
     </PaperProvider>
   );
 }
