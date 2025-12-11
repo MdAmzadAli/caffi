@@ -119,7 +119,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const scrollViewRef = useRef<any>(null);
   const savedScrollOffset = useRef(0);
   const COLLAPSE_THRESHOLD = 100; // Scroll threshold to trigger collapse
-  const DEFAULT_GRAPH_HEIGHT = Dimensions.get("window").height * 0.32; // Graph height (32% of screen)
+  const DEFAULT_GRAPH_HEIGHT = Dimensions.get("window").height * 0.38; // Graph height (38% of screen)
   const HEADER_HEIGHT = 60; // Screen header height
   const RING_ROW_HEIGHT = 72; // Ring progress row height
   const GRAPH_BOTTOM_PADDING = Spacing.xl; // Keep sticky content below x-axis labels

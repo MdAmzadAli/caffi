@@ -46,13 +46,12 @@ export function StickyDateHeader({
     return {
       position: "absolute" as const,
       top: dateOffset,
-      left: 0,
-      right: 0,
+      left: Spacing.lg,
+      right: Spacing.lg,
       zIndex: 9,
       backgroundColor: theme.bg,
       paddingTop: 0,
       paddingBottom: Spacing.sm,
-      paddingHorizontal: Spacing.lg,
       marginTop: 0,
       marginBottom: 0,
       opacity: interpolate(
