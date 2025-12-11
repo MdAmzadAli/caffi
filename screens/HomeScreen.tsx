@@ -17,7 +17,7 @@ import { CollapsibleInfoCards, ExpandButton } from "@/components/CollapsibleInfo
 import { StickyConsumptionTitle } from "@/components/StickyConsumptionTitle";
 import { StickyDateHeader } from "@/components/StickyDateHeader";
 import { CaffeineLogPopup } from "@/components/CaffeineLogPopup";
-import EditDrinkModal from "@/components/EditDrinkModal";
+import { CustomDrinkModal } from "@/components/CustomDrinkModal";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { useCaffeineStore, DrinkEntry } from "@/store/caffeineStore";
 import {
@@ -501,9 +501,9 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         onDelete={handleDeleteEntry}
       />
 
-      <EditDrinkModal
+      <CustomDrinkModal
         visible={editModalVisible}
-        entry={selectedEntry}
+        editEntry={selectedEntry}
         onClose={handleCloseEditModal}
       />
     </View>

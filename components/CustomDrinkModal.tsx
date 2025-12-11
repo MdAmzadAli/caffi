@@ -24,7 +24,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { ImagePickerModal } from "@/components/ImagePickerModal";
 import { TimePickerModal } from "@/components/TimePickerModal";
 import { TimeToFinishModal } from "@/components/TimeToFinishModal";
-import { useCaffeineStore } from "@/store/caffeineStore";
+import { useCaffeineStore, DrinkEntry } from "@/store/caffeineStore";
 import { useTheme } from "@/hooks/useTheme";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 
@@ -32,17 +32,19 @@ interface CustomDrinkModalProps {
   visible: boolean;
   onClose: () => void;
   onAdd?: () => void;
+  editEntry?: DrinkEntry | null;
 }
 
 const UNITS = ["cup", "shot", "ml", "oz", "teaspoon", "tablespoon", "glass", "can", "bottle", "scoop", "pint", "liter", "fl oz", "mug"];
 
-export function CustomDrinkModal({ visible, onClose, onAdd }: CustomDrinkModalProps) {
+export function CustomDrinkModal({ visible, onClose, onAdd, editEntry }: CustomDrinkModalProps) {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
-  const { addEntry, profile } = useCaffeineStore();
+  const { addEntry, updateEntry, profile } = useCaffeineStore();
   const { height: windowHeight } = useWindowDimensions();
   
   const MODAL_HEIGHT = windowHeight * 0.75;
+  const isEditMode = !!editEntry;
 
   const [drinkName, setDrinkName] = useState("");
   const [quantity, setQuantity] = useState(1);
@@ -56,6 +58,29 @@ export function CustomDrinkModal({ visible, onClose, onAdd }: CustomDrinkModalPr
   const [showStartTimePicker, setShowStartTimePicker] = useState(false);
   const [startTime, setStartTime] = useState<Date>(new Date());
   const [startTimeLabel, setStartTimeLabel] = useState("now");
+
+  useEffect(() => {
+    if (editEntry && visible) {
+      setDrinkName(editEntry.name || "");
+      setQuantity(1);
+      setCaffeineMg(editEntry.caffeineAmount?.toString() || "10");
+      setSelectedUnit("cup");
+      setStartTime(new Date(editEntry.timestamp));
+      const entryDate = new Date(editEntry.timestamp);
+      const now = new Date();
+      const isToday = entryDate.toDateString() === now.toDateString();
+      if (isToday) {
+        const timeDiff = Math.abs(now.getTime() - entryDate.getTime());
+        if (timeDiff < 60000) {
+          setStartTimeLabel("now");
+        } else {
+          setStartTimeLabel(entryDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }));
+        }
+      } else {
+        setStartTimeLabel(entryDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }));
+      }
+    }
+  }, [editEntry, visible]);
 
   const translateY = useSharedValue(MODAL_HEIGHT);
   const startY = useSharedValue(0);
@@ -147,18 +172,28 @@ export function CustomDrinkModal({ visible, onClose, onAdd }: CustomDrinkModalPr
 
   const handleAdd = () => {
     if (drinkName.trim() && totalCaffeine > 0) {
-      const customDrink = {
-        id: `custom-${Date.now()}`,
-        name: drinkName.trim(),
-        category: "custom" as const,
-        caffeinePer100ml: (parseInt(caffeineMg) || 0),
-        defaultServingMl: 100,
-        icon: "coffee",
-        sizes: [{ name: selectedUnit, ml: 100 }],
-      };
-      addEntry(customDrink, 100 * quantity, undefined, false);
-      closeModal();
-      onAdd?.();
+      if (isEditMode && editEntry) {
+        updateEntry(editEntry.id, {
+          name: drinkName.trim(),
+          caffeineAmount: totalCaffeine,
+          timestamp: startTime,
+        });
+        closeModal();
+        onAdd?.();
+      } else {
+        const customDrink = {
+          id: `custom-${Date.now()}`,
+          name: drinkName.trim(),
+          category: "custom" as const,
+          caffeinePer100ml: (parseInt(caffeineMg) || 0),
+          defaultServingMl: 100,
+          icon: "coffee",
+          sizes: [{ name: selectedUnit, ml: 100 }],
+        };
+        addEntry(customDrink, 100 * quantity, undefined, false);
+        closeModal();
+        onAdd?.();
+      }
     }
   };
 
@@ -371,7 +406,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd }: CustomDrinkModalPr
                 ]}
                 disabled={!drinkName.trim() || totalCaffeine <= 0}
               >
-                <ThemedText type="body" style={styles.addButtonText}>Add</ThemedText>
+                <ThemedText type="body" style={styles.addButtonText}>{isEditMode ? "Save" : "Add"}</ThemedText>
               </Pressable>
             </ScrollView>
           </Animated.View>
@@ -407,7 +442,7 @@ const styles = StyleSheet.create({
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.4)",
+    backgroundColor: "rgba(0,0,0,0.35)",
   },
   modalContent: {
     position: "absolute",
