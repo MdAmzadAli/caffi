@@ -1,15 +1,21 @@
 import React, { useMemo } from "react";
 import { View, StyleSheet, Text, Pressable } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { ScreenScrollView } from "@/components/ScreenScrollView";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { useCaffeineStore } from "@/store/caffeineStore";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
+import type { StatsStackParamList } from "@/navigation/StatsStackNavigator";
+
+type StatsNavigationProp = NativeStackNavigationProp<StatsStackParamList>;
 
 export default function StatisticsScreen() {
   const { theme } = useTheme();
   const { entries } = useCaffeineStore();
+  const navigation = useNavigation<StatsNavigationProp>();
 
   const weeklyData = useMemo(() => {
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -41,7 +47,10 @@ export default function StatisticsScreen() {
     <ScreenScrollView header={<ScreenHeader title="Analytics" />}>
       <Text style={[styles.subtitle, { color: theme.text }]}>Spotlight</Text>
 
-      <View style={[styles.card, { backgroundColor: theme.backgroundSecondary }]}>
+      <Pressable
+        style={[styles.card, { backgroundColor: theme.backgroundSecondary }]}
+        onPress={() => navigation.navigate("CaffeineIntakeDetail")}
+      >
         <View style={styles.cardHeader}>
           <View style={styles.cardTitleRow}>
             <Feather name="bar-chart-2" size={18} color={theme.mutedGrey} />
@@ -87,7 +96,7 @@ export default function StatisticsScreen() {
             </View>
           ))}
         </View>
-      </View>
+      </Pressable>
 
       <MenuItem
         icon="coffee"

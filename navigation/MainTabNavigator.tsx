@@ -12,7 +12,7 @@ import { useNavigation, NavigationProp } from "@react-navigation/native";
 import HomeStackNavigator from "@/navigation/HomeStackNavigator";
 import HistoryStackNavigator from "@/navigation/HistoryStackNavigator";
 import SettingsStackNavigator from "@/navigation/SettingsStackNavigator";
-import StatisticsScreen from "@/screens/StatisticsScreen";
+import StatsStackNavigator from "@/navigation/StatsStackNavigator";
 import AddDrinkModal from "@/screens/AddDrinkModal";
 import { useTheme } from "@/hooks/useTheme";
 import { Colors, Spacing, BorderRadius, Shadows } from "@/constants/theme";
@@ -66,9 +66,6 @@ function FloatingActionButton({ onPress }: FABProps) {
   );
 }
 
-function StatsTabWrapper() {
-  return <StatisticsScreen />;
-}
 
 export default function MainTabNavigator() {
   const { theme, isDark } = useTheme();
@@ -127,7 +124,7 @@ export default function MainTabNavigator() {
         />
         <Tab.Screen
           name="StatsTab"
-          component={StatsTabWrapper}
+          component={StatsStackNavigator}
           options={{
             title: "Stats",
             tabBarIcon: ({ color, size }) => (
