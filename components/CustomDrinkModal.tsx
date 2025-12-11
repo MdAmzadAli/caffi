@@ -270,21 +270,23 @@ export function CustomDrinkModal({ visible, onClose, onAdd }: CustomDrinkModalPr
 
                   {showUnitPicker && (
                     <View style={[styles.unitPickerDropdown, { backgroundColor: theme.backgroundSecondary }]}>
-                      {UNITS.map((unit) => (
-                        <Pressable
-                          key={unit}
-                          onPress={() => {
-                            setSelectedUnit(unit);
-                            setShowUnitPicker(false);
-                          }}
-                          style={[
-                            styles.pickerItem,
-                            selectedUnit === unit && { backgroundColor: `${Colors.light.accent}20` },
-                          ]}
-                        >
-                          <ThemedText type="body">{unit}</ThemedText>
-                        </Pressable>
-                      ))}
+                      <ScrollView nestedScrollEnabled style={{ maxHeight: 200 }}>
+                        {UNITS.map((unit) => (
+                          <Pressable
+                            key={unit}
+                            onPress={() => {
+                              setSelectedUnit(unit);
+                              setShowUnitPicker(false);
+                            }}
+                            style={[
+                              styles.pickerItem,
+                              selectedUnit === unit && { backgroundColor: `${Colors.light.accent}20` },
+                            ]}
+                          >
+                            <ThemedText type="body">{unit}</ThemedText>
+                          </Pressable>
+                        ))}
+                      </ScrollView>
                     </View>
                   )}
                 </View>
