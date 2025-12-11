@@ -64,18 +64,31 @@ export default function CaffeineIntakeDetailScreen() {
         .reduce((sum, e) => sum + e.caffeineAmount, 0);
     };
 
-    if (selectedPeriod === "week" || selectedPeriod === "month") {
+    if (selectedPeriod === "week") {
       for (let i = 51; i >= 0; i--) {
         const weekEnd = new Date(now);
         weekEnd.setDate(now.getDate() - i * 7);
         const label = weekEnd.toLocaleDateString("en-US", { month: "short", day: "numeric" });
         data.push({ label, value: getWeekTotal(weekEnd) });
       }
-    } else {
+    } else if (selectedPeriod === "month") {
       for (let i = 11; i >= 0; i--) {
         const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
         const label = date.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
         data.push({ label, value: getMonthTotal(date) });
+      }
+    } else {
+      for (let i = 4; i >= 0; i--) {
+        const year = now.getFullYear() - i;
+        const startOfYear = new Date(year, 0, 1);
+        const endOfYear = new Date(year, 11, 31, 23, 59, 59, 999);
+        const yearTotal = entries
+          .filter((e) => {
+            const t = new Date(e.timestamp);
+            return t >= startOfYear && t <= endOfYear;
+          })
+          .reduce((sum, e) => sum + e.caffeineAmount, 0);
+        data.push({ label: year.toString(), value: yearTotal });
       }
     }
 
