@@ -102,6 +102,7 @@ export default function StatisticsScreen() {
         icon="coffee"
         label="Caffeine by source"
         theme={theme}
+        onPress={() => navigation.navigate("CaffeineBySource")}
       />
       <MenuItem
         icon="clock"
