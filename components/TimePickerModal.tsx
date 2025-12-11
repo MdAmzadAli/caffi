@@ -18,7 +18,7 @@ import Animated, {
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Calendar, TimePickerModal as PaperTimePickerModal, registerTranslation, en } from "react-native-paper-dates";
-import { Button, Provider as PaperProvider, MD3DarkTheme, MD3LightTheme } from "react-native-paper";
+import { Button, Provider as PaperProvider, MD3DarkTheme, MD3LightTheme, Portal } from "react-native-paper";
 
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
@@ -327,17 +327,19 @@ export function TimePickerModal({ visible, onClose, onSelectTime, initialDate }:
           </Modal>
         )}
 
-        <PaperTimePickerModal
-          visible={showTimePicker}
-          onDismiss={() => setShowTimePicker(false)}
-          onConfirm={onTimeConfirm}
-          hours={customDate.getHours()}
-          minutes={customDate.getMinutes()}
-          label="Select Time"
-          locale="en"
-          cancelLabel="Cancel"
-          confirmLabel="OK"
-        />
+        <Portal>
+          <PaperTimePickerModal
+            visible={showTimePicker}
+            onDismiss={() => setShowTimePicker(false)}
+            onConfirm={onTimeConfirm}
+            hours={customDate.getHours()}
+            minutes={customDate.getMinutes()}
+            label="Select Time"
+            locale="en"
+            cancelLabel="Cancel"
+            confirmLabel="OK"
+          />
+        </Portal>
       </Modal>
     </PaperProvider>
   );
