@@ -114,6 +114,7 @@ export default function StatisticsScreen() {
         icon="refresh-cw"
         label="Consumption by time of day"
         theme={theme}
+        onPress={() => navigation.navigate("ConsumptionByTime")}
       />
     </ScreenScrollView>
   );
