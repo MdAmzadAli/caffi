@@ -7,8 +7,6 @@ import { useCaffeineStore } from "@/store/caffeineStore";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 
-type ViewMode = "Week" | "Month";
-
 interface DayData {
   day: number;
   caffeineAtSleep: number | null;
@@ -23,7 +21,6 @@ export default function SleepTargetScreen() {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { entries, profile } = useCaffeineStore();
-  const [viewMode, setViewMode] = useState<ViewMode>("Month");
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
   const optimalCaffeine = profile.optimalCaffeine || 100;
@@ -153,30 +150,6 @@ export default function SleepTargetScreen() {
           How often are you going to bed with safe caffeine amounts?
         </Text>
 
-        <View style={styles.modeSelector}>
-          {(["Week", "Month"] as ViewMode[]).map((mode) => (
-            <Pressable
-              key={mode}
-              style={[
-                styles.modeButton,
-                viewMode === mode
-                  ? { backgroundColor: theme.accentGold }
-                  : { backgroundColor: theme.backgroundSecondary },
-              ]}
-              onPress={() => setViewMode(mode)}
-            >
-              <Text
-                style={[
-                  styles.modeButtonText,
-                  { color: viewMode === mode ? "#FFFFFF" : theme.text },
-                ]}
-              >
-                {mode}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-
         <View style={styles.monthNavigator}>
           <Pressable onPress={() => navigateMonth(-1)} hitSlop={12}>
             <Feather name="chevron-left" size={20} color={theme.text} />
@@ -283,20 +256,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     marginBottom: Spacing.xl,
-  },
-  modeSelector: {
-    flexDirection: "row",
-    gap: Spacing.sm,
-    marginBottom: Spacing.xl,
-  },
-  modeButton: {
-    paddingHorizontal: Spacing.xl,
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.xl,
-  },
-  modeButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
   },
   monthNavigator: {
     flexDirection: "row",
