@@ -266,6 +266,8 @@ const styles = StyleSheet.create({
   monthLabel: {
     fontSize: 16,
     fontWeight: "600",
+    minWidth: 200,
+    textAlign: "center",
   },
   calendarGrid: {
     flexDirection: "row",
