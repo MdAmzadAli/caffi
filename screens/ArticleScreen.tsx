@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet, Text, Pressable, ScrollView } from "react-native";
+import { View, StyleSheet, Text, Pressable, ScrollView, Image } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -27,7 +27,7 @@ export default function ArticleScreen() {
           <Feather name="arrow-left" size={24} color={theme.text} />
         </Pressable>
         <Text style={[styles.headerTitle, { color: theme.text }]} numberOfLines={1}>
-          Article
+          Information Hub
         </Text>
         <View style={styles.headerSpacer} />
       </View>
@@ -37,6 +37,7 @@ export default function ArticleScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        <Image source={{ uri: article.image }} style={styles.articleImage} />
         <Text style={[styles.title, { color: theme.text }]}>{article.title}</Text>
         
         <Text style={[styles.content, { color: theme.text }]}>
@@ -85,6 +86,12 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: Spacing.lg,
     paddingBottom: Spacing["3xl"],
+  },
+  articleImage: {
+    width: "100%",
+    height: 200,
+    borderRadius: BorderRadius.md,
+    marginBottom: Spacing.lg,
   },
   title: {
     fontSize: 24,

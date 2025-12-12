@@ -323,12 +323,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   articleTitle: {
-    fontSize: 15,
+    fontSize: 13,
     fontWeight: "600",
-    marginBottom: 4,
+    marginBottom: 2,
+    lineHeight: 16,
   },
   articleSummary: {
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: 11,
+    lineHeight: 14,
   },
 });
