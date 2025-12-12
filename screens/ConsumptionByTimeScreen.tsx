@@ -7,7 +7,7 @@ import { useCaffeineStore } from "@/store/caffeineStore";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 
-type ViewMode = "Day" | "Month" | "Year";
+type ViewMode = "Week" | "Month" | "Year";
 
 interface TimePeriod {
   label: string;
@@ -50,8 +50,11 @@ export default function ConsumptionByTimeScreen() {
     const start = new Date(selectedDate);
     const end = new Date(selectedDate);
 
-    if (viewMode === "Day") {
+    if (viewMode === "Week") {
+      const day = start.getDay();
+      start.setDate(start.getDate() - day);
       start.setHours(0, 0, 0, 0);
+      end.setDate(start.getDate() + 6);
       end.setHours(23, 59, 59, 999);
     } else if (viewMode === "Month") {
       start.setDate(1);
@@ -92,8 +95,8 @@ export default function ConsumptionByTimeScreen() {
 
   const navigateDate = (direction: number) => {
     const newDate = new Date(selectedDate);
-    if (viewMode === "Day") {
-      newDate.setDate(newDate.getDate() + direction);
+    if (viewMode === "Week") {
+      newDate.setDate(newDate.getDate() + direction * 7);
     } else if (viewMode === "Month") {
       newDate.setMonth(newDate.getMonth() + direction);
     } else {
@@ -103,12 +106,11 @@ export default function ConsumptionByTimeScreen() {
   };
 
   const getDateLabel = (): string => {
-    if (viewMode === "Day") {
-      return selectedDate.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
+    if (viewMode === "Week") {
+      const { start, end } = getDateRange;
+      const startStr = start.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      const endStr = end.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+      return `${startStr} - ${endStr}`;
     } else if (viewMode === "Month") {
       return selectedDate.toLocaleDateString("en-US", {
         month: "long",
@@ -150,7 +152,7 @@ export default function ConsumptionByTimeScreen() {
         </Text>
 
         <View style={styles.modeSelector}>
-          {(["Day", "Month", "Year"] as ViewMode[]).map((mode) => (
+          {(["Week", "Month", "Year"] as ViewMode[]).map((mode) => (
             <Pressable
               key={mode}
               style={[
