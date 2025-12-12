@@ -308,6 +308,8 @@ const styles = StyleSheet.create({
   dateLabel: {
     fontSize: 16,
     fontWeight: "600",
+    minWidth: 200,
+    textAlign: "center",
   },
   barsContainer: {
     gap: Spacing.lg,
