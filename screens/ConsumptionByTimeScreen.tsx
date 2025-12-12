@@ -23,6 +23,13 @@ const TIME_PERIODS: TimePeriod[] = [
   { label: "7PM - 5AM", icon: "moon", startHour: 19, endHour: 5 },
 ];
 
+const BAR_COLORS = [
+  "#E8DCCC",
+  "#D4C4A8",
+  "#C9A36A",
+  "#5C4A3B",
+];
+
 export default function ConsumptionByTimeScreen() {
   const { theme } = useTheme();
   const navigation = useNavigation();
@@ -181,7 +188,9 @@ export default function ConsumptionByTimeScreen() {
         <View style={styles.barsContainer}>
           {periodData.map((period, idx) => {
             const barWidth = period.total > 0 ? (period.total / maxTotal) * 100 : 0;
-            const isFullBar = barWidth > 80;
+            const barColor = BAR_COLORS[idx];
+            const isDarkBar = idx >= 2;
+            const textOnBar = barWidth > 60;
 
             return (
               <View key={idx} style={styles.barRow}>
@@ -196,7 +205,7 @@ export default function ConsumptionByTimeScreen() {
                       styles.barFill,
                       {
                         width: `${barWidth}%`,
-                        backgroundColor: isFullBar ? theme.darkBrown : theme.accentGold,
+                        backgroundColor: barColor,
                       },
                     ]}
                   />
@@ -206,7 +215,7 @@ export default function ConsumptionByTimeScreen() {
                       <Text
                         style={[
                           styles.barLabelText,
-                          { color: isFullBar && barWidth > 50 ? "#FFFFFF" : theme.text },
+                          { color: textOnBar && isDarkBar ? "#FFFFFF" : theme.text },
                         ]}
                       >
                         {period.label}
@@ -215,7 +224,7 @@ export default function ConsumptionByTimeScreen() {
                     <Text
                       style={[
                         styles.barValueText,
-                        { color: isFullBar && barWidth > 90 ? "#FFFFFF" : theme.text },
+                        { color: textOnBar && isDarkBar ? "#FFFFFF" : theme.text },
                       ]}
                     >
                       {period.total} mg
