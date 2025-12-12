@@ -108,6 +108,7 @@ export default function StatisticsScreen() {
         icon="clock"
         label="Sleep target"
         theme={theme}
+        onPress={() => navigation.navigate("SleepTarget")}
       />
       <MenuItem
         icon="refresh-cw"
