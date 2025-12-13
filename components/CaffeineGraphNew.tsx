@@ -179,7 +179,7 @@ export function CaffeineGraphNew({
   const yAxisTicks = useMemo(() => {
     const ticks = [];
     const step = yMax <= 200 ? 50 : 100;
-    for (let mg = 0; mg <= yMax; mg += step) {
+    for (let mg = step; mg <= yMax; mg += step) {
       ticks.push(mg);
     }
     return ticks;
@@ -494,7 +494,7 @@ const styles = StyleSheet.create({
   },
   yAxisContainer: {
     position: "absolute",
-    left: 4,
+    left: 0,
     top: 0,
     width: Y_AXIS_WIDTH,
     height: "100%",
