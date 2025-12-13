@@ -26,7 +26,7 @@ export function StickyDateHeader({
   const { theme } = useTheme();
 
   const titleHeightValue = titleHeight ?? 28;
-  const dateOffset = stickyOffset + titleHeightValue;
+  const dateOffset = stickyOffset + titleHeightValue - Spacing.xs;
 
   const stickyStyle = useAnimatedStyle(() => {
     const progress = Math.min(scrollY.value / collapseThreshold, 1);
