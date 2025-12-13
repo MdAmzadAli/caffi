@@ -257,6 +257,14 @@ export function CaffeineGraphNew({
     return Math.max(0, nowPosition - SCREEN_WIDTH / 2);
   }, [nowMs, startMs, endMs, scrollContentWidth]);
 
+  useEffect(() => {
+    if (scrollViewRef?.current) {
+      setTimeout(() => {
+        scrollViewRef.current?.scrollTo({ x: defaultScrollX, y: 0, animated: false });
+      }, 0);
+    }
+  }, []);
+
   const handleScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       if (onScrollOffsetChange) {
