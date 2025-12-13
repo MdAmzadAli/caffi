@@ -318,78 +318,93 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
 
               <View style={[styles.divider, { backgroundColor: theme.divider }]} />
 
-              <View style={styles.unitCaffeineRow}>
-                <View style={styles.unitSelectorContainer}>
-                  {prefillDrink ? (
-                    <View style={styles.prefillUnitOptions}>
-                      <Pressable
-                        onPress={() => setSelectedUnit(getUnitForDrink(prefillDrink.name, prefillDrink.category, prefillDrink.sizes))}
-                        style={[styles.unitOptionChip, selectedUnit !== "ml" && styles.unitOptionChipActive]}
-                      >
-                        <ThemedText type="small" style={selectedUnit !== "ml" ? styles.unitOptionTextActive : undefined}>
-                          {getUnitForDrink(prefillDrink.name, prefillDrink.category, prefillDrink.sizes)}
-                        </ThemedText>
-                      </Pressable>
-                      <Pressable
-                        onPress={() => setSelectedUnit("ml")}
-                        style={[styles.unitOptionChip, selectedUnit === "ml" && styles.unitOptionChipActive]}
-                      >
-                        <ThemedText type="small" style={selectedUnit === "ml" ? styles.unitOptionTextActive : undefined}>
-                          ml
-                        </ThemedText>
-                        <ThemedText type="caption" muted style={{ marginLeft: 4 }}>
-                          ({prefillDrink.caffeinePer100ml}mg/100ml)
-                        </ThemedText>
-                      </Pressable>
+              {prefillDrink ? (
+                <View style={styles.prefillUnitSection}>
+                  <Pressable
+                    onPress={() => setSelectedUnit(getUnitForDrink(prefillDrink.name, prefillDrink.category, prefillDrink.sizes))}
+                    style={styles.radioRow}
+                  >
+                    <View style={[styles.radioCircle, selectedUnit !== "ml" && styles.radioCircleActive]}>
+                      {selectedUnit !== "ml" && <View style={styles.radioInner} />}
                     </View>
-                  ) : (
-                    <>
-                      <Pressable
-                        onPress={() => {
-                          setShowUnitPicker(!showUnitPicker);
-                        }}
-                        style={styles.unitSelector}
-                      >
-                        <Feather name="chevron-down" size={16} color={theme.textMuted} />
-                        <ThemedText type="body">{selectedUnit}</ThemedText>
-                      </Pressable>
-
-                      {showUnitPicker && (
-                        <View style={[styles.unitPickerDropdown, { backgroundColor: theme.backgroundSecondary }]}>
-                          <ScrollView nestedScrollEnabled style={{ maxHeight: 200 }}>
-                            {UNITS.map((unit) => (
-                              <Pressable
-                                key={unit}
-                                onPress={() => {
-                                  setSelectedUnit(unit);
-                                  setShowUnitPicker(false);
-                                }}
-                                style={[
-                                  styles.pickerItem,
-                                  selectedUnit === unit && { backgroundColor: `${Colors.light.accent}20` },
-                                ]}
-                              >
-                                <ThemedText type="body">{unit}</ThemedText>
-                              </Pressable>
-                            ))}
-                          </ScrollView>
-                        </View>
-                      )}
-                    </>
-                  )}
+                    <ThemedText type="body" style={{ flex: 1 }}>
+                      {getUnitForDrink(prefillDrink.name, prefillDrink.category, prefillDrink.sizes)}
+                    </ThemedText>
+                    <View style={styles.caffeineInputWrapper}>
+                      <TextInput
+                        style={[styles.caffeineInput, { color: theme.text }]}
+                        value={caffeineMg}
+                        onChangeText={setCaffeineMg}
+                        keyboardType="numeric"
+                        maxLength={4}
+                        editable={selectedUnit !== "ml"}
+                      />
+                      <ThemedText type="body" muted> mg</ThemedText>
+                    </View>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => setSelectedUnit("ml")}
+                    style={styles.radioRow}
+                  >
+                    <View style={[styles.radioCircle, selectedUnit === "ml" && styles.radioCircleActive]}>
+                      {selectedUnit === "ml" && <View style={styles.radioInner} />}
+                    </View>
+                    <ThemedText type="body" style={{ flex: 1 }}>ml</ThemedText>
+                    {selectedUnit === "ml" && (
+                      <ThemedText type="body" style={{ color: Colors.light.accent }}>
+                        {Math.round((prefillDrink.caffeinePer100ml / 100) * quantity)} mg/ml
+                      </ThemedText>
+                    )}
+                  </Pressable>
                 </View>
+              ) : (
+                <View style={styles.unitCaffeineRow}>
+                  <View style={styles.unitSelectorContainer}>
+                    <Pressable
+                      onPress={() => {
+                        setShowUnitPicker(!showUnitPicker);
+                      }}
+                      style={styles.unitSelector}
+                    >
+                      <Feather name="chevron-down" size={16} color={theme.textMuted} />
+                      <ThemedText type="body">{selectedUnit}</ThemedText>
+                    </Pressable>
 
-                <View style={styles.caffeineInputWrapper}>
-                  <TextInput
-                    style={[styles.caffeineInput, { color: theme.text }]}
-                    value={caffeineMg}
-                    onChangeText={setCaffeineMg}
-                    keyboardType="numeric"
-                    maxLength={4}
-                  />
-                  <ThemedText type="body" muted> mg</ThemedText>
+                    {showUnitPicker && (
+                      <View style={[styles.unitPickerDropdown, { backgroundColor: theme.backgroundSecondary }]}>
+                        <ScrollView nestedScrollEnabled style={{ maxHeight: 200 }}>
+                          {UNITS.map((unit) => (
+                            <Pressable
+                              key={unit}
+                              onPress={() => {
+                                setSelectedUnit(unit);
+                                setShowUnitPicker(false);
+                              }}
+                              style={[
+                                styles.pickerItem,
+                                selectedUnit === unit && { backgroundColor: `${Colors.light.accent}20` },
+                              ]}
+                            >
+                              <ThemedText type="body">{unit}</ThemedText>
+                            </Pressable>
+                          ))}
+                        </ScrollView>
+                      </View>
+                    )}
+                  </View>
+
+                  <View style={styles.caffeineInputWrapper}>
+                    <TextInput
+                      style={[styles.caffeineInput, { color: theme.text }]}
+                      value={caffeineMg}
+                      onChangeText={setCaffeineMg}
+                      keyboardType="numeric"
+                      maxLength={4}
+                    />
+                    <ThemedText type="body" muted> mg</ThemedText>
+                  </View>
                 </View>
-              </View>
+              )}
 
               <View style={[styles.divider, { backgroundColor: theme.divider }]} />
 
@@ -588,27 +603,32 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: Spacing.xs,
   },
-  prefillUnitOptions: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: Spacing.xs,
+  prefillUnitSection: {
+    gap: Spacing.sm,
   },
-  unitOptionChip: {
+  radioRow: {
     flexDirection: "row",
     alignItems: "center",
+    gap: Spacing.sm,
     paddingVertical: Spacing.xs,
-    paddingHorizontal: Spacing.sm,
-    borderRadius: BorderRadius.sm,
-    borderWidth: 1,
-    borderColor: "transparent",
   },
-  unitOptionChipActive: {
-    backgroundColor: `${Colors.light.accent}15`,
+  radioCircle: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: "#ccc",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  radioCircleActive: {
     borderColor: Colors.light.accent,
   },
-  unitOptionTextActive: {
-    color: Colors.light.accent,
-    fontWeight: "600",
+  radioInner: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: Colors.light.accent,
   },
   unitPickerDropdown: {
     position: "absolute",
