@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useCallback } from "react";
+import React, { useMemo, useRef, useCallback, useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -119,7 +119,16 @@ export function CaffeineGraphNew({
   const scrollContentWidth = SCREEN_WIDTH * (viewWindowHours / HOURS_VISIBLE);
   const chartWidth = scrollContentWidth;
 
-  const nowMs = Date.parse(now);
+  const [realTimeNow, setRealTimeNow] = useState(Date.now());
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRealTimeNow(Date.now());
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const nowMs = realTimeNow;
   const nowDate = new Date(nowMs);
 
   const { samples: sampleTimesMs, startMs, endMs } = useMemo(() => {
@@ -177,12 +186,12 @@ export function CaffeineGraphNew({
   }, [curvePoints, curvePath, mgToY]);
 
   const yAxisTicks = useMemo(() => {
-    const ticks = [];
+    const ticks = [50];
     const step = yMax <= 200 ? 50 : 100;
     for (let mg = step; mg <= yMax; mg += step) {
-      ticks.push(mg);
+      if (mg !== 50) ticks.push(mg);
     }
-    return ticks;
+    return ticks.sort((a, b) => a - b);
   }, [yMax]);
 
   const xAxisTicks = useMemo(() => {
