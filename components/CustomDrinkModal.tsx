@@ -321,8 +321,26 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
               <View style={styles.unitCaffeineRow}>
                 <View style={styles.unitSelectorContainer}>
                   {prefillDrink ? (
-                    <View style={styles.unitSelector}>
-                      <ThemedText type="body">{selectedUnit}</ThemedText>
+                    <View style={styles.prefillUnitOptions}>
+                      <Pressable
+                        onPress={() => setSelectedUnit(getUnitForDrink(prefillDrink.name, prefillDrink.category, prefillDrink.sizes))}
+                        style={[styles.unitOptionChip, selectedUnit !== "ml" && styles.unitOptionChipActive]}
+                      >
+                        <ThemedText type="small" style={selectedUnit !== "ml" ? styles.unitOptionTextActive : undefined}>
+                          {getUnitForDrink(prefillDrink.name, prefillDrink.category, prefillDrink.sizes)}
+                        </ThemedText>
+                      </Pressable>
+                      <Pressable
+                        onPress={() => setSelectedUnit("ml")}
+                        style={[styles.unitOptionChip, selectedUnit === "ml" && styles.unitOptionChipActive]}
+                      >
+                        <ThemedText type="small" style={selectedUnit === "ml" ? styles.unitOptionTextActive : undefined}>
+                          ml
+                        </ThemedText>
+                        <ThemedText type="caption" muted style={{ marginLeft: 4 }}>
+                          ({prefillDrink.caffeinePer100ml}mg/100ml)
+                        </ThemedText>
+                      </Pressable>
                     </View>
                   ) : (
                     <>
@@ -569,6 +587,28 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: Spacing.xs,
+  },
+  prefillUnitOptions: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: Spacing.xs,
+  },
+  unitOptionChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: Spacing.xs,
+    paddingHorizontal: Spacing.sm,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+    borderColor: "transparent",
+  },
+  unitOptionChipActive: {
+    backgroundColor: `${Colors.light.accent}15`,
+    borderColor: Colors.light.accent,
+  },
+  unitOptionTextActive: {
+    color: Colors.light.accent,
+    fontWeight: "600",
   },
   unitPickerDropdown: {
     position: "absolute",
