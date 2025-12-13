@@ -96,8 +96,8 @@ export function RecommendationCards({
                 backgroundColor: theme.backgroundSecondary,
                 shadowColor: isDark ? "#000" : "#9E9E9E",
                 shadowOpacity: isDark ? 0.3 : 0.25,
-                borderWidth: isDark ? 1 : 0,
-                borderColor: isDark ? theme.divider : "transparent",
+                borderWidth: 1,
+                borderColor: isDark ? theme.divider : "#E8E4DC",
               },
               pressed && { opacity: 0.8, transform: [{ scale: 0.98 }] },
             ]}
