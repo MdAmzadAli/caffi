@@ -114,7 +114,7 @@ export function CaffeineGraphNew({
 }: CaffeineGraphProps) {
   const GRAPH_COLORS = isDark ? DARK_GRAPH_COLORS : LIGHT_GRAPH_COLORS;
   
-  const graphHeight = SCREEN_HEIGHT * 0.32;
+  const graphHeight = SCREEN_HEIGHT * 0.36;
   const chartHeight = graphHeight - X_AXIS_HEIGHT - GRAPH_PADDING_TOP - GRAPH_PADDING_BOTTOM;
   const scrollContentWidth = SCREEN_WIDTH * (viewWindowHours / HOURS_VISIBLE);
   const chartWidth = scrollContentWidth;
