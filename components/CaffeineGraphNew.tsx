@@ -3,10 +3,10 @@ import {
   View,
   StyleSheet,
   Text,
-  Dimensions,
   ScrollView,
   NativeSyntheticEvent,
   NativeScrollEvent,
+  useWindowDimensions,
 } from "react-native";
 import Svg, {
   Path,
@@ -90,7 +90,6 @@ interface CaffeineGraphProps {
   isDark?: boolean;
 }
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const Y_AXIS_WIDTH = 24;
 const LEFT_PADDING = 0;
 const RIGHT_PADDING = 0;
@@ -120,10 +119,11 @@ export function CaffeineGraphNew({
   isDark = false,
 }: CaffeineGraphProps) {
   const GRAPH_COLORS = isDark ? DARK_GRAPH_COLORS : LIGHT_GRAPH_COLORS;
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   
-  const graphHeight = SCREEN_HEIGHT * 0.36;
+  const graphHeight = windowHeight * 0.36;
   const chartHeight = graphHeight - X_AXIS_HEIGHT - GRAPH_PADDING_TOP - GRAPH_PADDING_BOTTOM;
-  const scrollContentWidth = SCREEN_WIDTH * (viewWindowHours / HOURS_VISIBLE);
+  const scrollContentWidth = windowWidth * (viewWindowHours / HOURS_VISIBLE);
   const chartWidth = scrollContentWidth;
 
   const [realTimeNow, setRealTimeNow] = useState(Date.now());
@@ -261,8 +261,8 @@ export function CaffeineGraphNew({
 
   const defaultScrollX = useMemo(() => {
     const nowPosition = ((nowMs - startMs) / (endMs - startMs)) * scrollContentWidth;
-    return Math.max(0, nowPosition - SCREEN_WIDTH / 2);
-  }, [nowMs, startMs, endMs, scrollContentWidth]);
+    return Math.max(0, nowPosition - windowWidth / 2);
+  }, [nowMs, startMs, endMs, scrollContentWidth, windowWidth]);
 
   useEffect(() => {
     if (scrollViewRef?.current) {
@@ -276,16 +276,16 @@ export function CaffeineGraphNew({
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       if (onScrollOffsetChange) {
         const scrollX = event.nativeEvent.contentOffset.x;
-        const centerX = scrollX + SCREEN_WIDTH / 2;
+        const centerX = scrollX + windowWidth / 2;
         const nowPosition = ((nowMs - startMs) / (endMs - startMs)) * scrollContentWidth;
-        const isOffCenter = Math.abs(centerX - nowPosition) > SCREEN_WIDTH * 0.1;
+        const isOffCenter = Math.abs(centerX - nowPosition) > windowWidth * 0.1;
         const direction: 'left' | 'right' | null = isOffCenter 
           ? (centerX < nowPosition ? 'right' : 'left') 
           : null;
         onScrollOffsetChange(isOffCenter, direction);
       }
     },
-    [onScrollOffsetChange, nowMs, startMs, endMs, scrollContentWidth]
+    [onScrollOffsetChange, nowMs, startMs, endMs, scrollContentWidth, windowWidth]
   );
 
   const gradientId = isDark ? "curveGradientDark" : "curveGradientLight";
