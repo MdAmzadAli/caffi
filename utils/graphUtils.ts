@@ -35,13 +35,17 @@ export function buildSampleTimes(
   return { samples, startMs, endMs };
 }
 
+const K_ELIM = 0.00231;
+const K_ABS = 0.045;
+
 export function remainingAfterHours(
   doseMg: number,
   hoursSinceDose: number,
   halfLifeHours: number
 ): number {
   if (hoursSinceDose < 0) return 0;
-  return doseMg * Math.pow(0.5, hoursSinceDose / halfLifeHours);
+  const dtMinutes = hoursSinceDose * 60;
+  return doseMg * (1 - Math.exp(-K_ABS * dtMinutes)) * Math.exp(-K_ELIM * dtMinutes);
 }
 
 export function computeActiveCurve(
