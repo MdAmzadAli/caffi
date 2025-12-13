@@ -512,11 +512,10 @@ const styles = StyleSheet.create({
   },
   sleepLabel: {
     position: "absolute",
-    left: 0,
-    width: Y_AXIS_WIDTH + 56,
+    left: Y_AXIS_WIDTH + 4,
   },
   sleepLabelText: {
-    fontSize: 7,
+    fontSize: 6,
     fontWeight: "500",
   },
   scrollView: {
