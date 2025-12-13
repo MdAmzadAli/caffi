@@ -152,7 +152,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       currentCaffeineMg: activeCaffeine,
       optimalDailyMg: profile.optimalCaffeine,
       halfLifeHours: 5.5,
-      sleepThresholdMg: 100,
+      sleepThresholdMg: 40,
     });
   }, [todayCaffeine, activeCaffeine, profile]);
 
@@ -444,7 +444,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           <HomeGraphController
             events={caffeineEvents}
             bedtime={profile.sleepTime}
-            sleepThresholdMg={100}
+            sleepThresholdMg={40}
             halfLifeHours={5.5}
             isDark={isDark}
             onHeight={setGraphHeight}
