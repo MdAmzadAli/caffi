@@ -494,7 +494,7 @@ const styles = StyleSheet.create({
   },
   yAxisContainer: {
     position: "absolute",
-    left: -14,
+    left: 4,
     top: 0,
     width: Y_AXIS_WIDTH,
     height: "100%",
