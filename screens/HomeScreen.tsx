@@ -141,6 +141,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       name: entry.name,
       mg: entry.caffeineAmount,
       timestampISO: new Date(entry.timestamp).toISOString(),
+      category: entry.category,
     }));
   }, [entries]);
 

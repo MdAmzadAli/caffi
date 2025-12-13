@@ -4,6 +4,7 @@ export interface CaffeineEvent {
   mg: number;
   timestampISO: string;
   iconUrl?: string;
+  category?: string;
 }
 
 export interface SamplePoint {

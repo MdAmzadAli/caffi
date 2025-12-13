@@ -17,6 +17,8 @@ import Svg, {
   Circle,
   Text as SvgText,
   G,
+  Image as SvgImage,
+  ClipPath,
 } from "react-native-svg";
 import { Feather } from "@expo/vector-icons";
 import {
@@ -96,8 +98,13 @@ const X_AXIS_HEIGHT = 22;
 const GRAPH_PADDING_TOP = 8;
 const GRAPH_PADDING_BOTTOM = 8;
 const MARKER_SIZE = 28;
+const MARKER_IMAGE_SIZE = 24;
 const HOURS_VISIBLE = 11;
 const TOTAL_WINDOW_HOURS = 168;
+
+const CATEGORY_IMAGES: Record<string, any> = {
+  coffee: require("@/attached_assets/generated_images/caffi_app_icon_coffee_cup.png"),
+};
 
 export function CaffeineGraphNew({
   events,
@@ -419,6 +426,10 @@ export function CaffeineGraphNew({
             const mgAtEvent = getActiveAtTime(events, eventMs, halfLifeHours);
             const markerY = mgToY(mgAtEvent);
             const isClustered = marker.clustered.length > 1;
+            const category = marker.event.category || 'coffee';
+            const hasImage = CATEGORY_IMAGES[category];
+            const clipId = `clip-${marker.event.id}`;
+            const markerCenterY = markerY + MARKER_SIZE / 2 + 6;
 
             return (
               <G key={marker.event.id}>
@@ -428,40 +439,52 @@ export function CaffeineGraphNew({
                   r={3}
                   fill={GRAPH_COLORS.darkBrown2}
                 />
+                <Defs>
+                  <ClipPath id={clipId}>
+                    <Circle cx={marker.x} cy={markerCenterY} r={MARKER_IMAGE_SIZE / 2} />
+                  </ClipPath>
+                </Defs>
                 <Circle
                   cx={marker.x}
-                  cy={markerY + MARKER_SIZE / 2 + 6}
-                  r={MARKER_SIZE / 2}
+                  cy={markerCenterY}
+                  r={MARKER_IMAGE_SIZE / 2 + 2}
                   fill={GRAPH_COLORS.bgSecondary}
-                  stroke={GRAPH_COLORS.bgSecondary}
-                  strokeWidth={1.5}
+                  stroke={GRAPH_COLORS.mutedGrey}
+                  strokeWidth={0.5}
+                  strokeOpacity={0.3}
                 />
-                <Circle
-                  cx={marker.x}
-                  cy={markerY + MARKER_SIZE / 2 + 6}
-                  r={MARKER_SIZE / 2 - 2}
-                  fill={GRAPH_COLORS.bgSecondary}
-                />
-                <SvgText
-                  x={marker.x}
-                  y={markerY + MARKER_SIZE / 2 + 10}
-                  fontSize={12}
-                  textAnchor="middle"
-                  fill={GRAPH_COLORS.darkBrown}
-                >
-                  ☕
-                </SvgText>
+                {hasImage ? (
+                  <SvgImage
+                    x={marker.x - MARKER_IMAGE_SIZE / 2}
+                    y={markerCenterY - MARKER_IMAGE_SIZE / 2}
+                    width={MARKER_IMAGE_SIZE}
+                    height={MARKER_IMAGE_SIZE}
+                    href={CATEGORY_IMAGES[category]}
+                    clipPath={`url(#${clipId})`}
+                    preserveAspectRatio="xMidYMid slice"
+                  />
+                ) : (
+                  <SvgText
+                    x={marker.x}
+                    y={markerCenterY + 4}
+                    fontSize={12}
+                    textAnchor="middle"
+                    fill={GRAPH_COLORS.darkBrown}
+                  >
+                    ☕
+                  </SvgText>
+                )}
                 {isClustered && (
                   <>
                     <Circle
-                      cx={marker.x + 11}
-                      cy={markerY + MARKER_SIZE / 2}
-                      r={8}
+                      cx={marker.x + 10}
+                      cy={markerCenterY - 8}
+                      r={7}
                       fill={GRAPH_COLORS.darkBrown2}
                     />
                     <SvgText
-                      x={marker.x + 11}
-                      y={markerY + MARKER_SIZE / 2 + 3}
+                      x={marker.x + 10}
+                      y={markerCenterY - 5}
                       fontSize={7}
                       fill={GRAPH_COLORS.bg}
                       textAnchor="middle"
