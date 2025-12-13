@@ -33,8 +33,18 @@ interface CustomDrinkModalProps {
   onClose: () => void;
   onAdd?: () => void;
   editEntry?: DrinkEntry | null;
-  prefillDrink?: { name: string; caffeinePer100ml: number; defaultServingMl: number; sizes?: { name: string; ml: number }[] } | null;
+  prefillDrink?: { name: string; caffeinePer100ml: number; defaultServingMl: number; category?: string; sizes?: { name: string; ml: number }[] } | null;
 }
+
+const getUnitForDrink = (name: string, category?: string, sizes?: { name: string; ml: number }[]): string => {
+  const lowerName = name.toLowerCase();
+  if (lowerName.includes("espresso") || lowerName.includes("shot")) return "shot";
+  if (lowerName.includes("can") || category === "energy" || category === "soda") return "can";
+  if (lowerName.includes("bottle")) return "bottle";
+  if (sizes?.[0]?.name) return sizes[0].name;
+  if (category === "tea" || category === "coffee" || category === "chocolate") return "cup";
+  return "cup";
+};
 
 const UNITS = ["cup", "shot", "ml", "oz", "teaspoon", "tablespoon", "glass", "can", "bottle", "scoop", "pint", "liter", "fl oz", "mug"];
 
@@ -83,8 +93,8 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
     } else if (prefillDrink && visible && !editEntry) {
       setDrinkName(prefillDrink.name);
       setQuantity(1);
-      const defaultUnit = prefillDrink.sizes?.[0]?.name || "cup";
-      setSelectedUnit(defaultUnit);
+      const bestUnit = getUnitForDrink(prefillDrink.name, prefillDrink.category, prefillDrink.sizes);
+      setSelectedUnit(bestUnit);
       const caffeine = Math.round((prefillDrink.caffeinePer100ml * prefillDrink.defaultServingMl) / 100);
       setCaffeineMg(caffeine.toString());
       setStartTime(new Date());
@@ -310,36 +320,44 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
 
               <View style={styles.unitCaffeineRow}>
                 <View style={styles.unitSelectorContainer}>
-                  <Pressable
-                    onPress={() => {
-                      setShowUnitPicker(!showUnitPicker);
-                    }}
-                    style={styles.unitSelector}
-                  >
-                    <Feather name="chevron-down" size={16} color={theme.textMuted} />
-                    <ThemedText type="body">{selectedUnit}</ThemedText>
-                  </Pressable>
-
-                  {showUnitPicker && (
-                    <View style={[styles.unitPickerDropdown, { backgroundColor: theme.backgroundSecondary }]}>
-                      <ScrollView nestedScrollEnabled style={{ maxHeight: 200 }}>
-                        {UNITS.map((unit) => (
-                          <Pressable
-                            key={unit}
-                            onPress={() => {
-                              setSelectedUnit(unit);
-                              setShowUnitPicker(false);
-                            }}
-                            style={[
-                              styles.pickerItem,
-                              selectedUnit === unit && { backgroundColor: `${Colors.light.accent}20` },
-                            ]}
-                          >
-                            <ThemedText type="body">{unit}</ThemedText>
-                          </Pressable>
-                        ))}
-                      </ScrollView>
+                  {prefillDrink ? (
+                    <View style={styles.unitSelector}>
+                      <ThemedText type="body">{selectedUnit}</ThemedText>
                     </View>
+                  ) : (
+                    <>
+                      <Pressable
+                        onPress={() => {
+                          setShowUnitPicker(!showUnitPicker);
+                        }}
+                        style={styles.unitSelector}
+                      >
+                        <Feather name="chevron-down" size={16} color={theme.textMuted} />
+                        <ThemedText type="body">{selectedUnit}</ThemedText>
+                      </Pressable>
+
+                      {showUnitPicker && (
+                        <View style={[styles.unitPickerDropdown, { backgroundColor: theme.backgroundSecondary }]}>
+                          <ScrollView nestedScrollEnabled style={{ maxHeight: 200 }}>
+                            {UNITS.map((unit) => (
+                              <Pressable
+                                key={unit}
+                                onPress={() => {
+                                  setSelectedUnit(unit);
+                                  setShowUnitPicker(false);
+                                }}
+                                style={[
+                                  styles.pickerItem,
+                                  selectedUnit === unit && { backgroundColor: `${Colors.light.accent}20` },
+                                ]}
+                              >
+                                <ThemedText type="body">{unit}</ThemedText>
+                              </Pressable>
+                            ))}
+                          </ScrollView>
+                        </View>
+                      )}
+                    </>
                   )}
                 </View>
 
