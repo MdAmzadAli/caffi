@@ -280,7 +280,7 @@ export function CaffeineGraphNew({
             <Text style={[styles.yAxisLabel, { color: GRAPH_COLORS.mutedGrey }]}>{mg}</Text>
           </View>
         ))}
-        <View style={[styles.sleepLabel, { top: sleepThresholdY - 14 }]}>
+        <View style={[styles.sleepLabel, { top: sleepThresholdY - 18 }]}>
           <Text style={[styles.sleepLabelText, { color: GRAPH_COLORS.green }]}>Sleep unaffected</Text>
         </View>
       </View>
