@@ -33,6 +33,8 @@ export function RecommendationCards({
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedCard, setSelectedCard] = useState<CardData | null>(null);
 
+  const accentColor = theme.accentGold;
+  
   const cards: CardData[] = [
     {
       id: "focus",
@@ -45,7 +47,7 @@ export function RecommendationCards({
       subtitle: recommendations.noSafeDose
         ? "Limit reached"
         : "Small boost for concentration",
-      accentColor: theme.accentGold,
+      accentColor,
       reasoning: recommendations.focusDoseReasoning,
     },
     {
@@ -57,7 +59,7 @@ export function RecommendationCards({
           ? "N/A"
           : `${recommendations.bestWindowStart} – ${recommendations.bestWindowEnd}`,
       subtitle: "Your ideal caffeine window",
-      accentColor: theme.blue,
+      accentColor,
       reasoning: recommendations.bestTimeReasoning,
     },
     {
@@ -66,7 +68,7 @@ export function RecommendationCards({
       title: "Cutoff Time",
       value: `After ${recommendations.cutoffTime}`,
       subtitle: "Avoid for best sleep",
-      accentColor: theme.green,
+      accentColor,
       reasoning: recommendations.cutoffReasoning,
     },
   ];
@@ -104,7 +106,7 @@ export function RecommendationCards({
             accessibilityRole="button"
           >
             <View style={styles.cardHeader}>
-              <Feather name={card.icon} size={16} color={card.accentColor} />
+              <Feather name={card.icon} size={14} color={card.accentColor} />
               <Text style={[styles.cardTitle, { color: theme.mutedGrey }]}>{card.title}</Text>
             </View>
             <Text style={[styles.cardValue, { color: theme.darkBrown }]} numberOfLines={1}>
@@ -173,10 +175,10 @@ const styles = StyleSheet.create({
   },
   card: {
     borderRadius: BorderRadius.sm,
-    padding: Spacing.md,
-    minWidth: 140,
-    maxWidth: 160,
-    borderLeftWidth: 4,
+    padding: Spacing.sm,
+    minWidth: 120,
+    maxWidth: 140,
+    borderLeftWidth: 3,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
     elevation: 2,
@@ -184,21 +186,21 @@ const styles = StyleSheet.create({
   cardHeader: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    marginBottom: Spacing.xs,
+    gap: 4,
+    marginBottom: 2,
   },
   cardTitle: {
-    fontSize: 11,
+    fontSize: 9,
     fontWeight: "500",
     textTransform: "uppercase",
   },
   cardValue: {
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: "700",
     marginBottom: 2,
   },
   cardSubtitle: {
-    fontSize: 11,
+    fontSize: 9,
   },
   modalOverlay: {
     flex: 1,
