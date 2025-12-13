@@ -33,11 +33,12 @@ interface CustomDrinkModalProps {
   onClose: () => void;
   onAdd?: () => void;
   editEntry?: DrinkEntry | null;
+  prefillDrink?: { name: string; caffeinePer100ml: number; defaultServingMl: number; sizes?: { name: string; ml: number }[] } | null;
 }
 
 const UNITS = ["cup", "shot", "ml", "oz", "teaspoon", "tablespoon", "glass", "can", "bottle", "scoop", "pint", "liter", "fl oz", "mug"];
 
-export function CustomDrinkModal({ visible, onClose, onAdd, editEntry }: CustomDrinkModalProps) {
+export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDrink }: CustomDrinkModalProps) {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const { addEntry, updateEntry, profile } = useCaffeineStore();
@@ -79,8 +80,17 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry }: CustomD
       } else {
         setStartTimeLabel(entryDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }));
       }
+    } else if (prefillDrink && visible && !editEntry) {
+      setDrinkName(prefillDrink.name);
+      setQuantity(1);
+      const defaultUnit = prefillDrink.sizes?.[0]?.name || "cup";
+      setSelectedUnit(defaultUnit);
+      const caffeine = Math.round((prefillDrink.caffeinePer100ml * prefillDrink.defaultServingMl) / 100);
+      setCaffeineMg(caffeine.toString());
+      setStartTime(new Date());
+      setStartTimeLabel("now");
     }
-  }, [editEntry, visible]);
+  }, [editEntry, prefillDrink, visible]);
 
   const translateY = useSharedValue(MODAL_HEIGHT);
   const startY = useSharedValue(0);

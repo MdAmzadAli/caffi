@@ -55,13 +55,16 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
   const maxExpandedHeight = windowHeight - insets.top;
   
   const [showCustomDrinkModal, setShowCustomDrinkModal] = useState(false);
+  const [prefillDrink, setPrefillDrink] = useState<DrinkItem | null>(null);
 
   const handleAddCustomDrink = () => {
+    setPrefillDrink(null);
     setShowCustomDrinkModal(true);
   };
 
   const handleCustomDrinkAdded = () => {
     setShowCustomDrinkModal(false);
+    setPrefillDrink(null);
     handleCloseAnimated();
   };
 
@@ -110,8 +113,8 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
   }, [caffeineMg, profile.dailyLimit]);
 
   const handleSelectDrink = (drink: DrinkItem) => {
-    setSelectedDrink(drink);
-    setSelectedSize(drink.defaultServingMl);
+    setPrefillDrink(drink);
+    setShowCustomDrinkModal(true);
   };
 
   const handleAdd = () => {
@@ -545,8 +548,9 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
 
       <CustomDrinkModal
         visible={showCustomDrinkModal}
-        onClose={() => setShowCustomDrinkModal(false)}
+        onClose={() => { setShowCustomDrinkModal(false); setPrefillDrink(null); }}
         onAdd={handleCustomDrinkAdded}
+        prefillDrink={prefillDrink}
       />
     </Modal>
   );
