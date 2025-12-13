@@ -334,14 +334,9 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
                       {getUnitForDrink(prefillDrink.name, prefillDrink.category, prefillDrink.sizes)}
                     </ThemedText>
                     <View style={styles.caffeineInputWrapper}>
-                      <TextInput
-                        style={[styles.caffeineInput, { color: theme.text }]}
-                        value={caffeineMg}
-                        onChangeText={setCaffeineMg}
-                        keyboardType="numeric"
-                        maxLength={4}
-                        editable={selectedUnit !== "ml"}
-                      />
+                      <ThemedText type="body" style={{ color: theme.text }}>
+                        {(parseInt(caffeineMg) || 0) * quantity}
+                      </ThemedText>
                       <ThemedText type="body" muted> mg</ThemedText>
                     </View>
                   </Pressable>
@@ -353,9 +348,12 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
                       {selectedUnit === "ml" && <View style={styles.radioInner} />}
                     </View>
                     <ThemedText type="body" style={{ flex: 1 }}>ml</ThemedText>
-                    <ThemedText type="body" style={{ color: theme.text }}>
-                      {Math.round((prefillDrink.caffeinePer100ml / 100) * quantity)} mg
-                    </ThemedText>
+                    <View style={styles.caffeineInputWrapper}>
+                      <ThemedText type="body" style={{ color: theme.text }}>
+                        {Math.round((prefillDrink.caffeinePer100ml / 100) * quantity)}
+                      </ThemedText>
+                      <ThemedText type="body" muted> mg</ThemedText>
+                    </View>
                   </Pressable>
                 </View>
               ) : (
