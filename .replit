@@ -8,10 +8,6 @@ channel = "stable-25_05"
 localPort = 5000
 externalPort = 80
 
-[[ports]]
-localPort = 8082
-externalPort = 3000
-
 [workflows]
 runButton = "Project"
 
@@ -65,7 +61,7 @@ outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "EXPO_PACKAGER_PROXY_URL=https://$REPLIT_DEV_DOMAIN REACT_NATIVE_PACKAGER_HOSTNAME=$REPLIT_DEV_DOMAIN npx expo start --web --port 5000"
+args = "npm run dev"
 waitForPort = 5000
 
 [agent]
