@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import caffeineDB from "./caffeineDB.json";
 
 export interface DrinkEntry {
   id: string;
@@ -147,250 +148,38 @@ export function calculateOptimalCaffeine(inputs: CaffeineCalculationInputs): { o
 
 const CAFFEINE_HALF_LIFE_HOURS = 5;
 
-export const DRINK_DATABASE: DrinkItem[] = [
-  {
-    id: "espresso",
-    name: "Espresso",
-    category: "coffee",
-    caffeinePer100ml: 212,
-    defaultServingMl: 30,
-    sizes: [
-      { name: "Single", ml: 30 },
-      { name: "Double", ml: 60 },
-    ],
-    icon: "coffee",
-  },
-  {
-    id: "drip-coffee",
-    name: "Drip Coffee",
-    category: "coffee",
-    caffeinePer100ml: 40,
-    defaultServingMl: 240,
-    sizes: [
-      { name: "Small", ml: 240 },
-      { name: "Medium", ml: 350 },
-      { name: "Large", ml: 470 },
-    ],
-    icon: "coffee",
-  },
-  {
-    id: "starbucks-pike",
-    name: "Starbucks Pike Place",
-    category: "coffee",
-    caffeinePer100ml: 47,
-    defaultServingMl: 350,
-    sizes: [
-      { name: "Short", ml: 240 },
-      { name: "Tall", ml: 350 },
-      { name: "Grande", ml: 470 },
-      { name: "Venti", ml: 590 },
-    ],
-    icon: "coffee",
-  },
-  {
-    id: "latte",
-    name: "Latte",
-    category: "coffee",
-    caffeinePer100ml: 25,
-    defaultServingMl: 350,
-    sizes: [
-      { name: "Short", ml: 240 },
-      { name: "Tall", ml: 350 },
-      { name: "Grande", ml: 470 },
-      { name: "Venti", ml: 590 },
-    ],
-    icon: "coffee",
-  },
-  {
-    id: "cappuccino",
-    name: "Cappuccino",
-    category: "coffee",
-    caffeinePer100ml: 32,
-    defaultServingMl: 240,
-    sizes: [
-      { name: "Small", ml: 180 },
-      { name: "Medium", ml: 240 },
-      { name: "Large", ml: 350 },
-    ],
-    icon: "coffee",
-  },
-  {
-    id: "cold-brew",
-    name: "Cold Brew",
-    category: "coffee",
-    caffeinePer100ml: 65,
-    defaultServingMl: 350,
-    sizes: [
-      { name: "Tall", ml: 350 },
-      { name: "Grande", ml: 470 },
-      { name: "Venti", ml: 590 },
-    ],
-    icon: "coffee",
-  },
-  {
-    id: "americano",
-    name: "Americano",
-    category: "coffee",
-    caffeinePer100ml: 35,
-    defaultServingMl: 350,
-    sizes: [
-      { name: "Short", ml: 240 },
-      { name: "Tall", ml: 350 },
-      { name: "Grande", ml: 470 },
-    ],
-    icon: "coffee",
-  },
-  {
-    id: "black-tea",
-    name: "Black Tea",
-    category: "tea",
-    caffeinePer100ml: 20,
-    defaultServingMl: 240,
-    sizes: [
-      { name: "Cup", ml: 240 },
-      { name: "Mug", ml: 350 },
-    ],
-    icon: "droplet",
-  },
-  {
-    id: "green-tea",
-    name: "Green Tea",
-    category: "tea",
-    caffeinePer100ml: 12,
-    defaultServingMl: 240,
-    sizes: [
-      { name: "Cup", ml: 240 },
-      { name: "Mug", ml: 350 },
-    ],
-    icon: "droplet",
-  },
-  {
-    id: "matcha",
-    name: "Matcha Latte",
-    category: "tea",
-    caffeinePer100ml: 25,
-    defaultServingMl: 350,
-    sizes: [
-      { name: "Tall", ml: 350 },
-      { name: "Grande", ml: 470 },
-    ],
-    icon: "droplet",
-  },
-  {
-    id: "chai-tea",
-    name: "Chai Tea Latte",
-    category: "tea",
-    caffeinePer100ml: 15,
-    defaultServingMl: 350,
-    sizes: [
-      { name: "Tall", ml: 350 },
-      { name: "Grande", ml: 470 },
-    ],
-    icon: "droplet",
-  },
-  {
-    id: "redbull",
-    name: "Red Bull",
-    category: "energy",
-    caffeinePer100ml: 32,
-    defaultServingMl: 250,
-    sizes: [
-      { name: "Regular", ml: 250 },
-      { name: "Large", ml: 355 },
-    ],
-    icon: "zap",
-  },
-  {
-    id: "monster",
-    name: "Monster Energy",
-    category: "energy",
-    caffeinePer100ml: 32,
-    defaultServingMl: 473,
-    sizes: [{ name: "Can", ml: 473 }],
-    icon: "zap",
-  },
-  {
-    id: "celsius",
-    name: "Celsius",
-    category: "energy",
-    caffeinePer100ml: 67,
-    defaultServingMl: 355,
-    sizes: [{ name: "Can", ml: 355 }],
-    icon: "zap",
-  },
-  {
-    id: "coca-cola",
-    name: "Coca-Cola",
-    category: "soda",
-    caffeinePer100ml: 10,
-    defaultServingMl: 355,
-    sizes: [
-      { name: "Can", ml: 355 },
-      { name: "Bottle", ml: 500 },
-    ],
-    icon: "droplet",
-  },
-  {
-    id: "pepsi",
-    name: "Pepsi",
-    category: "soda",
-    caffeinePer100ml: 10,
-    defaultServingMl: 355,
-    sizes: [
-      { name: "Can", ml: 355 },
-      { name: "Bottle", ml: 500 },
-    ],
-    icon: "droplet",
-  },
-  {
-    id: "mountain-dew",
-    name: "Mountain Dew",
-    category: "soda",
-    caffeinePer100ml: 15,
-    defaultServingMl: 355,
-    sizes: [
-      { name: "Can", ml: 355 },
-      { name: "Bottle", ml: 500 },
-    ],
-    icon: "droplet",
-  },
-  {
-    id: "dark-chocolate",
-    name: "Dark Chocolate (70%)",
-    category: "chocolate",
-    caffeinePer100ml: 80,
-    defaultServingMl: 40,
-    sizes: [
-      { name: "Small Bar", ml: 40 },
-      { name: "Large Bar", ml: 100 },
-    ],
-    icon: "square",
-  },
-  {
-    id: "milk-chocolate",
-    name: "Milk Chocolate",
-    category: "chocolate",
-    caffeinePer100ml: 20,
-    defaultServingMl: 40,
-    sizes: [
-      { name: "Small Bar", ml: 40 },
-      { name: "Large Bar", ml: 100 },
-    ],
-    icon: "square",
-  },
-  {
-    id: "hot-chocolate",
-    name: "Hot Chocolate",
-    category: "chocolate",
-    caffeinePer100ml: 5,
-    defaultServingMl: 240,
-    sizes: [
-      { name: "Cup", ml: 240 },
-      { name: "Large", ml: 350 },
-    ],
-    icon: "square",
-  },
-];
+const CATEGORY_MAP: Record<string, DrinkItem["category"]> = {
+  "Coffee": "coffee",
+  "Tea": "tea",
+  "Energy Drinks": "energy",
+  "Soft Drinks": "soda",
+  "Chocolate": "chocolate",
+};
+
+const ICON_MAP: Record<DrinkItem["category"], string> = {
+  coffee: "coffee",
+  tea: "droplet",
+  energy: "zap",
+  soda: "droplet",
+  chocolate: "square",
+  custom: "plus",
+};
+
+export const DRINK_DATABASE: DrinkItem[] = Object.entries(caffeineDB).flatMap(
+  ([categoryName, drinks]) => {
+    const category = CATEGORY_MAP[categoryName];
+    if (!category) return [];
+    return drinks.map((drink: { name: string; serving_size_ml: number; caffeine_mg_per_ml: number | null }) => ({
+      id: drink.name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+      name: drink.name,
+      category,
+      caffeinePer100ml: Math.round((drink.caffeine_mg_per_ml ?? 0) * 100),
+      defaultServingMl: drink.serving_size_ml,
+      sizes: [{ name: "Default", ml: drink.serving_size_ml }],
+      icon: ICON_MAP[category],
+    }));
+  }
+);
 
 const STORAGE_KEYS = {
   PROFILE: "@caffi_profile",
