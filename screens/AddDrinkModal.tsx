@@ -23,7 +23,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { CustomDrinkModal } from "@/components/CustomDrinkModal";
-import { useCaffeineStore, DrinkItem } from "@/store/caffeineStore";
+import { useCaffeineStore, DrinkItem, DrinkEntry } from "@/store/caffeineStore";
 import { useTheme } from "@/hooks/useTheme";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 
@@ -49,7 +49,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const { height: windowHeight } = useWindowDimensions();
-  const { addEntry, getAllDrinks, getFavoriteDrinks, profile } = useCaffeineStore();
+  const { addEntry, getAllDrinks, getFavoriteDrinks, profile, entries, customDrinks } = useCaffeineStore();
 
   const INITIAL_HEIGHT = windowHeight * 0.8;
   const maxExpandedHeight = windowHeight - insets.top;
@@ -77,6 +77,12 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
 
   const allDrinks = getAllDrinks();
   const favoriteDrinks = getFavoriteDrinks();
+
+  const recentEntries = useMemo(() => {
+    return [...entries]
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+      .slice(0, 5);
+  }, [entries]);
 
   const filteredDrinks = useMemo(() => {
     let drinks = allDrinks;
@@ -327,12 +333,38 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
                 ))}
               </View>
 
-              {favoriteDrinks.length > 0 && !searchQuery && !selectedCategory && (
+              {recentEntries.length > 0 && !searchQuery && (
                 <View style={styles.section}>
                   <ThemedText type="small" muted style={styles.sectionLabel}>
-                    FAVORITES
+                    QUICK ADD
                   </ThemedText>
-                  {favoriteDrinks.slice(0, 3).map((drink) => (
+                  {recentEntries.map((entry) => (
+                    <RecentEntryItem
+                      key={entry.id}
+                      entry={entry}
+                      onPress={() => {
+                        const drink = allDrinks.find(d => d.id === entry.drinkId) || {
+                          id: entry.drinkId,
+                          name: entry.name,
+                          category: entry.category as Category,
+                          caffeinePer100ml: (entry.caffeineAmount / entry.servingSize) * 100,
+                          defaultServingMl: entry.servingSize,
+                          icon: "coffee",
+                          sizes: [],
+                        };
+                        handleSelectDrink(drink);
+                      }}
+                    />
+                  ))}
+                </View>
+              )}
+
+              {customDrinks.length > 0 && !searchQuery && (
+                <View style={styles.section}>
+                  <ThemedText type="small" muted style={styles.sectionLabel}>
+                    MY CUSTOM DRINKS
+                  </ThemedText>
+                  {customDrinks.map((drink) => (
                     <DrinkListItem
                       key={drink.id}
                       drink={drink}
@@ -344,7 +376,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
 
               <View style={styles.section}>
                 <ThemedText type="small" muted style={styles.sectionLabel}>
-                  {searchQuery || selectedCategory ? "RESULTS" : "POPULAR"}
+                  {searchQuery ? "RESULTS" : selectedCategory ? selectedCategory.toUpperCase() : "POPULAR"}
                 </ThemedText>
                 {filteredDrinks.map((drink) => (
                   <DrinkListItem
@@ -657,6 +689,50 @@ function DrinkListItem({ drink, onPress }: DrinkListItemProps) {
         </ThemedText>
       </View>
       <Feather name="chevron-right" size={20} color={theme.textMuted} />
+    </AnimatedPressable>
+  );
+}
+
+interface RecentEntryItemProps {
+  entry: DrinkEntry;
+  onPress: () => void;
+}
+
+function RecentEntryItem({ entry, onPress }: RecentEntryItemProps) {
+  const { theme } = useTheme();
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const formatTime = (date: Date) => {
+    return new Date(date).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  };
+
+  const servingLabel = entry.servingSize >= 100 ? `${(entry.servingSize / 100).toFixed(2).replace(/\.?0+$/, '')} cup` : `${entry.servingSize}ml`;
+
+  return (
+    <AnimatedPressable
+      onPress={onPress}
+      onPressIn={() => { scale.value = withSpring(0.98); }}
+      onPressOut={() => { scale.value = withSpring(1); }}
+      style={[styles.drinkListItem, { backgroundColor: theme.backgroundDefault }, animatedStyle]}
+    >
+      <View style={styles.drinkIcon}>
+        <Feather name="coffee" size={20} color={Colors.light.accent} />
+      </View>
+      <View style={styles.drinkInfo}>
+        <ThemedText type="body" style={styles.drinkName}>
+          {entry.name}, {servingLabel}
+        </ThemedText>
+        <ThemedText type="caption" muted>
+          Recently added: {formatTime(entry.timestamp)}
+        </ThemedText>
+      </View>
+      <ThemedText type="body" style={{ fontWeight: "600" }}>
+        {entry.caffeineAmount} mg
+      </ThemedText>
     </AnimatedPressable>
   );
 }
