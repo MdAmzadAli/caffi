@@ -30,7 +30,7 @@ interface ImagePickerModalProps {
   onSelectImage: (imageUri: string) => void;
 }
 
-const PRESET_IMAGES = [
+export const PRESET_IMAGES = [
   { id: "latte", name: "Latte", image: require("@/assets/images/drinks/latte.jpg") },
   { id: "coffee-cup", name: "Coffee Cup", image: require("@/assets/images/drinks/coffee-cup.jpg") },
   { id: "cappuccino", name: "Cappuccino", image: require("@/assets/images/drinks/cappuccino.jpg") },

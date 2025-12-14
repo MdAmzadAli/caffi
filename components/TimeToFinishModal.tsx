@@ -63,15 +63,13 @@ export function TimeToFinishModal({
     }
   }, [visible, initialMinutes, translateY, sliderPosition]);
 
-  const closeModal = () => {
+  const closeModal = (saveValue: boolean = true) => {
+    if (saveValue) {
+      onSelectTime(minutes);
+    }
     translateY.value = withTiming(MODAL_HEIGHT, { duration: 200 }, () => {
       runOnJS(onClose)();
     });
-  };
-
-  const handleConfirm = () => {
-    onSelectTime(minutes);
-    closeModal();
   };
 
   const updateMinutes = (value: number) => {
@@ -117,10 +115,10 @@ export function TimeToFinishModal({
       transparent
       statusBarTranslucent
       animationType="fade"
-      onRequestClose={closeModal}
+      onRequestClose={() => closeModal(true)}
     >
       <View style={styles.overlay}>
-        <Pressable style={styles.backdrop} onPress={closeModal} />
+        <Pressable style={styles.backdrop} onPress={() => closeModal(true)} />
 
         <Animated.View
           style={[

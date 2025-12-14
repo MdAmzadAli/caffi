@@ -8,6 +8,7 @@ import {
   ScrollView,
   useWindowDimensions,
   Image,
+  FlatList,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import Animated, {
@@ -21,7 +22,7 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { ImagePickerModal } from "@/components/ImagePickerModal";
+import { ImagePickerModal, PRESET_IMAGES } from "@/components/ImagePickerModal";
 import { TimePickerModal } from "@/components/TimePickerModal";
 import { TimeToFinishModal } from "@/components/TimeToFinishModal";
 import { useCaffeineStore, DrinkEntry } from "@/store/caffeineStore";
@@ -272,9 +273,14 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
                 >
                   {selectedImage ? (
                     selectedImage.startsWith("preset:") ? (
-                      <View style={styles.selectedPresetIcon}>
-                        <Feather name="coffee" size={32} color={Colors.light.accent} />
-                      </View>
+                      (() => {
+                        const preset = PRESET_IMAGES.find(p => p.id === selectedImage.replace("preset:", ""));
+                        return preset ? (
+                          <Image source={preset.image} style={styles.selectedImage} resizeMode="cover" />
+                        ) : (
+                          <Feather name="coffee" size={32} color={Colors.light.accent} />
+                        );
+                      })()
                     ) : (
                       <Image source={{ uri: selectedImage }} style={styles.selectedImage} />
                     )
@@ -372,10 +378,14 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
 
                     {showUnitPicker && (
                       <View style={[styles.unitPickerDropdown, { backgroundColor: theme.backgroundSecondary }]}>
-                        <ScrollView nestedScrollEnabled style={{ maxHeight: 200 }}>
-                          {UNITS.map((unit) => (
+                        <FlatList
+                          data={UNITS}
+                          keyExtractor={(item) => item}
+                          style={{ maxHeight: 200 }}
+                          showsVerticalScrollIndicator={true}
+                          keyboardShouldPersistTaps="handled"
+                          renderItem={({ item: unit }) => (
                             <Pressable
-                              key={unit}
                               onPress={() => {
                                 setSelectedUnit(unit);
                                 setShowUnitPicker(false);
@@ -387,8 +397,8 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
                             >
                               <ThemedText type="body">{unit}</ThemedText>
                             </Pressable>
-                          ))}
-                        </ScrollView>
+                          )}
+                        />
                       </View>
                     )}
                   </View>
