@@ -638,12 +638,12 @@ const styles = StyleSheet.create({
   unitPickerOverlay: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 100,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: "flex-end",
+    paddingBottom: 280,
+    paddingHorizontal: Spacing.xl,
   },
   unitPickerDropdown: {
-    minWidth: 200,
-    maxWidth: 280,
+    width: 120,
     borderRadius: BorderRadius.md,
     overflow: "hidden",
     shadowColor: "#000",
