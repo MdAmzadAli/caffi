@@ -49,7 +49,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const { height: windowHeight } = useWindowDimensions();
-  const { addEntry, getAllDrinks, getFavoriteDrinks, profile } = useCaffeineStore();
+  const { addEntry, getAllDrinks, getFavoriteDrinks, entries, customDrinks, profile } = useCaffeineStore();
 
   const INITIAL_HEIGHT = windowHeight * 0.8;
   const maxExpandedHeight = windowHeight - insets.top;
@@ -77,6 +77,22 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
 
   const allDrinks = getAllDrinks();
   const favoriteDrinks = getFavoriteDrinks();
+
+  const recentDrinks = useMemo(() => {
+    const seen = new Set<string>();
+    const recent: DrinkItem[] = [];
+    const sortedEntries = [...entries].sort((a, b) => 
+      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+    for (const entry of sortedEntries) {
+      if (!seen.has(entry.drinkId) && recent.length < 5) {
+        seen.add(entry.drinkId);
+        const drink = allDrinks.find(d => d.id === entry.drinkId);
+        if (drink) recent.push(drink);
+      }
+    }
+    return recent;
+  }, [entries, allDrinks]);
 
   const filteredDrinks = useMemo(() => {
     let drinks = allDrinks;
@@ -327,12 +343,27 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
                 ))}
               </View>
 
-              {favoriteDrinks.length > 0 && !searchQuery && !selectedCategory && (
+              {recentDrinks.length > 0 && !searchQuery && !selectedCategory && (
                 <View style={styles.section}>
                   <ThemedText type="small" muted style={styles.sectionLabel}>
-                    FAVORITES
+                    QUICK ADD
                   </ThemedText>
-                  {favoriteDrinks.slice(0, 3).map((drink) => (
+                  {recentDrinks.map((drink) => (
+                    <DrinkListItem
+                      key={drink.id}
+                      drink={drink}
+                      onPress={() => handleSelectDrink(drink)}
+                    />
+                  ))}
+                </View>
+              )}
+
+              {customDrinks.length > 0 && !searchQuery && !selectedCategory && (
+                <View style={styles.section}>
+                  <ThemedText type="small" muted style={styles.sectionLabel}>
+                    MY CUSTOM DRINKS
+                  </ThemedText>
+                  {customDrinks.map((drink) => (
                     <DrinkListItem
                       key={drink.id}
                       drink={drink}
@@ -344,7 +375,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
 
               <View style={styles.section}>
                 <ThemedText type="small" muted style={styles.sectionLabel}>
-                  {searchQuery || selectedCategory ? "RESULTS" : "POPULAR"}
+                  {searchQuery || selectedCategory ? "RESULTS" : "CATEGORIES"}
                 </ThemedText>
                 {filteredDrinks.map((drink) => (
                   <DrinkListItem
