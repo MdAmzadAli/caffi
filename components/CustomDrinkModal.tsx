@@ -107,11 +107,13 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
 
   const totalCaffeine = useMemo(() => {
     if (prefillDrink && selectedUnit === "ml") {
-      return Math.round((prefillDrink.caffeinePer100ml / 100) * quantity);
+      return (prefillDrink.caffeinePer100ml / 100) * quantity;
     }
     const mg = parseInt(caffeineMg) || 0;
     return mg * quantity;
   }, [caffeineMg, quantity, selectedUnit, prefillDrink]);
+
+  const formatCaffeine = (value: number) => value.toFixed(3).replace(/\.?0+$/, '') || '0';
 
   const peakTime = useMemo(() => {
     const now = new Date();
@@ -350,7 +352,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
                     <ThemedText type="body" style={{ flex: 1 }}>ml</ThemedText>
                     <View style={styles.caffeineInputWrapper}>
                       <ThemedText type="body" style={{ color: theme.text }}>
-                        {((prefillDrink.caffeinePer100ml / 100) * quantity).toFixed(3).replace(/\.?0+$/, '') || '0'}
+                        {formatCaffeine((prefillDrink.caffeinePer100ml / 100) * quantity)}
                       </ThemedText>
                       <ThemedText type="body" muted> mg</ThemedText>
                     </View>
@@ -447,7 +449,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
                     type="h3"
                     style={{ color: Colors.light.accent }}
                   >
-                    {totalCaffeine} mg
+                    {formatCaffeine(totalCaffeine)} mg
                   </ThemedText>
                 </View>
                 <ThemedText type="caption" muted>
