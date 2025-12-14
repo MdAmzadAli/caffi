@@ -350,7 +350,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
                     <ThemedText type="body" style={{ flex: 1 }}>ml</ThemedText>
                     <View style={styles.caffeineInputWrapper}>
                       <ThemedText type="body" style={{ color: theme.text }}>
-                        {Math.round((prefillDrink.caffeinePer100ml / 100) * quantity)}
+                        {((prefillDrink.caffeinePer100ml / 100) * quantity).toFixed(3).replace(/\.?0+$/, '') || '0'}
                       </ThemedText>
                       <ThemedText type="body" muted> mg</ThemedText>
                     </View>
