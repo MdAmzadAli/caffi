@@ -8,7 +8,6 @@ import {
   ScrollView,
   useWindowDimensions,
   Image,
-  FlatList,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import Animated, {
@@ -238,13 +237,6 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
       <View style={styles.overlay}>
         <Pressable style={styles.backdrop} onPress={closeModal} />
 
-        {showUnitPicker && (
-          <Pressable
-            style={[StyleSheet.absoluteFillObject, { zIndex: 5 }]}
-            onPress={() => setShowUnitPicker(false)}
-          />
-        )}
-
         <GestureDetector gesture={panGesture}>
           <Animated.View
             style={[
@@ -376,31 +368,6 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
                       <ThemedText type="body">{selectedUnit}</ThemedText>
                     </Pressable>
 
-                    {showUnitPicker && (
-                      <View style={[styles.unitPickerDropdown, { backgroundColor: theme.backgroundSecondary }]}>
-                        <FlatList
-                          data={UNITS}
-                          keyExtractor={(item) => item}
-                          style={{ maxHeight: 200 }}
-                          showsVerticalScrollIndicator={true}
-                          keyboardShouldPersistTaps="handled"
-                          renderItem={({ item: unit }) => (
-                            <Pressable
-                              onPress={() => {
-                                setSelectedUnit(unit);
-                                setShowUnitPicker(false);
-                              }}
-                              style={[
-                                styles.pickerItem,
-                                selectedUnit === unit && { backgroundColor: `${Colors.light.accent}20` },
-                              ]}
-                            >
-                              <ThemedText type="body">{unit}</ThemedText>
-                            </Pressable>
-                          )}
-                        />
-                      </View>
-                    )}
                   </View>
 
                   <View style={styles.caffeineInputWrapper}>
@@ -482,6 +449,34 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
             </ScrollView>
           </Animated.View>
         </GestureDetector>
+
+        {showUnitPicker && (
+          <View style={styles.unitPickerOverlay}>
+            <Pressable 
+              style={StyleSheet.absoluteFillObject} 
+              onPress={() => setShowUnitPicker(false)} 
+            />
+            <View style={[styles.unitPickerDropdown, { backgroundColor: theme.backgroundSecondary }]}>
+              <ScrollView style={{ maxHeight: 250 }} showsVerticalScrollIndicator={true}>
+                {UNITS.map((unit) => (
+                  <Pressable
+                    key={unit}
+                    onPress={() => {
+                      setSelectedUnit(unit);
+                      setShowUnitPicker(false);
+                    }}
+                    style={[
+                      styles.pickerItem,
+                      selectedUnit === unit && { backgroundColor: `${Colors.light.accent}20` },
+                    ]}
+                  >
+                    <ThemedText type="body">{unit}</ThemedText>
+                  </Pressable>
+                ))}
+              </ScrollView>
+            </View>
+          </View>
+        )}
       </View>
 
       <ImagePickerModal
@@ -640,19 +635,22 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: Colors.light.accent,
   },
+  unitPickerOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 100,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   unitPickerDropdown: {
-    position: "absolute",
-    top: "100%",
-    left: 0,
-    minWidth: 100,
-    borderRadius: BorderRadius.sm,
-    marginTop: 4,
+    minWidth: 200,
+    maxWidth: 280,
+    borderRadius: BorderRadius.md,
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 10,
   },
   caffeineInputWrapper: {
     flexDirection: "row",
