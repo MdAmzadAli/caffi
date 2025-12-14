@@ -51,7 +51,7 @@ const UNITS = ["cup", "shot", "ml", "oz", "teaspoon", "tablespoon", "glass", "ca
 export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDrink }: CustomDrinkModalProps) {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
-  const { addEntry, updateEntry, profile } = useCaffeineStore();
+  const { addEntry, updateEntry, addCustomDrink, profile } = useCaffeineStore();
   const { height: windowHeight } = useWindowDimensions();
   
   const MODAL_HEIGHT = windowHeight * 0.75;
@@ -206,16 +206,15 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
         closeModal();
         onAdd?.();
       } else {
-        const customDrink = {
-          id: `custom-${Date.now()}`,
+        const savedDrink = addCustomDrink({
           name: drinkName.trim(),
           category: "custom" as const,
           caffeinePer100ml: (parseInt(caffeineMg) || 0),
           defaultServingMl: 100,
           icon: "coffee",
           sizes: [{ name: selectedUnit, ml: 100 }],
-        };
-        addEntry(customDrink, 100 * quantity, undefined, false);
+        });
+        addEntry(savedDrink, 100 * quantity, undefined, false);
         closeModal();
         onAdd?.();
       }
