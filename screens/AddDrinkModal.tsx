@@ -94,7 +94,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
       );
     }
 
-    return drinks.slice(0, 10);
+    return drinks;
   }, [allDrinks, selectedCategory, searchQuery]);
 
   const caffeineMg = selectedDrink && selectedSize
