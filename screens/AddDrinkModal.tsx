@@ -365,7 +365,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
                     MY CUSTOM DRINKS
                   </ThemedText>
                   {customDrinks.map((drink) => (
-                    <DrinkListItem
+                    <CustomDrinkListItem
                       key={drink.id}
                       drink={drink}
                       onPress={() => handleSelectDrink(drink)}
@@ -693,6 +693,57 @@ function DrinkListItem({ drink, onPress }: DrinkListItemProps) {
   );
 }
 
+interface CustomDrinkListItemProps {
+  drink: DrinkItem;
+  onPress: () => void;
+}
+
+function CustomDrinkListItem({ drink, onPress }: CustomDrinkListItemProps) {
+  const { theme } = useTheme();
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const caffeineMg = Math.round(
+    (drink.caffeinePer100ml * drink.defaultServingMl) / 100,
+  );
+  const servingLabel = drink.defaultServingMl >= 100 
+    ? `${(drink.defaultServingMl / 100).toFixed(0)} cup` 
+    : `${drink.defaultServingMl}ml`;
+
+  return (
+    <AnimatedPressable
+      onPress={onPress}
+      onPressIn={() => { scale.value = withSpring(0.98); }}
+      onPressOut={() => { scale.value = withSpring(1); }}
+      style={[styles.drinkListItem, { backgroundColor: theme.backgroundDefault }, animatedStyle]}
+    >
+      <View style={styles.drinkIcon}>
+        <Feather
+          name={drink.icon as keyof typeof Feather.glyphMap}
+          size={20}
+          color={Colors.light.accent}
+        />
+      </View>
+      <View style={styles.drinkInfo}>
+        <ThemedText type="body" style={styles.drinkName}>
+          {drink.name}
+        </ThemedText>
+      </View>
+      <View style={styles.customDrinkRight}>
+        <ThemedText type="body" style={{ fontWeight: "600" }}>
+          {caffeineMg} mg
+        </ThemedText>
+        <ThemedText type="caption" muted>
+          {servingLabel}
+        </ThemedText>
+      </View>
+    </AnimatedPressable>
+  );
+}
+
 interface RecentEntryItemProps {
   entry: DrinkEntry;
   onPress: () => void;
@@ -923,6 +974,9 @@ const styles = StyleSheet.create({
   },
   drinkInfo: {
     flex: 1,
+  },
+  customDrinkRight: {
+    alignItems: "flex-end",
   },
   drinkName: {
     fontWeight: "500",
