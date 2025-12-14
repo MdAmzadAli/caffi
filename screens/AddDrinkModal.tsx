@@ -56,6 +56,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
   
   const [showCustomDrinkModal, setShowCustomDrinkModal] = useState(false);
   const [prefillDrink, setPrefillDrink] = useState<DrinkItem | null>(null);
+  const [editingCustomDrink, setEditingCustomDrink] = useState<DrinkItem | null>(null);
 
   const handleAddCustomDrink = () => {
     setPrefillDrink(null);
@@ -65,7 +66,18 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
   const handleCustomDrinkAdded = () => {
     setShowCustomDrinkModal(false);
     setPrefillDrink(null);
+    setEditingCustomDrink(null);
     handleCloseAnimated();
+  };
+
+  const handleEditCustomDrink = (drink: DrinkItem) => {
+    setEditingCustomDrink(drink);
+    setPrefillDrink(null);
+    setShowCustomDrinkModal(true);
+  };
+
+  const handleSaveCustomDrink = () => {
+    setEditingCustomDrink(null);
   };
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -369,6 +381,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
                       key={drink.id}
                       drink={drink}
                       onPress={() => handleSelectDrink(drink)}
+                      onEdit={() => handleEditCustomDrink(drink)}
                     />
                   ))}
                 </View>
@@ -580,9 +593,11 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
 
       <CustomDrinkModal
         visible={showCustomDrinkModal}
-        onClose={() => { setShowCustomDrinkModal(false); setPrefillDrink(null); }}
+        onClose={() => { setShowCustomDrinkModal(false); setPrefillDrink(null); setEditingCustomDrink(null); }}
         onAdd={handleCustomDrinkAdded}
         prefillDrink={prefillDrink}
+        editCustomDrink={editingCustomDrink}
+        onSaveCustomDrink={handleSaveCustomDrink}
       />
     </Modal>
   );
@@ -696,9 +711,10 @@ function DrinkListItem({ drink, onPress }: DrinkListItemProps) {
 interface CustomDrinkListItemProps {
   drink: DrinkItem;
   onPress: () => void;
+  onEdit: () => void;
 }
 
-function CustomDrinkListItem({ drink, onPress }: CustomDrinkListItemProps) {
+function CustomDrinkListItem({ drink, onPress, onEdit }: CustomDrinkListItemProps) {
   const { theme } = useTheme();
   const scale = useSharedValue(1);
 
@@ -709,9 +725,7 @@ function CustomDrinkListItem({ drink, onPress }: CustomDrinkListItemProps) {
   const caffeineMg = Math.round(
     (drink.caffeinePer100ml * drink.defaultServingMl) / 100,
   );
-  const servingLabel = drink.defaultServingMl >= 100 
-    ? `${(drink.defaultServingMl / 100).toFixed(0)} cup` 
-    : `${drink.defaultServingMl}ml`;
+  const servingLabel = drink.sizes?.[0]?.name || "cup";
 
   return (
     <AnimatedPressable
@@ -731,15 +745,17 @@ function CustomDrinkListItem({ drink, onPress }: CustomDrinkListItemProps) {
         <ThemedText type="body" style={styles.drinkName}>
           {drink.name}
         </ThemedText>
-      </View>
-      <View style={styles.customDrinkRight}>
-        <ThemedText type="body" style={{ fontWeight: "600" }}>
-          {caffeineMg} mg
-        </ThemedText>
         <ThemedText type="caption" muted>
-          {servingLabel}
+          {caffeineMg} mg / {servingLabel}
         </ThemedText>
       </View>
+      <Pressable 
+        onPress={(e) => { e.stopPropagation(); onEdit(); }}
+        style={styles.editButton}
+        hitSlop={8}
+      >
+        <Feather name="edit-2" size={16} color={Colors.light.accent} />
+      </Pressable>
     </AnimatedPressable>
   );
 }
@@ -977,6 +993,10 @@ const styles = StyleSheet.create({
   },
   customDrinkRight: {
     alignItems: "flex-end",
+  },
+  editButton: {
+    padding: Spacing.xs,
+    marginLeft: Spacing.sm,
   },
   drinkName: {
     fontWeight: "500",

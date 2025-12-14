@@ -33,7 +33,9 @@ interface CustomDrinkModalProps {
   onClose: () => void;
   onAdd?: () => void;
   editEntry?: DrinkEntry | null;
-  prefillDrink?: { name: string; caffeinePer100ml: number; defaultServingMl: number; category?: string; sizes?: { name: string; ml: number }[] } | null;
+  prefillDrink?: { id?: string; name: string; caffeinePer100ml: number; defaultServingMl: number; category?: string; sizes?: { name: string; ml: number }[] } | null;
+  editCustomDrink?: { id: string; name: string; caffeinePer100ml: number; defaultServingMl: number; category?: string; sizes?: { name: string; ml: number }[] } | null;
+  onSaveCustomDrink?: () => void;
 }
 
 const getUnitForDrink = (name: string, category?: string, sizes?: { name: string; ml: number }[]): string => {
@@ -48,14 +50,15 @@ const getUnitForDrink = (name: string, category?: string, sizes?: { name: string
 
 const UNITS = ["cup", "shot", "ml", "oz", "teaspoon", "tablespoon", "glass", "can", "bottle", "scoop", "pint", "liter", "fl oz", "mug"];
 
-export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDrink }: CustomDrinkModalProps) {
+export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDrink, editCustomDrink, onSaveCustomDrink }: CustomDrinkModalProps) {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
-  const { addEntry, updateEntry, addCustomDrink, profile } = useCaffeineStore();
+  const { addEntry, updateEntry, addCustomDrink, updateCustomDrink, profile } = useCaffeineStore();
   const { height: windowHeight } = useWindowDimensions();
   
   const MODAL_HEIGHT = windowHeight * 0.75;
   const isEditMode = !!editEntry;
+  const isEditingCustomDrink = !!editCustomDrink;
 
   const [drinkName, setDrinkName] = useState("");
   const [quantity, setQuantity] = useState(1);
@@ -90,6 +93,14 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
       } else {
         setStartTimeLabel(entryDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }));
       }
+    } else if (editCustomDrink && visible) {
+      setDrinkName(editCustomDrink.name);
+      setQuantity(1);
+      const bestUnit = getUnitForDrink(editCustomDrink.name, editCustomDrink.category, editCustomDrink.sizes);
+      setSelectedUnit(bestUnit);
+      setCaffeineMg(editCustomDrink.caffeinePer100ml.toString());
+      setStartTime(new Date());
+      setStartTimeLabel("now");
     } else if (prefillDrink && visible && !editEntry) {
       setDrinkName(prefillDrink.name);
       setQuantity(1);
@@ -100,7 +111,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
       setStartTime(new Date());
       setStartTimeLabel("now");
     }
-  }, [editEntry, prefillDrink, visible]);
+  }, [editEntry, prefillDrink, editCustomDrink, visible]);
 
   const translateY = useSharedValue(MODAL_HEIGHT);
   const startY = useSharedValue(0);
@@ -205,6 +216,13 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
         });
         closeModal();
         onAdd?.();
+      } else if (isEditingCustomDrink && editCustomDrink) {
+        updateCustomDrink(editCustomDrink.id, {
+          name: drinkName.trim(),
+          caffeinePer100ml: parseInt(caffeineMg) || 0,
+          sizes: [{ name: selectedUnit, ml: 100 }],
+        });
+        onSaveCustomDrink?.();
       } else {
         const savedDrink = addCustomDrink({
           name: drinkName.trim(),
@@ -326,8 +344,8 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
                     onPress={() => setSelectedUnit(getUnitForDrink(prefillDrink.name, prefillDrink.category, prefillDrink.sizes))}
                     style={styles.radioRow}
                   >
-                    <View style={[styles.radioCircle, selectedUnit !== "ml" && styles.radioCircleActive]}>
-                      {selectedUnit !== "ml" && <View style={styles.radioInner} />}
+                    <View style={[styles.radioCircle, (selectedUnit !== "ml" || prefillDrink.category === "custom") && styles.radioCircleActive]}>
+                      {(selectedUnit !== "ml" || prefillDrink.category === "custom") && <View style={styles.radioInner} />}
                     </View>
                     <ThemedText type="body" style={{ flex: 1 }}>
                       {getUnitForDrink(prefillDrink.name, prefillDrink.category, prefillDrink.sizes)}
@@ -339,21 +357,23 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
                       <ThemedText type="body" muted> mg</ThemedText>
                     </View>
                   </Pressable>
-                  <Pressable
-                    onPress={() => setSelectedUnit("ml")}
-                    style={styles.radioRow}
-                  >
-                    <View style={[styles.radioCircle, selectedUnit === "ml" && styles.radioCircleActive]}>
-                      {selectedUnit === "ml" && <View style={styles.radioInner} />}
-                    </View>
-                    <ThemedText type="body" style={{ flex: 1 }}>ml</ThemedText>
-                    <View style={styles.caffeineInputWrapper}>
-                      <ThemedText type="body" style={{ color: theme.text }}>
-                        {formatCaffeine((prefillDrink.caffeinePer100ml / 100) * quantity)}
-                      </ThemedText>
-                      <ThemedText type="body" muted> mg</ThemedText>
-                    </View>
-                  </Pressable>
+                  {prefillDrink.category !== "custom" && (
+                    <Pressable
+                      onPress={() => setSelectedUnit("ml")}
+                      style={styles.radioRow}
+                    >
+                      <View style={[styles.radioCircle, selectedUnit === "ml" && styles.radioCircleActive]}>
+                        {selectedUnit === "ml" && <View style={styles.radioInner} />}
+                      </View>
+                      <ThemedText type="body" style={{ flex: 1 }}>ml</ThemedText>
+                      <View style={styles.caffeineInputWrapper}>
+                        <ThemedText type="body" style={{ color: theme.text }}>
+                          {formatCaffeine((prefillDrink.caffeinePer100ml / 100) * quantity)}
+                        </ThemedText>
+                        <ThemedText type="body" muted> mg</ThemedText>
+                      </View>
+                    </Pressable>
+                  )}
                 </View>
               ) : (
                 <View style={styles.unitCaffeineRow}>
@@ -444,7 +464,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
                 ]}
                 disabled={!drinkName.trim() || totalCaffeine <= 0}
               >
-                <ThemedText type="body" style={styles.addButtonText}>{isEditMode ? "Save" : "Add"}</ThemedText>
+                <ThemedText type="body" style={styles.addButtonText}>{isEditMode || isEditingCustomDrink ? "Save" : "Add"}</ThemedText>
               </Pressable>
             </ScrollView>
           </Animated.View>

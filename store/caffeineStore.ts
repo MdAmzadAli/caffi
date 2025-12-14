@@ -346,6 +346,17 @@ export function useCaffeineStore() {
     return newDrink;
   }, []);
 
+  const updateCustomDrink = useCallback((id: string, updates: Partial<DrinkItem>) => {
+    globalCustomDrinks = globalCustomDrinks.map((drink) => {
+      if (drink.id === id) {
+        return { ...drink, ...updates };
+      }
+      return drink;
+    });
+    notifyListeners();
+    saveToStorage();
+  }, []);
+
   const toggleFavorite = useCallback((drinkId: string) => {
     if (globalFavorites.includes(drinkId)) {
       globalFavorites = globalFavorites.filter((id) => id !== drinkId);
@@ -467,6 +478,7 @@ export function useCaffeineStore() {
     updateEntry,
     updateProfile,
     addCustomDrink,
+    updateCustomDrink,
     toggleFavorite,
     getTodayEntries,
     getTodayCaffeine,
