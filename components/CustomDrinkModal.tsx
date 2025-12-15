@@ -223,6 +223,10 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
           sizes: [{ name: selectedUnit, ml: 100 }],
         });
         onSaveCustomDrink?.();
+      } else if (prefillDrink?.id && !prefillDrink.id.startsWith('custom-')) {
+        addEntry(prefillDrink as any, prefillDrink.defaultServingMl * quantity, undefined, false);
+        closeModal();
+        onAdd?.();
       } else {
         const savedDrink = addCustomDrink({
           name: drinkName.trim(),
