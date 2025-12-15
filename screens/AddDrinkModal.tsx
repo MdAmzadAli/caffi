@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback, useLayoutEffect } from "react";
+import React, { useState, useMemo, useEffect, useCallback, useLayoutEffect, useRef } from "react";
 import {
   View,
   StyleSheet,
@@ -7,6 +7,9 @@ import {
   Pressable,
   ScrollView,
   useWindowDimensions,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  LayoutChangeEvent,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import Animated, {
@@ -87,6 +90,12 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
   const [notes, setNotes] = useState("");
   const [isFavorite, setIsFavorite] = useState(false);
 
+  const [scrollY, setScrollY] = useState(0);
+  const [categoryExpanded, setCategoryExpanded] = useState(false);
+  const [sectionOffsets, setSectionOffsets] = useState<{ [key: string]: number }>({});
+  const [currentStickySection, setCurrentStickySection] = useState<string | null>(null);
+  const CATEGORY_COLLAPSE_THRESHOLD = 50;
+
   const allDrinks = getAllDrinks();
   const favoriteDrinks = getFavoriteDrinks();
 
@@ -149,7 +158,34 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
     setSelectedSize(null);
     setNotes("");
     setIsFavorite(false);
+    setScrollY(0);
+    setCategoryExpanded(false);
+    setSectionOffsets({});
+    setCurrentStickySection(null);
   };
+
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const y = event.nativeEvent.contentOffset.y;
+    setScrollY(y);
+    
+    const stickyOffset = 60;
+    const sections = Object.entries(sectionOffsets).sort((a, b) => a[1] - b[1]);
+    let activeSection: string | null = null;
+    
+    for (const [key, offset] of sections) {
+      if (y >= offset - stickyOffset - 10) {
+        activeSection = key;
+      }
+    }
+    setCurrentStickySection(activeSection);
+  };
+
+  const handleSectionLayout = (sectionKey: string) => (event: LayoutChangeEvent) => {
+    const { y } = event.nativeEvent.layout;
+    setSectionOffsets(prev => ({ ...prev, [sectionKey]: y }));
+  };
+
+  const isCategoryCollapsed = scrollY > CATEGORY_COLLAPSE_THRESHOLD;
 
   const translateY = useSharedValue(INITIAL_HEIGHT);
   const sheetHeight = useSharedValue(INITIAL_HEIGHT);
@@ -302,104 +338,154 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
             </View>
 
             {!selectedDrink ? (
-              <ScrollView
-                style={styles.scrollContent}
-                showsVerticalScrollIndicator={false}
-              >
-              <View style={styles.searchContainer}>
-                <View
-                  style={[
-                    styles.searchBox,
-                    { backgroundColor: theme.backgroundDefault },
-                  ]}
-                >
-                  <Feather name="search" size={20} color={theme.textMuted} />
-                  <TextInput
-                    style={[styles.searchInput, { color: theme.text }]}
-                    placeholder="Search drinks or brands..."
-                    placeholderTextColor={theme.textMuted}
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                  />
-                  {searchQuery.length > 0 && (
-                    <Pressable onPress={() => setSearchQuery("")}>
-                      <Feather name="x" size={20} color={theme.textMuted} />
-                    </Pressable>
+              <View style={styles.drinkListContainer}>
+                {/* Fixed Header: Search + Collapsible Category */}
+                <View style={[styles.fixedHeader, { backgroundColor: theme.backgroundRoot }]}>
+                  <View style={styles.searchRow}>
+                    <View
+                      style={[
+                        styles.searchBox,
+                        { backgroundColor: theme.backgroundDefault, flex: 1 },
+                      ]}
+                    >
+                      <Feather name="search" size={20} color={theme.textMuted} />
+                      <TextInput
+                        style={[styles.searchInput, { color: theme.text }]}
+                        placeholder="Search drinks or brands..."
+                        placeholderTextColor={theme.textMuted}
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                      />
+                      {searchQuery.length > 0 && (
+                        <Pressable onPress={() => setSearchQuery("")}>
+                          <Feather name="x" size={20} color={theme.textMuted} />
+                        </Pressable>
+                      )}
+                    </View>
+                    {isCategoryCollapsed && (
+                      <Pressable
+                        onPress={() => setCategoryExpanded(!categoryExpanded)}
+                        style={[styles.categoryExpandButton, { backgroundColor: theme.backgroundDefault }]}
+                      >
+                        <Feather 
+                          name={categoryExpanded ? "chevron-up" : "chevron-down"} 
+                          size={20} 
+                          color={selectedCategory ? Colors.light.accent : theme.textMuted} 
+                        />
+                      </Pressable>
+                    )}
+                  </View>
+                  
+                  {/* Expanded categories dropdown */}
+                  {isCategoryCollapsed && categoryExpanded && (
+                    <View style={styles.categoriesDropdown}>
+                      {QUICK_CATEGORIES.map((cat) => (
+                        <QuickCategoryCard
+                          key={cat.key}
+                          label={cat.label}
+                          icon={cat.icon}
+                          isActive={selectedCategory === cat.key}
+                          onPress={() => {
+                            setSelectedCategory(selectedCategory === cat.key ? null : cat.key);
+                            setCategoryExpanded(false);
+                          }}
+                        />
+                      ))}
+                    </View>
+                  )}
+                  
+                  {/* Inline categories when not scrolled */}
+                  {!isCategoryCollapsed && (
+                    <View style={styles.categoriesRow}>
+                      {QUICK_CATEGORIES.map((cat) => (
+                        <QuickCategoryCard
+                          key={cat.key}
+                          label={cat.label}
+                          icon={cat.icon}
+                          isActive={selectedCategory === cat.key}
+                          onPress={() =>
+                            setSelectedCategory(selectedCategory === cat.key ? null : cat.key)
+                          }
+                        />
+                      ))}
+                    </View>
+                  )}
+                  
+                  {/* Sticky Section Header */}
+                  {currentStickySection && isCategoryCollapsed && (
+                    <View style={[styles.stickySectionHeader, { backgroundColor: theme.backgroundRoot }]}>
+                      <ThemedText type="small" muted style={styles.sectionLabel}>
+                        {currentStickySection}
+                      </ThemedText>
+                    </View>
                   )}
                 </View>
+
+                <ScrollView
+                  style={styles.scrollContent}
+                  showsVerticalScrollIndicator={false}
+                  onScroll={handleScroll}
+                  scrollEventThrottle={16}
+                >
+                  {recentEntries.length > 0 && !searchQuery && (
+                    <View style={styles.section} onLayout={handleSectionLayout("QUICK ADD")}>
+                      <ThemedText type="small" muted style={styles.sectionLabel}>
+                        QUICK ADD
+                      </ThemedText>
+                      {recentEntries.map((entry) => (
+                        <RecentEntryItem
+                          key={entry.id}
+                          entry={entry}
+                          onPress={() => {
+                            const drink = allDrinks.find(d => d.id === entry.drinkId) || {
+                              id: entry.drinkId,
+                              name: entry.name,
+                              category: entry.category as Category,
+                              caffeinePer100ml: (entry.caffeineAmount / entry.servingSize) * 100,
+                              defaultServingMl: entry.servingSize,
+                              icon: "coffee",
+                              sizes: [],
+                            };
+                            handleSelectDrink(drink);
+                          }}
+                        />
+                      ))}
+                    </View>
+                  )}
+
+                  {customDrinks.length > 0 && !searchQuery && (
+                    <View style={styles.section} onLayout={handleSectionLayout("MY CUSTOM DRINKS")}>
+                      <ThemedText type="small" muted style={styles.sectionLabel}>
+                        MY CUSTOM DRINKS
+                      </ThemedText>
+                      {customDrinks.map((drink) => (
+                        <CustomDrinkListItem
+                          key={drink.id}
+                          drink={drink}
+                          onPress={() => handleSelectDrink(drink)}
+                          onEdit={() => handleEditCustomDrink(drink)}
+                        />
+                      ))}
+                    </View>
+                  )}
+
+                  <View 
+                    style={styles.section} 
+                    onLayout={handleSectionLayout(searchQuery ? "RESULTS" : selectedCategory ? selectedCategory.toUpperCase() : "POPULAR")}
+                  >
+                    <ThemedText type="small" muted style={styles.sectionLabel}>
+                      {searchQuery ? "RESULTS" : selectedCategory ? selectedCategory.toUpperCase() : "POPULAR"}
+                    </ThemedText>
+                    {filteredDrinks.map((drink) => (
+                      <DrinkListItem
+                        key={drink.id}
+                        drink={drink}
+                        onPress={() => handleSelectDrink(drink)}
+                      />
+                    ))}
+                  </View>
+                </ScrollView>
               </View>
-
-              <View style={styles.categoriesRow}>
-                {QUICK_CATEGORIES.map((cat) => (
-                  <QuickCategoryCard
-                    key={cat.key}
-                    label={cat.label}
-                    icon={cat.icon}
-                    isActive={selectedCategory === cat.key}
-                    onPress={() =>
-                      setSelectedCategory(
-                        selectedCategory === cat.key ? null : cat.key,
-                      )
-                    }
-                  />
-                ))}
-              </View>
-
-              {recentEntries.length > 0 && !searchQuery && (
-                <View style={styles.section}>
-                  <ThemedText type="small" muted style={styles.sectionLabel}>
-                    QUICK ADD
-                  </ThemedText>
-                  {recentEntries.map((entry) => (
-                    <RecentEntryItem
-                      key={entry.id}
-                      entry={entry}
-                      onPress={() => {
-                        const drink = allDrinks.find(d => d.id === entry.drinkId) || {
-                          id: entry.drinkId,
-                          name: entry.name,
-                          category: entry.category as Category,
-                          caffeinePer100ml: (entry.caffeineAmount / entry.servingSize) * 100,
-                          defaultServingMl: entry.servingSize,
-                          icon: "coffee",
-                          sizes: [],
-                        };
-                        handleSelectDrink(drink);
-                      }}
-                    />
-                  ))}
-                </View>
-              )}
-
-              {customDrinks.length > 0 && !searchQuery && (
-                <View style={styles.section}>
-                  <ThemedText type="small" muted style={styles.sectionLabel}>
-                    MY CUSTOM DRINKS
-                  </ThemedText>
-                  {customDrinks.map((drink) => (
-                    <CustomDrinkListItem
-                      key={drink.id}
-                      drink={drink}
-                      onPress={() => handleSelectDrink(drink)}
-                      onEdit={() => handleEditCustomDrink(drink)}
-                    />
-                  ))}
-                </View>
-              )}
-
-              <View style={styles.section}>
-                <ThemedText type="small" muted style={styles.sectionLabel}>
-                  {searchQuery ? "RESULTS" : selectedCategory ? selectedCategory.toUpperCase() : "POPULAR"}
-                </ThemedText>
-                {filteredDrinks.map((drink) => (
-                  <DrinkListItem
-                    key={drink.id}
-                    drink={drink}
-                    onPress={() => handleSelectDrink(drink)}
-                  />
-                ))}
-              </View>
-              </ScrollView>
             ) : (
               <ScrollView
                 style={styles.scrollContent}
@@ -906,8 +992,39 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  drinkListContainer: {
+    flex: 1,
+  },
+  fixedHeader: {
+    paddingHorizontal: Spacing.xl,
+    paddingBottom: Spacing.sm,
+    zIndex: 10,
+  },
+  searchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+    marginBottom: Spacing.sm,
+  },
+  categoryExpandButton: {
+    width: 44,
+    height: 44,
+    borderRadius: BorderRadius.sm,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  categoriesDropdown: {
+    flexDirection: "row",
+    gap: Spacing.sm,
+    marginBottom: Spacing.sm,
+  },
+  stickySectionHeader: {
+    paddingTop: Spacing.xs,
+    paddingBottom: Spacing.xs,
+  },
   scrollContent: {
     paddingHorizontal: Spacing.xl,
+    flex: 1,
   },
   customDrinkButton: {
     flexDirection: "row",
