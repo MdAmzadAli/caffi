@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback, useLayoutEffect, useRef } from "react";
+import React, { useState, useMemo, useEffect, useCallback, useLayoutEffect, useRef, memo } from "react";
 import {
   View,
   StyleSheet,
@@ -10,6 +10,7 @@ import {
   NativeScrollEvent,
   NativeSyntheticEvent,
   LayoutChangeEvent,
+  ActivityIndicator,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import Animated, {
@@ -124,6 +125,31 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
     return drinks;
   }, [allDrinks, selectedCategory, searchQuery]);
 
+  // Pagination for infinite scroll
+  const PAGE_SIZE = 25;
+  const [displayedCount, setDisplayedCount] = useState(PAGE_SIZE);
+  const isLoadingMore = useRef(false);
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    setDisplayedCount(PAGE_SIZE);
+  }, [selectedCategory, searchQuery]);
+
+  const displayedDrinks = useMemo(() => {
+    return filteredDrinks.slice(0, displayedCount);
+  }, [filteredDrinks, displayedCount]);
+
+  const hasMoreDrinks = displayedCount < filteredDrinks.length;
+
+  const loadMoreDrinks = useCallback(() => {
+    if (isLoadingMore.current || !hasMoreDrinks) return;
+    isLoadingMore.current = true;
+    setTimeout(() => {
+      setDisplayedCount(prev => Math.min(prev + PAGE_SIZE, filteredDrinks.length));
+      isLoadingMore.current = false;
+    }, 100);
+  }, [hasMoreDrinks, filteredDrinks.length]);
+
   const caffeineMg = selectedDrink && selectedSize
     ? Math.round((selectedDrink.caffeinePer100ml * selectedSize) / 100)
     : 0;
@@ -165,7 +191,8 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
   };
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const y = event.nativeEvent.contentOffset.y;
+    const { contentOffset, layoutMeasurement, contentSize } = event.nativeEvent;
+    const y = contentOffset.y;
     setScrollY(y);
     
     const stickyOffset = 60;
@@ -178,6 +205,12 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
       }
     }
     setCurrentStickySection(activeSection);
+
+    // Infinite scroll: load more when near bottom
+    const distanceFromBottom = contentSize.height - layoutMeasurement.height - y;
+    if (distanceFromBottom < 200 && hasMoreDrinks) {
+      loadMoreDrinks();
+    }
   };
 
   const handleSectionLayout = (sectionKey: string) => (event: LayoutChangeEvent) => {
@@ -478,13 +511,18 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
                     <ThemedText type="small" muted style={styles.sectionLabel}>
                       {searchQuery ? "RESULTS" : selectedCategory ? selectedCategory.toUpperCase() : "POPULAR"}
                     </ThemedText>
-                    {filteredDrinks.map((drink) => (
-                      <DrinkListItem
+                    {displayedDrinks.map((drink) => (
+                      <MemoizedDrinkListItem
                         key={drink.id}
                         drink={drink}
                         onPress={() => handleSelectDrink(drink)}
                       />
                     ))}
+                    {hasMoreDrinks && (
+                      <View style={styles.loadingMore}>
+                        <ActivityIndicator size="small" color={Colors.light.accent} />
+                      </View>
+                    )}
                   </View>
                 </ScrollView>
               </View>
@@ -796,6 +834,8 @@ function DrinkListItem({ drink, onPress }: DrinkListItemProps) {
   );
 }
 
+const MemoizedDrinkListItem = memo(DrinkListItem, (prev, next) => prev.drink.id === next.drink.id);
+
 interface CustomDrinkListItemProps {
   drink: DrinkItem;
   onPress: () => void;
@@ -1085,6 +1125,10 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: Spacing.lg,
+  },
+  loadingMore: {
+    paddingVertical: Spacing.lg,
+    alignItems: "center",
   },
   sectionLabel: {
     marginBottom: Spacing.sm,
