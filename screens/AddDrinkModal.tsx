@@ -415,7 +415,9 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
                   {currentStickySection && isCategoryCollapsed && (
                     <View style={[styles.stickySectionHeader, { backgroundColor: theme.backgroundRoot }]}>
                       <ThemedText type="small" muted style={styles.sectionLabel}>
-                        {currentStickySection}
+                        {currentStickySection === "CATEGORY_SECTION" 
+                          ? (searchQuery ? "RESULTS" : selectedCategory ? selectedCategory.toUpperCase() : "POPULAR")
+                          : currentStickySection}
                       </ThemedText>
                     </View>
                   )}
@@ -471,7 +473,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
 
                   <View 
                     style={styles.section} 
-                    onLayout={handleSectionLayout(searchQuery ? "RESULTS" : selectedCategory ? selectedCategory.toUpperCase() : "POPULAR")}
+                    onLayout={handleSectionLayout("CATEGORY_SECTION")}
                   >
                     <ThemedText type="small" muted style={styles.sectionLabel}>
                       {searchQuery ? "RESULTS" : selectedCategory ? selectedCategory.toUpperCase() : "POPULAR"}
