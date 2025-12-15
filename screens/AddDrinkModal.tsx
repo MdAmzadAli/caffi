@@ -130,10 +130,10 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
   const [displayedCount, setDisplayedCount] = useState(PAGE_SIZE);
   const isLoadingMore = useRef(false);
 
-  // Reset pagination when filters change
+  // Reset pagination when filters change or modal reopens
   useEffect(() => {
     setDisplayedCount(PAGE_SIZE);
-  }, [selectedCategory, searchQuery]);
+  }, [selectedCategory, searchQuery, visible]);
 
   const displayedDrinks = useMemo(() => {
     return filteredDrinks.slice(0, displayedCount);
