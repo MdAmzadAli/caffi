@@ -29,7 +29,6 @@ import {
   formatTimeLabel,
   formatCurrentTime,
   generateSmoothPath,
-  getEventMarkersWithCollision,
   getSleepStatusMessage,
   parseBedtimeToMs,
 } from "@/utils/graphUtils";
@@ -235,13 +234,6 @@ export function CaffeineGraphNew({
     return markers;
   }, [startMs, endMs]);
 
-  const eventMarkers = useMemo(() => {
-    const relevantEvents = events.filter((e) => {
-      const eventMs = Date.parse(e.timestampISO);
-      return eventMs >= startMs && eventMs <= endMs;
-    });
-    return getEventMarkersWithCollision(relevantEvents, timeToX, 22);
-  }, [events, startMs, endMs, timeToX]);
 
   const nowX = timeToX(nowMs);
   const bedtimeX = timeToX(bedtimeMs);
@@ -426,78 +418,54 @@ export function CaffeineGraphNew({
             if (eventMs < startMs || eventMs > endMs) return null;
             const x = timeToX(eventMs);
             const y = mgToY(getActiveAtTime(events, eventMs, halfLifeHours));
-            return (
-              <Circle
-                key={`dot-${evt.id}`}
-                cx={x}
-                cy={y}
-                r={3}
-                fill={GRAPH_COLORS.accentGold}
-              />
-            );
-          })}
-
-          {eventMarkers.map((marker, idx) => {
-            const eventMs = Date.parse(marker.event.timestampISO);
-            const mgAtEvent = getActiveAtTime(events, eventMs, halfLifeHours);
-            const markerY = mgToY(mgAtEvent);
-            const eventsToRender = marker.clustered.length > 1 ? marker.clustered : [marker.event];
-            const stackOffset = MARKER_SIZE * 0.7;
+            const iconY = Math.max(GRAPH_PADDING_TOP + MARKER_IMAGE_SIZE / 2, y - MARKER_IMAGE_SIZE / 2 - 6);
+            const category = evt.category || 'coffee';
+            const hasImage = CATEGORY_IMAGES[category];
+            const clipId = `clip-${evt.id}`;
 
             return (
-              <G key={marker.event.id}>
+              <G key={`event-${evt.id}`}>
                 <Circle
-                  cx={marker.x}
-                  cy={markerY}
-                  r={2}
-                  fill={GRAPH_COLORS.darkBrown2}
+                  cx={x}
+                  cy={y}
+                  r={3}
+                  fill={GRAPH_COLORS.accentGold}
                 />
-                {eventsToRender.map((evt, stackIdx) => {
-                  const category = evt.category || 'coffee';
-                  const hasImage = CATEGORY_IMAGES[category];
-                  const clipId = `clip-${evt.id}`;
-                  const markerCenterY = Math.max(GRAPH_PADDING_TOP + MARKER_SIZE / 2, markerY - MARKER_SIZE / 2 - 4 - (stackIdx * stackOffset));
-
-                  return (
-                    <G key={evt.id}>
-                      <Defs>
-                        <ClipPath id={clipId}>
-                          <Circle cx={marker.x} cy={markerCenterY} r={MARKER_IMAGE_SIZE / 2} />
-                        </ClipPath>
-                      </Defs>
-                      <Circle
-                        cx={marker.x}
-                        cy={markerCenterY}
-                        r={MARKER_IMAGE_SIZE / 2 + 2}
-                        fill={GRAPH_COLORS.bgSecondary}
-                        stroke={GRAPH_COLORS.mutedGrey}
-                        strokeWidth={0.5}
-                        strokeOpacity={0.3}
-                      />
-                      {hasImage ? (
-                        <SvgImage
-                          x={marker.x - MARKER_IMAGE_SIZE / 2}
-                          y={markerCenterY - MARKER_IMAGE_SIZE / 2}
-                          width={MARKER_IMAGE_SIZE}
-                          height={MARKER_IMAGE_SIZE}
-                          href={CATEGORY_IMAGES[category]}
-                          clipPath={`url(#${clipId})`}
-                          preserveAspectRatio="xMidYMid slice"
-                        />
-                      ) : (
-                        <SvgText
-                          x={marker.x}
-                          y={markerCenterY + 3}
-                          fontSize={8}
-                          textAnchor="middle"
-                          fill={GRAPH_COLORS.darkBrown}
-                        >
-                          ☕
-                        </SvgText>
-                      )}
-                    </G>
-                  );
-                })}
+                <Defs>
+                  <ClipPath id={clipId}>
+                    <Circle cx={x} cy={iconY} r={MARKER_IMAGE_SIZE / 2} />
+                  </ClipPath>
+                </Defs>
+                <Circle
+                  cx={x}
+                  cy={iconY}
+                  r={MARKER_IMAGE_SIZE / 2 + 2}
+                  fill={GRAPH_COLORS.bgSecondary}
+                  stroke={GRAPH_COLORS.mutedGrey}
+                  strokeWidth={0.5}
+                  strokeOpacity={0.3}
+                />
+                {hasImage ? (
+                  <SvgImage
+                    x={x - MARKER_IMAGE_SIZE / 2}
+                    y={iconY - MARKER_IMAGE_SIZE / 2}
+                    width={MARKER_IMAGE_SIZE}
+                    height={MARKER_IMAGE_SIZE}
+                    href={CATEGORY_IMAGES[category]}
+                    clipPath={`url(#${clipId})`}
+                    preserveAspectRatio="xMidYMid slice"
+                  />
+                ) : (
+                  <SvgText
+                    x={x}
+                    y={iconY + 3}
+                    fontSize={8}
+                    textAnchor="middle"
+                    fill={GRAPH_COLORS.darkBrown}
+                  >
+                    ☕
+                  </SvgText>
+                )}
               </G>
             );
           })}
