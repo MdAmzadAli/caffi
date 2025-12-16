@@ -421,6 +421,22 @@ export function CaffeineGraphNew({
             fill="none"
           />
 
+          {events.map((evt) => {
+            const eventMs = Date.parse(evt.timestampISO);
+            if (eventMs < startMs || eventMs > endMs) return null;
+            const x = timeToX(eventMs);
+            const y = mgToY(getActiveAtTime(events, eventMs, halfLifeHours));
+            return (
+              <Circle
+                key={`dot-${evt.id}`}
+                cx={x}
+                cy={y}
+                r={3}
+                fill={GRAPH_COLORS.accentGold}
+              />
+            );
+          })}
+
           {eventMarkers.map((marker, idx) => {
             const eventMs = Date.parse(marker.event.timestampISO);
             const mgAtEvent = getActiveAtTime(events, eventMs, halfLifeHours);
