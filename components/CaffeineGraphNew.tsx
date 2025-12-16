@@ -99,7 +99,7 @@ const MARKER_SIZE = 18;
 const MARKER_IMAGE_SIZE = 14;
 const HOURS_VISIBLE = 11;
 const TOTAL_WINDOW_HOURS = 168;
-const GROUP_PROXIMITY_PX = 25;
+const GROUP_PROXIMITY_PX = 15;
 
 interface EventGroup {
   events: CaffeineEvent[];
