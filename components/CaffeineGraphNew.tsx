@@ -99,6 +99,15 @@ const MARKER_SIZE = 18;
 const MARKER_IMAGE_SIZE = 14;
 const HOURS_VISIBLE = 11;
 const TOTAL_WINDOW_HOURS = 168;
+const GROUP_PROXIMITY_PX = 25;
+
+interface EventGroup {
+  events: CaffeineEvent[];
+  x: number;
+  y: number;
+  iconY: number;
+  category: string;
+}
 
 const CATEGORY_IMAGES: Record<string, any> = {
   coffee: require("@/attached_assets/generated_images/caffi_app_icon_coffee_cup.png"),
@@ -413,62 +422,118 @@ export function CaffeineGraphNew({
             fill="none"
           />
 
-          {events.map((evt) => {
-            const eventMs = Date.parse(evt.timestampISO);
-            if (eventMs < startMs || eventMs > endMs) return null;
-            const x = timeToX(eventMs);
-            const y = mgToY(getActiveAtTime(events, eventMs, halfLifeHours));
-            const iconY = Math.max(GRAPH_PADDING_TOP + MARKER_IMAGE_SIZE / 2, y - MARKER_IMAGE_SIZE / 2 - 6);
-            const category = evt.category || 'coffee';
-            const hasImage = CATEGORY_IMAGES[category];
-            const clipId = `clip-${evt.id}`;
+          {(() => {
+            const visibleEvents = events
+              .map(evt => {
+                const eventMs = Date.parse(evt.timestampISO);
+                if (eventMs < startMs || eventMs > endMs) return null;
+                const x = timeToX(eventMs);
+                const y = mgToY(getActiveAtTime(events, eventMs, halfLifeHours));
+                return { evt, x, y, eventMs };
+              })
+              .filter((e): e is NonNullable<typeof e> => e !== null)
+              .sort((a, b) => a.eventMs - b.eventMs);
+
+            const groups: EventGroup[] = [];
+            let lastX = -Infinity;
+            for (const item of visibleEvents) {
+              const lastGroup = groups[groups.length - 1];
+              if (lastGroup && Math.abs(item.x - lastX) <= GROUP_PROXIMITY_PX) {
+                lastGroup.events.push(item.evt);
+                lastX = item.x;
+              } else {
+                const iconY = Math.max(GRAPH_PADDING_TOP + MARKER_IMAGE_SIZE / 2, item.y - MARKER_IMAGE_SIZE / 2 - 6);
+                groups.push({
+                  events: [item.evt],
+                  x: item.x,
+                  y: item.y,
+                  iconY,
+                  category: item.evt.category || 'coffee',
+                });
+                lastX = item.x;
+              }
+            }
 
             return (
-              <G key={`event-${evt.id}`}>
-                <Circle
-                  cx={x}
-                  cy={y}
-                  r={3}
-                  fill={GRAPH_COLORS.accentGold}
-                />
-                <Defs>
-                  <ClipPath id={clipId}>
-                    <Circle cx={x} cy={iconY} r={MARKER_IMAGE_SIZE / 2} />
-                  </ClipPath>
-                </Defs>
-                <Circle
-                  cx={x}
-                  cy={iconY}
-                  r={MARKER_IMAGE_SIZE / 2 + 2}
-                  fill={GRAPH_COLORS.bgSecondary}
-                  stroke={GRAPH_COLORS.mutedGrey}
-                  strokeWidth={0.5}
-                  strokeOpacity={0.3}
-                />
-                {hasImage ? (
-                  <SvgImage
-                    x={x - MARKER_IMAGE_SIZE / 2}
-                    y={iconY - MARKER_IMAGE_SIZE / 2}
-                    width={MARKER_IMAGE_SIZE}
-                    height={MARKER_IMAGE_SIZE}
-                    href={CATEGORY_IMAGES[category]}
-                    clipPath={`url(#${clipId})`}
-                    preserveAspectRatio="xMidYMid slice"
+              <>
+                {visibleEvents.map(item => (
+                  <Circle
+                    key={`dot-${item.evt.id}`}
+                    cx={item.x}
+                    cy={item.y}
+                    r={3}
+                    fill={GRAPH_COLORS.accentGold}
                   />
-                ) : (
-                  <SvgText
-                    x={x}
-                    y={iconY + 3}
-                    fontSize={8}
-                    textAnchor="middle"
-                    fill={GRAPH_COLORS.darkBrown}
-                  >
-                    ☕
-                  </SvgText>
-                )}
-              </G>
+                ))}
+                {groups.map((group, idx) => {
+                  const { x, iconY, category, events: groupEvents } = group;
+                  const hasImage = CATEGORY_IMAGES[category];
+                  const clipId = `clip-group-${idx}`;
+                  const count = groupEvents.length;
+
+                  return (
+                    <G key={`group-${idx}`}>
+                      <Defs>
+                        <ClipPath id={clipId}>
+                          <Circle cx={x} cy={iconY} r={MARKER_IMAGE_SIZE / 2} />
+                        </ClipPath>
+                      </Defs>
+                      <Circle
+                        cx={x}
+                        cy={iconY}
+                        r={MARKER_IMAGE_SIZE / 2 + 2}
+                        fill={GRAPH_COLORS.bgSecondary}
+                        stroke={GRAPH_COLORS.mutedGrey}
+                        strokeWidth={0.5}
+                        strokeOpacity={0.3}
+                      />
+                      {hasImage ? (
+                        <SvgImage
+                          x={x - MARKER_IMAGE_SIZE / 2}
+                          y={iconY - MARKER_IMAGE_SIZE / 2}
+                          width={MARKER_IMAGE_SIZE}
+                          height={MARKER_IMAGE_SIZE}
+                          href={CATEGORY_IMAGES[category]}
+                          clipPath={`url(#${clipId})`}
+                          preserveAspectRatio="xMidYMid slice"
+                        />
+                      ) : (
+                        <SvgText
+                          x={x}
+                          y={iconY + 3}
+                          fontSize={8}
+                          textAnchor="middle"
+                          fill={GRAPH_COLORS.darkBrown}
+                        >
+                          ☕
+                        </SvgText>
+                      )}
+                      {count > 1 && (
+                        <>
+                          <Circle
+                            cx={x + MARKER_IMAGE_SIZE / 2}
+                            cy={iconY - MARKER_IMAGE_SIZE / 2}
+                            r={6}
+                            fill={GRAPH_COLORS.accentGold}
+                          />
+                          <SvgText
+                            x={x + MARKER_IMAGE_SIZE / 2}
+                            y={iconY - MARKER_IMAGE_SIZE / 2 + 3}
+                            fontSize={8}
+                            fontWeight="bold"
+                            textAnchor="middle"
+                            fill="#FFFFFF"
+                          >
+                            {count}
+                          </SvgText>
+                        </>
+                      )}
+                    </G>
+                  );
+                })}
+              </>
             );
-          })}
+          })()}
         </Svg>
 
         <View style={[styles.xAxisContainer, { width: scrollContentWidth }]}>
