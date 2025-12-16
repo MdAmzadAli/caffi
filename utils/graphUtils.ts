@@ -229,6 +229,34 @@ export function getCaffeineAtSleepTimeWithNewEntry(
   return getActiveAtTime(allEvents, sleepTimeMs, halfLifeHours);
 }
 
+export function getMaxCaffeineInSleepWindow(
+  events: CaffeineEvent[],
+  newEntryMg: number,
+  newEntryTimeMs: number,
+  sleepTimeMs: number,
+  halfLifeHours: number,
+  windowHours: number = 6
+): number {
+  const tempEvent: CaffeineEvent = {
+    id: "temp",
+    name: "temp",
+    mg: newEntryMg,
+    timestampISO: new Date(newEntryTimeMs).toISOString(),
+  };
+  const allEvents = [...events, tempEvent];
+  
+  const stepMs = 15 * 60 * 1000;
+  const endMs = sleepTimeMs + windowHours * 3600000;
+  let maxCaffeine = 0;
+  
+  for (let t = sleepTimeMs; t <= endMs; t += stepMs) {
+    const mg = getActiveAtTime(allEvents, t, halfLifeHours);
+    if (mg > maxCaffeine) maxCaffeine = mg;
+  }
+  
+  return maxCaffeine;
+}
+
 export function getCaffeineLimitStatus(
   peakMg: number,
   optimalLimit: number

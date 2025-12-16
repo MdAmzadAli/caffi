@@ -30,7 +30,7 @@ import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import {
   CaffeineEvent,
   getPeakCaffeineWithNewEntry,
-  getCaffeineAtSleepTimeWithNewEntry,
+  getMaxCaffeineInSleepWindow,
   getCaffeineLimitStatus,
   getSleepImpactStatus,
   parseBedtimeToMs,
@@ -159,14 +159,14 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
   const sleepImpactStatus = useMemo(() => {
     if (!totalCaffeine || totalCaffeine <= 0) return "safe" as const;
     const sleepTimeMs = parseBedtimeToMs(profile.sleepTime || "23:00", startTime);
-    const caffeineAtSleep = getCaffeineAtSleepTimeWithNewEntry(
+    const maxCaffeineInSleepWindow = getMaxCaffeineInSleepWindow(
       caffeineEvents,
       totalCaffeine,
       startTime.getTime(),
       sleepTimeMs,
       HALF_LIFE_HOURS
     );
-    return getSleepImpactStatus(caffeineAtSleep);
+    return getSleepImpactStatus(maxCaffeineInSleepWindow);
   }, [caffeineEvents, totalCaffeine, startTime, profile.sleepTime]);
 
   const resetState = () => {
