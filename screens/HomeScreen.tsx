@@ -358,14 +358,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 
     return (
       <>
-        <View style={styles.ringRow}>
-          <RingProgress
-            consumedTodayMg={todayCaffeine}
-            optimalDailyMg={profile.optimalCaffeine}
-            sizePx={72}
-          />
-        </View>
-
         <View style={styles.mainContent}>
           <CollapsibleInfoCards
             recommendations={recommendations}
