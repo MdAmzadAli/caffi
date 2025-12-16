@@ -23,7 +23,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { ImagePickerModal, PRESET_IMAGES } from "@/components/ImagePickerModal";
 import { TimePickerModal } from "@/components/TimePickerModal";
-import { TimeToFinishModal } from "@/components/TimeToFinishModal";
+import { GlowIndicator } from "@/components/GlowIndicator";
 import { useCaffeineStore, DrinkEntry } from "@/store/caffeineStore";
 import { useTheme } from "@/hooks/useTheme";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
@@ -65,8 +65,6 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
   const [selectedUnit, setSelectedUnit] = useState("cup");
   const [caffeineMg, setCaffeineMg] = useState("10");
   const [showUnitPicker, setShowUnitPicker] = useState(false);
-  const [showTimeToFinishModal, setShowTimeToFinishModal] = useState(false);
-  const [timeToFinishMinutes, setTimeToFinishMinutes] = useState(10);
   const [showImagePicker, setShowImagePicker] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [showStartTimePicker, setShowStartTimePicker] = useState(false);
@@ -126,12 +124,6 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
 
   const formatCaffeine = (value: number) => value.toFixed(3).replace(/\.?0+$/, '') || '0';
 
-  const peakTime = useMemo(() => {
-    const now = new Date();
-    now.setMinutes(now.getMinutes() + 45);
-    return now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
-  }, []);
-
   const willDisruptSleep = useMemo(() => {
     const now = new Date();
     const sleepTimeDate = new Date();
@@ -149,7 +141,6 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
     setQuantity(1);
     setSelectedUnit("cup");
     setCaffeineMg("10");
-    setTimeToFinishMinutes(10);
     setSelectedImage(null);
     setStartTime(new Date());
     setStartTimeLabel("now");
@@ -422,42 +413,17 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
 
               <View style={[styles.divider, { backgroundColor: theme.divider }]} />
 
-              <View style={styles.timeRow}>
-                <ThemedText type="body">Time to finish:</ThemedText>
-                <Pressable
-                  onPress={() => setShowTimeToFinishModal(true)}
-                  style={[styles.timeChip, { borderColor: Colors.light.accent }]}
-                >
-                  <Feather name="clock" size={14} color={Colors.light.accent} />
-                  <ThemedText type="small" style={{ color: Colors.light.accent }}>{timeToFinishMinutes} minutes</ThemedText>
-                </Pressable>
-              </View>
-
-              <View style={[styles.divider, { backgroundColor: theme.divider }]} />
-
-              <View
-                style={[
-                  styles.peakInfoCard,
-                  { backgroundColor: `${Colors.light.accent}15` },
-                ]}
-              >
-                <View style={styles.peakInfoHeader}>
-                  <ThemedText type="body" style={{ fontWeight: "600" }}>
-                    Your caffeine will peak at:
-                  </ThemedText>
-                  <ThemedText
-                    type="h3"
-                    style={{ color: Colors.light.accent }}
-                  >
-                    {formatCaffeine(totalCaffeine)} mg
-                  </ThemedText>
-                </View>
-                <ThemedText type="caption" muted>
-                  This item will peak at {peakTime}.{" "}
-                  {willDisruptSleep
-                    ? "This may disrupt your sleep time."
-                    : "This won't disrupt your sleep time."}
-                </ThemedText>
+              <View style={styles.indicatorsRow}>
+                <GlowIndicator
+                  icon="coffee"
+                  label="Caffeine Limit"
+                  status="safe"
+                />
+                <GlowIndicator
+                  icon="moon"
+                  label="Sleep Impact"
+                  status="safe"
+                />
               </View>
 
               <Pressable
@@ -514,13 +480,6 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
         onClose={() => setShowStartTimePicker(false)}
         onSelectTime={handleSelectStartTime}
         initialDate={startTime}
-      />
-
-      <TimeToFinishModal
-        visible={showTimeToFinishModal}
-        onClose={() => setShowTimeToFinishModal(false)}
-        onSelectTime={(minutes) => setTimeToFinishMinutes(minutes)}
-        initialMinutes={timeToFinishMinutes}
       />
     </Modal>
   );
@@ -710,18 +669,12 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
   },
-  peakInfoCard: {
-    padding: Spacing.lg,
-    borderRadius: BorderRadius.md,
-    marginTop: Spacing.md,
-    marginBottom: Spacing.lg,
-    height: 90,
-  },
-  peakInfoHeader: {
+  indicatorsRow: {
     flexDirection: "row",
+    justifyContent: "space-around",
     alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: Spacing.xs,
+    paddingVertical: Spacing.md,
+    marginBottom: Spacing.md,
   },
   addButton: {
     backgroundColor: "#4CAF50",
