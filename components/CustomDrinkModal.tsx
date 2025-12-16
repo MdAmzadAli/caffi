@@ -447,16 +447,38 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
               <View style={[styles.divider, { backgroundColor: theme.divider }]} />
 
               <View style={styles.indicatorsRow}>
-                <GlowIndicator
-                  icon="coffee"
-                  label="Caffeine Limit"
-                  status={caffeineLimitStatus}
-                />
-                <GlowIndicator
-                  icon="moon"
-                  label="Sleep Impact"
-                  status={sleepImpactStatus}
-                />
+                <View style={styles.indicatorWithText}>
+                  <GlowIndicator
+                    icon="coffee"
+                    label="Caffeine Limit"
+                    status={caffeineLimitStatus}
+                  />
+                  <View style={[styles.indicatorTextCard, { backgroundColor: theme.backgroundSecondary }]}>
+                    <ThemedText type="caption" style={styles.indicatorExplanation}>
+                      {caffeineLimitStatus === "safe"
+                        ? "Supports alertness and focus."
+                        : caffeineLimitStatus === "warning"
+                        ? "May cause mild restlessness or less stable focus."
+                        : "Side effects like anxiety, jitters, or energy crashes become more likely."}
+                    </ThemedText>
+                  </View>
+                </View>
+                <View style={styles.indicatorWithText}>
+                  <GlowIndicator
+                    icon="moon"
+                    label="Sleep Impact"
+                    status={sleepImpactStatus}
+                  />
+                  <View style={[styles.indicatorTextCard, { backgroundColor: theme.backgroundSecondary }]}>
+                    <ThemedText type="caption" style={styles.indicatorExplanation}>
+                      {sleepImpactStatus === "safe"
+                        ? "Unlikely to disrupt sleep."
+                        : sleepImpactStatus === "warning"
+                        ? "May disrupt sleep for some people."
+                        : "More likely to disrupt sleep."}
+                    </ThemedText>
+                  </View>
+                </View>
               </View>
 
               <Pressable
@@ -705,9 +727,25 @@ const styles = StyleSheet.create({
   indicatorsRow: {
     flexDirection: "row",
     justifyContent: "space-around",
-    alignItems: "center",
+    alignItems: "flex-start",
     paddingVertical: Spacing.md,
     marginBottom: Spacing.md,
+    gap: Spacing.md,
+  },
+  indicatorWithText: {
+    flex: 1,
+    alignItems: "center",
+    gap: Spacing.sm,
+  },
+  indicatorTextCard: {
+    borderRadius: BorderRadius.sm,
+    paddingVertical: Spacing.xs,
+    paddingHorizontal: Spacing.sm,
+    width: "100%",
+  },
+  indicatorExplanation: {
+    textAlign: "center",
+    lineHeight: 16,
   },
   addButton: {
     backgroundColor: "#4CAF50",
