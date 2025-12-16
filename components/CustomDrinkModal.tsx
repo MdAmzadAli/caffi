@@ -27,6 +27,14 @@ import { GlowIndicator } from "@/components/GlowIndicator";
 import { useCaffeineStore, DrinkEntry } from "@/store/caffeineStore";
 import { useTheme } from "@/hooks/useTheme";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
+import {
+  CaffeineEvent,
+  getPeakCaffeineWithNewEntry,
+  getCaffeineAtSleepTimeWithNewEntry,
+  getCaffeineLimitStatus,
+  getSleepImpactStatus,
+  parseBedtimeToMs,
+} from "@/utils/graphUtils";
 
 interface CustomDrinkModalProps {
   visible: boolean;
@@ -53,8 +61,9 @@ const UNITS = ["cup", "shot", "ml", "oz", "teaspoon", "tablespoon", "glass", "ca
 export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDrink, editCustomDrink, onSaveCustomDrink }: CustomDrinkModalProps) {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
-  const { addEntry, updateEntry, addCustomDrink, updateCustomDrink, profile } = useCaffeineStore();
+  const { addEntry, updateEntry, addCustomDrink, updateCustomDrink, profile, entries } = useCaffeineStore();
   const { height: windowHeight } = useWindowDimensions();
+  const HALF_LIFE_HOURS = 5;
   
   const MODAL_HEIGHT = windowHeight * 0.75;
   const isEditMode = !!editEntry;
@@ -124,17 +133,41 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
 
   const formatCaffeine = (value: number) => value.toFixed(3).replace(/\.?0+$/, '') || '0';
 
-  const willDisruptSleep = useMemo(() => {
-    const now = new Date();
-    const sleepTimeDate = new Date();
-    const sleepTimeParts = profile.sleepTime?.split(":") || ["22", "00"];
-    sleepTimeDate.setHours(parseInt(sleepTimeParts[0]) || 22, parseInt(sleepTimeParts[1]) || 0, 0, 0);
-    if (sleepTimeDate < now) {
-      sleepTimeDate.setDate(sleepTimeDate.getDate() + 1);
-    }
-    const hoursUntilSleep = (sleepTimeDate.getTime() - now.getTime()) / (1000 * 60 * 60);
-    return hoursUntilSleep < 6 && totalCaffeine > 50;
-  }, [totalCaffeine, profile.sleepTime]);
+  const caffeineEvents: CaffeineEvent[] = useMemo(() => {
+    const filteredEntries = isEditMode && editEntry 
+      ? entries.filter((e) => e.id !== editEntry.id)
+      : entries;
+    return filteredEntries.map((entry) => ({
+      id: entry.id,
+      name: entry.name,
+      mg: entry.caffeineAmount,
+      timestampISO: new Date(entry.timestamp).toISOString(),
+    }));
+  }, [entries, isEditMode, editEntry]);
+
+  const caffeineLimitStatus = useMemo(() => {
+    if (!totalCaffeine || totalCaffeine <= 0) return "safe" as const;
+    const peakMg = getPeakCaffeineWithNewEntry(
+      caffeineEvents,
+      totalCaffeine,
+      startTime.getTime(),
+      HALF_LIFE_HOURS
+    );
+    return getCaffeineLimitStatus(peakMg, profile.optimalCaffeine);
+  }, [caffeineEvents, totalCaffeine, startTime, profile.optimalCaffeine]);
+
+  const sleepImpactStatus = useMemo(() => {
+    if (!totalCaffeine || totalCaffeine <= 0) return "safe" as const;
+    const sleepTimeMs = parseBedtimeToMs(profile.sleepTime || "23:00", startTime);
+    const caffeineAtSleep = getCaffeineAtSleepTimeWithNewEntry(
+      caffeineEvents,
+      totalCaffeine,
+      startTime.getTime(),
+      sleepTimeMs,
+      HALF_LIFE_HOURS
+    );
+    return getSleepImpactStatus(caffeineAtSleep);
+  }, [caffeineEvents, totalCaffeine, startTime, profile.sleepTime]);
 
   const resetState = () => {
     setDrinkName("");
@@ -417,12 +450,12 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
                 <GlowIndicator
                   icon="coffee"
                   label="Caffeine Limit"
-                  status="safe"
+                  status={caffeineLimitStatus}
                 />
                 <GlowIndicator
                   icon="moon"
                   label="Sleep Impact"
-                  status="safe"
+                  status={sleepImpactStatus}
                 />
               </View>
 

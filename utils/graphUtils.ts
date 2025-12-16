@@ -183,3 +183,66 @@ export function getSleepStatusMessage(
     return { message: "High caffeine — might cause major disruption.", color: "red" };
   }
 }
+
+export function getPeakCaffeineWithNewEntry(
+  events: CaffeineEvent[],
+  newEntryMg: number,
+  newEntryTimeMs: number,
+  halfLifeHours: number,
+  lookAheadHours: number = 24
+): number {
+  const tempEvent: CaffeineEvent = {
+    id: "temp",
+    name: "temp",
+    mg: newEntryMg,
+    timestampISO: new Date(newEntryTimeMs).toISOString(),
+  };
+  const allEvents = [...events, tempEvent];
+  
+  const stepMs = 15 * 60 * 1000;
+  const endMs = newEntryTimeMs + lookAheadHours * 3600000;
+  let peak = 0;
+  
+  for (let t = newEntryTimeMs; t <= endMs; t += stepMs) {
+    const mg = getActiveAtTime(allEvents, t, halfLifeHours);
+    if (mg > peak) peak = mg;
+  }
+  
+  return peak;
+}
+
+export function getCaffeineAtSleepTimeWithNewEntry(
+  events: CaffeineEvent[],
+  newEntryMg: number,
+  newEntryTimeMs: number,
+  sleepTimeMs: number,
+  halfLifeHours: number
+): number {
+  const tempEvent: CaffeineEvent = {
+    id: "temp",
+    name: "temp",
+    mg: newEntryMg,
+    timestampISO: new Date(newEntryTimeMs).toISOString(),
+  };
+  const allEvents = [...events, tempEvent];
+  
+  return getActiveAtTime(allEvents, sleepTimeMs, halfLifeHours);
+}
+
+export function getCaffeineLimitStatus(
+  peakMg: number,
+  optimalLimit: number
+): "safe" | "warning" | "danger" {
+  const percentage = (peakMg / optimalLimit) * 100;
+  if (percentage > 100) return "danger";
+  if (percentage >= 90) return "warning";
+  return "safe";
+}
+
+export function getSleepImpactStatus(
+  caffeineAtSleepMg: number
+): "safe" | "warning" | "danger" {
+  if (caffeineAtSleepMg > 40) return "danger";
+  if (caffeineAtSleepMg >= 30) return "warning";
+  return "safe";
+}
