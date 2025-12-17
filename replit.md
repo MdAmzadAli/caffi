@@ -89,6 +89,13 @@ Caffi is a privacy-first, offline caffeine tracking mobile app built with Expo R
 - Alcohol intake: "Never" preferred over "Rare" label
 
 ## Recent Changes
+- December 17, 2025: Sleep window status message in graph
+  - Updated graph subtitle text to show sleep disruption status based on max caffeine in sleep window
+  - Calculates max caffeine from user's sleep time to +6 hours
+  - Text thresholds: <30mg = "sleep undisrupted.", 30-40mg = "May disrupt sleep for some people.", >40mg = "More likely to disrupt sleep."
+  - Edge case: After passing user's bedtime, automatically calculates for next day's sleep time
+  - Added getMaxCaffeineInSleepWindowForDisplay() and getSleepWindowStatusMessage() in graphUtils.ts
+
 - December 17, 2025: Graph legend and optimal caffeine line
   - Added horizontal dashed line showing user's optimal caffeine level (gold/accent color)
   - Removed "Sleep unaffected" text from graph
