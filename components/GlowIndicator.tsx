@@ -31,7 +31,7 @@ export function GlowIndicator({ icon, label, status, style }: GlowIndicatorProps
           <Feather name={icon} size={24} color={color} />
         </View>
       </View>
-      <ThemedText type="caption" style={[styles.label, { color: theme.textMuted }]}>
+      <ThemedText type="caption" style={[styles.label, { color: theme.text }]}>
         {label}
       </ThemedText>
     </View>
