@@ -657,19 +657,11 @@ export function CaffeineGraphNew({
         </Svg>
 
         <View style={[styles.xAxisContainer, { width: scrollContentWidth }]}>
-          {xAxisTicks.map((tickMs, idx) => {
+          {xAxisTicks.map((tickMs) => {
             const x = timeToX(tickMs);
-            const tickDate = new Date(tickMs);
-            const isDateChange = tickDate.getHours() === 0;
-            const dateLabel = isDateChange 
-              ? `${tickDate.getDate()} ${tickDate.toLocaleDateString('en-US', { month: 'short' })}`
-              : null;
             return (
               <View key={tickMs} style={[styles.xAxisTick, { left: x - 12 }]}>
                 <Text style={[styles.xAxisLabel, { color: GRAPH_COLORS.mutedGrey }]}>{formatTimeLabel(tickMs)}</Text>
-                {dateLabel && (
-                  <Text style={[styles.xAxisDateLabel, { color: GRAPH_COLORS.mutedGrey }]}>{dateLabel}</Text>
-                )}
               </View>
             );
           })}
@@ -737,11 +729,6 @@ const styles = StyleSheet.create({
   xAxisLabel: {
     fontSize: 7,
     fontWeight: "500",
-  },
-  xAxisDateLabel: {
-    fontSize: 6,
-    fontWeight: "400",
-    marginTop: 1,
   },
   currentTimeLabel: {
     position: "absolute",
