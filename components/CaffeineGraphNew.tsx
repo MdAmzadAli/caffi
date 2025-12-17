@@ -30,7 +30,8 @@ import {
   formatTimeLabel,
   formatCurrentTime,
   generateSmoothPath,
-  getSleepStatusMessage,
+  getMaxCaffeineInSleepWindowForDisplay,
+  getSleepWindowStatusMessage,
   parseBedtimeToMs,
 } from "@/utils/graphUtils";
 
@@ -275,9 +276,12 @@ export function CaffeineGraphNew({
   
   const [showLegend, setShowLegend] = useState(false);
 
-  const { message: sleepMessage, color: sleepColor } = getSleepStatusMessage(
-    currentActiveMg,
-    sleepThresholdMg
+  const maxCaffeineInSleepWindow = useMemo(() => {
+    return getMaxCaffeineInSleepWindowForDisplay(events, bedtime, nowMs, halfLifeHours, 6);
+  }, [events, bedtime, nowMs, halfLifeHours]);
+
+  const { message: sleepMessage, color: sleepColor } = getSleepWindowStatusMessage(
+    maxCaffeineInSleepWindow
   );
 
   const statusTextColor =

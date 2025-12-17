@@ -111,6 +111,37 @@ export function parseBedtimeToMs(bedtimeStr: string, referenceDate: Date): numbe
   return result.getTime();
 }
 
+export function getMaxCaffeineInSleepWindowForDisplay(
+  events: CaffeineEvent[],
+  bedtimeStr: string,
+  nowMs: number,
+  halfLifeHours: number,
+  windowHours: number = 6
+): number {
+  const nowDate = new Date(nowMs);
+  const sleepTimeMs = parseBedtimeToMs(bedtimeStr, nowDate);
+  const stepMs = 15 * 60 * 1000;
+  const endMs = sleepTimeMs + windowHours * 3600000;
+  let maxCaffeine = 0;
+  for (let t = sleepTimeMs; t <= endMs; t += stepMs) {
+    const mg = getActiveAtTime(events, t, halfLifeHours);
+    if (mg > maxCaffeine) maxCaffeine = mg;
+  }
+  return maxCaffeine;
+}
+
+export function getSleepWindowStatusMessage(
+  maxCaffeineInWindow: number
+): { message: string; color: "green" | "brown" | "red" } {
+  if (maxCaffeineInWindow < 30) {
+    return { message: "sleep undisrupted.", color: "green" };
+  } else if (maxCaffeineInWindow <= 40) {
+    return { message: "May disrupt sleep for some people.", color: "brown" };
+  } else {
+    return { message: "More likely to disrupt sleep.", color: "red" };
+  }
+}
+
 export function generateSmoothPath(
   points: { x: number; y: number }[],
   tension: number = 0.3
