@@ -5,7 +5,7 @@ Caffi is a privacy-first, offline caffeine tracking mobile app built with Expo R
 
 ## Current State
 - **Status**: MVP Complete - Functional prototype with all core features
-- **Last Updated**: December 16, 2025
+- **Last Updated**: December 17, 2025
 - **Platform**: Expo React Native (iOS, Android, Web)
 
 ## Project Architecture
@@ -89,6 +89,15 @@ Caffi is a privacy-first, offline caffeine tracking mobile app built with Expo R
 - Alcohol intake: "Never" preferred over "Rare" label
 
 ## Recent Changes
+- December 17, 2025: Infinite scrolling for home screen caffeine graph
+  - Added CaffeineGraphNew component with virtualized day-window rendering
+  - Shows 5 days at a time (prev 3 days, current day, next day) for performance
+  - Edge detection extends window by 5 days when user scrolls to boundaries
+  - Scroll position preserved when day window extends (no jumping)
+  - Arrow buttons appear when scrolled away from current time, clicking returns to now
+  - Date labels shown below x-axis only at midnight (day boundaries)
+  - HomeGraphController manages day window state and reset functionality
+
 - December 16, 2025: Improved sleep impact indicator logic and explanatory text cards
   - Sleep impact now checks maximum caffeine level during 6-hour sleep window (not just at exact sleep time)
   - Added getMaxCaffeineInSleepWindow() function in graphUtils.ts
