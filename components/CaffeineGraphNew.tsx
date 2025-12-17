@@ -8,7 +8,6 @@ import {
   NativeScrollEvent,
   useWindowDimensions,
   Pressable,
-  Modal,
 } from "react-native";
 import Svg, {
   Path,
@@ -398,13 +397,9 @@ export function CaffeineGraphNew({
         </Pressable>
       </View>
       
-      <Modal
-        visible={showLegend}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowLegend(false)}
-      >
-        <Pressable style={styles.modalOverlay} onPress={() => setShowLegend(false)}>
+      {showLegend && (
+        <>
+          <Pressable style={styles.legendOverlay} onPress={() => setShowLegend(false)} />
           <View style={[styles.legendCard, { backgroundColor: GRAPH_COLORS.bg }]}>
             <Text style={[styles.legendTitle, { color: GRAPH_COLORS.darkBrown2 }]}>Graph Legend</Text>
             <View style={styles.legendRow}>
@@ -416,8 +411,8 @@ export function CaffeineGraphNew({
               <Text style={[styles.legendText, { color: GRAPH_COLORS.darkBrown }]}>Your optimal daily caffeine level</Text>
             </View>
           </View>
-        </Pressable>
-      </Modal>
+        </>
+      )}
 
       <ScrollView
         ref={scrollViewRef}
@@ -778,22 +773,27 @@ const styles = StyleSheet.create({
     left: Y_AXIS_WIDTH + 4,
     padding: 4,
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.4)",
-    justifyContent: "center",
-    alignItems: "center",
+  legendOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 19,
   },
   legendCard: {
-    padding: 16,
-    borderRadius: 12,
-    width: "80%",
-    maxWidth: 320,
+    position: "absolute",
+    top: GRAPH_PADDING_TOP + 24,
+    left: Y_AXIS_WIDTH + 8,
+    padding: 12,
+    borderRadius: 8,
+    maxWidth: 240,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.15,
     shadowRadius: 4,
     elevation: 5,
+    zIndex: 20,
   },
   legendTitle: {
     fontSize: 16,
