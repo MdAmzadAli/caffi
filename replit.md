@@ -89,6 +89,13 @@ Caffi is a privacy-first, offline caffeine tracking mobile app built with Expo R
 - Alcohol intake: "Never" preferred over "Rare" label
 
 ## Recent Changes
+- December 17, 2025: Graph legend and optimal caffeine line
+  - Added horizontal dashed line showing user's optimal caffeine level (gold/accent color)
+  - Removed "Sleep unaffected" text from graph
+  - Added info icon (i) at top left of graph that opens legend modal
+  - Legend explains: green line = sleep threshold, gold dashed line = optimal daily caffeine
+  - Passes optimalCaffeineMg through HomeScreen -> HomeGraphController -> CaffeineGraphNew
+
 - December 17, 2025: Infinite scrolling for home screen caffeine graph
   - Added CaffeineGraphNew component with virtualized day-window rendering
   - Shows 5 days at a time (prev 3 days, current day, next day) for performance

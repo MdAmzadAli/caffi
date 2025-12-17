@@ -16,6 +16,7 @@ interface HomeGraphControllerProps {
   bedtime: string;
   halfLifeHours?: number;
   sleepThresholdMg?: number;
+  optimalCaffeineMg?: number;
   isDark?: boolean;
   onHeight?: (height: number) => void;
 }
@@ -39,6 +40,7 @@ export function HomeGraphController({
   bedtime,
   halfLifeHours = 5.5,
   sleepThresholdMg = 100,
+  optimalCaffeineMg = 200,
   isDark = false,
   onHeight,
 }: HomeGraphControllerProps) {
@@ -95,6 +97,7 @@ export function HomeGraphController({
         bedtime={bedtime}
         halfLifeHours={halfLifeHours}
         sleepThresholdMg={sleepThresholdMg}
+        optimalCaffeineMg={optimalCaffeineMg}
         onScrollOffsetChange={handleScrollOffsetChange}
         scrollViewRef={scrollViewRef}
         isDark={isDark}

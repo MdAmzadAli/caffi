@@ -7,6 +7,8 @@ import {
   NativeSyntheticEvent,
   NativeScrollEvent,
   useWindowDimensions,
+  Pressable,
+  Modal,
 } from "react-native";
 import Svg, {
   Path,
@@ -82,6 +84,7 @@ interface CaffeineGraphProps {
   sampleResolutionMinutes?: number;
   yMax?: number;
   sleepThresholdMg?: number;
+  optimalCaffeineMg?: number;
   bedtime: string;
   onScrollOffsetChange?: (isOffCenter: boolean, direction: 'left' | 'right' | null) => void;
   scrollViewRef?: React.RefObject<ScrollView | null>;
@@ -124,6 +127,7 @@ export function CaffeineGraphNew({
   sampleResolutionMinutes = 5,
   yMax = 450,
   sleepThresholdMg = 100,
+  optimalCaffeineMg = 200,
   bedtime,
   onScrollOffsetChange,
   scrollViewRef,
@@ -268,6 +272,9 @@ export function CaffeineGraphNew({
   const nowX = timeToX(nowMs);
   const bedtimeX = timeToX(bedtimeMs);
   const sleepThresholdY = mgToY(sleepThresholdMg);
+  const optimalCaffeineY = mgToY(optimalCaffeineMg);
+  
+  const [showLegend, setShowLegend] = useState(false);
 
   const { message: sleepMessage, color: sleepColor } = getSleepStatusMessage(
     currentActiveMg,
@@ -382,10 +389,35 @@ export function CaffeineGraphNew({
             <Text style={[styles.yAxisLabel, { color: GRAPH_COLORS.mutedGrey }]}>{mg}</Text>
           </View>
         ))}
-        <View style={[styles.sleepLabel, { top: sleepThresholdY - 18 }]}>
-          <Text style={[styles.sleepLabelText, { color: GRAPH_COLORS.green }]}>Sleep unaffected</Text>
-        </View>
+        <Pressable 
+          style={styles.infoButton} 
+          onPress={() => setShowLegend(true)}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+          <Feather name="info" size={14} color={GRAPH_COLORS.mutedGrey} />
+        </Pressable>
       </View>
+      
+      <Modal
+        visible={showLegend}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowLegend(false)}
+      >
+        <Pressable style={styles.modalOverlay} onPress={() => setShowLegend(false)}>
+          <View style={[styles.legendCard, { backgroundColor: GRAPH_COLORS.bg }]}>
+            <Text style={[styles.legendTitle, { color: GRAPH_COLORS.darkBrown2 }]}>Graph Legend</Text>
+            <View style={styles.legendRow}>
+              <View style={[styles.legendLine, { backgroundColor: GRAPH_COLORS.green }]} />
+              <Text style={[styles.legendText, { color: GRAPH_COLORS.darkBrown }]}>Sleep threshold - caffeine below this won't affect sleep</Text>
+            </View>
+            <View style={styles.legendRow}>
+              <View style={[styles.legendLineDashed, { borderColor: GRAPH_COLORS.accentGold }]} />
+              <Text style={[styles.legendText, { color: GRAPH_COLORS.darkBrown }]}>Your optimal daily caffeine level</Text>
+            </View>
+          </View>
+        </Pressable>
+      </Modal>
 
       <ScrollView
         ref={scrollViewRef}
@@ -429,6 +461,16 @@ export function CaffeineGraphNew({
             y2={sleepThresholdY}
             stroke={GRAPH_COLORS.green}
             strokeWidth={1}
+          />
+
+          <Line
+            x1={0}
+            y1={optimalCaffeineY}
+            x2={scrollContentWidth}
+            y2={optimalCaffeineY}
+            stroke={GRAPH_COLORS.accentGold}
+            strokeWidth={1}
+            strokeDasharray="4,3"
           />
 
           {dateMarkers.map((marker) => {
@@ -676,14 +718,6 @@ const styles = StyleSheet.create({
     fontSize: 8,
     fontWeight: "500",
   },
-  sleepLabel: {
-    position: "absolute",
-    left: Y_AXIS_WIDTH + 4,
-  },
-  sleepLabelText: {
-    fontSize: 6,
-    fontWeight: "500",
-  },
   scrollView: {
     flex: 1,
   },
@@ -737,6 +771,55 @@ const styles = StyleSheet.create({
     marginTop: 2,
     maxWidth: 140,
     textAlign: "right",
+  },
+  infoButton: {
+    position: "absolute",
+    top: GRAPH_PADDING_TOP,
+    left: Y_AXIS_WIDTH + 4,
+    padding: 4,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  legendCard: {
+    padding: 16,
+    borderRadius: 12,
+    width: "80%",
+    maxWidth: 320,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  legendTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 12,
+  },
+  legendRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  legendLine: {
+    width: 24,
+    height: 2,
+    marginRight: 10,
+  },
+  legendLineDashed: {
+    width: 24,
+    height: 0,
+    borderTopWidth: 2,
+    borderStyle: "dashed",
+    marginRight: 10,
+  },
+  legendText: {
+    fontSize: 13,
+    flex: 1,
   },
 });
 
