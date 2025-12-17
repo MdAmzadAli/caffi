@@ -89,6 +89,11 @@ Caffi is a privacy-first, offline caffeine tracking mobile app built with Expo R
 - Alcohol intake: "Never" preferred over "Rare" label
 
 ## Recent Changes
+- December 17, 2025: Sleep impact indicator fix for past entries
+  - Fixed CustomDrinkModal sleep impact indicator to only show changes for current/future entries
+  - Past date entries (before today's midnight) now always show "safe" status
+  - Prevents retroactive color changes when logging historical caffeine intake
+
 - December 17, 2025: Sleep window status message in graph
   - Updated graph subtitle text to show sleep disruption status based on max caffeine in sleep window
   - Calculates max caffeine from user's sleep time to +6 hours
