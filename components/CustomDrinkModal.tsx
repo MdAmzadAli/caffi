@@ -248,7 +248,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
         });
         onSaveCustomDrink?.();
       } else if (prefillDrink?.id && !prefillDrink.id.startsWith('custom-')) {
-        addEntry(prefillDrink as any, prefillDrink.defaultServingMl * quantity, undefined, false);
+        addEntry(prefillDrink as any, prefillDrink.defaultServingMl * quantity, undefined, false, startTime);
         closeModal();
         onAdd?.();
       } else {
@@ -260,7 +260,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
           icon: "coffee",
           sizes: [{ name: selectedUnit, ml: 100 }],
         });
-        addEntry(savedDrink, 100 * quantity, undefined, false);
+        addEntry(savedDrink, 100 * quantity, undefined, false, startTime);
         closeModal();
         onAdd?.();
       }

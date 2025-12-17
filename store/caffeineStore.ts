@@ -286,6 +286,7 @@ export function useCaffeineStore() {
       servingSize: number,
       notes?: string,
       isFavorite?: boolean,
+      timestamp?: Date,
     ) => {
       const caffeineAmount = Math.round(
         (drink.caffeinePer100ml * servingSize) / 100,
@@ -297,7 +298,7 @@ export function useCaffeineStore() {
         caffeineAmount,
         servingSize,
         category: drink.category,
-        timestamp: new Date(),
+        timestamp: timestamp || new Date(),
         notes,
         isFavorite,
       };
