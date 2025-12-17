@@ -437,7 +437,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
               <View style={[styles.divider, { backgroundColor: theme.divider }]} />
 
               <View style={styles.timeRow}>
-                <ThemedText type="body">Started drinking:</ThemedText>
+                <ThemedText type="body">Finished Drinking:</ThemedText>
                 <Pressable 
                   onPress={() => setShowStartTimePicker(true)}
                   style={[styles.timeChip, { borderColor: Colors.light.accent }]}
