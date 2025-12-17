@@ -40,10 +40,9 @@ export function GlowIndicator({ icon, label, status, style }: GlowIndicatorProps
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: Spacing.md,
+    paddingVertical: Spacing.xs,
   },
   iconWrapper: {
     shadowOffset: { width: 0, height: 0 },
@@ -59,7 +58,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   label: {
-    marginTop: Spacing.sm,
+    marginTop: Spacing.xs,
     textAlign: "center",
   },
 });

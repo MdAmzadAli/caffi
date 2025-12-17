@@ -306,6 +306,9 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
               style={styles.scrollContent}
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
+              bounces={false}
+              overScrollMode="never"
+              scrollEventThrottle={16}
             >
               <View style={styles.topSection}>
                 <Pressable 
@@ -457,7 +460,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
                     status={caffeineLimitStatus}
                   />
                   <View style={[styles.indicatorTextCard, { backgroundColor: theme.backgroundSecondary }]}>
-                    <ThemedText type="caption" muted style={styles.indicatorExplanation}>
+                    <ThemedText type="caption" muted style={styles.indicatorExplanation} numberOfLines={3}>
                       {caffeineLimitStatus === "safe"
                         ? "Supports alertness and focus."
                         : caffeineLimitStatus === "warning"
@@ -473,7 +476,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
                     status={sleepImpactStatus}
                   />
                   <View style={[styles.indicatorTextCard, { backgroundColor: theme.backgroundSecondary }]}>
-                    <ThemedText type="caption" muted style={styles.indicatorExplanation}>
+                    <ThemedText type="caption" muted style={styles.indicatorExplanation} numberOfLines={3}>
                       {sleepImpactStatus === "safe"
                         ? "Unlikely to disrupt sleep."
                         : sleepImpactStatus === "warning"
@@ -738,7 +741,7 @@ const styles = StyleSheet.create({
   indicatorWithText: {
     flex: 1,
     alignItems: "center",
-    gap: Spacing.sm,
+    gap: Spacing.xs,
     borderWidth: 1,
     borderColor: "rgba(0,0,0,0.1)",
     borderRadius: BorderRadius.md,
@@ -749,7 +752,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.xs,
     paddingHorizontal: Spacing.sm,
     width: "100%",
-    minHeight: 48,
+    minHeight: 56,
     justifyContent: "center",
   },
   indicatorExplanation: {
