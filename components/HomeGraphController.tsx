@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useMemo } from "react";
-import { View, StyleSheet, Pressable, Text, ScrollView, Dimensions } from "react-native";
+import { View, StyleSheet, Pressable, ScrollView } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -9,7 +9,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { Feather } from "@expo/vector-icons";
 import { CaffeineGraphNew } from "./CaffeineGraphNew";
-import { CaffeineEvent, parseBedtimeToMs } from "@/utils/graphUtils";
+import { CaffeineEvent } from "@/utils/graphUtils";
 
 interface HomeGraphControllerProps {
   events: CaffeineEvent[];
@@ -19,8 +19,6 @@ interface HomeGraphControllerProps {
   isDark?: boolean;
   onHeight?: (height: number) => void;
 }
-
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 const LIGHT_COLORS = {
   bg: "#FFFFFF",
@@ -32,8 +30,9 @@ const DARK_COLORS = {
   darkBrown: "#F5EBDD",
 };
 
-const HOURS_VISIBLE = 11;
-const TOTAL_WINDOW_HOURS = 168;
+const INITIAL_START_DAY = -3;
+const INITIAL_END_DAY = 1;
+const DAYS_TO_EXTEND = 5;
 
 export function HomeGraphController({
   events,
@@ -45,6 +44,9 @@ export function HomeGraphController({
 }: HomeGraphControllerProps) {
   const [isOffCenter, setIsOffCenter] = useState(false);
   const [scrollDirection, setScrollDirection] = useState<'left' | 'right' | null>(null);
+  const [dayWindowStart, setDayWindowStart] = useState(INITIAL_START_DAY);
+  const [dayWindowEnd, setDayWindowEnd] = useState(INITIAL_END_DAY);
+  const [resetKey, setResetKey] = useState(0);
   const scrollViewRef = useRef<ScrollView>(null);
   const buttonScale = useSharedValue(1);
 
@@ -57,27 +59,25 @@ export function HomeGraphController({
     setScrollDirection(direction);
   }, []);
 
+  const handleExtendDays = useCallback((direction: 'left' | 'right') => {
+    if (direction === 'left') {
+      setDayWindowStart(prev => prev - DAYS_TO_EXTEND);
+    } else {
+      setDayWindowEnd(prev => prev + DAYS_TO_EXTEND);
+    }
+  }, []);
+
   const handleJumpToNow = useCallback(() => {
     buttonScale.value = withSequence(
       withTiming(0.9, { duration: 100 }),
       withSpring(1, { damping: 10, stiffness: 400 })
     );
 
-    if (scrollViewRef.current) {
-      const nowMs = Date.now();
-      const viewWindowHours = TOTAL_WINDOW_HOURS;
-      const centerMs = nowMs;
-      const halfWindowMs = (viewWindowHours / 2) * 3600000;
-      const startMs = centerMs - halfWindowMs;
-      const endMs = centerMs + halfWindowMs;
-      const scrollContentWidth = SCREEN_WIDTH * (viewWindowHours / HOURS_VISIBLE);
-
-      const nowPosition = ((nowMs - startMs) / (endMs - startMs)) * scrollContentWidth;
-      const scrollX = Math.max(0, nowPosition - SCREEN_WIDTH / 2);
-
-      scrollViewRef.current.scrollTo({ x: scrollX, animated: true });
-    }
+    setDayWindowStart(INITIAL_START_DAY);
+    setDayWindowEnd(INITIAL_END_DAY);
     setIsOffCenter(false);
+    setScrollDirection(null);
+    setResetKey(prev => prev + 1);
   }, [buttonScale]);
 
   const jumpButtonStyle = useAnimatedStyle(() => ({
@@ -95,10 +95,13 @@ export function HomeGraphController({
         bedtime={bedtime}
         halfLifeHours={halfLifeHours}
         sleepThresholdMg={sleepThresholdMg}
-        viewWindowHours={TOTAL_WINDOW_HOURS}
         onScrollOffsetChange={handleScrollOffsetChange}
         scrollViewRef={scrollViewRef}
         isDark={isDark}
+        dayWindowStart={dayWindowStart}
+        dayWindowEnd={dayWindowEnd}
+        onExtendDays={handleExtendDays}
+        resetKey={resetKey}
       />
 
       {isOffCenter && scrollDirection === 'right' && (

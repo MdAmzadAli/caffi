@@ -80,13 +80,16 @@ interface CaffeineGraphProps {
   now?: string;
   halfLifeHours?: number;
   sampleResolutionMinutes?: number;
-  viewWindowHours?: number;
   yMax?: number;
   sleepThresholdMg?: number;
   bedtime: string;
   onScrollOffsetChange?: (isOffCenter: boolean, direction: 'left' | 'right' | null) => void;
   scrollViewRef?: React.RefObject<ScrollView | null>;
   isDark?: boolean;
+  dayWindowStart: number;
+  dayWindowEnd: number;
+  onExtendDays?: (direction: 'left' | 'right') => void;
+  resetKey?: number;
 }
 
 const Y_AXIS_WIDTH = 24;
@@ -98,8 +101,9 @@ const GRAPH_PADDING_BOTTOM = 8;
 const MARKER_SIZE = 18;
 const MARKER_IMAGE_SIZE = 14;
 const HOURS_VISIBLE = 11;
-const TOTAL_WINDOW_HOURS = 168;
 const GROUP_PROXIMITY_PX = 15;
+const HOURS_PER_DAY = 24;
+const EDGE_THRESHOLD = 50;
 
 interface EventGroup {
   events: CaffeineEvent[];
@@ -118,17 +122,21 @@ export function CaffeineGraphNew({
   now = new Date().toISOString(),
   halfLifeHours = 5.5,
   sampleResolutionMinutes = 5,
-  viewWindowHours = TOTAL_WINDOW_HOURS,
   yMax = 450,
   sleepThresholdMg = 100,
   bedtime,
   onScrollOffsetChange,
   scrollViewRef,
   isDark = false,
+  dayWindowStart,
+  dayWindowEnd,
+  onExtendDays,
+  resetKey = 0,
 }: CaffeineGraphProps) {
   const GRAPH_COLORS = isDark ? DARK_GRAPH_COLORS : LIGHT_GRAPH_COLORS;
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   
+  const viewWindowHours = (dayWindowEnd - dayWindowStart + 1) * HOURS_PER_DAY;
   const graphHeight = windowHeight * 0.36;
   const chartHeight = graphHeight - X_AXIS_HEIGHT - GRAPH_PADDING_TOP - GRAPH_PADDING_BOTTOM;
   const scrollContentWidth = windowWidth * (viewWindowHours / HOURS_VISIBLE);
@@ -146,9 +154,22 @@ export function CaffeineGraphNew({
   const nowMs = realTimeNow;
   const nowDate = new Date(nowMs);
 
-  const { samples: sampleTimesMs, startMs, endMs } = useMemo(() => {
-    return buildSampleTimes(now, viewWindowHours, sampleResolutionMinutes);
-  }, [now, viewWindowHours, sampleResolutionMinutes]);
+  const { startMs, endMs } = useMemo(() => {
+    const todayStart = new Date(nowMs);
+    todayStart.setHours(0, 0, 0, 0);
+    const start = todayStart.getTime() + dayWindowStart * HOURS_PER_DAY * 3600000;
+    const end = todayStart.getTime() + (dayWindowEnd + 1) * HOURS_PER_DAY * 3600000;
+    return { startMs: start, endMs: end };
+  }, [nowMs, dayWindowStart, dayWindowEnd]);
+
+  const sampleTimesMs = useMemo(() => {
+    const samples: number[] = [];
+    const stepMs = sampleResolutionMinutes * 60000;
+    for (let t = startMs; t <= endMs; t += stepMs) {
+      samples.push(t);
+    }
+    return samples;
+  }, [startMs, endMs, sampleResolutionMinutes]);
 
   const curveData = useMemo(() => {
     return computeActiveCurve(events, sampleTimesMs, halfLifeHours);
@@ -261,32 +282,88 @@ export function CaffeineGraphNew({
         : GRAPH_COLORS.dangerRed;
 
   const defaultScrollX = useMemo(() => {
-    const nowPosition = ((nowMs - startMs) / (endMs - startMs)) * scrollContentWidth;
-    return Math.max(0, nowPosition - windowWidth / 2);
+    if (nowMs >= startMs && nowMs <= endMs) {
+      const nowPosition = ((nowMs - startMs) / (endMs - startMs)) * scrollContentWidth;
+      return Math.max(0, nowPosition - windowWidth / 2);
+    }
+    return scrollContentWidth / 2 - windowWidth / 2;
   }, [nowMs, startMs, endMs, scrollContentWidth, windowWidth]);
 
+  const lastExtendRef = useRef<number>(0);
+  const hasInitialScrolled = useRef<boolean>(false);
+  const prevDayWindowStartRef = useRef<number>(dayWindowStart);
+  const currentScrollXRef = useRef<number>(defaultScrollX);
+
   useEffect(() => {
-    if (scrollViewRef?.current) {
+    if (scrollViewRef?.current && !hasInitialScrolled.current) {
+      hasInitialScrolled.current = true;
       setTimeout(() => {
         scrollViewRef.current?.scrollTo({ x: defaultScrollX, y: 0, animated: false });
       }, 0);
     }
   }, []);
 
+  useEffect(() => {
+    if (!hasInitialScrolled.current) return;
+    
+    const daysDelta = prevDayWindowStartRef.current - dayWindowStart;
+    if (daysDelta !== 0 && scrollViewRef?.current) {
+      const pixelsPerDay = (windowWidth * HOURS_PER_DAY) / HOURS_VISIBLE;
+      const offsetAdjustment = daysDelta * pixelsPerDay;
+      const newScrollX = currentScrollXRef.current + offsetAdjustment;
+      
+      setTimeout(() => {
+        scrollViewRef.current?.scrollTo({ x: Math.max(0, newScrollX), y: 0, animated: false });
+      }, 0);
+    }
+    prevDayWindowStartRef.current = dayWindowStart;
+  }, [dayWindowStart, dayWindowEnd, windowWidth]);
+
+  useEffect(() => {
+    if (resetKey > 0 && scrollViewRef?.current) {
+      prevDayWindowStartRef.current = dayWindowStart;
+      currentScrollXRef.current = defaultScrollX;
+      setTimeout(() => {
+        scrollViewRef.current?.scrollTo({ x: defaultScrollX, y: 0, animated: true });
+      }, 50);
+    }
+  }, [resetKey]);
+
   const handleScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const scrollX = event.nativeEvent.contentOffset.x;
+      const contentWidth = event.nativeEvent.contentSize.width;
+      const viewportWidth = event.nativeEvent.layoutMeasurement.width;
+      const maxScrollX = contentWidth - viewportWidth;
+
+      currentScrollXRef.current = scrollX;
+
       if (onScrollOffsetChange) {
-        const scrollX = event.nativeEvent.contentOffset.x;
         const centerX = scrollX + windowWidth / 2;
-        const nowPosition = ((nowMs - startMs) / (endMs - startMs)) * scrollContentWidth;
-        const isOffCenter = Math.abs(centerX - nowPosition) > windowWidth * 0.1;
+        const nowPosition = nowMs >= startMs && nowMs <= endMs 
+          ? ((nowMs - startMs) / (endMs - startMs)) * scrollContentWidth 
+          : -1;
+        const isOffCenter = nowPosition < 0 || Math.abs(centerX - nowPosition) > windowWidth * 0.1;
         const direction: 'left' | 'right' | null = isOffCenter 
-          ? (centerX < nowPosition ? 'right' : 'left') 
+          ? (nowPosition < 0 ? (dayWindowEnd < 1 ? 'right' : 'left') : (centerX < nowPosition ? 'right' : 'left')) 
           : null;
         onScrollOffsetChange(isOffCenter, direction);
       }
+
+      const now = Date.now();
+      if (now - lastExtendRef.current < 300) return;
+
+      if (onExtendDays) {
+        if (scrollX <= EDGE_THRESHOLD) {
+          lastExtendRef.current = now;
+          onExtendDays('left');
+        } else if (scrollX >= maxScrollX - EDGE_THRESHOLD) {
+          lastExtendRef.current = now;
+          onExtendDays('right');
+        }
+      }
     },
-    [onScrollOffsetChange, nowMs, startMs, endMs, scrollContentWidth, windowWidth]
+    [onScrollOffsetChange, onExtendDays, nowMs, startMs, endMs, scrollContentWidth, windowWidth, dayWindowEnd]
   );
 
   const gradientId = isDark ? "curveGradientDark" : "curveGradientLight";
@@ -404,14 +481,16 @@ export function CaffeineGraphNew({
             </>
           )}
 
-          <Line
-            x1={nowX}
-            y1={GRAPH_PADDING_TOP}
-            x2={nowX}
-            y2={chartHeight + GRAPH_PADDING_TOP}
-            stroke={GRAPH_COLORS.darkBrown2}
-            strokeWidth={1.5}
-          />
+          {nowMs >= startMs && nowMs <= endMs && (
+            <Line
+              x1={nowX}
+              y1={GRAPH_PADDING_TOP}
+              x2={nowX}
+              y2={chartHeight + GRAPH_PADDING_TOP}
+              stroke={GRAPH_COLORS.darkBrown2}
+              strokeWidth={1.5}
+            />
+          )}
 
           <Path d={areaPath} fill={`url(#${gradientId})`} />
 
@@ -539,17 +618,27 @@ export function CaffeineGraphNew({
         <View style={[styles.xAxisContainer, { width: scrollContentWidth }]}>
           {xAxisTicks.map((tickMs, idx) => {
             const x = timeToX(tickMs);
+            const tickDate = new Date(tickMs);
+            const isDateChange = tickDate.getHours() === 0;
+            const dateLabel = isDateChange 
+              ? `${tickDate.getDate()} ${tickDate.toLocaleDateString('en-US', { month: 'short' })}`
+              : null;
             return (
               <View key={tickMs} style={[styles.xAxisTick, { left: x - 12 }]}>
                 <Text style={[styles.xAxisLabel, { color: GRAPH_COLORS.mutedGrey }]}>{formatTimeLabel(tickMs)}</Text>
+                {dateLabel && (
+                  <Text style={[styles.xAxisDateLabel, { color: GRAPH_COLORS.mutedGrey }]}>{dateLabel}</Text>
+                )}
               </View>
             );
           })}
-          <View style={[styles.currentTimeLabel, { left: nowX - 18 }]}>
-            <Text style={[styles.currentTimeLabelText, { color: GRAPH_COLORS.darkBrown2 }]}>
-              {formatCurrentTime(nowMs)}
-            </Text>
-          </View>
+          {nowMs >= startMs && nowMs <= endMs && (
+            <View style={[styles.currentTimeLabel, { left: nowX - 18 }]}>
+              <Text style={[styles.currentTimeLabelText, { color: GRAPH_COLORS.darkBrown2 }]}>
+                {formatCurrentTime(nowMs)}
+              </Text>
+            </View>
+          )}
         </View>
       </ScrollView>
 
@@ -615,6 +704,11 @@ const styles = StyleSheet.create({
   xAxisLabel: {
     fontSize: 7,
     fontWeight: "500",
+  },
+  xAxisDateLabel: {
+    fontSize: 6,
+    fontWeight: "400",
+    marginTop: 1,
   },
   currentTimeLabel: {
     position: "absolute",
