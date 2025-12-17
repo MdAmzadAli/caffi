@@ -158,6 +158,9 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
 
   const sleepImpactStatus = useMemo(() => {
     if (!totalCaffeine || totalCaffeine <= 0) return "safe" as const;
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    if (startTime.getTime() < todayStart.getTime()) return "safe" as const;
     const sleepTimeMs = parseBedtimeToMs(profile.sleepTime || "23:00", startTime);
     const maxCaffeineInSleepWindow = getMaxCaffeineInSleepWindow(
       caffeineEvents,
