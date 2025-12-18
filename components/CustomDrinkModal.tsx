@@ -46,6 +46,17 @@ interface CustomDrinkModalProps {
   onSaveCustomDrink?: () => void;
 }
 
+const getCategoryImageSource = (category: string) => {
+  const imageMap: Record<string, any> = {
+    coffee: require("@/assets/CaffeineSourceImages/coffee.png"),
+    tea: require("@/assets/CaffeineSourceImages/tea.jpg"),
+    energy: require("@/assets/CaffeineSourceImages/energy.png"),
+    soda: require("@/assets/CaffeineSourceImages/soda.png"),
+    chocolate: require("@/assets/CaffeineSourceImages/chocolate.png"),
+  };
+  return imageMap[category] || imageMap.coffee;
+};
+
 const getUnitForDrink = (name: string, category?: string, sizes?: { name: string; ml: number }[]): string => {
   const lowerName = name.toLowerCase();
   if (lowerName.includes("espresso") || lowerName.includes("shot")) return "shot";
@@ -117,6 +128,9 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
       setCaffeineMg(caffeine.toString());
       setStartTime(new Date());
       setStartTimeLabel("now");
+      if (prefillDrink.category) {
+        setSelectedImage(`category:${prefillDrink.category}`);
+      }
     }
   }, [editEntry, prefillDrink, editCustomDrink, visible]);
 
@@ -318,7 +332,13 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
                   style={[styles.chooseIconBox, { backgroundColor: theme.backgroundSecondary }]}
                 >
                   {selectedImage ? (
-                    selectedImage.startsWith("preset:") ? (
+                    selectedImage.startsWith("category:") ? (
+                      <Image 
+                        source={getCategoryImageSource(selectedImage.replace("category:", ""))} 
+                        style={styles.selectedImage} 
+                        resizeMode="cover" 
+                      />
+                    ) : selectedImage.startsWith("preset:") ? (
                       (() => {
                         const preset = PRESET_IMAGES.find(p => p.id === selectedImage.replace("preset:", ""));
                         return preset ? (
