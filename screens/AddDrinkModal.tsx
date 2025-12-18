@@ -11,6 +11,7 @@ import {
   NativeSyntheticEvent,
   LayoutChangeEvent,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import Animated, {
@@ -29,6 +30,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { CustomDrinkModal } from "@/components/CustomDrinkModal";
 import { useCaffeineStore, DrinkItem, DrinkEntry } from "@/store/caffeineStore";
 import { useTheme } from "@/hooks/useTheme";
+import { useTeaImage } from "@/hooks/useTeaImage";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -790,6 +792,7 @@ interface DrinkListItemProps {
 function DrinkListItem({ drink, onPress }: DrinkListItemProps) {
   const { theme } = useTheme();
   const scale = useSharedValue(1);
+  const { imageUrl } = drink.category === "tea" ? useTeaImage(drink.name) : { imageUrl: null };
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -815,11 +818,15 @@ function DrinkListItem({ drink, onPress }: DrinkListItemProps) {
       ]}
     >
       <View style={styles.drinkIcon}>
-        <Feather
-          name={drink.icon as keyof typeof Feather.glyphMap}
-          size={20}
-          color={Colors.light.accent}
-        />
+        {drink.category === "tea" && imageUrl ? (
+          <Image source={{ uri: imageUrl }} style={styles.teaImage} />
+        ) : (
+          <Feather
+            name={drink.icon as keyof typeof Feather.glyphMap}
+            size={20}
+            color={Colors.light.accent}
+          />
+        )}
       </View>
       <View style={styles.drinkInfo}>
         <ThemedText type="body" style={styles.drinkName}>
@@ -845,6 +852,7 @@ interface CustomDrinkListItemProps {
 function CustomDrinkListItem({ drink, onPress, onEdit }: CustomDrinkListItemProps) {
   const { theme } = useTheme();
   const scale = useSharedValue(1);
+  const { imageUrl } = drink.category === "tea" ? useTeaImage(drink.name) : { imageUrl: null };
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -863,11 +871,15 @@ function CustomDrinkListItem({ drink, onPress, onEdit }: CustomDrinkListItemProp
       style={[styles.drinkListItem, { backgroundColor: theme.backgroundDefault }, animatedStyle]}
     >
       <View style={styles.drinkIcon}>
-        <Feather
-          name={drink.icon as keyof typeof Feather.glyphMap}
-          size={20}
-          color={Colors.light.accent}
-        />
+        {drink.category === "tea" && imageUrl ? (
+          <Image source={{ uri: imageUrl }} style={styles.teaImage} />
+        ) : (
+          <Feather
+            name={drink.icon as keyof typeof Feather.glyphMap}
+            size={20}
+            color={Colors.light.accent}
+          />
+        )}
       </View>
       <View style={styles.drinkInfo}>
         <ThemedText type="body" style={styles.drinkName}>
@@ -1150,6 +1162,13 @@ const styles = StyleSheet.create({
     backgroundColor: `${Colors.light.accent}20`,
     alignItems: "center",
     justifyContent: "center",
+    overflow: "hidden",
+  },
+  teaImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 20,
+    resizeMode: "cover",
   },
   drinkInfo: {
     flex: 1,
