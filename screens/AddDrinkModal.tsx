@@ -45,6 +45,19 @@ const getCategoryImageSource = (category: string) => {
   return imageMap[category] || imageMap.coffee;
 };
 
+const getImageSourceForDrinkModal = (item: DrinkItem | DrinkEntry): { uri?: string; source?: any } => {
+  const imgUri = (item as any).imageUri;
+  if (imgUri) {
+    if (imgUri.startsWith("preset:")) {
+      const { PRESET_IMAGES } = require("@/components/ImagePickerModal");
+      const preset = PRESET_IMAGES.find((p: any) => p.id === imgUri.replace("preset:", ""));
+      return preset ? { source: preset.image } : { source: getCategoryImageSource((item as any).category) };
+    }
+    return { uri: imgUri };
+  }
+  return { source: getCategoryImageSource((item as any).category) };
+};
+
 interface AddDrinkModalProps {
   visible: boolean;
   onClose: () => void;
@@ -866,6 +879,7 @@ function CustomDrinkListItem({ drink, onPress, onEdit }: CustomDrinkListItemProp
     (drink.caffeinePer100ml * drink.defaultServingMl) / 100,
   );
   const servingLabel = drink.sizes?.[0]?.name || "cup";
+  const imageSource = getImageSourceForDrinkModal(drink);
 
   return (
     <AnimatedPressable
@@ -876,7 +890,7 @@ function CustomDrinkListItem({ drink, onPress, onEdit }: CustomDrinkListItemProp
     >
       <View style={styles.drinkIcon}>
         <Image
-          source={getCategoryImageSource(drink.category)}
+          source={imageSource.source || { uri: imageSource.uri }}
           style={{ width: 40, height: 40, borderRadius: 20 }}
           resizeMode="cover"
         />
@@ -918,6 +932,7 @@ function RecentEntryItem({ entry, onPress }: RecentEntryItemProps) {
   };
 
   const servingLabel = entry.servingSize >= 100 ? `${(entry.servingSize / 100).toFixed(2).replace(/\.?0+$/, '')} cup` : `${entry.servingSize}ml`;
+  const imageSource = getImageSourceForDrinkModal(entry);
 
   return (
     <AnimatedPressable
@@ -928,7 +943,7 @@ function RecentEntryItem({ entry, onPress }: RecentEntryItemProps) {
     >
       <View style={styles.drinkIcon}>
         <Image
-          source={getCategoryImageSource(entry.category)}
+          source={imageSource.source || { uri: imageSource.uri }}
           style={{ width: 40, height: 40, borderRadius: 20 }}
           resizeMode="cover"
         />
