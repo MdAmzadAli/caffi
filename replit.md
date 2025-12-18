@@ -89,6 +89,15 @@ Caffi is a privacy-first, offline caffeine tracking mobile app built with Expo R
 - Alcohol intake: "Never" preferred over "Rare" label
 
 ## Recent Changes
+- December 18, 2025: Graph marker click functionality
+  - Single marker click opens CaffeineLogPopup to view/edit/delete entry
+  - Stacked markers (multiple drinks at similar times) show StackedEntriesModal
+  - StackedEntriesModal displays list with image, name, time, and mg for each entry
+  - Clicking an entry in the stacked modal opens its CaffeineLogPopup
+  - Added StackedEntriesModal component in components/StackedEntriesModal.tsx
+  - Updated CaffeineGraphNew.tsx with Pressable overlays for marker clicks
+  - Updated HomeGraphController.tsx to pass click handlers through
+
 - December 17, 2025: Sleep impact indicator fix for past entries
   - Fixed CustomDrinkModal sleep impact indicator to only show changes for current/future entries
   - Past date entries (before today's midnight) now always show "safe" status
