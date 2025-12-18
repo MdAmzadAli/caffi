@@ -11,6 +11,7 @@ import {
   NativeSyntheticEvent,
   LayoutChangeEvent,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import Animated, {
@@ -32,6 +33,17 @@ import { useTheme } from "@/hooks/useTheme";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+const getCategoryImageSource = (category: string) => {
+  const imageMap: Record<string, any> = {
+    coffee: require("@/assets/CaffeineSourceImages/coffee.png"),
+    tea: require("@/assets/CaffeineSourceImages/tea.jpg"),
+    energy: require("@/assets/CaffeineSourceImages/energy.png"),
+    soda: require("@/assets/CaffeineSourceImages/soda.png"),
+    chocolate: require("@/assets/CaffeineSourceImages/chocolate.png"),
+  };
+  return imageMap[category] || imageMap.coffee;
+};
 
 interface AddDrinkModalProps {
   visible: boolean;
@@ -815,10 +827,10 @@ function DrinkListItem({ drink, onPress }: DrinkListItemProps) {
       ]}
     >
       <View style={styles.drinkIcon}>
-        <Feather
-          name={drink.icon as keyof typeof Feather.glyphMap}
-          size={20}
-          color={Colors.light.accent}
+        <Image
+          source={getCategoryImageSource(drink.category)}
+          style={{ width: 40, height: 40, borderRadius: 20 }}
+          resizeMode="cover"
         />
       </View>
       <View style={styles.drinkInfo}>
@@ -863,10 +875,10 @@ function CustomDrinkListItem({ drink, onPress, onEdit }: CustomDrinkListItemProp
       style={[styles.drinkListItem, { backgroundColor: theme.backgroundDefault }, animatedStyle]}
     >
       <View style={styles.drinkIcon}>
-        <Feather
-          name={drink.icon as keyof typeof Feather.glyphMap}
-          size={20}
-          color={Colors.light.accent}
+        <Image
+          source={getCategoryImageSource(drink.category)}
+          style={{ width: 40, height: 40, borderRadius: 20 }}
+          resizeMode="cover"
         />
       </View>
       <View style={styles.drinkInfo}>
@@ -915,7 +927,11 @@ function RecentEntryItem({ entry, onPress }: RecentEntryItemProps) {
       style={[styles.drinkListItem, { backgroundColor: theme.backgroundDefault }, animatedStyle]}
     >
       <View style={styles.drinkIcon}>
-        <Feather name="coffee" size={20} color={Colors.light.accent} />
+        <Image
+          source={getCategoryImageSource(entry.category)}
+          style={{ width: 40, height: 40, borderRadius: 20 }}
+          resizeMode="cover"
+        />
       </View>
       <View style={styles.drinkInfo}>
         <ThemedText type="body" style={styles.drinkName}>
