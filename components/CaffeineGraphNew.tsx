@@ -114,6 +114,7 @@ interface EventGroup {
   y: number;
   iconY: number;
   category: string;
+  imageUri?: string;
 }
 
 const CATEGORY_IMAGES: Record<string, any> = {
@@ -573,6 +574,7 @@ export function CaffeineGraphNew({
                   y: item.y,
                   iconY,
                   category: item.evt.category || 'coffee',
+                  imageUri: item.evt.imageUri,
                 });
                 lastX = item.x;
               }
@@ -590,8 +592,10 @@ export function CaffeineGraphNew({
                   />
                 ))}
                 {groups.map((group, idx) => {
-                  const { x, iconY, category, events: groupEvents } = group;
-                  const hasImage = CATEGORY_IMAGES[category];
+                  const { x, iconY, category, imageUri, events: groupEvents } = group;
+                  const categoryImage = CATEGORY_IMAGES[category];
+                  const hasImage = imageUri || categoryImage;
+                  const imageHref = imageUri || categoryImage;
                   const clipId = `clip-group-${idx}`;
                   const count = groupEvents.length;
 
@@ -617,7 +621,7 @@ export function CaffeineGraphNew({
                           y={iconY - MARKER_IMAGE_SIZE / 2}
                           width={MARKER_IMAGE_SIZE}
                           height={MARKER_IMAGE_SIZE}
-                          href={CATEGORY_IMAGES[category]}
+                          href={imageHref}
                           clipPath={`url(#${clipId})`}
                           preserveAspectRatio="xMidYMid slice"
                         />

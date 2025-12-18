@@ -5,6 +5,7 @@ export interface CaffeineEvent {
   timestampISO: string;
   iconUrl?: string;
   category?: string;
+  imageUri?: string;
 }
 
 export interface SamplePoint {
