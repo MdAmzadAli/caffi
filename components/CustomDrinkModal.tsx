@@ -128,7 +128,10 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
       setCaffeineMg(caffeine.toString());
       setStartTime(new Date());
       setStartTimeLabel("now");
-      if (prefillDrink.category) {
+      const imgUri = (prefillDrink as any).imageUri;
+      if (imgUri) {
+        setSelectedImage(imgUri);
+      } else if (prefillDrink.category) {
         setSelectedImage(`category:${prefillDrink.category}`);
       }
     }
