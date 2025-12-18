@@ -792,7 +792,7 @@ interface DrinkListItemProps {
 function DrinkListItem({ drink, onPress }: DrinkListItemProps) {
   const { theme } = useTheme();
   const scale = useSharedValue(1);
-  const { imageUrl } = drink.category === "tea" ? useTeaImage(drink.name) : { imageUrl: null };
+  const { imageUrl } = useTeaImage(drink.category === "tea" ? drink.name : "");
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -852,7 +852,7 @@ interface CustomDrinkListItemProps {
 function CustomDrinkListItem({ drink, onPress, onEdit }: CustomDrinkListItemProps) {
   const { theme } = useTheme();
   const scale = useSharedValue(1);
-  const { imageUrl } = drink.category === "tea" ? useTeaImage(drink.name) : { imageUrl: null };
+  const { imageUrl } = useTeaImage(drink.category === "tea" ? drink.name : "");
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
