@@ -125,6 +125,20 @@ const CATEGORY_IMAGES: Record<string, any> = {
   chocolate: require("@/assets/CaffeineSourceImages/chocolate.png"),
 };
 
+const resolveImageSource = (imageUri: string | undefined): any => {
+  if (!imageUri) return null;
+  if (imageUri.startsWith("category:")) {
+    const category = imageUri.replace("category:", "");
+    return CATEGORY_IMAGES[category];
+  }
+  if (imageUri.startsWith("preset:")) {
+    const { PRESET_IMAGES } = require("@/components/ImagePickerModal");
+    const preset = PRESET_IMAGES.find((p: any) => p.id === imageUri.replace("preset:", ""));
+    return preset?.image;
+  }
+  return imageUri;
+};
+
 export function CaffeineGraphNew({
   events,
   now = new Date().toISOString(),
@@ -594,8 +608,8 @@ export function CaffeineGraphNew({
                 {groups.map((group, idx) => {
                   const { x, iconY, category, imageUri, events: groupEvents } = group;
                   const categoryImage = CATEGORY_IMAGES[category];
-                  const hasImage = imageUri || categoryImage;
-                  const imageHref = imageUri || categoryImage;
+                  const resolvedImage = resolveImageSource(imageUri) || categoryImage;
+                  const hasImage = !!resolvedImage;
                   const clipId = `clip-group-${idx}`;
                   const count = groupEvents.length;
 
@@ -621,7 +635,7 @@ export function CaffeineGraphNew({
                           y={iconY - MARKER_IMAGE_SIZE / 2}
                           width={MARKER_IMAGE_SIZE}
                           height={MARKER_IMAGE_SIZE}
-                          href={imageHref}
+                          href={resolvedImage}
                           clipPath={`url(#${clipId})`}
                           preserveAspectRatio="xMidYMid slice"
                         />
