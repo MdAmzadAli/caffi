@@ -117,7 +117,11 @@ interface EventGroup {
 }
 
 const CATEGORY_IMAGES: Record<string, any> = {
-  coffee: require("@/attached_assets/generated_images/caffi_app_icon_coffee_cup.png"),
+  coffee: require("@/assets/CaffeineSourceImages/coffee.png"),
+  tea: require("@/assets/CaffeineSourceImages/tea.jpg"),
+  energy: require("@/assets/CaffeineSourceImages/energy.png"),
+  soda: require("@/assets/CaffeineSourceImages/soda.png"),
+  chocolate: require("@/assets/CaffeineSourceImages/chocolate.png"),
 };
 
 export function CaffeineGraphNew({
