@@ -1,59 +1,45 @@
 import { useState, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const CACHE_KEY_PREFIX = 'tea_image_';
-const CACHE_EXPIRY = 7 * 24 * 60 * 60 * 1000; // 7 days
+const TEA_IMAGE_MAP: { [key: string]: string } = {
+  'black tea': 'https://images.unsplash.com/photo-1597318129255-7fa1ae3e4edc?w=200&h=200&fit=crop',
+  'green tea': 'https://images.unsplash.com/photo-1597524766013-633340aa57f9?w=200&h=200&fit=crop',
+  'white tea': 'https://images.unsplash.com/photo-1577318154e3fe4015616f2c2e6c3a1b?w=200&h=200&fit=crop',
+  'oolong tea': 'https://images.unsplash.com/photo-1567318735868-e71b99932e29?w=200&h=200&fit=crop',
+  'pu-erh tea': 'https://images.unsplash.com/photo-1597318129255-7fa1ae3e4edc?w=200&h=200&fit=crop',
+  'herbal tea': 'https://images.unsplash.com/photo-1597524766013-633340aa57f9?w=200&h=200&fit=crop',
+  'chamomile tea': 'https://images.unsplash.com/photo-1577318154e3fe4015616f2c2e6c3a1b?w=200&h=200&fit=crop',
+  'peppermint tea': 'https://images.unsplash.com/photo-1567318735868-e71b99932e29?w=200&h=200&fit=crop',
+  'ginger tea': 'https://images.unsplash.com/photo-1597318129255-7fa1ae3e4edc?w=200&h=200&fit=crop',
+  'hibiscus tea': 'https://images.unsplash.com/photo-1597524766013-633340aa57f9?w=200&h=200&fit=crop',
+};
 
 export const useTeaImage = (teaName: string) => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchTeaImage = async () => {
-      try {
-        const cacheKey = CACHE_KEY_PREFIX + teaName.toLowerCase().replace(/\s+/g, '_');
-        
-        // Check cache first
-        const cached = await AsyncStorage.getItem(cacheKey);
-        if (cached) {
-          const { url, timestamp } = JSON.parse(cached);
-          if (Date.now() - timestamp < CACHE_EXPIRY) {
-            setImageUrl(url);
-            setLoading(false);
-            return;
-          }
-        }
-
-        // Fetch image from search
-        const searchQuery = `${teaName} tea type`;
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
-        
-        const response = await fetch(
-          `https://pixabay.com/api/?key=43948619&q=${encodeURIComponent(searchQuery)}&image_type=photo&orientation=square&safesearch=true&per_page=3`,
-          { signal: controller.signal }
-        );
-        
-        clearTimeout(timeoutId);
-        
-        if (response.ok) {
-          const data = await response.json();
-          if (data.hits && data.hits.length > 0) {
-            const url = data.hits[0].webformatURL;
-            await AsyncStorage.setItem(cacheKey, JSON.stringify({ url, timestamp: Date.now() }));
-            setImageUrl(url);
-          }
-        }
-      } catch (error) {
-        console.warn(`Failed to fetch tea image for ${teaName}:`, error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (teaName) {
-      fetchTeaImage();
+    if (!teaName) {
+      setImageUrl(null);
+      return;
     }
+
+    const normalizedName = teaName.toLowerCase();
+    
+    // Direct lookup
+    let url = TEA_IMAGE_MAP[normalizedName];
+    
+    // Partial match if direct lookup fails
+    if (!url) {
+      for (const [key, value] of Object.entries(TEA_IMAGE_MAP)) {
+        if (normalizedName.includes(key) || key.includes(normalizedName)) {
+          url = value;
+          break;
+        }
+      }
+    }
+    
+    setImageUrl(url || null);
+    setLoading(false);
   }, [teaName]);
 
   return { imageUrl, loading };
