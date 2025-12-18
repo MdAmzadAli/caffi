@@ -91,6 +91,19 @@ const CATEGORY_IMAGES: Record<string, any> = {
   chocolate: require("@/assets/CaffeineSourceImages/chocolate.png"),
 };
 
+function getDrinkImageSource(item: DrinkEntry): { uri?: string; source?: any } {
+  const imageUri = item.imageUri;
+  if (item.category === "custom" && imageUri) {
+    if (imageUri.startsWith("preset:")) {
+      const { PRESET_IMAGES } = require("@/components/ImagePickerModal");
+      const preset = PRESET_IMAGES.find((p: any) => p.id === imageUri.replace("preset:", ""));
+      return preset ? { source: preset.image } : {};
+    }
+    return { uri: imageUri };
+  }
+  return CATEGORY_IMAGES[item.category] ? { source: CATEGORY_IMAGES[item.category] } : {};
+}
+
 function getEntryIcon(category: string): string {
   return CATEGORY_ICONS[category] || "☕";
 }
@@ -311,14 +324,18 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         onPress={() => handleSelectEntry(item)}
       >
         <View style={[styles.iconContainer, { backgroundColor: theme.backgroundTertiary }]}>
-          {CATEGORY_IMAGES[item.category] ? (
-            <Image
-              source={CATEGORY_IMAGES[item.category]}
-              style={styles.entryImage}
-            />
-          ) : (
-            <Text style={styles.entryEmoji}>{getEntryIcon(item.category)}</Text>
-          )}
+          {(() => {
+            const imageSource = getDrinkImageSource(item);
+            if (imageSource.source || imageSource.uri) {
+              return (
+                <Image
+                  source={imageSource.source || { uri: imageSource.uri }}
+                  style={styles.entryImage}
+                />
+              );
+            }
+            return <Text style={styles.entryEmoji}>{getEntryIcon(item.category)}</Text>;
+          })()}
         </View>
 
         <View style={styles.entryInfo}>

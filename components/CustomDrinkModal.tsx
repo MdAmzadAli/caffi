@@ -248,6 +248,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
           name: drinkName.trim(),
           caffeinePer100ml: parseInt(caffeineMg) || 0,
           sizes: [{ name: selectedUnit, ml: 100 }],
+          imageUri: selectedImage || undefined,
         });
         onSaveCustomDrink?.();
       } else if (prefillDrink?.id && !prefillDrink.id.startsWith('custom-')) {
@@ -262,6 +263,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
           defaultServingMl: 100,
           icon: "coffee",
           sizes: [{ name: selectedUnit, ml: 100 }],
+          imageUri: selectedImage || undefined,
         });
         addEntry(savedDrink, 100 * quantity, undefined, false, startTime);
         closeModal();

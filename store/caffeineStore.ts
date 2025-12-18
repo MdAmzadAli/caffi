@@ -12,6 +12,7 @@ export interface DrinkEntry {
   timestamp: Date;
   notes?: string;
   isFavorite?: boolean;
+  imageUri?: string;
 }
 
 export interface DrinkItem {
@@ -22,6 +23,7 @@ export interface DrinkItem {
   defaultServingMl: number;
   sizes?: { name: string; ml: number }[];
   icon: string;
+  imageUri?: string;
 }
 
 export type Gender = "male" | "female" | "other" | "prefer_not_to_say";
@@ -301,6 +303,7 @@ export function useCaffeineStore() {
         timestamp: timestamp || new Date(),
         notes,
         isFavorite,
+        imageUri: drink.imageUri,
       };
       globalEntries = [entry, ...globalEntries];
       if (isFavorite && !globalFavorites.includes(drink.id)) {
