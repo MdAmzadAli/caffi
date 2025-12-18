@@ -11,6 +11,7 @@ import {
   NativeSyntheticEvent,
   LayoutChangeEvent,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import Animated, {
@@ -787,6 +788,17 @@ interface DrinkListItemProps {
   onPress: () => void;
 }
 
+function DrinkImageIcon({ name }: { name: string }) {
+  const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(name)}`;
+  return (
+    <Image
+      source={{ uri: imageUrl }}
+      style={styles.drinkImageIcon}
+      resizeMode="cover"
+    />
+  );
+}
+
 function DrinkListItem({ drink, onPress }: DrinkListItemProps) {
   const { theme } = useTheme();
   const scale = useSharedValue(1);
@@ -815,11 +827,7 @@ function DrinkListItem({ drink, onPress }: DrinkListItemProps) {
       ]}
     >
       <View style={styles.drinkIcon}>
-        <Feather
-          name={drink.icon as keyof typeof Feather.glyphMap}
-          size={20}
-          color={Colors.light.accent}
-        />
+        <DrinkImageIcon name={drink.name} />
       </View>
       <View style={styles.drinkInfo}>
         <ThemedText type="body" style={styles.drinkName}>
@@ -863,11 +871,7 @@ function CustomDrinkListItem({ drink, onPress, onEdit }: CustomDrinkListItemProp
       style={[styles.drinkListItem, { backgroundColor: theme.backgroundDefault }, animatedStyle]}
     >
       <View style={styles.drinkIcon}>
-        <Feather
-          name={drink.icon as keyof typeof Feather.glyphMap}
-          size={20}
-          color={Colors.light.accent}
-        />
+        <DrinkImageIcon name={drink.name} />
       </View>
       <View style={styles.drinkInfo}>
         <ThemedText type="body" style={styles.drinkName}>
@@ -915,7 +919,7 @@ function RecentEntryItem({ entry, onPress }: RecentEntryItemProps) {
       style={[styles.drinkListItem, { backgroundColor: theme.backgroundDefault }, animatedStyle]}
     >
       <View style={styles.drinkIcon}>
-        <Feather name="coffee" size={20} color={Colors.light.accent} />
+        <DrinkImageIcon name={entry.name} />
       </View>
       <View style={styles.drinkInfo}>
         <ThemedText type="body" style={styles.drinkName}>
@@ -1150,6 +1154,12 @@ const styles = StyleSheet.create({
     backgroundColor: `${Colors.light.accent}20`,
     alignItems: "center",
     justifyContent: "center",
+    overflow: "hidden",
+  },
+  drinkImageIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
   },
   drinkInfo: {
     flex: 1,
