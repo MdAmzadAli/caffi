@@ -93,6 +93,8 @@ interface CaffeineGraphProps {
   dayWindowEnd: number;
   onExtendDays?: (direction: 'left' | 'right') => void;
   resetKey?: number;
+  onEventClick?: (event: CaffeineEvent) => void;
+  onStackedEventsClick?: (events: CaffeineEvent[], position: { x: number; y: number }) => void;
 }
 
 const Y_AXIS_WIDTH = 24;
@@ -155,6 +157,8 @@ export function CaffeineGraphNew({
   dayWindowEnd,
   onExtendDays,
   resetKey = 0,
+  onEventClick,
+  onStackedEventsClick,
 }: CaffeineGraphProps) {
   const GRAPH_COLORS = isDark ? DARK_GRAPH_COLORS : LIGHT_GRAPH_COLORS;
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
@@ -397,6 +401,50 @@ export function CaffeineGraphNew({
 
   const gradientId = isDark ? "curveGradientDark" : "curveGradientLight";
 
+  const eventGroups = useMemo(() => {
+    const visibleEvents = events
+      .map(evt => {
+        const eventMs = Date.parse(evt.timestampISO);
+        if (eventMs < startMs || eventMs > endMs) return null;
+        const x = timeToX(eventMs);
+        const y = mgToY(getActiveAtTime(events, eventMs, halfLifeHours));
+        return { evt, x, y, eventMs };
+      })
+      .filter((e): e is NonNullable<typeof e> => e !== null)
+      .sort((a, b) => a.eventMs - b.eventMs);
+
+    const groups: EventGroup[] = [];
+    let lastX = -Infinity;
+    for (const item of visibleEvents) {
+      const lastGroup = groups[groups.length - 1];
+      if (lastGroup && Math.abs(item.x - lastX) <= GROUP_PROXIMITY_PX) {
+        lastGroup.events.push(item.evt);
+        lastX = item.x;
+      } else {
+        const iconY = Math.max(GRAPH_PADDING_TOP + MARKER_IMAGE_SIZE / 2, item.y - MARKER_IMAGE_SIZE / 2 - 6);
+        groups.push({
+          events: [item.evt],
+          x: item.x,
+          y: item.y,
+          iconY,
+          category: item.evt.category || 'coffee',
+          imageUri: item.evt.imageUri,
+        });
+        lastX = item.x;
+      }
+    }
+
+    return { visibleEvents, groups };
+  }, [events, startMs, endMs, timeToX, mgToY, halfLifeHours]);
+
+  const handleMarkerPress = useCallback((group: EventGroup, pageX: number, pageY: number) => {
+    if (group.events.length === 1) {
+      onEventClick?.(group.events[0]);
+    } else {
+      onStackedEventsClick?.(group.events, { x: pageX, y: pageY });
+    }
+  }, [onEventClick, onStackedEventsClick]);
+
   return (
     <View style={[styles.container, { height: graphHeight, backgroundColor: GRAPH_COLORS.bg }]}>
       <View style={[styles.yAxisContainer, { backgroundColor: GRAPH_COLORS.bg }]}>
@@ -561,122 +609,109 @@ export function CaffeineGraphNew({
             fill="none"
           />
 
-          {(() => {
-            const visibleEvents = events
-              .map(evt => {
-                const eventMs = Date.parse(evt.timestampISO);
-                if (eventMs < startMs || eventMs > endMs) return null;
-                const x = timeToX(eventMs);
-                const y = mgToY(getActiveAtTime(events, eventMs, halfLifeHours));
-                return { evt, x, y, eventMs };
-              })
-              .filter((e): e is NonNullable<typeof e> => e !== null)
-              .sort((a, b) => a.eventMs - b.eventMs);
-
-            const groups: EventGroup[] = [];
-            let lastX = -Infinity;
-            for (const item of visibleEvents) {
-              const lastGroup = groups[groups.length - 1];
-              if (lastGroup && Math.abs(item.x - lastX) <= GROUP_PROXIMITY_PX) {
-                lastGroup.events.push(item.evt);
-                lastX = item.x;
-              } else {
-                const iconY = Math.max(GRAPH_PADDING_TOP + MARKER_IMAGE_SIZE / 2, item.y - MARKER_IMAGE_SIZE / 2 - 6);
-                groups.push({
-                  events: [item.evt],
-                  x: item.x,
-                  y: item.y,
-                  iconY,
-                  category: item.evt.category || 'coffee',
-                  imageUri: item.evt.imageUri,
-                });
-                lastX = item.x;
-              }
-            }
+          {eventGroups.visibleEvents.map(item => (
+            <Circle
+              key={`dot-${item.evt.id}`}
+              cx={item.x}
+              cy={item.y}
+              r={3}
+              fill={GRAPH_COLORS.accentGold}
+            />
+          ))}
+          {eventGroups.groups.map((group, idx) => {
+            const { x, iconY, category, imageUri, events: groupEvents } = group;
+            const categoryImage = CATEGORY_IMAGES[category];
+            const resolvedImage = resolveImageSource(imageUri) || categoryImage;
+            const hasImage = !!resolvedImage;
+            const clipId = `clip-group-${idx}`;
+            const count = groupEvents.length;
 
             return (
-              <>
-                {visibleEvents.map(item => (
-                  <Circle
-                    key={`dot-${item.evt.id}`}
-                    cx={item.x}
-                    cy={item.y}
-                    r={3}
-                    fill={GRAPH_COLORS.accentGold}
+              <G key={`group-${idx}`}>
+                <Defs>
+                  <ClipPath id={clipId}>
+                    <Circle cx={x} cy={iconY} r={MARKER_IMAGE_SIZE / 2} />
+                  </ClipPath>
+                </Defs>
+                <Circle
+                  cx={x}
+                  cy={iconY}
+                  r={MARKER_IMAGE_SIZE / 2 + 2}
+                  fill={GRAPH_COLORS.bgSecondary}
+                  stroke={GRAPH_COLORS.mutedGrey}
+                  strokeWidth={0.5}
+                  strokeOpacity={0.3}
+                />
+                {hasImage ? (
+                  <SvgImage
+                    x={x - MARKER_IMAGE_SIZE / 2}
+                    y={iconY - MARKER_IMAGE_SIZE / 2}
+                    width={MARKER_IMAGE_SIZE}
+                    height={MARKER_IMAGE_SIZE}
+                    href={resolvedImage}
+                    clipPath={`url(#${clipId})`}
+                    preserveAspectRatio="xMidYMid slice"
                   />
-                ))}
-                {groups.map((group, idx) => {
-                  const { x, iconY, category, imageUri, events: groupEvents } = group;
-                  const categoryImage = CATEGORY_IMAGES[category];
-                  const resolvedImage = resolveImageSource(imageUri) || categoryImage;
-                  const hasImage = !!resolvedImage;
-                  const clipId = `clip-group-${idx}`;
-                  const count = groupEvents.length;
-
-                  return (
-                    <G key={`group-${idx}`}>
-                      <Defs>
-                        <ClipPath id={clipId}>
-                          <Circle cx={x} cy={iconY} r={MARKER_IMAGE_SIZE / 2} />
-                        </ClipPath>
-                      </Defs>
-                      <Circle
-                        cx={x}
-                        cy={iconY}
-                        r={MARKER_IMAGE_SIZE / 2 + 2}
-                        fill={GRAPH_COLORS.bgSecondary}
-                        stroke={GRAPH_COLORS.mutedGrey}
-                        strokeWidth={0.5}
-                        strokeOpacity={0.3}
-                      />
-                      {hasImage ? (
-                        <SvgImage
-                          x={x - MARKER_IMAGE_SIZE / 2}
-                          y={iconY - MARKER_IMAGE_SIZE / 2}
-                          width={MARKER_IMAGE_SIZE}
-                          height={MARKER_IMAGE_SIZE}
-                          href={resolvedImage}
-                          clipPath={`url(#${clipId})`}
-                          preserveAspectRatio="xMidYMid slice"
-                        />
-                      ) : (
-                        <SvgText
-                          x={x}
-                          y={iconY + 3}
-                          fontSize={8}
-                          textAnchor="middle"
-                          fill={GRAPH_COLORS.darkBrown}
-                        >
-                          ☕
-                        </SvgText>
-                      )}
-                      {count > 1 && (
-                        <>
-                          <Circle
-                            cx={x + MARKER_IMAGE_SIZE / 2}
-                            cy={iconY - MARKER_IMAGE_SIZE / 2}
-                            r={6}
-                            fill={GRAPH_COLORS.accentGold}
-                          />
-                          <SvgText
-                            x={x + MARKER_IMAGE_SIZE / 2}
-                            y={iconY - MARKER_IMAGE_SIZE / 2 + 3}
-                            fontSize={8}
-                            fontWeight="bold"
-                            textAnchor="middle"
-                            fill="#FFFFFF"
-                          >
-                            {count}
-                          </SvgText>
-                        </>
-                      )}
-                    </G>
-                  );
-                })}
-              </>
+                ) : (
+                  <SvgText
+                    x={x}
+                    y={iconY + 3}
+                    fontSize={8}
+                    textAnchor="middle"
+                    fill={GRAPH_COLORS.darkBrown}
+                  >
+                    ☕
+                  </SvgText>
+                )}
+                {count > 1 && (
+                  <>
+                    <Circle
+                      cx={x + MARKER_IMAGE_SIZE / 2}
+                      cy={iconY - MARKER_IMAGE_SIZE / 2}
+                      r={6}
+                      fill={GRAPH_COLORS.accentGold}
+                    />
+                    <SvgText
+                      x={x + MARKER_IMAGE_SIZE / 2}
+                      y={iconY - MARKER_IMAGE_SIZE / 2 + 3}
+                      fontSize={8}
+                      fontWeight="bold"
+                      textAnchor="middle"
+                      fill="#FFFFFF"
+                    >
+                      {count}
+                    </SvgText>
+                  </>
+                )}
+              </G>
             );
-          })()}
+          })}
         </Svg>
+
+        <View style={styles.markerOverlayContainer} pointerEvents="box-none">
+          {eventGroups.groups.map((group, idx) => {
+            const { x, iconY } = group;
+            const hitSize = MARKER_SIZE + 8;
+            return (
+              <Pressable
+                key={`marker-press-${idx}`}
+                style={[
+                  styles.markerPressable,
+                  {
+                    left: x - hitSize / 2,
+                    top: iconY - hitSize / 2,
+                    width: hitSize,
+                    height: hitSize,
+                  },
+                ]}
+                onPress={(e) => {
+                  const { pageX, pageY } = e.nativeEvent;
+                  handleMarkerPress(group, pageX, pageY);
+                }}
+              />
+            );
+          })}
+        </View>
 
         <View style={[styles.xAxisContainer, { width: scrollContentWidth }]}>
           {xAxisTicks.map((tickMs) => {
@@ -736,6 +771,17 @@ const styles = StyleSheet.create({
   },
   svgChart: {
     backgroundColor: "transparent",
+  },
+  markerOverlayContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: X_AXIS_HEIGHT,
+  },
+  markerPressable: {
+    position: "absolute",
+    borderRadius: 12,
   },
   xAxisContainer: {
     height: X_AXIS_HEIGHT,

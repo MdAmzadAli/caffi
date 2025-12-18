@@ -1,0 +1,205 @@
+import React from "react";
+import {
+  Modal,
+  View,
+  StyleSheet,
+  Pressable,
+  Text,
+  Image,
+  ScrollView,
+  Dimensions,
+} from "react-native";
+import { useTheme } from "@/hooks/useTheme";
+import { CaffeineEvent } from "@/utils/graphUtils";
+
+const SCREEN_WIDTH = Dimensions.get("window").width;
+const SCREEN_HEIGHT = Dimensions.get("window").height;
+const MAX_MODAL_HEIGHT = SCREEN_HEIGHT * 0.4;
+const MODAL_WIDTH = 200;
+
+const CATEGORY_IMAGES: Record<string, any> = {
+  coffee: require("@/assets/CaffeineSourceImages/coffee.png"),
+  tea: require("@/assets/CaffeineSourceImages/tea.jpg"),
+  energy: require("@/assets/CaffeineSourceImages/energy.png"),
+  soda: require("@/assets/CaffeineSourceImages/soda.png"),
+  chocolate: require("@/assets/CaffeineSourceImages/chocolate.png"),
+};
+
+const resolveImageSource = (imageUri?: string): any => {
+  if (!imageUri) return null;
+  if (imageUri.startsWith("preset:")) {
+    const { PRESET_IMAGES } = require("@/components/ImagePickerModal");
+    const preset = PRESET_IMAGES.find((p: any) => p.id === imageUri.replace("preset:", ""));
+    return preset?.image;
+  }
+  return { uri: imageUri };
+};
+
+interface StackedEntriesModalProps {
+  visible: boolean;
+  events: CaffeineEvent[];
+  position: { x: number; y: number };
+  onClose: () => void;
+  onSelectEvent: (event: CaffeineEvent) => void;
+}
+
+function formatTime(timestampISO: string): string {
+  const date = new Date(timestampISO);
+  return date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
+export function StackedEntriesModal({
+  visible,
+  events,
+  position,
+  onClose,
+  onSelectEvent,
+}: StackedEntriesModalProps) {
+  const { theme } = useTheme();
+
+  const modalLeft = Math.min(
+    Math.max(position.x + 10, 10),
+    SCREEN_WIDTH - MODAL_WIDTH - 10
+  );
+  const modalTop = Math.min(
+    Math.max(position.y - 40, 60),
+    SCREEN_HEIGHT - MAX_MODAL_HEIGHT - 100
+  );
+
+  if (!visible || events.length === 0) return null;
+
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
+    >
+      <Pressable style={styles.overlay} onPress={onClose}>
+        <View
+          style={[
+            styles.modalContainer,
+            {
+              backgroundColor: theme.bg,
+              left: modalLeft,
+              top: modalTop,
+              shadowColor: "#000",
+            },
+          ]}
+        >
+          <ScrollView
+            style={styles.scrollView}
+            showsVerticalScrollIndicator={false}
+          >
+            {events.map((event, index) => {
+              const categoryImage = CATEGORY_IMAGES[event.category || "coffee"];
+              const resolvedImage = resolveImageSource(event.imageUri) || categoryImage;
+
+              return (
+                <Pressable
+                  key={event.id || index}
+                  style={({ pressed }) => [
+                    styles.entryRow,
+                    { backgroundColor: pressed ? theme.backgroundTertiary : "transparent" },
+                    index < events.length - 1 && {
+                      borderBottomWidth: StyleSheet.hairlineWidth,
+                      borderBottomColor: theme.mutedGrey + "30",
+                    },
+                  ]}
+                  onPress={() => {
+                    onSelectEvent(event);
+                  }}
+                >
+                  <View style={[styles.imageContainer, { backgroundColor: theme.backgroundSecondary }]}>
+                    {resolvedImage ? (
+                      <Image source={resolvedImage} style={styles.entryImage} />
+                    ) : (
+                      <Text style={styles.emoji}>☕</Text>
+                    )}
+                  </View>
+                  <View style={styles.textContainer}>
+                    <Text style={[styles.entryName, { color: theme.darkBrown }]} numberOfLines={1}>
+                      {event.name}
+                    </Text>
+                    <Text style={[styles.entryTime, { color: theme.mutedGrey }]}>
+                      {formatTime(event.timestampISO)}
+                    </Text>
+                    <Text style={[styles.entryMg, { color: theme.accentGold }]}>
+                      {event.mg} mg
+                    </Text>
+                  </View>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+        </View>
+      </Pressable>
+    </Modal>
+  );
+}
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+  },
+  modalContainer: {
+    position: "absolute",
+    width: MODAL_WIDTH,
+    maxHeight: MAX_MODAL_HEIGHT,
+    borderRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
+    overflow: "hidden",
+  },
+  scrollView: {
+    maxHeight: MAX_MODAL_HEIGHT,
+  },
+  entryRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+  },
+  imageContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+  },
+  entryImage: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+  },
+  emoji: {
+    fontSize: 18,
+  },
+  textContainer: {
+    flex: 1,
+    marginLeft: 10,
+  },
+  entryName: {
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  entryTime: {
+    fontSize: 11,
+    marginTop: 2,
+  },
+  entryMg: {
+    fontSize: 11,
+    fontWeight: "600",
+    marginTop: 2,
+  },
+});
+
+export default StackedEntriesModal;

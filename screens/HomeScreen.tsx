@@ -18,6 +18,7 @@ import { StickyConsumptionTitle } from "@/components/StickyConsumptionTitle";
 import { StickyDateHeader } from "@/components/StickyDateHeader";
 import { CaffeineLogPopup } from "@/components/CaffeineLogPopup";
 import { CustomDrinkModal } from "@/components/CustomDrinkModal";
+import { StackedEntriesModal } from "@/components/StackedEntriesModal";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { useCaffeineStore, DrinkEntry } from "@/store/caffeineStore";
 import {
@@ -130,6 +131,9 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [headerHeight, setHeaderHeight] = useState(0);
   const [graphHeight, setGraphHeight] = useState(0);
   const [titleHeight, setTitleHeight] = useState(0);
+  const [stackedModalVisible, setStackedModalVisible] = useState(false);
+  const [stackedEvents, setStackedEvents] = useState<CaffeineEvent[]>([]);
+  const [stackedPosition, setStackedPosition] = useState({ x: 0, y: 0 });
   
   // Scroll animation values
   const scrollY = useSharedValue(0);
@@ -264,6 +268,34 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     setPopupVisible(false);
     setSelectedEntry(null);
   };
+
+  const handleGraphEventClick = useCallback((event: CaffeineEvent) => {
+    const matchingEntry = entries.find(e => e.id === event.id);
+    if (matchingEntry) {
+      setSelectedEntry(matchingEntry);
+      setPopupVisible(true);
+    }
+  }, [entries]);
+
+  const handleGraphStackedEventsClick = useCallback((events: CaffeineEvent[], position: { x: number; y: number }) => {
+    setStackedEvents(events);
+    setStackedPosition(position);
+    setStackedModalVisible(true);
+  }, []);
+
+  const handleStackedModalSelect = useCallback((event: CaffeineEvent) => {
+    setStackedModalVisible(false);
+    const matchingEntry = entries.find(e => e.id === event.id);
+    if (matchingEntry) {
+      setSelectedEntry(matchingEntry);
+      setPopupVisible(true);
+    }
+  }, [entries]);
+
+  const handleStackedModalClose = useCallback(() => {
+    setStackedModalVisible(false);
+    setStackedEvents([]);
+  }, []);
 
   // Track current visible section for sticky date header
   const handleViewableItemsChanged = useCallback(({ viewableItems }: any) => {
@@ -464,6 +496,8 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             halfLifeHours={5.5}
             isDark={isDark}
             onHeight={setGraphHeight}
+            onEventClick={handleGraphEventClick}
+            onStackedEventsClick={handleGraphStackedEventsClick}
           />
         </View>
 
@@ -528,6 +562,14 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         visible={editModalVisible}
         editEntry={selectedEntry}
         onClose={handleCloseEditModal}
+      />
+
+      <StackedEntriesModal
+        visible={stackedModalVisible}
+        events={stackedEvents}
+        position={stackedPosition}
+        onClose={handleStackedModalClose}
+        onSelectEvent={handleStackedModalSelect}
       />
     </View>
   );

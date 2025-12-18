@@ -19,6 +19,8 @@ interface HomeGraphControllerProps {
   optimalCaffeineMg?: number;
   isDark?: boolean;
   onHeight?: (height: number) => void;
+  onEventClick?: (event: CaffeineEvent) => void;
+  onStackedEventsClick?: (events: CaffeineEvent[], position: { x: number; y: number }) => void;
 }
 
 const LIGHT_COLORS = {
@@ -43,6 +45,8 @@ export function HomeGraphController({
   optimalCaffeineMg = 200,
   isDark = false,
   onHeight,
+  onEventClick,
+  onStackedEventsClick,
 }: HomeGraphControllerProps) {
   const [isOffCenter, setIsOffCenter] = useState(false);
   const [scrollDirection, setScrollDirection] = useState<'left' | 'right' | null>(null);
@@ -105,6 +109,8 @@ export function HomeGraphController({
         dayWindowEnd={dayWindowEnd}
         onExtendDays={handleExtendDays}
         resetKey={resetKey}
+        onEventClick={onEventClick}
+        onStackedEventsClick={onStackedEventsClick}
       />
 
       {isOffCenter && scrollDirection === 'right' && (
