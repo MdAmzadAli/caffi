@@ -191,7 +191,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
 
   const resetState = () => {
     setSearchQuery("");
-    setSelectedCategory(null);
+    setSelectedCategory("coffee");
     setSelectedDrink(null);
     setSelectedSize(null);
     setNotes("");
