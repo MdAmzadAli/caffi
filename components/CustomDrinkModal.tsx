@@ -119,6 +119,10 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
       setCaffeineMg(editCustomDrink.caffeinePer100ml.toString());
       setStartTime(new Date());
       setStartTimeLabel("now");
+      const imgUri = (editCustomDrink as any).imageUri;
+      if (imgUri) {
+        setSelectedImage(imgUri);
+      }
     } else if (prefillDrink && visible && !editEntry) {
       setDrinkName(prefillDrink.name);
       setQuantity(1);
