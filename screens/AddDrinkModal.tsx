@@ -97,7 +97,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
   };
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>("coffee");
   const [selectedDrink, setSelectedDrink] = useState<DrinkItem | null>(null);
   const [selectedSize, setSelectedSize] = useState<number | null>(null);
   const [notes, setNotes] = useState("");
@@ -461,7 +461,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
                     <View style={[styles.stickySectionHeader, { backgroundColor: theme.backgroundRoot }]}>
                       <ThemedText type="small" muted style={styles.sectionLabel}>
                         {currentStickySection === "CATEGORY_SECTION" 
-                          ? (searchQuery ? "RESULTS" : selectedCategory ? selectedCategory.toUpperCase() : "POPULAR")
+                          ? (searchQuery ? "RESULTS" : selectedCategory!.toUpperCase())
                           : currentStickySection}
                       </ThemedText>
                     </View>
@@ -521,7 +521,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
                     onLayout={handleSectionLayout("CATEGORY_SECTION")}
                   >
                     <ThemedText type="small" muted style={styles.sectionLabel}>
-                      {searchQuery ? "RESULTS" : selectedCategory ? selectedCategory.toUpperCase() : "POPULAR"}
+                      {searchQuery ? "RESULTS" : selectedCategory!.toUpperCase()}
                     </ThemedText>
                     {displayedDrinks.map((drink) => (
                       <MemoizedDrinkListItem
