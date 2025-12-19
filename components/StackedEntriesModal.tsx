@@ -14,7 +14,7 @@ import { CaffeineEvent } from "@/utils/graphUtils";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SCREEN_HEIGHT = Dimensions.get("window").height;
-const MAX_MODAL_HEIGHT = SCREEN_HEIGHT * 0.28;
+const DEFAULT_MODAL_HEIGHT = SCREEN_HEIGHT * 0.28;
 const MODAL_WIDTH = 200;
 
 const CATEGORY_IMAGES: Record<string, any> = {
@@ -60,6 +60,9 @@ export function StackedEntriesModal({
   onSelectEvent,
 }: StackedEntriesModalProps) {
   const { theme } = useTheme();
+  const [modalHeight, setModalHeight] = React.useState(0);
+
+  const effectiveModalHeight = modalHeight || DEFAULT_MODAL_HEIGHT;
 
   const modalLeft = Math.min(
     Math.max(position.x + 10, 10),
@@ -68,7 +71,7 @@ export function StackedEntriesModal({
   const xAxisLabelHeight = SCREEN_HEIGHT * 0.04;
   const modalTop = Math.min(
     Math.max(position.y - 40, 60),
-    SCREEN_HEIGHT - MAX_MODAL_HEIGHT - xAxisLabelHeight
+    SCREEN_HEIGHT - effectiveModalHeight - xAxisLabelHeight
   );
 
   if (!visible || events.length === 0) return null;
@@ -89,11 +92,13 @@ export function StackedEntriesModal({
               left: modalLeft,
               top: modalTop,
               shadowColor: "#000",
+              maxHeight: effectiveModalHeight,
             },
           ]}
+          onLayout={(e) => setModalHeight(e.nativeEvent.layout.height)}
         >
           <ScrollView
-            style={styles.scrollView}
+            style={[styles.scrollView, { maxHeight: effectiveModalHeight }]}
             showsVerticalScrollIndicator={false}
           >
             {events.map((event, index) => {
@@ -153,7 +158,6 @@ const styles = StyleSheet.create({
   modalContainer: {
     position: "absolute",
     width: MODAL_WIDTH,
-    maxHeight: MAX_MODAL_HEIGHT,
     borderRadius: 12,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
@@ -162,7 +166,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   scrollView: {
-    maxHeight: MAX_MODAL_HEIGHT,
+    flex: 1,
   },
   entryRow: {
     flexDirection: "row",
