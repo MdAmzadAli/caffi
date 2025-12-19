@@ -61,12 +61,14 @@ export function StackedEntriesModal({
 }: StackedEntriesModalProps) {
   const { theme } = useTheme();
   const [modalHeight, setModalHeight] = React.useState(0);
+  const [modalWidth, setModalWidth] = React.useState(0);
 
   const effectiveModalHeight = modalHeight || DEFAULT_MODAL_HEIGHT;
+  const effectiveModalWidth = modalWidth || MODAL_WIDTH;
 
   const modalLeft = Math.min(
     Math.max(position.x + 10, 10),
-    SCREEN_WIDTH - MODAL_WIDTH - 10
+    SCREEN_WIDTH - effectiveModalWidth - 10
   );
   const xAxisLabelHeight = SCREEN_HEIGHT * 0.04;
   const modalTop = Math.min(
@@ -95,7 +97,10 @@ export function StackedEntriesModal({
               maxHeight: effectiveModalHeight,
             },
           ]}
-          onLayout={(e) => setModalHeight(e.nativeEvent.layout.height)}
+          onLayout={(e) => {
+            setModalHeight(e.nativeEvent.layout.height);
+            setModalWidth(e.nativeEvent.layout.width);
+          }}
         >
           <ScrollView
             style={[styles.scrollView, { maxHeight: effectiveModalHeight }]}
