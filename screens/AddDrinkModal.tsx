@@ -195,6 +195,20 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
     setShowCustomDrinkModal(true);
   };
 
+  const handleQuickAdd = (entry: DrinkEntry) => {
+    const drink = allDrinks.find(d => d.id === entry.drinkId) || {
+      id: entry.drinkId,
+      name: entry.name,
+      category: entry.category as Category,
+      caffeinePer100ml: (entry.caffeineAmount / entry.servingSize) * 100,
+      defaultServingMl: entry.servingSize,
+      icon: "coffee",
+      sizes: [],
+    };
+    addEntry(drink, entry.servingSize, entry.notes, entry.isFavorite, new Date());
+    handleCloseAnimated();
+  };
+
   const handleAdd = () => {
     if (selectedDrink && selectedSize) {
       addEntry(selectedDrink, selectedSize, notes || undefined, isFavorite);
@@ -496,18 +510,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
                         <RecentEntryItem
                           key={entry.id}
                           entry={entry}
-                          onPress={() => {
-                            const drink = allDrinks.find(d => d.id === entry.drinkId) || {
-                              id: entry.drinkId,
-                              name: entry.name,
-                              category: entry.category as Category,
-                              caffeinePer100ml: (entry.caffeineAmount / entry.servingSize) * 100,
-                              defaultServingMl: entry.servingSize,
-                              icon: "coffee",
-                              sizes: [],
-                            };
-                            handleSelectDrink(drink);
-                          }}
+                          onPress={() => handleQuickAdd(entry)}
                         />
                       ))}
                     </View>
