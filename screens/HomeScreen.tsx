@@ -284,7 +284,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   }, []);
 
   const handleStackedModalSelect = useCallback((event: CaffeineEvent) => {
-    setStackedModalVisible(false);
     const matchingEntry = entries.find(e => e.id === event.id);
     if (matchingEntry) {
       setSelectedEntry(matchingEntry);
