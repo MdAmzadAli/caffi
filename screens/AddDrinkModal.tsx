@@ -78,7 +78,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const { height: windowHeight } = useWindowDimensions();
-  const { addEntry, getAllDrinks, getFavoriteDrinks, profile, entries, customDrinks } = useCaffeineStore();
+  const { addEntry, deleteEntry, getAllDrinks, getFavoriteDrinks, profile, entries, customDrinks } = useCaffeineStore();
 
   const INITIAL_HEIGHT = windowHeight * 0.8;
   const maxExpandedHeight = windowHeight - insets.top;
@@ -206,6 +206,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
       sizes: [],
     };
     addEntry(drink, entry.servingSize, entry.notes, entry.isFavorite, new Date());
+    deleteEntry(entry.id);
     handleCloseAnimated();
   };
 
