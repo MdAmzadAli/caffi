@@ -200,14 +200,13 @@ const styles = StyleSheet.create({
   },
   timeAndMgRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
     alignItems: "center",
     marginTop: 2,
-    gap: 4,
+    gap: 1,
   },
   entryTime: {
     fontSize: 8,
-    flex: 1,
   },
   entryMg: {
     fontSize: 8,
