@@ -139,7 +139,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const scrollY = useSharedValue(0);
   const scrollViewRef = useRef<any>(null);
   const savedScrollOffset = useRef(0);
-  const lastEntryCountRef = useRef(entries.length);
   const COLLAPSE_THRESHOLD = 100; // Scroll threshold to trigger collapse
   const DEFAULT_GRAPH_HEIGHT = Dimensions.get("window").height * 0.36; // Graph height (36% of screen)
   const HEADER_HEIGHT = 60; // Screen header height
@@ -227,21 +226,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       }
     }
   }, [sections, currentStickyDate]);
-
-  // Auto-scroll to top when a new entry is added
-  useEffect(() => {
-    if (entries.length > lastEntryCountRef.current && scrollViewRef.current) {
-      setTimeout(() => {
-        scrollViewRef.current.scrollToLocation({
-          sectionIndex: 0,
-          itemIndex: 0,
-          animated: true,
-          viewOffset: 0,
-        });
-      }, 100);
-    }
-    lastEntryCountRef.current = entries.length;
-  }, [entries.length]);
 
   const handleSelectEntry = (entry: DrinkEntry) => {
     setSelectedEntry(entry);

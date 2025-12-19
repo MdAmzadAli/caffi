@@ -62,7 +62,6 @@ interface AddDrinkModalProps {
   visible: boolean;
   onClose: () => void;
   onNavigateToCustomDrink?: () => void;
-  onEntryAdded?: (timestamp: Date) => void;
 }
 
 type Category = "coffee" | "tea" | "energy" | "soda" | "chocolate" | "custom";
@@ -75,7 +74,7 @@ const QUICK_CATEGORIES: { key: Category; label: string; icon: keyof typeof Feath
   { key: "chocolate", label: "Chocolate", icon: "square" },
 ];
 
-export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrink, onEntryAdded }: AddDrinkModalProps) {
+export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrink }: AddDrinkModalProps) {
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const { height: windowHeight } = useWindowDimensions();
@@ -206,18 +205,14 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
       icon: "coffee",
       sizes: [],
     };
-    const now = new Date();
-    addEntry(drink, entry.servingSize, entry.notes, entry.isFavorite, now);
+    addEntry(drink, entry.servingSize, entry.notes, entry.isFavorite, new Date());
     deleteEntry(entry.id);
-    onEntryAdded?.(now);
     handleCloseAnimated();
   };
 
   const handleAdd = () => {
     if (selectedDrink && selectedSize) {
-      const now = new Date();
-      addEntry(selectedDrink, selectedSize, notes || undefined, isFavorite, now);
-      onEntryAdded?.(now);
+      addEntry(selectedDrink, selectedSize, notes || undefined, isFavorite);
       handleCloseAnimated();
     }
   };
