@@ -14,7 +14,7 @@ import { CaffeineEvent } from "@/utils/graphUtils";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SCREEN_HEIGHT = Dimensions.get("window").height;
-const MAX_MODAL_HEIGHT = SCREEN_HEIGHT * 0.4;
+const MAX_MODAL_HEIGHT = SCREEN_HEIGHT * 0.28;
 const MODAL_WIDTH = 200;
 
 const CATEGORY_IMAGES: Record<string, any> = {
@@ -167,24 +167,24 @@ const styles = StyleSheet.create({
   entryRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 12,
+    paddingVertical: SCREEN_HEIGHT * 0.006,
+    paddingHorizontal: SCREEN_WIDTH * 0.02,
   },
   imageContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: SCREEN_WIDTH * 0.07,
+    height: SCREEN_WIDTH * 0.07,
+    borderRadius: SCREEN_WIDTH * 0.035,
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
   },
   entryImage: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: SCREEN_WIDTH * 0.07,
+    height: SCREEN_WIDTH * 0.07,
+    borderRadius: SCREEN_WIDTH * 0.035,
   },
   emoji: {
-    fontSize: 18,
+    fontSize: SCREEN_WIDTH * 0.035,
   },
   textContainer: {
     flex: 1,
