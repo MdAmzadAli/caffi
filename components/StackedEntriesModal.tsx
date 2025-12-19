@@ -83,7 +83,7 @@ export function StackedEntriesModal({
       animationType="fade"
       onRequestClose={onClose}
     >
-      <Pressable style={[styles.overlay, { backgroundColor: "transparent" }]} onPress={onClose}>
+      <Pressable style={[styles.overlay, { backgroundColor: "transparent" }]} onPress={onClose} pointerEvents="box-none">
         <View
           style={[
             styles.modalContainer,
@@ -93,6 +93,7 @@ export function StackedEntriesModal({
               top: modalTop,
               shadowColor: "#000",
               maxHeight: effectiveModalHeight,
+              pointerEvents: "auto",
             },
           ]}
           onLayout={(e) => setModalHeight(e.nativeEvent.layout.height)}
