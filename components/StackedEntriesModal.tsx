@@ -15,7 +15,7 @@ import { CaffeineEvent } from "@/utils/graphUtils";
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const DEFAULT_MODAL_HEIGHT = SCREEN_HEIGHT * 0.28;
-const MODAL_WIDTH = 200;
+const MODAL_WIDTH = SCREEN_WIDTH * 0.35;
 
 const CATEGORY_IMAGES: Record<string, any> = {
   coffee: require("@/assets/CaffeineSourceImages/coffee.png"),
