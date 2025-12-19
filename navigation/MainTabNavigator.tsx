@@ -78,6 +78,11 @@ export default function MainTabNavigator() {
     } as any);
   };
 
+  const handleEntryAdded = (timestamp: Date) => {
+    setShowAddModal(false);
+    navigation.navigate("HomeTab");
+  };
+
   return (
     <>
       <Tab.Navigator
@@ -168,6 +173,7 @@ export default function MainTabNavigator() {
         visible={showAddModal}
         onClose={() => setShowAddModal(false)}
         onNavigateToCustomDrink={handleNavigateToCustomDrink}
+        onEntryAdded={handleEntryAdded}
       />
     </>
   );
