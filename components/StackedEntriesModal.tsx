@@ -83,8 +83,11 @@ export function StackedEntriesModal({
       animationType="fade"
       onRequestClose={onClose}
     >
-      <Pressable style={[styles.overlay, { backgroundColor: "transparent" }]} onPress={onClose} pointerEvents="box-none">
-        <View
+      <Pressable 
+        style={[styles.overlay, { backgroundColor: "transparent" }]} 
+        onPress={onClose}
+      >
+        <Pressable
           style={[
             styles.modalContainer,
             {
@@ -93,10 +96,10 @@ export function StackedEntriesModal({
               top: modalTop,
               shadowColor: "#000",
               maxHeight: effectiveModalHeight,
-              pointerEvents: "auto",
             },
           ]}
           onLayout={(e) => setModalHeight(e.nativeEvent.layout.height)}
+          onPress={() => {}}
         >
           <ScrollView
             style={[styles.scrollView, { maxHeight: effectiveModalHeight }]}
@@ -145,7 +148,7 @@ export function StackedEntriesModal({
               );
             })}
           </ScrollView>
-        </View>
+        </Pressable>
       </Pressable>
     </Modal>
   );
