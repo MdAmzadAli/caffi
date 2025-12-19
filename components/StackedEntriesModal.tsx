@@ -65,9 +65,10 @@ export function StackedEntriesModal({
     Math.max(position.x + 10, 10),
     SCREEN_WIDTH - MODAL_WIDTH - 10
   );
+  const xAxisLabelHeight = SCREEN_HEIGHT * 0.04;
   const modalTop = Math.min(
     Math.max(position.y - 40, 60),
-    SCREEN_HEIGHT - MAX_MODAL_HEIGHT - 100
+    SCREEN_HEIGHT - MAX_MODAL_HEIGHT - xAxisLabelHeight
   );
 
   if (!visible || events.length === 0) return null;
@@ -79,7 +80,7 @@ export function StackedEntriesModal({
       animationType="fade"
       onRequestClose={onClose}
     >
-      <Pressable style={styles.overlay} onPress={onClose}>
+      <Pressable style={[styles.overlay, { backgroundColor: "transparent" }]} onPress={onClose}>
         <View
           style={[
             styles.modalContainer,
@@ -125,12 +126,14 @@ export function StackedEntriesModal({
                     <Text style={[styles.entryName, { color: theme.darkBrown }]} numberOfLines={1}>
                       {event.name}
                     </Text>
-                    <Text style={[styles.entryTime, { color: theme.mutedGrey }]}>
-                      {formatTime(event.timestampISO)}
-                    </Text>
-                    <Text style={[styles.entryMg, { color: theme.accentGold }]}>
-                      {event.mg} mg
-                    </Text>
+                    <View style={styles.timeAndMgRow}>
+                      <Text style={[styles.entryTime, { color: theme.mutedGrey }]}>
+                        {formatTime(event.timestampISO)}
+                      </Text>
+                      <Text style={[styles.entryMg, { color: theme.accentGold }]}>
+                        {event.mg} mg
+                      </Text>
+                    </View>
                   </View>
                 </Pressable>
               );
@@ -191,14 +194,20 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "600",
   },
+  timeAndMgRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 4,
+    gap: 8,
+  },
   entryTime: {
     fontSize: 11,
-    marginTop: 2,
+    flex: 1,
   },
   entryMg: {
     fontSize: 11,
     fontWeight: "600",
-    marginTop: 2,
   },
 });
 
