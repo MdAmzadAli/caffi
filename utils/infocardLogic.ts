@@ -215,11 +215,12 @@ export function calculateInfoCard(
     now
   );
 
-  // Step 2: Enforce minimum spacing
+  // Step 2: Enforce minimum spacing (but never before effective wake time)
   const earliestCandidateTime = new Date(
     Math.max(
       now.getTime(),
-      lastDoseTime.getTime() + MIN_GAP_BETWEEN_DOSES * 60 * 1000
+      lastDoseTime.getTime() + MIN_GAP_BETWEEN_DOSES * 60 * 1000,
+      effectiveWakeTime.getTime() // Don't recommend before wake time
     )
   );
 
