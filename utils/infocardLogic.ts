@@ -273,7 +273,7 @@ export function calculateInfoCard(
         status: 'RECOMMENDED',
         focusDose: Math.round(dose),
         bestTimeStart: bestTime,
-        bestTimeEnd: addMinutes(bestTime, 30),
+        bestTimeEnd: cutoffTime,
       };
     }
   }
