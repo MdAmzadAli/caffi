@@ -1,0 +1,176 @@
+Task:
+Create a new utility file called infocardLogic.ts inside the utils/ directory.
+This file must contain all logic for the Info Cards section shown below the caffeine graph on the home screen (Focus Dose, Best Time, and No-More-Caffeine state).
+
+🔒 VERY IMPORTANT CONSTRAINTS (DO NOT IGNORE)
+
+DO NOT create new caffeine decay or peak formulas.
+You MUST reuse the same function that is already used to render the caffeine graph on the Home Screen to:
+
+Simulate caffeine curves
+
+Calculate active caffeine at any time
+
+Calculate the combined peak when a new dose is hypothetically added
+
+For sleep impact validation, you MUST reuse the exact function currently used by the “Sleep Impact” indicator in the Custom Drink modal.
+
+The recommendation is valid ONLY if sleep remains "undisrupted".
+
+This logic must be peak-aware, not simple subtraction.
+
+A recommendation is valid only if the maximum value of the combined caffeine curve (existing + new dose) never exceeds maxSafeCaffeineCap.
+
+📥 INPUTS THE FUNCTION WILL RECEIVE
+
+The main exported function in infocardLogic.ts should accept:
+
+now: Date
+
+wakeTime: Date
+
+sleepTime: Date
+
+optimalDailyCaffeine: number (mg)
+
+totalConsumedCaffeine: number (mg)
+
+caffeineEntries: Array<{ time: Date; amount: number }>
+
+References to:
+
+simulateCaffeineCurve(...) → the same function used by the Home Screen graph
+
+checkSleepImpact(...) → the same function used by the Custom Drink modal sleep indicator
+
+📐 CONSTANT RULES (MUST FOLLOW)
+
+maxSafeCaffeineCap = 0.6 × optimalDailyCaffeine
+
+cutoffTime = sleepTime − 6 hours
+
+MIN_DOSE = 25 mg
+
+MAX_DOSE = 75 mg
+
+MIN_GAP_BETWEEN_DOSES = 90 minutes
+
+Time step for simulation search: 15 minutes
+
+🧠 LOGIC FLOW (IMPLEMENT EXACTLY)
+1️⃣ Determine the last relevant dose time
+
+Find the most recent caffeine entry ≤ now
+
+If no entry exists today, use wakeTime
+
+Call this lastDoseTime
+
+2️⃣ Enforce minimum spacing
+
+The earliest possible next dose time is:
+
+earliestCandidateTime = max(now, lastDoseTime + 90 minutes)
+
+3️⃣ Hard stop conditions
+
+Immediately return:
+
+{ status: "NO_MORE_CAFFEINE_TODAY" }
+
+
+If ANY of the following are true:
+
+earliestCandidateTime > cutoffTime
+
+optimalDailyCaffeine − totalConsumedCaffeine < MIN_DOSE
+
+4️⃣ Calculate dose distribution
+
+Let:
+
+X = lastDoseTime > wakeTime ? lastDoseTime : wakeTime
+availableHours = hoursBetween(X, cutoffTime)
+doseSlots = max(1, floor(availableHours / 3))
+
+
+Initial candidate dose:
+
+nextDose = min(
+  (optimalDailyCaffeine − totalConsumedCaffeine) / doseSlots,
+  MAX_DOSE
+)
+
+
+If nextDose < MIN_DOSE, stop and return "NO_MORE_CAFFEINE_TODAY"
+
+5️⃣ Find BEST TIME using peak-aware simulation
+
+For dose = nextDose down to MIN_DOSE (decrease by 5 mg each loop):
+
+For t from earliestCandidateTime to cutoffTime in 15-minute steps:
+
+Use the Home Screen graph simulation function to:
+
+Simulate existing caffeine curve
+
+Simulate adding dose at time t
+
+Compute the maximum combined peak of the resulting curve
+
+Reject this time if:
+
+combinedPeak > maxSafeCaffeineCap
+
+Use the Custom Drink modal sleep impact function to check:
+
+If sleep is undisrupted ,then only pass else → reject
+
+The first time t that passes both checks is the best time
+
+6️⃣ Success return shape
+
+If a valid time is found, return:
+
+{
+  status: "RECOMMENDED",
+  focusDose: dose,
+  bestTimeStart: t,
+  bestTimeEnd: t + 30 minutes
+}
+
+7️⃣ Final fallback
+
+If no time is found even after reducing dose below MIN_DOSE, return:
+
+{
+  status: "NO_MORE_CAFFEINE_TODAY"
+}
+
+🎯 OUTPUT EXPECTATION
+
+The logic must:
+
+Never recommend stacking caffeine too close
+
+Never exceed peak safety ceiling
+
+Never disrupt sleep
+
+Always use existing simulation + sleep logic
+
+Be deterministic and explainable
+
+🚫 DO NOT
+
+Invent new decay math
+
+Hardcode peaks
+
+Ignore minimum dose spacing
+
+Recommend caffeine after cutoff
+
+Duplicate logic already present elsewhere
+
+Implement this cleanly, with readable helper functions and comments.
