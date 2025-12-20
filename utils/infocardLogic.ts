@@ -187,19 +187,25 @@ export function calculateInfoCard(
   let effectiveEntries = caffeineEntries;
   let effectiveConsumed = totalConsumedCaffeine;
   let effectiveWakeTime = wakeTime;
+  let effectiveSleepTime = sleepTime;
   
   if (hasPassed) {
-    // Past sleep time - treat as fresh day with only today's entries
+    // Past sleep time - treat as fresh day starting tomorrow morning
+    const nextWakeTime = new Date(wakeTime.getTime() + 24 * 3600000);
+    const nextSleepTime = new Date(sleepTime.getTime() + 24 * 3600000);
+    
+    // Only count entries from this morning onwards (yesterday's sleep to now)
     effectiveEntries = caffeineEntries.filter(
-      (entry) => Date.parse(entry.timestampISO) > wakeTime.getTime()
+      (entry) => Date.parse(entry.timestampISO) >= wakeTime.getTime()
     );
     effectiveConsumed = effectiveEntries.reduce((sum, e) => sum + e.mg, 0);
-    // Fresh start: earliest candidate is wake time + 60 minutes
-    effectiveWakeTime = addMinutes(wakeTime, 60);
+    // Fresh start: earliest candidate is NEXT wake time + 60 minutes
+    effectiveWakeTime = addMinutes(nextWakeTime, 60);
+    effectiveSleepTime = nextSleepTime;
   }
 
   const cutoffTime = new Date(
-    sleepTime.getTime() - 6 * 3600000
+    effectiveSleepTime.getTime() - 6 * 3600000
   );
 
   // Step 1: Find last relevant dose time
