@@ -9,11 +9,13 @@ import Animated, {
 import { Feather } from "@expo/vector-icons";
 import { RecommendationCards } from "./RecommendationCards";
 import { RecommendationResult } from "@/utils/recommendationEngine";
+import { InfoCardResult } from "@/utils/infocardLogic";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing } from "@/constants/theme";
 
 interface CollapsibleInfoCardsProps {
-  recommendations: RecommendationResult;
+  recommendations?: RecommendationResult;
+  infoCard?: InfoCardResult;
   scrollY: Animated.SharedValue<number>;
   collapseThreshold: number;
   onExpand: () => void;
@@ -24,6 +26,7 @@ interface CollapsibleInfoCardsProps {
 
 export function CollapsibleInfoCards({
   recommendations,
+  infoCard,
   scrollY,
   collapseThreshold,
   onExpand,
@@ -88,7 +91,10 @@ export function CollapsibleInfoCards({
     <View style={styles.wrapper}>
       <Animated.View style={[styles.cardsContainer, containerStyle]}>
         <View style={styles.cardsWrapper}>
-          <RecommendationCards recommendations={recommendations} />
+          <RecommendationCards 
+            recommendations={recommendations}
+            infoCard={infoCard}
+          />
         </View>
       </Animated.View>
     </View>

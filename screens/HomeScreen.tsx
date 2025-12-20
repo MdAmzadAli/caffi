@@ -26,6 +26,7 @@ import {
   getHoursUntilBedtime,
 } from "@/utils/recommendationEngine";
 import { CaffeineEvent } from "@/utils/graphUtils";
+import { calculateInfoCard, InfoCardResult } from "@/utils/infocardLogic";
 import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/useTheme";
 import type { HomeStackParamList } from "@/navigation/HomeStackNavigator";
@@ -134,6 +135,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [stackedModalVisible, setStackedModalVisible] = useState(false);
   const [stackedEvents, setStackedEvents] = useState<CaffeineEvent[]>([]);
   const [stackedPosition, setStackedPosition] = useState({ x: 0, y: 0 });
+  const [infoCardResult, setInfoCardResult] = useState<InfoCardResult | null>(null);
   
   // Scroll animation values
   const scrollY = useSharedValue(0);
@@ -167,6 +169,21 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     }));
   }, [entries]);
 
+  // Parse wakeTime and sleepTime strings (format: "HH:MM")
+  const parseTimeString = (timeStr: string): Date => {
+    const today = new Date();
+    const [hours, minutes] = timeStr.split(":").map(Number);
+    const result = new Date(today);
+    result.setHours(hours, minutes, 0, 0);
+    if (result.getTime() < today.getTime()) {
+      result.setDate(result.getDate() + 1);
+    }
+    return result;
+  };
+
+  const wakeTime = useMemo(() => parseTimeString(profile.wakeTime), [profile.wakeTime]);
+  const sleepTime = useMemo(() => parseTimeString(profile.sleepTime), [profile.sleepTime]);
+
   const recommendations = useMemo(() => {
     const hoursUntilBed = getHoursUntilBedtime(profile.sleepTime);
     return calculateRecommendations({
@@ -178,6 +195,20 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       sleepThresholdMg: 40,
     });
   }, [todayCaffeine, activeCaffeine, profile]);
+
+  // Calculate info card recommendations using new logic
+  useEffect(() => {
+    const result = calculateInfoCard({
+      now: new Date(),
+      wakeTime,
+      sleepTime,
+      optimalDailyCaffeine: profile.optimalCaffeine,
+      totalConsumedCaffeine: todayCaffeine,
+      caffeineEntries: caffeineEvents,
+      halfLifeHours: 5.5,
+    });
+    setInfoCardResult(result);
+  }, [wakeTime, sleepTime, todayCaffeine, caffeineEvents, profile.optimalCaffeine]);
 
   const sections = useMemo(() => {
     if (allEntries.length === 0) return [];
@@ -414,6 +445,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         <View style={styles.mainContent}>
           <CollapsibleInfoCards
             recommendations={recommendations}
+            infoCard={infoCardResult || undefined}
             scrollY={scrollY}
             collapseThreshold={COLLAPSE_THRESHOLD}
             onExpand={handleExpand}

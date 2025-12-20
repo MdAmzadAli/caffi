@@ -10,10 +10,12 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
 import { RecommendationResult } from "@/utils/recommendationEngine";
+import { InfoCardResult } from "@/utils/infocardLogic";
 import { useTheme } from "@/hooks/useTheme";
 
 interface RecommendationCardsProps {
-  recommendations: RecommendationResult;
+  recommendations?: RecommendationResult;
+  infoCard?: InfoCardResult;
 }
 
 interface CardData {
@@ -28,50 +30,103 @@ interface CardData {
 
 export function RecommendationCards({
   recommendations,
+  infoCard,
 }: RecommendationCardsProps) {
   const { theme, isDark } = useTheme();
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedCard, setSelectedCard] = useState<CardData | null>(null);
 
   const accentColor = theme.accentGold;
+
+  // Format time helper
+  const formatTime = (date: Date): string => {
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const ampm = hours >= 12 ? "PM" : "AM";
+    const hour12 = hours % 12 || 12;
+    const minStr = minutes.toString().padStart(2, "0");
+    return `${hour12}:${minStr} ${ampm}`;
+  };
   
-  const cards: CardData[] = [
-    {
-      id: "focus",
-      icon: "target",
-      title: "Focus Dose",
-      value:
-        recommendations.noSafeDose || recommendations.focusDoseMg === 0
-          ? "None"
-          : `${recommendations.focusDoseMg} mg`,
-      subtitle: recommendations.noSafeDose
-        ? "Limit reached"
-        : "Small boost for concentration",
-      accentColor,
-      reasoning: recommendations.focusDoseReasoning,
-    },
-    {
-      id: "bestTime",
-      icon: "clock",
-      title: "Best Time",
-      value:
-        recommendations.noSafeDose
-          ? "N/A"
-          : `${recommendations.bestWindowStart} – ${recommendations.bestWindowEnd}`,
-      subtitle: "Your ideal caffeine window",
-      accentColor,
-      reasoning: recommendations.bestTimeReasoning,
-    },
-    {
-      id: "cutoff",
-      icon: "alert-circle",
-      title: "Cutoff Time",
-      value: `After ${recommendations.cutoffTime}`,
-      subtitle: "Avoid for best sleep",
-      accentColor,
-      reasoning: recommendations.cutoffReasoning,
-    },
-  ];
+  // Use new infoCard if available, otherwise fall back to old recommendations
+  const cards: CardData[] = infoCard
+    ? [
+        {
+          id: "focus",
+          icon: "target",
+          title: "Focus Dose",
+          value:
+            infoCard.status === "NO_MORE_CAFFEINE_TODAY"
+              ? "None"
+              : `${infoCard.focusDose || 0} mg`,
+          subtitle:
+            infoCard.status === "NO_MORE_CAFFEINE_TODAY"
+              ? "Limit reached"
+              : "Recommended caffeine dose",
+          accentColor,
+          reasoning:
+            infoCard.status === "NO_MORE_CAFFEINE_TODAY"
+              ? "No more caffeine recommended today."
+              : `Take ${infoCard.focusDose}mg for optimal focus without disrupting sleep.`,
+        },
+        {
+          id: "bestTime",
+          icon: "clock",
+          title: "Best Time",
+          value:
+            infoCard.status === "NO_MORE_CAFFEINE_TODAY"
+              ? "N/A"
+              : `${formatTime(infoCard.bestTimeStart || new Date())} – ${formatTime(infoCard.bestTimeEnd || new Date())}`,
+          subtitle:
+            infoCard.status === "NO_MORE_CAFFEINE_TODAY"
+              ? "No safe window today"
+              : "30-min optimal intake window",
+          accentColor,
+          reasoning:
+            infoCard.status === "NO_MORE_CAFFEINE_TODAY"
+              ? "Peak safe levels already reached today."
+              : "Peak-aware timing for maximum focus while preserving sleep quality.",
+        },
+      ]
+    : recommendations
+    ? [
+        {
+          id: "focus",
+          icon: "target",
+          title: "Focus Dose",
+          value:
+            recommendations.noSafeDose || recommendations.focusDoseMg === 0
+              ? "None"
+              : `${recommendations.focusDoseMg} mg`,
+          subtitle: recommendations.noSafeDose
+            ? "Limit reached"
+            : "Small boost for concentration",
+          accentColor,
+          reasoning: recommendations.focusDoseReasoning,
+        },
+        {
+          id: "bestTime",
+          icon: "clock",
+          title: "Best Time",
+          value:
+            recommendations.noSafeDose
+              ? "N/A"
+              : `${recommendations.bestWindowStart} – ${recommendations.bestWindowEnd}`,
+          subtitle: "Your ideal caffeine window",
+          accentColor,
+          reasoning: recommendations.bestTimeReasoning,
+        },
+        {
+          id: "cutoff",
+          icon: "alert-circle",
+          title: "Cutoff Time",
+          value: `After ${recommendations.cutoffTime}`,
+          subtitle: "Avoid for best sleep",
+          accentColor,
+          reasoning: recommendations.cutoffReasoning,
+        },
+      ]
+    : [];
 
   const handleCardPress = (card: CardData) => {
     setSelectedCard(card);
