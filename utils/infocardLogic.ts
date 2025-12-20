@@ -47,16 +47,19 @@ function addMinutes(date: Date, minutes: number): Date {
 }
 
 /**
- * Helper: Find most recent caffeine entry within the current sleep window
+ * Helper: Find most recent caffeine entry within the 24-hour sleep window
  */
 function getLastDoseTimeInWindow(
   caffeineEntries: CaffeineEvent[],
   wakeTime: Date,
   sleepTime: Date
 ): Date {
+  // Window is 24-hour cycle from last sleep to next sleep
+  const lastSleepTime = new Date(sleepTime.getTime() - 24 * 3600000);
+  
   const windowEntries = caffeineEntries.filter((entry) => {
     const entryTime = Date.parse(entry.timestampISO);
-    return entryTime >= wakeTime.getTime() && entryTime < sleepTime.getTime();
+    return entryTime >= lastSleepTime.getTime() && entryTime < sleepTime.getTime();
   });
 
   if (windowEntries.length === 0) {
