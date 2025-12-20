@@ -18,7 +18,7 @@ interface InfoCardInputs {
 }
 
 // Constants
-const MIN_DOSE = 25;
+const MIN_DOSE = 35;
 const MAX_DOSE = 75;
 const MIN_GAP_BETWEEN_DOSES = 90; // minutes
 const SIMULATION_STEP = 15; // minutes
