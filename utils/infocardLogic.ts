@@ -199,8 +199,7 @@ export function calculateInfoCard(
       (entry) => Date.parse(entry.timestampISO) >= wakeTime.getTime()
     );
     effectiveConsumed = effectiveEntries.reduce((sum, e) => sum + e.mg, 0);
-    // Fresh start: earliest candidate is NEXT wake time + 60 minutes
-    effectiveWakeTime = addMinutes(nextWakeTime, 60);
+    effectiveWakeTime = nextWakeTime;
     effectiveSleepTime = nextSleepTime;
   }
 
@@ -215,12 +214,15 @@ export function calculateInfoCard(
     now
   );
 
-  // Step 2: Enforce minimum spacing (but never before effective wake time)
+  // Step 2: Recommendation window always starts 60 minutes after actual wake time
+  const recommendationStartTime = addMinutes(effectiveWakeTime, 60);
+  
+  // Step 3: Enforce minimum spacing (but never before recommendation start)
   const earliestCandidateTime = new Date(
     Math.max(
       now.getTime(),
       lastDoseTime.getTime() + MIN_GAP_BETWEEN_DOSES * 60 * 1000,
-      effectiveWakeTime.getTime() // Don't recommend before wake time
+      recommendationStartTime.getTime() // Don't recommend before wake + 60 min
     )
   );
 
