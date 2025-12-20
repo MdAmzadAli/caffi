@@ -181,14 +181,31 @@ export function calculateInfoCard(
   } = inputs;
 
   const maxSafeCaffeineCap = MAX_SAFE_MULTIPLIER * optimalDailyCaffeine;
+  
+  // RESET LOGIC: Check if we've passed sleep time (fresh day)
+  const hasPassed = now.getTime() > sleepTime.getTime();
+  let effectiveEntries = caffeineEntries;
+  let effectiveConsumed = totalConsumedCaffeine;
+  let effectiveWakeTime = wakeTime;
+  
+  if (hasPassed) {
+    // Past sleep time - treat as fresh day with only today's entries
+    effectiveEntries = caffeineEntries.filter(
+      (entry) => Date.parse(entry.timestampISO) > wakeTime.getTime()
+    );
+    effectiveConsumed = effectiveEntries.reduce((sum, e) => sum + e.mg, 0);
+    // Fresh start: earliest candidate is wake time + 60 minutes
+    effectiveWakeTime = addMinutes(wakeTime, 60);
+  }
+
   const cutoffTime = new Date(
     sleepTime.getTime() - 6 * 3600000
   );
 
   // Step 1: Find last relevant dose time
   const lastDoseTime = getLastDoseTimeBeforeNow(
-    caffeineEntries,
-    wakeTime,
+    effectiveEntries,
+    effectiveWakeTime,
     now
   );
 
@@ -201,7 +218,7 @@ export function calculateInfoCard(
   );
 
   // Step 3: Hard stop conditions
-  const remainingSafeMg = optimalDailyCaffeine - totalConsumedCaffeine;
+  const remainingSafeMg = optimalDailyCaffeine - effectiveConsumed;
 
   if (
     earliestCandidateTime.getTime() > cutoffTime.getTime() ||
@@ -211,9 +228,9 @@ export function calculateInfoCard(
   }
 
   // Step 4: Calculate dose distribution
-  const X = lastDoseTime.getTime() > wakeTime.getTime()
+  const X = lastDoseTime.getTime() > effectiveWakeTime.getTime()
     ? lastDoseTime
-    : wakeTime;
+    : effectiveWakeTime;
 
   const availableHours = hoursBetween(X, cutoffTime);
   const doseSlots = Math.max(1, Math.floor(availableHours / 3));
@@ -229,7 +246,7 @@ export function calculateInfoCard(
   // Step 5: Find best time using peak-aware simulation
   for (let dose = nextDose; dose >= MIN_DOSE; dose -= 5) {
     const bestTime = findBestTime(
-      caffeineEntries,
+      effectiveEntries,
       earliestCandidateTime,
       cutoffTime,
       dose,
