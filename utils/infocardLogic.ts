@@ -47,6 +47,33 @@ function addMinutes(date: Date, minutes: number): Date {
 }
 
 /**
+ * Helper: Get time of day in minutes since midnight
+ */
+function getTimeOfDay(date: Date): number {
+  return date.getHours() * 60 + date.getMinutes();
+}
+
+/**
+ * Helper: Check if current time is within the wake-to-sleep window
+ */
+function isWithinWakeSleepWindow(
+  now: Date,
+  wakeTime: Date,
+  sleepTime: Date
+): boolean {
+  const nowTime = getTimeOfDay(now);
+  const wakeTimeMin = getTimeOfDay(wakeTime);
+  const sleepTimeMin = getTimeOfDay(sleepTime);
+
+  // Sleep window crosses midnight (e.g., wake 9 AM, sleep 1 AM)
+  if (wakeTimeMin > sleepTimeMin) {
+    return nowTime >= wakeTimeMin || nowTime < sleepTimeMin;
+  }
+  // Normal window (e.g., wake 9 AM, sleep 11 PM)
+  return nowTime >= wakeTimeMin && nowTime < sleepTimeMin;
+}
+
+/**
  * Helper: Find most recent caffeine entry within the current sleep window
  */
 function getLastDoseTimeInWindow(
@@ -184,7 +211,8 @@ export function calculateInfoCard(
   const maxSafeCaffeineCap = MAX_SAFE_MULTIPLIER * optimalDailyCaffeine;
   
   // RESET LOGIC: Check if we've passed sleep time (fresh day)
-  const hasPassed = now.getTime() > sleepTime.getTime();
+  const isInCurrentWindow = isWithinWakeSleepWindow(now, wakeTime, sleepTime);
+  const hasPassed = !isInCurrentWindow && getTimeOfDay(now) >= getTimeOfDay(sleepTime);
   let effectiveEntries = caffeineEntries;
   let effectiveConsumed = totalConsumedCaffeine;
   let effectiveWakeTime = wakeTime;
