@@ -194,9 +194,10 @@ export function calculateInfoCard(
     const nextWakeTime = new Date(wakeTime.getTime() + 24 * 3600000);
     const nextSleepTime = new Date(sleepTime.getTime() + 24 * 3600000);
     
-    // Only count entries from this morning onwards (yesterday's sleep to now)
+    // Only count entries from NEXT wake time onwards (fresh cycle)
+    // This ensures entries between sleep and wake are excluded
     effectiveEntries = caffeineEntries.filter(
-      (entry) => Date.parse(entry.timestampISO) >= wakeTime.getTime()
+      (entry) => Date.parse(entry.timestampISO) >= nextWakeTime.getTime()
     );
     effectiveConsumed = effectiveEntries.reduce((sum, e) => sum + e.mg, 0);
     effectiveWakeTime = nextWakeTime;
@@ -217,12 +218,14 @@ export function calculateInfoCard(
   // Step 2: Recommendation window always starts 60 minutes after actual wake time
   const recommendationStartTime = addMinutes(effectiveWakeTime, 60);
   
-  // Step 3: Enforce minimum spacing (but never before recommendation start)
+  // Step 3: Enforce minimum spacing (only if there are previous doses)
+  const hasPreviousDose = effectiveEntries.length > 0;
   const earliestCandidateTime = new Date(
     Math.max(
       now.getTime(),
-      lastDoseTime.getTime() + MIN_GAP_BETWEEN_DOSES * 60 * 1000,
-      recommendationStartTime.getTime() // Don't recommend before wake + 60 min
+      hasPreviousDose
+        ? lastDoseTime.getTime() + MIN_GAP_BETWEEN_DOSES * 60 * 1000
+        : recommendationStartTime.getTime()
     )
   );
 
