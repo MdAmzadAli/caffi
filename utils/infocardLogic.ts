@@ -47,22 +47,23 @@ function addMinutes(date: Date, minutes: number): Date {
 }
 
 /**
- * Helper: Find last caffeine entry at or before a given time
+ * Helper: Find most recent caffeine entry within the current sleep window
  */
-function getLastDoseTimeBeforeNow(
+function getLastDoseTimeInWindow(
   caffeineEntries: CaffeineEvent[],
   wakeTime: Date,
-  now: Date
+  sleepTime: Date
 ): Date {
-  const relevantEntries = caffeineEntries.filter(
-    (entry) => Date.parse(entry.timestampISO) <= now.getTime()
-  );
+  const windowEntries = caffeineEntries.filter((entry) => {
+    const entryTime = Date.parse(entry.timestampISO);
+    return entryTime >= wakeTime.getTime() && entryTime < sleepTime.getTime();
+  });
 
-  if (relevantEntries.length === 0) {
+  if (windowEntries.length === 0) {
     return wakeTime;
   }
 
-  const sorted = [...relevantEntries].sort(
+  const sorted = [...windowEntries].sort(
     (a, b) => Date.parse(b.timestampISO) - Date.parse(a.timestampISO)
   );
 
@@ -208,11 +209,11 @@ export function calculateInfoCard(
     effectiveSleepTime.getTime() - 6 * 3600000
   );
 
-  // Step 1: Find last relevant dose time
-  const lastDoseTime = getLastDoseTimeBeforeNow(
+  // Step 1: Find last relevant dose time within the sleep window
+  const lastDoseTime = getLastDoseTimeInWindow(
     effectiveEntries,
     effectiveWakeTime,
-    now
+    effectiveSleepTime
   );
 
   // Step 2: Recommendation window always starts 60 minutes after actual wake time
