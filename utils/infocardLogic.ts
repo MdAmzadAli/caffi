@@ -246,14 +246,13 @@ export function calculateInfoCard(
 
   const availableHours = hoursBetween(X, cutoffTime);
   const doseSlots = Math.max(1, Math.floor(availableHours / 3));
-  const nextDose = Math.min(
-    remainingSafeMg / doseSlots,
-    MAX_DOSE
+  const nextDose = Math.max(
+    MIN_DOSE,
+    Math.min(
+      remainingSafeMg / doseSlots,
+      MAX_DOSE
+    )
   );
-
-  if (nextDose < MIN_DOSE) {
-    return { status: 'NO_MORE_CAFFEINE_TODAY' };
-  }
 
   // Step 5: Find best time using peak-aware simulation
   for (let dose = nextDose; dose >= MIN_DOSE; dose -= 5) {
