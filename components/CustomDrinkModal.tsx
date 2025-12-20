@@ -177,6 +177,16 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
     return getCaffeineLimitStatus(peakMg, profile.optimalCaffeine);
   }, [caffeineEvents, totalCaffeine, startTime, profile.optimalCaffeine]);
 
+  const sleepDateLabel = useMemo(() => {
+    const [hours, minutes] = (profile.sleepTime || "23:00").split(":").map(Number);
+    const sleepDate = new Date(startTime);
+    sleepDate.setHours(hours, minutes, 0, 0);
+    if (sleepDate.getTime() <= startTime.getTime()) {
+      sleepDate.setDate(sleepDate.getDate() + 1);
+    }
+    return sleepDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  }, [startTime, profile.sleepTime]);
+
   const sleepImpactStatus = useMemo(() => {
     if (!totalCaffeine || totalCaffeine <= 0) return "safe" as const;
     const todayStart = new Date();
@@ -505,6 +515,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
                     status={sleepImpactStatus}
                   />
                   <View style={[styles.indicatorTextCard, { backgroundColor: theme.backgroundSecondary }]}>
+                    <ThemedText type="caption" style={styles.sleepDateLabel}>{sleepDateLabel}</ThemedText>
                     <ThemedText type="caption" muted style={styles.indicatorExplanation} numberOfLines={3}>
                       {sleepImpactStatus === "safe"
                         ? "Unlikely to disrupt sleep."
@@ -783,6 +794,14 @@ const styles = StyleSheet.create({
     width: "100%",
     minHeight: 56,
     justifyContent: "center",
+    position: "relative",
+  },
+  sleepDateLabel: {
+    position: "absolute",
+    top: Spacing.xs,
+    right: Spacing.xs,
+    color: Colors.light.accent,
+    fontWeight: "500",
   },
   indicatorExplanation: {
     textAlign: "center",
