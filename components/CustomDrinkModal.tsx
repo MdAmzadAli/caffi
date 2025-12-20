@@ -514,8 +514,8 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
                     label="Sleep Impact"
                     status={sleepImpactStatus}
                   />
+                  <ThemedText type="caption" style={styles.sleepDateLabel}>{sleepDateLabel}</ThemedText>
                   <View style={[styles.indicatorTextCard, { backgroundColor: theme.backgroundSecondary }]}>
-                    <ThemedText type="caption" style={styles.sleepDateLabel}>{sleepDateLabel}</ThemedText>
                     <ThemedText type="caption" muted style={styles.indicatorExplanation} numberOfLines={3}>
                       {sleepImpactStatus === "safe"
                         ? "Unlikely to disrupt sleep."
@@ -794,12 +794,11 @@ const styles = StyleSheet.create({
     width: "100%",
     minHeight: 56,
     justifyContent: "center",
-    position: "relative",
   },
   sleepDateLabel: {
     position: "absolute",
     top: Spacing.xs,
-    right: Spacing.xs,
+    right: Spacing.sm,
     color: Colors.light.accent,
     fontWeight: "500",
   },
