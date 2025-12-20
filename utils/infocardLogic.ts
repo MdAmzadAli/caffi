@@ -191,17 +191,16 @@ export function calculateInfoCard(
   let effectiveSleepTime = sleepTime;
   
   if (hasPassed) {
-    // Past sleep time - treat as fresh day starting tomorrow morning
-    const nextWakeTime = new Date(wakeTime.getTime() + 24 * 3600000);
+    // Past sleep time - use current sleep window boundary
+    const lastSleepTime = sleepTime;
     const nextSleepTime = new Date(sleepTime.getTime() + 24 * 3600000);
     
-    // Only count entries from NEXT wake time onwards (fresh cycle)
-    // This ensures entries between sleep and wake are excluded
-    effectiveEntries = caffeineEntries.filter(
-      (entry) => Date.parse(entry.timestampISO) >= nextWakeTime.getTime()
-    );
+    // Count entries within 24-hour window: last sleep to next sleep
+    effectiveEntries = caffeineEntries.filter((entry) => {
+      const entryTime = Date.parse(entry.timestampISO);
+      return entryTime >= lastSleepTime.getTime() && entryTime < nextSleepTime.getTime();
+    });
     effectiveConsumed = effectiveEntries.reduce((sum, e) => sum + e.mg, 0);
-    effectiveWakeTime = nextWakeTime;
     effectiveSleepTime = nextSleepTime;
   }
 
