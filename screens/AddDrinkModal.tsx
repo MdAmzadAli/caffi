@@ -117,10 +117,8 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
   const [isFavorite, setIsFavorite] = useState(false);
 
   const [scrollY, setScrollY] = useState(0);
-  const [categoryExpanded, setCategoryExpanded] = useState(false);
   const [sectionOffsets, setSectionOffsets] = useState<{ [key: string]: number }>({});
   const [currentStickySection, setCurrentStickySection] = useState<string | null>(null);
-  const CATEGORY_COLLAPSE_THRESHOLD = 50;
 
   const allDrinks = getAllDrinks();
   const favoriteDrinks = getFavoriteDrinks();
@@ -225,7 +223,6 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
     setNotes("");
     setIsFavorite(false);
     setScrollY(0);
-    setCategoryExpanded(false);
     setSectionOffsets({});
     setCurrentStickySection(null);
   };
@@ -257,8 +254,6 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
     const { y } = event.nativeEvent.layout;
     setSectionOffsets(prev => ({ ...prev, [sectionKey]: y }));
   };
-
-  const isCategoryCollapsed = scrollY > CATEGORY_COLLAPSE_THRESHOLD;
 
   const translateY = useSharedValue(INITIAL_HEIGHT);
   const sheetHeight = useSharedValue(INITIAL_HEIGHT);
@@ -410,15 +405,10 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
 
             {!selectedDrink ? (
               <View style={styles.drinkListContainer}>
-                {/* Fixed Header: Search + Collapsible Category */}
+                {/* Fixed Search Bar - Always Visible */}
                 <View style={[styles.fixedHeader, { backgroundColor: theme.backgroundRoot }]}>
                   <View style={styles.searchRow}>
-                    <View
-                      style={[
-                        styles.searchBox,
-                        { backgroundColor: theme.backgroundDefault, flex: 1 },
-                      ]}
-                    >
+                    <View style={[styles.searchBox, { backgroundColor: theme.backgroundDefault }]}>
                       <Feather name="search" size={20} color={theme.textMuted} />
                       <TextInput
                         style={[styles.searchInput, { color: theme.text }]}
@@ -433,57 +423,10 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
                         </Pressable>
                       )}
                     </View>
-                    {isCategoryCollapsed && (
-                      <Pressable
-                        onPress={() => setCategoryExpanded(!categoryExpanded)}
-                        style={[styles.categoryExpandButton, { backgroundColor: theme.backgroundDefault }]}
-                      >
-                        <Feather 
-                          name={categoryExpanded ? "chevron-up" : "chevron-down"} 
-                          size={20} 
-                          color={selectedCategory ? Colors.light.accent : theme.textMuted} 
-                        />
-                      </Pressable>
-                    )}
                   </View>
                   
-                  {/* Expanded categories dropdown */}
-                  {isCategoryCollapsed && categoryExpanded && (
-                    <View style={styles.categoriesDropdown}>
-                      {QUICK_CATEGORIES.map((cat) => (
-                        <QuickCategoryCard
-                          key={cat.key}
-                          label={cat.label}
-                          icon={cat.icon}
-                          isActive={selectedCategory === cat.key}
-                          onPress={() => {
-                            setSelectedCategory(selectedCategory === cat.key ? null : cat.key);
-                            setCategoryExpanded(false);
-                          }}
-                        />
-                      ))}
-                    </View>
-                  )}
-                  
-                  {/* Inline categories when not scrolled */}
-                  {!isCategoryCollapsed && (
-                    <View style={styles.categoriesRow}>
-                      {QUICK_CATEGORIES.map((cat) => (
-                        <QuickCategoryCard
-                          key={cat.key}
-                          label={cat.label}
-                          icon={cat.icon}
-                          isActive={selectedCategory === cat.key}
-                          onPress={() =>
-                            setSelectedCategory(selectedCategory === cat.key ? null : cat.key)
-                          }
-                        />
-                      ))}
-                    </View>
-                  )}
-                  
                   {/* Sticky Section Header */}
-                  {currentStickySection && isCategoryCollapsed && (
+                  {currentStickySection && (
                     <View style={[styles.stickySectionHeader, { backgroundColor: theme.backgroundRoot }]}>
                       <ThemedText type="small" muted style={styles.sectionLabel}>
                         {currentStickySection === "CATEGORY_SECTION" 
@@ -494,12 +437,28 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
                   )}
                 </View>
 
+                {/* Scrollable Content - Categories Scroll With Content */}
                 <ScrollView
                   style={styles.scrollContent}
                   showsVerticalScrollIndicator={false}
                   onScroll={handleScroll}
                   scrollEventThrottle={16}
                 >
+                  {/* Categories in ScrollView */}
+                  <View style={styles.categoriesRow}>
+                    {QUICK_CATEGORIES.map((cat) => (
+                      <QuickCategoryCard
+                        key={cat.key}
+                        label={cat.label}
+                        icon={cat.icon}
+                        isActive={selectedCategory === cat.key}
+                        onPress={() =>
+                          setSelectedCategory(selectedCategory === cat.key ? null : cat.key)
+                        }
+                      />
+                    ))}
+                  </View>
+
                   {recentEntries.length > 0 && !searchQuery && (
                     <View style={styles.section} onLayout={handleSectionLayout("QUICK ADD")}>
                       <ThemedText type="small" muted style={styles.sectionLabel}>
@@ -1081,18 +1040,6 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
     marginBottom: Spacing.sm,
   },
-  categoryExpandButton: {
-    width: 44,
-    height: 44,
-    borderRadius: BorderRadius.sm,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  categoriesDropdown: {
-    flexDirection: "row",
-    gap: Spacing.sm,
-    marginBottom: Spacing.sm,
-  },
   stickySectionHeader: {
     paddingTop: Spacing.xs,
     paddingBottom: Spacing.xs,
@@ -1143,7 +1090,9 @@ const styles = StyleSheet.create({
   categoriesRow: {
     flexDirection: "row",
     gap: Spacing.sm,
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.md,
+    marginHorizontal: Spacing.xl,
+    paddingTop: Spacing.sm,
   },
   quickCategoryCard: {
     flex: 1,
