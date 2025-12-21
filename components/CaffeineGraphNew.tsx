@@ -765,6 +765,7 @@ const styles = StyleSheet.create({
   yAxisLabel: {
     fontSize: 8,
     fontWeight: "500",
+    backgroundColor: "transparent",
   },
   scrollView: {
     flex: 1,

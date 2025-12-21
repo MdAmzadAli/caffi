@@ -57,11 +57,11 @@ export function RecommendationCards({
           title: "Focus Dose",
           value:
             infoCard.status === "NO_MORE_CAFFEINE_TODAY"
-              ? "None"
+              ? "Oops ☺️"
               : `${infoCard.focusDose || 0} mg`,
           subtitle:
             infoCard.status === "NO_MORE_CAFFEINE_TODAY"
-              ? "Limit reached"
+              ? "No more caffeine today"
               : "Recommended caffeine dose",
           accentColor,
           reasoning:
@@ -75,7 +75,7 @@ export function RecommendationCards({
           title: "Best Time",
           value:
             infoCard.status === "NO_MORE_CAFFEINE_TODAY"
-              ? "N/A"
+              ? "Oops ☺️"
               : `${formatTime(infoCard.bestTimeStart || new Date())} – ${formatTime(infoCard.bestTimeEnd || new Date())}`,
           subtitle:
             infoCard.status === "NO_MORE_CAFFEINE_TODAY"
