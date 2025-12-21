@@ -136,7 +136,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [stackedEvents, setStackedEvents] = useState<CaffeineEvent[]>([]);
   const [stackedPosition, setStackedPosition] = useState({ x: 0, y: 0 });
   const [infoCardResult, setInfoCardResult] = useState<InfoCardResult | null>(null);
-  const [infoCardExpanded, setInfoCardExpanded] = useState(false);
   
   // Scroll animation values
   const scrollY = useSharedValue(0);
@@ -372,7 +371,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     // Reset scroll value after animation
     setTimeout(() => {
       scrollY.value = 0;
-      setInfoCardExpanded(false);
     }, 300);
   };
 
@@ -454,8 +452,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             graphHeight={effectiveGraphHeight}
             headerHeight={effectiveHeaderHeight}
             topInset={insets.top}
-            isExpanded={infoCardExpanded}
-            onToggleExpanded={setInfoCardExpanded}
           />
 
           <Animated.View style={[styles.consumptionHeader, titleOpacity]}>
@@ -561,8 +557,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           graphHeight={effectiveGraphHeight}
           headerHeight={effectiveHeaderHeight}
           topInset={insets.top}
-          isCardExpanded={infoCardExpanded}
-          onCardToggle={setInfoCardExpanded}
         />
 
         {/* Scrollable Content */}

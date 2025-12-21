@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, StyleSheet, Pressable } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -11,7 +11,7 @@ import { RecommendationCards } from "./RecommendationCards";
 import { RecommendationResult } from "@/utils/recommendationEngine";
 import { InfoCardResult } from "@/utils/infocardLogic";
 import { useTheme } from "@/hooks/useTheme";
-import { Spacing, BorderRadius } from "@/constants/theme";
+import { Spacing } from "@/constants/theme";
 
 interface CollapsibleInfoCardsProps {
   recommendations?: RecommendationResult;
@@ -22,8 +22,6 @@ interface CollapsibleInfoCardsProps {
   graphHeight: number;
   headerHeight: number;
   topInset: number;
-  isExpanded?: boolean;
-  onToggleExpanded?: (expanded: boolean) => void;
 }
 
 export function CollapsibleInfoCards({
@@ -35,20 +33,21 @@ export function CollapsibleInfoCards({
   graphHeight,
   headerHeight,
   topInset,
-  isExpanded = false,
-  onToggleExpanded,
 }: CollapsibleInfoCardsProps) {
   const { theme } = useTheme();
-  const COLLAPSE_THRESHOLD = collapseThreshold;
+  
+  // Calculate position at bottom right of graph area
+  const expandButtonTop = headerHeight + graphHeight + topInset - 40; // Position near bottom of graph
 
-  // Show full cards when NOT collapsed
-  const inlineStyle = useAnimatedStyle(() => {
-    const progress = Math.min(scrollY.value / COLLAPSE_THRESHOLD, 1);
+  // Animate collapse based on scroll position
+  const containerStyle = useAnimatedStyle(() => {
+    const progress = Math.min(scrollY.value / collapseThreshold, 1);
+    
     return {
       height: interpolate(
         progress,
         [0, 1],
-        [120, 0],
+        [120, 0], // Collapse from 120px to 0
         Extrapolation.CLAMP
       ),
       opacity: interpolate(
@@ -61,29 +60,36 @@ export function CollapsibleInfoCards({
     };
   });
 
-  // Dropdown visibility based on scroll + expanded state
-  const dropdownStyle = useAnimatedStyle(() => {
-    const progress = Math.min(scrollY.value / COLLAPSE_THRESHOLD, 1);
+  const expandButtonStyle = useAnimatedStyle(() => {
+    const progress = Math.min(scrollY.value / collapseThreshold, 1);
+    
     return {
-      opacity: isExpanded && progress > 0.8 ? 1 : 0,
-      pointerEvents: (isExpanded && progress > 0.8) ? "auto" : "none" as any,
+      opacity: interpolate(
+        progress,
+        [0.3, 1],
+        [0, 1],
+        Extrapolation.CLAMP
+      ),
+      transform: [
+        {
+          translateX: interpolate(
+            progress,
+            [0.3, 1],
+            [20, 0],
+            Extrapolation.CLAMP
+          ),
+        },
+      ],
+      position: "absolute" as const,
+      top: expandButtonTop,
+      right: Spacing.lg,
+      zIndex: 100,
     };
   });
 
   return (
     <View style={styles.wrapper}>
-      {/* Full cards - shown when NOT scrolled */}
-      <Animated.View style={[styles.cardsContainer, inlineStyle]}>
-        <View style={styles.cardsWrapper}>
-          <RecommendationCards 
-            recommendations={recommendations}
-            infoCard={infoCard}
-          />
-        </View>
-      </Animated.View>
-
-      {/* Expandable dropdown - shown when scrolled and expanded */}
-      <Animated.View style={[styles.cardsDropdown, { backgroundColor: theme.backgroundRoot }, dropdownStyle]}>
+      <Animated.View style={[styles.cardsContainer, containerStyle]}>
         <View style={styles.cardsWrapper}>
           <RecommendationCards 
             recommendations={recommendations}
@@ -103,8 +109,6 @@ interface ExpandButtonProps {
   graphHeight: number;
   headerHeight: number;
   topInset: number;
-  isCardExpanded?: boolean;
-  onCardToggle?: (expanded: boolean) => void;
 }
 
 export function ExpandButton({
@@ -114,8 +118,6 @@ export function ExpandButton({
   graphHeight,
   headerHeight,
   topInset,
-  isCardExpanded = false,
-  onCardToggle,
 }: ExpandButtonProps) {
   const { theme } = useTheme();
   
@@ -145,14 +147,6 @@ export function ExpandButton({
     };
   });
 
-  const handlePress = () => {
-    if (onCardToggle) {
-      onCardToggle(!isCardExpanded);
-    } else {
-      onExpand();
-    }
-  };
-
   return (
     <Animated.View 
       style={[
@@ -167,7 +161,7 @@ export function ExpandButton({
       pointerEvents="box-none"
     >
       <Pressable
-        onPress={handlePress}
+        onPress={onExpand}
         style={({ pressed }) => [
           styles.expandButton,
           {
@@ -176,11 +170,7 @@ export function ExpandButton({
           },
         ]}
       >
-        <Feather 
-          name={isCardExpanded ? "chevron-up" : "chevron-down"} 
-          size={20} 
-          color={theme.text} 
-        />
+        <Feather name="chevron-down" size={20} color={theme.text} />
       </Pressable>
     </Animated.View>
   );
@@ -196,11 +186,6 @@ const styles = StyleSheet.create({
   },
   cardsWrapper: {
     paddingHorizontal: Spacing.lg,
-  },
-  cardsDropdown: {
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.sm,
-    marginHorizontal: Spacing.lg,
   },
   expandButton: {
     width: 36,
