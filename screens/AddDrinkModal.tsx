@@ -119,6 +119,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
   const [scrollY, setScrollY] = useState(0);
   const [sectionOffsets, setSectionOffsets] = useState<{ [key: string]: number }>({});
   const [currentStickySection, setCurrentStickySection] = useState<string | null>(null);
+  const [fixedHeaderHeight, setFixedHeaderHeight] = useState(0);
 
   const allDrinks = getAllDrinks();
   const favoriteDrinks = getFavoriteDrinks();
@@ -232,12 +233,11 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
     const y = contentOffset.y;
     setScrollY(y);
     
-    const stickyOffset = 60;
     const sections = Object.entries(sectionOffsets).sort((a, b) => a[1] - b[1]);
     let activeSection: string | null = null;
     
     for (const [key, offset] of sections) {
-      if (y >= offset - stickyOffset - 10) {
+      if (y >= offset - fixedHeaderHeight) {
         activeSection = key;
       }
     }
@@ -253,6 +253,11 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
   const handleSectionLayout = (sectionKey: string) => (event: LayoutChangeEvent) => {
     const { y } = event.nativeEvent.layout;
     setSectionOffsets(prev => ({ ...prev, [sectionKey]: y }));
+  };
+
+  const handleFixedHeaderLayout = (event: LayoutChangeEvent) => {
+    const { height } = event.nativeEvent.layout;
+    setFixedHeaderHeight(height);
   };
 
   const translateY = useSharedValue(INITIAL_HEIGHT);
@@ -406,7 +411,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
             {!selectedDrink ? (
               <View style={styles.drinkListContainer}>
                 {/* Fixed Search Bar - Always Visible */}
-                <View style={[styles.fixedHeader, { backgroundColor: theme.backgroundRoot }]}>
+                <View style={[styles.fixedHeader, { backgroundColor: theme.backgroundRoot }]} onLayout={handleFixedHeaderLayout}>
                   <View style={styles.searchRow}>
                     <View style={[styles.searchBox, { backgroundColor: theme.backgroundDefault }]}>
                       <Feather name="search" size={20} color={theme.textMuted} />
