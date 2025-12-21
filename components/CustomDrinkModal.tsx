@@ -225,9 +225,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
   useEffect(() => {
     if (visible) {
       translateY.value = MODAL_HEIGHT;
-      setTimeout(() => {
-        translateY.value = withSpring(0, { damping: 16, stiffness: 200 });
-      }, 50);
+      translateY.value = withSpring(0);
     } else {
       translateY.value = MODAL_HEIGHT;
     }

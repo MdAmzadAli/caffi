@@ -176,9 +176,7 @@ export function CaffeineLogPopup({
 
   useEffect(() => {
     if (visible) {
-      setTimeout(() => {
-        translateY.value = withSpring(0, { damping: 16, stiffness: 200 });
-      }, 0);
+      translateY.value = withSpring(0);
     } else {
       translateY.value = sheetHeight;
     }
