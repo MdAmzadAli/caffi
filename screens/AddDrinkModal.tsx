@@ -22,6 +22,7 @@ import Animated, {
   runOnJS,
   interpolate,
   Extrapolation,
+  useAnimatedScrollHandler,
 } from "react-native-reanimated";
 import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -33,6 +34,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+const SEARCH_BAR_HEIGHT = 60;
 
 const getCategoryImageSource = (category: string) => {
   const imageMap: Record<string, any> = {
@@ -116,8 +118,8 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
   const [notes, setNotes] = useState("");
   const [isFavorite, setIsFavorite] = useState(false);
 
-  const [scrollY, setScrollY] = useState(0);
-  const [sectionOffsets, setSectionOffsets] = useState<{ [key: string]: number }>({});
+  const scrollY = useSharedValue(0);
+  const categoryHeaderY = useSharedValue(0);
   const [currentStickySection, setCurrentStickySection] = useState<string | null>(null);
 
   const allDrinks = getAllDrinks();
@@ -222,37 +224,23 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
     setSelectedSize(null);
     setNotes("");
     setIsFavorite(false);
-    setScrollY(0);
-    setSectionOffsets({});
+    scrollY.value = 0;
+    categoryHeaderY.value = 0;
     setCurrentStickySection(null);
   };
 
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const { contentOffset, layoutMeasurement, contentSize } = event.nativeEvent;
-    const y = contentOffset.y;
-    setScrollY(y);
-    
-    const stickyOffset = 60;
-    const sections = Object.entries(sectionOffsets).sort((a, b) => a[1] - b[1]);
-    let activeSection: string | null = null;
-    
-    for (const [key, offset] of sections) {
-      if (y >= offset - stickyOffset - 10) {
-        activeSection = key;
-      }
-    }
-    setCurrentStickySection(activeSection);
+  const handleScroll = useAnimatedScrollHandler({
+    onScroll: (e) => {
+      scrollY.value = e.contentOffset.y;
+    },
+  });
 
-    // Infinite scroll: load more when near bottom
-    const distanceFromBottom = contentSize.height - layoutMeasurement.height - y;
+  const handleInfiniteScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const { contentOffset, layoutMeasurement, contentSize } = event.nativeEvent;
+    const distanceFromBottom = contentSize.height - layoutMeasurement.height - contentOffset.y;
     if (distanceFromBottom < 200 && hasMoreDrinks) {
       loadMoreDrinks();
     }
-  };
-
-  const handleSectionLayout = (sectionKey: string) => (event: LayoutChangeEvent) => {
-    const { y } = event.nativeEvent.layout;
-    setSectionOffsets(prev => ({ ...prev, [sectionKey]: y }));
   };
 
   const translateY = useSharedValue(INITIAL_HEIGHT);
@@ -354,6 +342,16 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
     borderTopRightRadius: borderRadius.value,
   }));
 
+  const animatedStickyStyle = useAnimatedStyle(() => {
+    const opacity = interpolate(
+      scrollY.value,
+      [categoryHeaderY.value - 4, categoryHeaderY.value + 12],
+      [0, 1],
+      Extrapolation.CLAMP
+    );
+    return { opacity };
+  });
+
   const handleClose = () => handleCloseAnimated();
 
   return (
@@ -424,24 +422,22 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
                     </View>
                   </View>
                   
-                  {/* Sticky Section Header */}
-                  {currentStickySection && (
-                    <View style={[styles.stickySectionHeader, { backgroundColor: theme.backgroundRoot }]}>
-                      <ThemedText type="small" muted style={styles.sectionLabel}>
-                        {currentStickySection === "CATEGORY_SECTION" 
-                          ? (searchQuery ? "RESULTS" : selectedCategory!.toUpperCase())
-                          : currentStickySection}
-                      </ThemedText>
-                    </View>
-                  )}
+                  {/* Sticky Section Header Overlay */}
+                  <Animated.View style={[styles.stickyClone, { backgroundColor: theme.backgroundRoot }, animatedStickyStyle]}>
+                    <ThemedText type="small" muted style={styles.sectionLabel}>
+                      {searchQuery ? "RESULTS" : selectedCategory!.toUpperCase()}
+                    </ThemedText>
+                  </Animated.View>
                 </View>
 
                 {/* Scrollable Content - Categories Scroll With Content */}
-                <ScrollView
+                <Animated.ScrollView
                   style={styles.scrollContent}
                   showsVerticalScrollIndicator={false}
                   onScroll={handleScroll}
                   scrollEventThrottle={16}
+                  onMomentumScrollEnd={handleInfiniteScroll}
+                  onScrollEndDrag={handleInfiniteScroll}
                 >
                   {/* Categories in ScrollView */}
                   <View style={styles.categoriesRow}>
@@ -459,7 +455,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
                   </View>
 
                   {recentEntries.length > 0 && !searchQuery && (
-                    <View style={styles.section} onLayout={handleSectionLayout("QUICK ADD")}>
+                    <View style={styles.section}>
                       <ThemedText type="small" muted style={styles.sectionLabel}>
                         QUICK ADD
                       </ThemedText>
@@ -474,7 +470,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
                   )}
 
                   {customDrinks.length > 0 && !searchQuery && (
-                    <View style={styles.section} onLayout={handleSectionLayout("MY CUSTOM DRINKS")}>
+                    <View style={styles.section}>
                       <ThemedText type="small" muted style={styles.sectionLabel}>
                         MY CUSTOM DRINKS
                       </ThemedText>
@@ -490,9 +486,12 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
                   )}
 
                   <View 
-                    style={styles.section} 
-                    onLayout={handleSectionLayout("CATEGORY_SECTION")}
-                  >
+                    style={styles.spacer}
+                    onLayout={(e) => {
+                      categoryHeaderY.value = e.nativeEvent.layout.y;
+                    }}
+                  />
+                  <View style={styles.section}>
                     <ThemedText type="small" muted style={styles.sectionLabel}>
                       {searchQuery ? "RESULTS" : selectedCategory!.toUpperCase()}
                     </ThemedText>
@@ -509,7 +508,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
                       </View>
                     )}
                   </View>
-                </ScrollView>
+                </Animated.ScrollView>
               </View>
             ) : (
               <ScrollView
@@ -1039,9 +1038,16 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
     marginBottom: Spacing.sm,
   },
-  stickySectionHeader: {
+  stickyClone: {
+    position: "absolute",
+    left: Spacing.xl,
+    right: Spacing.xl,
+    top: 0,
     paddingTop: Spacing.xs,
     paddingBottom: Spacing.xs,
+  },
+  spacer: {
+    height: SEARCH_BAR_HEIGHT,
   },
   scrollContent: {
     paddingHorizontal: Spacing.xl,
