@@ -366,6 +366,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
       statusBarTranslucent
       animationType="none"
       onRequestClose={() => handleCloseAnimated()}
+      style={styles.modalContainer}
     >
       <GestureHandlerRootView style={{ flex: 1 }}>
 
@@ -980,6 +981,11 @@ function SizeButton({ label, sublabel, isActive, onPress }: SizeButtonProps) {
 }
 
 const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    position:"absolute",
+    
+  },
   modalOverlay: {
     flex: 1,
     justifyContent: "flex-end",
