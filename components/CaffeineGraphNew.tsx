@@ -447,7 +447,7 @@ export function CaffeineGraphNew({
 
   return (
     <View style={[styles.container, { height: graphHeight, backgroundColor: GRAPH_COLORS.bg }]}>
-      <View style={[styles.yAxisContainer, { backgroundColor: GRAPH_COLORS.bg }]}>
+      <View style={[styles.yAxisContainer]}>
         {yAxisTicks.map((mg) => (
           <View
             key={mg}
@@ -755,6 +755,7 @@ const styles = StyleSheet.create({
     width: Y_AXIS_WIDTH,
     height: "100%",
     zIndex: 10,
+    // backgroundColor:"transparent",
   },
   yAxisTickRow: {
     position: "absolute",
