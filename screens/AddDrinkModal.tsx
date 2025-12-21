@@ -370,7 +370,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
       <GestureHandlerRootView style={{ flex: 1 }}>
 
       <View style={styles.modalOverlay}>
-        <Pressable style={styles.backdrop} onPress={() => handleCloseAnimated()} />
+        <Pressable style={[styles.backdrop, { backgroundColor: isExpanded ? "transparent" : "rgba(0, 0, 0, 0.5)" }]} onPress={() => handleCloseAnimated()} />
 
         {/* <GestureDetector gesture={panGesture}> */}
           <Animated.View
