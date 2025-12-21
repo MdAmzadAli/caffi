@@ -15,7 +15,7 @@ import Animated, {
   withTiming,
   runOnJS,
 } from "react-native-reanimated";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Calendar, TimePickerModal as PaperTimePickerModal, registerTranslation, en } from "react-native-paper-dates";
 import { Button, Provider as PaperProvider, MD3DarkTheme, MD3LightTheme, Portal } from "react-native-paper";
@@ -102,9 +102,7 @@ export function TimePickerModal({ visible, onClose, onSelectTime, initialDate }:
       setSelectedPreset("now");
       setCustomDate(initialDate || new Date());
       translateY.value = MODAL_HEIGHT;
-      setTimeout(() => {
-        translateY.value = withSpring(0, { damping: 16, stiffness: 200 });
-      }, 50);
+        translateY.value = withSpring(0);
     } else {
       translateY.value = MODAL_HEIGHT;
     }
@@ -209,6 +207,7 @@ export function TimePickerModal({ visible, onClose, onSelectTime, initialDate }:
         animationType="fade"
         onRequestClose={closeModal}
       >
+        <GestureHandlerRootView style={{ flex: 1 }} >
         <View style={styles.overlay}>
           <Pressable style={styles.backdrop} onPress={closeModal} />
 
@@ -326,7 +325,7 @@ export function TimePickerModal({ visible, onClose, onSelectTime, initialDate }:
             </View>
           </Modal>
         )}
-
+        </GestureHandlerRootView>
       </Modal>
 
       <Portal>

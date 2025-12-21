@@ -17,7 +17,7 @@ import Animated, {
   withTiming,
   runOnJS,
 } from "react-native-reanimated";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { Gesture, GestureDetector,GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -319,6 +319,8 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
       animationType="fade"
       onRequestClose={closeModal}
     >
+      <GestureHandlerRootView style={{ flex: 1 }}>
+
       <View style={styles.overlay}>
         <Pressable style={styles.backdrop} onPress={closeModal} />
 
@@ -585,6 +587,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
         onSelectTime={handleSelectStartTime}
         initialDate={startTime}
       />
+        </GestureHandlerRootView>
     </Modal>
   );
 }

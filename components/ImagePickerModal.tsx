@@ -17,7 +17,7 @@ import Animated, {
   withTiming,
   runOnJS,
 } from "react-native-reanimated";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
 import { ThemedText } from "@/components/ThemedText";
@@ -55,9 +55,8 @@ export function ImagePickerModal({ visible, onClose, onSelectImage }: ImagePicke
   useEffect(() => {
     if (visible) {
       translateY.value = MODAL_HEIGHT;
-      setTimeout(() => {
-        translateY.value = withSpring(0, { damping: 16, stiffness: 200 });
-      }, 50);
+      
+        translateY.value = withSpring(0);
     } else {
       translateY.value = MODAL_HEIGHT;
     }
@@ -132,10 +131,11 @@ export function ImagePickerModal({ visible, onClose, onSelectImage }: ImagePicke
       animationType="fade"
       onRequestClose={closeModal}
     >
+      <GestureHandlerRootView style={{ flex: 1 }} >
       <View style={styles.overlay}>
         <Pressable style={styles.backdrop} onPress={closeModal} />
 
-        <GestureDetector gesture={panGesture}>
+        {/* <GestureDetector gesture={panGesture}> */}
           <Animated.View
             style={[
               styles.modalContent,
@@ -147,11 +147,13 @@ export function ImagePickerModal({ visible, onClose, onSelectImage }: ImagePicke
               },
             ]}
           >
+            <GestureDetector gesture={panGesture}>
             <View style={styles.handleContainer}>
               <View style={[styles.handle, { backgroundColor: Colors.light.accent }]} />
+              <ThemedText type="h3" style={styles.title}>Select Image</ThemedText>
             </View>
-
-            <ThemedText type="h3" style={styles.title}>Select Image</ThemedText>
+            </GestureDetector>
+            
 
             <ScrollView
               style={styles.scrollContent}
@@ -195,8 +197,9 @@ export function ImagePickerModal({ visible, onClose, onSelectImage }: ImagePicke
               ))}
             </ScrollView>
           </Animated.View>
-        </GestureDetector>
+        {/* </GestureDetector> */}
       </View>
+      </GestureHandlerRootView>
     </Modal>
   );
 }

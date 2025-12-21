@@ -23,7 +23,7 @@ import Animated, {
   interpolate,
   Extrapolation,
 } from "react-native-reanimated";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -81,7 +81,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
   const { addEntry, deleteEntry, getAllDrinks, getFavoriteDrinks, profile, entries, customDrinks } = useCaffeineStore();
 
   const INITIAL_HEIGHT = windowHeight * 0.8;
-  const maxExpandedHeight = windowHeight - insets.top;
+  const maxExpandedHeight = windowHeight;
   
   const [showCustomDrinkModal, setShowCustomDrinkModal] = useState(false);
   const [prefillDrink, setPrefillDrink] = useState<DrinkItem | null>(null);
@@ -367,10 +367,12 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
       animationType="none"
       onRequestClose={() => handleCloseAnimated()}
     >
+      <GestureHandlerRootView style={{ flex: 1 }}>
+
       <View style={styles.modalOverlay}>
         <Pressable style={styles.backdrop} onPress={() => handleCloseAnimated()} />
 
-        <GestureDetector gesture={panGesture}>
+        {/* <GestureDetector gesture={panGesture}> */}
           <Animated.View
             style={[
               styles.modalContent,
@@ -383,7 +385,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
             ]}
           >
             {!isExpanded && <View style={styles.handle} />}
-
+            <GestureDetector gesture={panGesture}>
             <View style={styles.header}>
               {isExpanded ? (
                 <Pressable onPress={handleClose} style={styles.backButton}>
@@ -402,7 +404,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
                 </Pressable>
               )}
             </View>
-
+            </GestureDetector>
             {!selectedDrink ? (
               <View style={styles.drinkListContainer}>
                 {/* Fixed Search Bar - Always Visible */}
@@ -700,9 +702,9 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
             </ScrollView>
             )}
           </Animated.View>
-        </GestureDetector>
+        {/* </GestureDetector> */}
       </View>
-
+      </GestureHandlerRootView>
       <CustomDrinkModal
         visible={showCustomDrinkModal}
         onClose={() => { setShowCustomDrinkModal(false); setPrefillDrink(null); setEditingCustomDrink(null); }}
