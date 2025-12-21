@@ -1106,6 +1106,7 @@ const styles = StyleSheet.create({
   quickCategoryLabel: {
     fontWeight: "500",
     textAlign: "center",
+    fontSize: 12,
   },
   section: {
     marginBottom: Spacing.lg,
