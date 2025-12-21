@@ -24,7 +24,7 @@ import Animated, {
   Extrapolation,
 } from "react-native-reanimated";
 import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { CustomDrinkModal } from "@/components/CustomDrinkModal";
@@ -368,34 +368,45 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
       onRequestClose={() => handleCloseAnimated()}
     >
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <View style={styles.modalOverlay}>
-          <Pressable style={styles.backdrop} onPress={() => handleCloseAnimated()} />
 
-          <Animated.View style={[styles.modalContent, sheetStyle]}>
-            <SafeAreaView style={[styles.safeAreaWrapper, { backgroundColor: theme.backgroundRoot }]} edges={isExpanded ? ["top", "bottom"] : ["bottom"]}>
-              {!isExpanded && <View style={styles.handle} />}
-              <GestureDetector gesture={panGesture}>
-                <View style={styles.header}>
-                  {isExpanded ? (
-                    <Pressable onPress={handleClose} style={styles.backButton}>
-                      <Feather name="arrow-left" size={24} color={theme.text} />
-                    </Pressable>
-                  ) : null}
-                  <ThemedText type="h4" style={isExpanded ? styles.expandedTitle : undefined}>Add Drink</ThemedText>
-                  {onNavigateToCustomDrink && !isExpanded && (
-                    <Pressable onPress={handleAddCustomDrink} style={styles.addCustomButton}>
-                      <Feather name="plus" size={24} color={Colors.light.accent} />
-                    </Pressable>
-                  )}
-                  {isExpanded && onNavigateToCustomDrink && (
-                    <Pressable onPress={handleAddCustomDrink} style={styles.addCustomButton}>
-                      <Feather name="plus" size={24} color={Colors.light.accent} />
-                    </Pressable>
-                  )}
-                </View>
-              </GestureDetector>
-              {!selectedDrink ? (
-                <View style={styles.drinkListContainer}>
+      <View style={styles.modalOverlay}>
+        <Pressable style={styles.backdrop} onPress={() => handleCloseAnimated()} />
+
+        {/* <GestureDetector gesture={panGesture}> */}
+          <Animated.View
+            style={[
+              styles.modalContent,
+              sheetStyle,
+              {
+                backgroundColor: theme.backgroundRoot,
+                paddingBottom: insets.bottom + Spacing.lg,
+                paddingTop: isExpanded ? insets.top : Spacing.sm,
+              },
+            ]}
+          >
+            {!isExpanded && <View style={styles.handle} />}
+            <GestureDetector gesture={panGesture}>
+            <View style={styles.header}>
+              {isExpanded ? (
+                <Pressable onPress={handleClose} style={styles.backButton}>
+                  <Feather name="arrow-left" size={24} color={theme.text} />
+                </Pressable>
+              ) : null}
+              <ThemedText type="h4" style={isExpanded ? styles.expandedTitle : undefined}>Add Drink</ThemedText>
+              {onNavigateToCustomDrink && !isExpanded && (
+                <Pressable onPress={handleAddCustomDrink} style={styles.addCustomButton}>
+                  <Feather name="plus" size={24} color={Colors.light.accent} />
+                </Pressable>
+              )}
+              {isExpanded && onNavigateToCustomDrink && (
+                <Pressable onPress={handleAddCustomDrink} style={styles.addCustomButton}>
+                  <Feather name="plus" size={24} color={Colors.light.accent} />
+                </Pressable>
+              )}
+            </View>
+            </GestureDetector>
+            {!selectedDrink ? (
+              <View style={styles.drinkListContainer}>
                 {/* Fixed Search Bar - Always Visible */}
                 <View style={[styles.fixedHeader, { backgroundColor: theme.backgroundRoot }]}>
                   <View style={styles.searchRow}>
@@ -502,197 +513,197 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
                     )}
                   </View>
                 </ScrollView>
-                </View>
-              ) : (
-                <ScrollView
-                  style={styles.scrollContent}
-                  showsVerticalScrollIndicator={false}
-                >
-                  <Pressable
-                    onPress={() => setSelectedDrink(null)}
-                    style={styles.backToDrinksButton}
-                  >
-                    <Feather name="arrow-left" size={20} color={Colors.light.accent} />
-                    <ThemedText type="body" style={{ color: Colors.light.accent }}>
-                      Back to drinks
+              </View>
+            ) : (
+              <ScrollView
+                style={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
+              >
+              <Pressable
+                onPress={() => setSelectedDrink(null)}
+                style={styles.backToDrinksButton}
+              >
+                <Feather name="arrow-left" size={20} color={Colors.light.accent} />
+                <ThemedText type="body" style={{ color: Colors.light.accent }}>
+                  Back to drinks
+                </ThemedText>
+              </Pressable>
+
+              <ThemedView elevation={1} style={styles.selectedDrinkCard}>
+                <View style={styles.selectedDrinkHeader}>
+                  <View style={styles.drinkIconLarge}>
+                    <Feather
+                      name={selectedDrink.icon as keyof typeof Feather.glyphMap}
+                      size={28}
+                      color={Colors.light.accent}
+                    />
+                  </View>
+                  <View style={styles.selectedDrinkInfo}>
+                    <ThemedText type="h4">{selectedDrink.name}</ThemedText>
+                    <ThemedText type="small" muted>
+                      {selectedDrink.caffeinePer100ml}mg per 100ml
                     </ThemedText>
-                  </Pressable>
-
-                  <ThemedView elevation={1} style={styles.selectedDrinkCard}>
-                    <View style={styles.selectedDrinkHeader}>
-                      <View style={styles.drinkIconLarge}>
-                        <Feather
-                          name={selectedDrink.icon as keyof typeof Feather.glyphMap}
-                          size={28}
-                          color={Colors.light.accent}
-                        />
-                      </View>
-                      <View style={styles.selectedDrinkInfo}>
-                        <ThemedText type="h4">{selectedDrink.name}</ThemedText>
-                        <ThemedText type="small" muted>
-                          {selectedDrink.caffeinePer100ml}mg per 100ml
-                        </ThemedText>
-                      </View>
-                    </View>
-
-                    {selectedDrink.sizes && selectedDrink.sizes.length > 0 && (
-                      <View style={styles.sizesSection}>
-                        <ThemedText type="small" muted style={styles.sizesLabel}>
-                          SIZE
-                        </ThemedText>
-                        <View style={styles.sizesRow}>
-                          {selectedDrink.sizes.map((size) => (
-                            <SizeButton
-                              key={size.name}
-                              label={size.name}
-                              sublabel={`${size.ml}ml`}
-                              isActive={selectedSize === size.ml}
-                              onPress={() => setSelectedSize(size.ml)}
-                            />
-                          ))}
-                        </View>
-                      </View>
-                    )}
-
-                    <View style={styles.caffeinePreview}>
-                      <ThemedText type="caption" muted>
-                        CAFFEINE
-                      </ThemedText>
-                      <ThemedText
-                        type="h2"
-                        style={{
-                          color:
-                            warningLevel === "danger"
-                              ? Colors.light.danger
-                              : warningLevel === "warning"
-                                ? Colors.light.warning
-                                : Colors.light.accent,
-                        }}
-                      >
-                        {caffeineMg} mg
-                      </ThemedText>
-                    </View>
-
-                    {warningLevel && (
-                      <View
-                        style={[
-                          styles.warningBanner,
-                          {
-                            backgroundColor:
-                              warningLevel === "danger"
-                                ? `${Colors.light.danger}20`
-                                : `${Colors.light.warning}20`,
-                          },
-                        ]}
-                      >
-                        <Feather
-                          name="alert-triangle"
-                          size={16}
-                          color={
-                            warningLevel === "danger"
-                              ? Colors.light.danger
-                              : Colors.light.warning
-                          }
-                        />
-                        <ThemedText
-                          type="small"
-                          style={{
-                            color:
-                              warningLevel === "danger"
-                                ? Colors.light.danger
-                                : Colors.light.warning,
-                            flex: 1,
-                          }}
-                        >
-                          {warningLevel === "danger"
-                            ? "This will exceed your daily limit!"
-                            : "You're approaching your daily limit. Consider a smaller size."}
-                        </ThemedText>
-                      </View>
-                    )}
-                  </ThemedView>
-
-                  <View style={styles.optionsSection}>
-                    <View
-                      style={[
-                        styles.notesInput,
-                        { backgroundColor: theme.backgroundDefault },
-                      ]}
-                    >
-                      <TextInput
-                        style={[styles.notesTextInput, { color: theme.text }]}
-                        placeholder="Add a note (optional)"
-                        placeholderTextColor={theme.textMuted}
-                        value={notes}
-                        onChangeText={setNotes}
-                      />
-                    </View>
-
-                    <Pressable
-                      onPress={() => setIsFavorite(!isFavorite)}
-                      style={[
-                        styles.favoriteToggle,
-                        { backgroundColor: theme.backgroundDefault },
-                      ]}
-                    >
-                      <View style={styles.favoriteToggleContent}>
-                        <Feather
-                          name="heart"
-                          size={20}
-                          color={isFavorite ? Colors.light.danger : theme.textMuted}
-                        />
-                        <ThemedText type="body">Mark as favorite</ThemedText>
-                      </View>
-                      <View
-                        style={[
-                          styles.checkbox,
-                          {
-                            backgroundColor: isFavorite
-                              ? Colors.light.accent
-                              : "transparent",
-                            borderColor: isFavorite
-                              ? Colors.light.accent
-                              : theme.textMuted,
-                          },
-                        ]}
-                      >
-                        {isFavorite && (
-                          <Feather name="check" size={14} color="#FFFFFF" />
-                        )}
-                      </View>
-                    </Pressable>
                   </View>
+                </View>
 
-                  <View style={styles.actionsRow}>
-                    <Pressable
-                      onPress={handleClose}
-                      style={[
-                        styles.cancelButton,
-                        { borderColor: theme.textMuted },
-                      ]}
-                    >
-                      <ThemedText type="body" muted>
-                        Cancel
-                      </ThemedText>
-                    </Pressable>
-                    <Pressable
-                      onPress={handleAdd}
-                      style={[
-                        styles.addButton,
-                        { opacity: caffeineMg > 0 ? 1 : 0.5 },
-                      ]}
-                      disabled={caffeineMg <= 0}
-                    >
-                      <ThemedText type="body" style={styles.addButtonText}>
-                        Add to today
-                      </ThemedText>
-                    </Pressable>
+                {selectedDrink.sizes && selectedDrink.sizes.length > 0 && (
+                  <View style={styles.sizesSection}>
+                    <ThemedText type="small" muted style={styles.sizesLabel}>
+                      SIZE
+                    </ThemedText>
+                    <View style={styles.sizesRow}>
+                      {selectedDrink.sizes.map((size) => (
+                        <SizeButton
+                          key={size.name}
+                          label={size.name}
+                          sublabel={`${size.ml}ml`}
+                          isActive={selectedSize === size.ml}
+                          onPress={() => setSelectedSize(size.ml)}
+                        />
+                      ))}
+                    </View>
                   </View>
-                </ScrollView>
-              )}
-            </SafeAreaView>
+                )}
+
+                <View style={styles.caffeinePreview}>
+                  <ThemedText type="caption" muted>
+                    CAFFEINE
+                  </ThemedText>
+                  <ThemedText
+                    type="h2"
+                    style={{
+                      color:
+                        warningLevel === "danger"
+                          ? Colors.light.danger
+                          : warningLevel === "warning"
+                            ? Colors.light.warning
+                            : Colors.light.accent,
+                    }}
+                  >
+                    {caffeineMg} mg
+                  </ThemedText>
+                </View>
+
+                {warningLevel && (
+                  <View
+                    style={[
+                      styles.warningBanner,
+                      {
+                        backgroundColor:
+                          warningLevel === "danger"
+                            ? `${Colors.light.danger}20`
+                            : `${Colors.light.warning}20`,
+                      },
+                    ]}
+                  >
+                    <Feather
+                      name="alert-triangle"
+                      size={16}
+                      color={
+                        warningLevel === "danger"
+                          ? Colors.light.danger
+                          : Colors.light.warning
+                      }
+                    />
+                    <ThemedText
+                      type="small"
+                      style={{
+                        color:
+                          warningLevel === "danger"
+                            ? Colors.light.danger
+                            : Colors.light.warning,
+                        flex: 1,
+                      }}
+                    >
+                      {warningLevel === "danger"
+                        ? "This will exceed your daily limit!"
+                        : "You're approaching your daily limit. Consider a smaller size."}
+                    </ThemedText>
+                  </View>
+                )}
+              </ThemedView>
+
+              <View style={styles.optionsSection}>
+                <View
+                  style={[
+                    styles.notesInput,
+                    { backgroundColor: theme.backgroundDefault },
+                  ]}
+                >
+                  <TextInput
+                    style={[styles.notesTextInput, { color: theme.text }]}
+                    placeholder="Add a note (optional)"
+                    placeholderTextColor={theme.textMuted}
+                    value={notes}
+                    onChangeText={setNotes}
+                  />
+                </View>
+
+                <Pressable
+                  onPress={() => setIsFavorite(!isFavorite)}
+                  style={[
+                    styles.favoriteToggle,
+                    { backgroundColor: theme.backgroundDefault },
+                  ]}
+                >
+                  <View style={styles.favoriteToggleContent}>
+                    <Feather
+                      name="heart"
+                      size={20}
+                      color={isFavorite ? Colors.light.danger : theme.textMuted}
+                    />
+                    <ThemedText type="body">Mark as favorite</ThemedText>
+                  </View>
+                  <View
+                    style={[
+                      styles.checkbox,
+                      {
+                        backgroundColor: isFavorite
+                          ? Colors.light.accent
+                          : "transparent",
+                        borderColor: isFavorite
+                          ? Colors.light.accent
+                          : theme.textMuted,
+                      },
+                    ]}
+                  >
+                    {isFavorite && (
+                      <Feather name="check" size={14} color="#FFFFFF" />
+                    )}
+                  </View>
+                </Pressable>
+              </View>
+
+              <View style={styles.actionsRow}>
+                <Pressable
+                  onPress={handleClose}
+                  style={[
+                    styles.cancelButton,
+                    { borderColor: theme.textMuted },
+                  ]}
+                >
+                  <ThemedText type="body" muted>
+                    Cancel
+                  </ThemedText>
+                </Pressable>
+                <Pressable
+                  onPress={handleAdd}
+                  style={[
+                    styles.addButton,
+                    { opacity: caffeineMg > 0 ? 1 : 0.5 },
+                  ]}
+                  disabled={caffeineMg <= 0}
+                >
+                  <ThemedText type="body" style={styles.addButtonText}>
+                    Add to today
+                  </ThemedText>
+                </Pressable>
+              </View>
+            </ScrollView>
+            )}
           </Animated.View>
-        </View>
+        {/* </GestureDetector> */}
+      </View>
       </GestureHandlerRootView>
       <CustomDrinkModal
         visible={showCustomDrinkModal}
@@ -969,11 +980,6 @@ function SizeButton({ label, sublabel, isActive, onPress }: SizeButtonProps) {
 }
 
 const styles = StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-    position:"absolute",
-    
-  },
   modalOverlay: {
     flex: 1,
     justifyContent: "flex-end",
@@ -1023,9 +1029,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   drinkListContainer: {
-    flex: 1,
-  },
-  safeAreaWrapper: {
     flex: 1,
   },
   fixedHeader: {
