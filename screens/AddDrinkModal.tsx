@@ -403,7 +403,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
             {!selectedDrink ? (
               <View style={styles.drinkListContainer}>
                 {/* Fixed Search Bar - Always Visible */}
-                <View style={[styles.fixedHeader, { backgroundColor: theme.backgroundRoot }]}>
+                <View style={[styles.fixedHeader, { backgroundColor: theme.backgroundRoot, position: "relative" }]}>
                   <View style={styles.searchRow}>
                     <View style={[styles.searchBox, { backgroundColor: theme.backgroundDefault }]}>
                       <Feather name="search" size={20} color={theme.textMuted} />
@@ -1042,7 +1042,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: Spacing.xl,
     right: Spacing.xl,
-    top: 0,
+    top: SEARCH_BAR_HEIGHT,
     paddingTop: Spacing.xs,
     paddingBottom: Spacing.xs,
   },
