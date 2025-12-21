@@ -234,7 +234,8 @@ const styles = StyleSheet.create({
   },
   spacedContent: {
     flex: 1,
-    justifyContent: "space-between",
+    justifyContent: "center",
+    gap: Spacing.md,
   },
   card: {
     borderRadius: BorderRadius.sm,
@@ -249,7 +250,7 @@ const styles = StyleSheet.create({
   cardFlex: {
     flex: 1,
     minWidth: undefined,
-    maxWidth: undefined,
+    maxWidth: "48%",
   },
   cardHeader: {
     flexDirection: "row",
