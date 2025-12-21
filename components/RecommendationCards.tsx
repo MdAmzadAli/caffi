@@ -80,7 +80,7 @@ export function RecommendationCards({
           subtitle:
             infoCard.status === "NO_MORE_CAFFEINE_TODAY"
               ? "No safe window today"
-              : "30-min optimal intake window",
+              : "optimal intake window",
           accentColor,
           reasoning:
             infoCard.status === "NO_MORE_CAFFEINE_TODAY"
@@ -133,19 +133,23 @@ export function RecommendationCards({
     setModalVisible(true);
   };
 
+  const isTwoCards = cards.length === 2;
+
   return (
     <>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, isTwoCards && styles.spacedContent]}
         style={styles.scrollView}
+        scrollEnabled={!isTwoCards}
       >
         {cards.map((card) => (
           <Pressable
             key={card.id}
             style={({ pressed }) => [
               styles.card,
+              isTwoCards && styles.cardFlex,
               { 
                 borderLeftColor: card.accentColor,
                 backgroundColor: theme.backgroundSecondary,
@@ -228,6 +232,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     gap: Spacing.sm,
   },
+  spacedContent: {
+    flex: 1,
+    justifyContent: "space-between",
+  },
   card: {
     borderRadius: BorderRadius.sm,
     padding: Spacing.sm,
@@ -237,6 +245,11 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
     elevation: 2,
+  },
+  cardFlex: {
+    flex: 1,
+    minWidth: undefined,
+    maxWidth: undefined,
   },
   cardHeader: {
     flexDirection: "row",
