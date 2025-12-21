@@ -192,12 +192,12 @@ export function calculateInfoCard(
   let effectiveConsumed = totalConsumedCaffeine;
   let effectiveWakeTime = wakeTime;
   let effectiveSleepTime = sleepTime;
-  
+  const nextSleepTime = new Date(sleepTime.getTime() + 24 * 3600000);
   if (hasPassed) {
     // Past sleep time - use current sleep window boundary
     const lastSleepTime = sleepTime;
-    const nextSleepTime = new Date(sleepTime.getTime() + 24 * 3600000);
     
+    console.log('lastSleepTime', lastSleepTime, 'nextSleepTime', nextSleepTime);
     // Count entries within 24-hour window: last sleep to next sleep
     effectiveEntries = caffeineEntries.filter((entry) => {
       const entryTime = Date.parse(entry.timestampISO);
@@ -208,7 +208,7 @@ export function calculateInfoCard(
   }
 
   const cutoffTime = new Date(
-    effectiveSleepTime.getTime() - 6 * 3600000
+    nextSleepTime.getTime() - 6 * 3600000
   );
 
   // Step 1: Find last relevant dose time within the sleep window
@@ -231,7 +231,7 @@ export function calculateInfoCard(
         : recommendationStartTime.getTime()
     )
   );
-
+ console.log('earliestCandidateTime',earliestCandidateTime);
   // Step 3: Hard stop conditions
   const remainingSafeMg = optimalDailyCaffeine - effectiveConsumed;
 
@@ -243,10 +243,9 @@ export function calculateInfoCard(
   }
 
   // Step 4: Calculate dose distribution
-  const X = lastDoseTime.getTime() > effectiveWakeTime.getTime()
-    ? lastDoseTime
-    : effectiveWakeTime;
-
+  const X = lastDoseTime
+  ? lastDoseTime
+  : new Date(Math.max(now.getTime(), effectiveWakeTime.getTime()));
   const availableHours = hoursBetween(X, cutoffTime);
   const doseSlots = Math.max(1, Math.floor(availableHours / 3));
   const nextDose = Math.max(
