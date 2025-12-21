@@ -289,16 +289,13 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
 
   useLayoutEffect(() => {
     if (visible) {
-      translateY.value = INITIAL_HEIGHT;
-      sheetHeight.value = INITIAL_HEIGHT;
-      borderRadius.value = BorderRadius.lg;
       setIsExpanded(false);
-       translateY.value = withSpring(0);
+      translateY.value = withSpring(0);
     } else {
       translateY.value = INITIAL_HEIGHT;
       sheetHeight.value = INITIAL_HEIGHT;
     }
-  }, [visible, translateY, sheetHeight, borderRadius]);
+  }, [visible, translateY, sheetHeight]);
 
   const panGesture = Gesture.Pan()
     .onStart(() => {
