@@ -298,9 +298,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
       sheetHeight.value = INITIAL_HEIGHT;
       borderRadius.value = BorderRadius.lg;
       setIsExpanded(false);
-      setTimeout(() => {
-        translateY.value = withSpring(0, { damping: 16, stiffness: 200 });
-      }, 0);
+       translateY.value = withSpring(0);
     } else {
       translateY.value = INITIAL_HEIGHT;
       sheetHeight.value = INITIAL_HEIGHT;

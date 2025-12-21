@@ -239,24 +239,29 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
   };
 
   const panGesture = Gesture.Pan()
-    .onStart(() => {
-      startY.value = translateY.value;
-    })
-    .onUpdate((event) => {
-      const nextY = Math.max(0, startY.value + event.translationY);
-      translateY.value = nextY;
-    })
-    .onEnd((event) => {
-      const shouldClose = translateY.value > MODAL_HEIGHT * 0.35 || event.velocityY > 800;
-      if (shouldClose) {
-        translateY.value = withTiming(MODAL_HEIGHT, { duration: 200 }, () => {
-          runOnJS(resetState)();
-          runOnJS(onClose)();
-        });
-      } else {
-        translateY.value = withSpring(0, { damping: 16, stiffness: 200 });
-      }
-    });
+  .simultaneousWithExternalGesture(Gesture.Native())
+  .onStart(() => {
+    startY.value = translateY.value;
+  })
+  .onUpdate((event) => {
+    const nextY = Math.max(0, startY.value + event.translationY);
+    translateY.value = nextY;
+  })
+  .onEnd((event) => {
+    const shouldClose =
+      translateY.value > MODAL_HEIGHT * 0.35 ||
+      event.velocityY > 800;
+
+    if (shouldClose) {
+      translateY.value = withTiming(MODAL_HEIGHT, { duration: 200 }, () => {
+        runOnJS(resetState)();
+        runOnJS(onClose)();
+      });
+    } else {
+      translateY.value = withSpring(0, { damping: 16, stiffness: 200 });
+    }
+  });
+
 
   const sheetStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.value }],
