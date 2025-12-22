@@ -368,6 +368,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
   }));
 
   const animatedStickyStyle = useAnimatedStyle(() => {
+    if (activeSectionY.value <= 0) return { opacity: 0 };
     const opacity = interpolate(
       scrollY.value,
       [activeSectionY.value - 4, activeSectionY.value + 12],
