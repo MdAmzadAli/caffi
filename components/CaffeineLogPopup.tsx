@@ -133,7 +133,8 @@ function useDecayPath(entry: DrinkEntry | null, curveColor: string) {
 
     // Time labels
     const date = new Date(entry.timestamp);
-    const peakTimeLabel = date.toLocaleTimeString("en-US", {
+    const peakTime = new Date(samples[peakIdx].t);
+    const peakTimeLabel = peakTime.toLocaleTimeString("en-US", {
       hour: "numeric",
       minute: "2-digit",
     });
