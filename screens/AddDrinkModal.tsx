@@ -119,8 +119,10 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
   const [isFavorite, setIsFavorite] = useState(false);
 
   const scrollY = useSharedValue(0);
+  const quickAddY = useSharedValue(0);
+  const customDrinksY = useSharedValue(0);
   const categoryHeaderY = useSharedValue(0);
-  const [currentStickySection, setCurrentStickySection] = useState<string | null>(null);
+  const [currentStickyLabel, setCurrentStickyLabel] = useState<string>("");
 
   const allDrinks = getAllDrinks();
   const favoriteDrinks = getFavoriteDrinks();
@@ -225,13 +227,26 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
     setNotes("");
     setIsFavorite(false);
     scrollY.value = 0;
+    quickAddY.value = 0;
+    customDrinksY.value = 0;
     categoryHeaderY.value = 0;
-    setCurrentStickySection(null);
+    setCurrentStickyLabel("");
   };
 
   const handleScroll = useAnimatedScrollHandler({
     onScroll: (e) => {
       scrollY.value = e.contentOffset.y;
+      const currentY = e.contentOffset.y;
+      
+      let activeLabel = "";
+      if (categoryHeaderY.value > 0 && currentY >= categoryHeaderY.value) {
+        activeLabel = searchQuery ? "RESULTS" : selectedCategory!.toUpperCase();
+      } else if (customDrinksY.value > 0 && currentY >= customDrinksY.value) {
+        activeLabel = "MY CUSTOM DRINKS";
+      } else if (quickAddY.value > 0 && currentY >= quickAddY.value) {
+        activeLabel = "QUICK ADD";
+      }
+      runOnJS(setCurrentStickyLabel)(activeLabel);
     },
   });
 
@@ -342,10 +357,22 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
     borderTopRightRadius: borderRadius.value,
   }));
 
+  const getStickyThreshold = () => {
+    if (categoryHeaderY.value > 0 && scrollY.value >= categoryHeaderY.value) {
+      return categoryHeaderY.value;
+    } else if (customDrinksY.value > 0 && scrollY.value >= customDrinksY.value) {
+      return customDrinksY.value;
+    } else if (quickAddY.value > 0 && scrollY.value >= quickAddY.value) {
+      return quickAddY.value;
+    }
+    return categoryHeaderY.value;
+  };
+
   const animatedStickyStyle = useAnimatedStyle(() => {
+    const threshold = getStickyThreshold();
     const opacity = interpolate(
       scrollY.value,
-      [categoryHeaderY.value - 4, categoryHeaderY.value + 12],
+      [threshold - 4, threshold + 12],
       [0, 1],
       Extrapolation.CLAMP
     );
@@ -425,7 +452,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
                   {/* Sticky Section Header Overlay */}
                   <Animated.View style={[styles.stickyClone, { backgroundColor: theme.backgroundRoot }, animatedStickyStyle]}>
                     <ThemedText type="small" muted style={styles.sectionLabel}>
-                      {searchQuery ? "RESULTS" : selectedCategory!.toUpperCase()}
+                      {currentStickyLabel}
                     </ThemedText>
                   </Animated.View>
                 </View>
@@ -455,7 +482,12 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
                   </View>
 
                   {recentEntries.length > 0 && !searchQuery && (
-                    <View style={styles.section}>
+                    <View 
+                      style={styles.section}
+                      onLayout={(e) => {
+                        quickAddY.value = e.nativeEvent.layout.y;
+                      }}
+                    >
                       <ThemedText type="small" muted style={styles.sectionLabel}>
                         QUICK ADD
                       </ThemedText>
@@ -470,7 +502,12 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
                   )}
 
                   {customDrinks.length > 0 && !searchQuery && (
-                    <View style={styles.section}>
+                    <View 
+                      style={styles.section}
+                      onLayout={(e) => {
+                        customDrinksY.value = e.nativeEvent.layout.y;
+                      }}
+                    >
                       <ThemedText type="small" muted style={styles.sectionLabel}>
                         MY CUSTOM DRINKS
                       </ThemedText>
