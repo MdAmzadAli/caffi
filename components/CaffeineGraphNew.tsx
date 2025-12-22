@@ -102,10 +102,10 @@ const LEFT_PADDING = 0;
 const RIGHT_PADDING = 0;
 const X_AXIS_HEIGHT = 22;
 const GRAPH_PADDING_TOP = 8;
-const GRAPH_PADDING_BOTTOM = 32;
+const GRAPH_PADDING_BOTTOM = 8;
 const MARKER_SIZE = 18;
 const MARKER_IMAGE_SIZE = 14;
-const HOURS_VISIBLE = 11;
+const HOURS_VISIBLE = 12;
 const GROUP_PROXIMITY_PX = 15;
 const HOURS_PER_DAY = 24;
 const EDGE_THRESHOLD = 50;
@@ -804,7 +804,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: 36,
     alignItems: "center",
-    top: 12,
+    top: 8,
   },
   currentTimeLabelText: {
     fontSize: 8,
