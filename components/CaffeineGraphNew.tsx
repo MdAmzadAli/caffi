@@ -44,7 +44,7 @@ interface GraphColors {
   green: string;
   blue: string;
   mutedGrey: string;
-  accent: string;
+  dangerRed: string;
   areaFill: string;
   areaFillEnd: string;
 }
@@ -58,7 +58,7 @@ const LIGHT_GRAPH_COLORS: GraphColors = {
   green: "#53A451",
   blue: "#4DA3FF",
   mutedGrey: "#9E9E9E",
-  accent: "#C9A36A",
+  dangerRed: "#D9534F",
   areaFill: "#E8DFD0",
   areaFillEnd: "#F5F0E8",
 };
@@ -72,7 +72,7 @@ const DARK_GRAPH_COLORS: GraphColors = {
   green: "#53A451",
   blue: "#4DA3FF",
   mutedGrey: "#A0A0A0",
-  accent: "#C9A36A",
+  dangerRed: "#D9534F",
   areaFill: "#3D3530",
   areaFillEnd: "#2A2420",
 };
@@ -312,7 +312,7 @@ export function CaffeineGraphNew({
       ? GRAPH_COLORS.green
       : sleepColor === "brown"
         ? GRAPH_COLORS.darkBrown2
-        : GRAPH_COLORS.accent;
+        : GRAPH_COLORS.darkBrown;
 
   const defaultScrollX = useMemo(() => {
     if (nowMs >= startMs && nowMs <= endMs) {
