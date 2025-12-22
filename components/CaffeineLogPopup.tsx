@@ -23,6 +23,7 @@ import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/useTheme";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { DrinkEntry } from "@/store/caffeineStore";
+import { getCaffeineSourceImage } from "@/utils/getCaffeineSourceImage";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const SHEET_MAX_HEIGHT = SCREEN_HEIGHT * 0.9;
@@ -246,11 +247,15 @@ export function CaffeineLogPopup({
                 {/* Header */}
                 <View style={styles.headerRow}>
                   <View style={[styles.iconWrap, { backgroundColor: theme.backgroundSecondary }]}>
-                    <Image
-                      source={require("@/assets/images/icon.png")}
-                      style={styles.icon}
-                      resizeMode="cover"
-                    />
+                    {getCaffeineSourceImage(entry.category) ? (
+                      <Image
+                        source={getCaffeineSourceImage(entry.category)}
+                        style={styles.icon}
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <Text style={styles.iconEmoji}>☕</Text>
+                    )}
                   </View>
                   <View style={styles.headerTextWrap}>
                     <Text style={[styles.mutedText, { color: theme.mutedGrey }]}>
@@ -434,6 +439,10 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 14,
+  },
+  iconEmoji: {
+    fontSize: 28,
+    lineHeight: 28,
   },
   headerTextWrap: {
     flex: 1,

@@ -4,6 +4,7 @@ import { Feather } from "@expo/vector-icons";
 import { Spacing } from "@/constants/theme";
 import { DrinkEntry } from "@/store/caffeineStore";
 import { useTheme } from "@/hooks/useTheme";
+import { getCaffeineSourceImage } from "@/utils/getCaffeineSourceImage";
 
 interface ConsumptionListProps {
   entries: DrinkEntry[];
@@ -24,10 +25,6 @@ const CATEGORY_ICONS: Record<string, string> = {
   soda: "🥤",
   chocolate: "🍫",
   custom: "🧋",
-};
-
-const CATEGORY_IMAGES: Record<string, any> = {
-  coffee: require("@/attached_assets/generated_images/caffi_app_icon_coffee_cup.png"),
 };
 
 function formatDateHeader(date: Date): string {
@@ -124,9 +121,9 @@ export function ConsumptionList({
         onPress={() => onEntryPress?.(item)}
       >
         <View style={[styles.iconContainer, { backgroundColor: theme.backgroundTertiary }]}>
-          {CATEGORY_IMAGES[item.category] ? (
+          {getCaffeineSourceImage(item.category) ? (
             <Image
-              source={CATEGORY_IMAGES[item.category]}
+              source={getCaffeineSourceImage(item.category)}
               style={styles.entryImage}
             />
           ) : (
