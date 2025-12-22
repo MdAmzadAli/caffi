@@ -233,7 +233,7 @@ export function calculateInfoCard(
   const earliestCandidateTime = new Date(
     Math.max(
       now.getTime(),
-      hasPreviousDose
+      lastDoseTime
         ? lastDoseTime.getTime() + MIN_GAP_BETWEEN_DOSES * 60 * 1000
         : recommendationStartTime.getTime()
     )

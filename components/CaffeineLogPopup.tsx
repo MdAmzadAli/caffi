@@ -25,6 +25,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { DrinkEntry } from "@/store/caffeineStore";
 import { getCaffeineSourceImage, resolveImageSource } from "@/utils/getCaffeineSourceImage";
 import { getServingLabel } from "@/utils/getServingLabel";
+import { calculateSingleEntryCurve } from "@/utils/singleEntryCurve";
+import { generateSmoothPath } from "@/utils/graphUtils";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const SHEET_MAX_HEIGHT = SCREEN_HEIGHT * 0.9;
@@ -86,6 +88,8 @@ function calculateCaffeineStats(entry: DrinkEntry | null) {
 function useDecayPath(entry: DrinkEntry | null, curveColor: string) {
   const width = Dimensions.get("window").width - Spacing.lg * 2;
   const height = 160;
+  const maxY = height - 10;
+  const minY = 10;
 
   const caffeineStats = useMemo(() => calculateCaffeineStats(entry), [entry]);
 
@@ -93,65 +97,66 @@ function useDecayPath(entry: DrinkEntry | null, curveColor: string) {
     if (!entry) {
       return { path: "", area: "", peak: { x: 0, y: height }, peakTimeLabel: "", timeLabels: [] };
     }
-    
-    const entryTime = new Date(entry.timestamp);
-    const now = new Date();
-    const hoursElapsed = (now.getTime() - entryTime.getTime()) / (1000 * 60 * 60);
-    const hoursToShow = Math.max(12, hoursElapsed + 2);
-    
-    const startX = 0;
-    const startY = height;
-    const peakX = width * 0.08;
-    const peakY = height * 0.15;
-    
-    const nowX = Math.min((hoursElapsed / hoursToShow) * width, width * 0.95);
-    const decayFactor = Math.pow(0.5, hoursElapsed / CAFFEINE_HALF_LIFE_HOURS);
-    const nowY = height * 0.15 + (height * 0.7) * (1 - decayFactor);
-    
-    const endX = width;
-    const endDecayFactor = Math.pow(0.5, hoursToShow / CAFFEINE_HALF_LIFE_HOURS);
-    const endY = height * 0.15 + (height * 0.7) * (1 - endDecayFactor);
 
-    const cp1x = width * 0.02;
-    const cp1y = height * 0.1;
-    const cp2x = width * 0.12;
-    const cp2y = height * 0.05;
+    // Get decay curve samples
+    const samples = calculateSingleEntryCurve(entry, 5, CAFFEINE_HALF_LIFE_HOURS);
+    
+    const entryMs = new Date(entry.timestamp).getTime();
+    const endMs = entryMs + 12 * 3600000;
+    const maxMg = entry.caffeineAmount;
+    
+    // Find peak
+    let peakMg = 0;
+    let peakIdx = 0;
+    for (let i = 0; i < samples.length; i++) {
+      if (samples[i].mg > peakMg) {
+        peakMg = samples[i].mg;
+        peakIdx = i;
+      }
+    }
 
-    const cp3x = width * 0.35;
-    const cp3y = height * 0.35;
+    // Convert samples to canvas points
+    const points: { x: number; y: number }[] = samples.map((sample) => {
+      const ratio = (sample.t - entryMs) / (endMs - entryMs);
+      const x = ratio * width;
+      const yRatio = sample.mg > 0 ? Math.min(sample.mg / maxMg, 1) : 0;
+      const y = maxY - yRatio * (maxY - minY);
+      return { x, y };
+    });
 
-    const pathStr = `M ${startX} ${startY} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${peakX} ${peakY} S ${cp3x} ${cp3y}, ${endX} ${endY}`;
-    const areaStr = `${pathStr} L ${endX} ${height} L ${startX} ${height} Z`;
+    // Generate smooth path
+    const pathStr = generateSmoothPath(points, 0.3);
+    const areaStr = `${pathStr} L ${width} ${maxY} L 0 ${maxY} Z`;
 
+    // Peak position
+    const peak = { x: points[peakIdx].x, y: points[peakIdx].y };
+
+    // Time labels
     const date = new Date(entry.timestamp);
-    const timeLabel = date.toLocaleTimeString("en-US", {
+    const peakTimeLabel = date.toLocaleTimeString("en-US", {
       hour: "numeric",
       minute: "2-digit",
     });
 
-    const startLabel = new Date(entryTime.getTime() - 1000 * 60 * 60).toLocaleTimeString("en-US", { hour: "numeric" });
-    const endLabel = new Date(entryTime.getTime() + hoursToShow * 1000 * 60 * 60).toLocaleTimeString("en-US", { hour: "numeric" });
-    
-    const midHours = [2, 4, 6, 8, 10];
-    const labels = midHours
-      .filter(h => h < hoursToShow)
-      .map(h => ({
-        x: (h / hoursToShow) * width,
-        label: new Date(entryTime.getTime() + h * 1000 * 60 * 60).toLocaleTimeString("en-US", { hour: "numeric" }),
-      }));
+    const startLabel = date.toLocaleTimeString("en-US", { hour: "numeric" });
+    const endLabel = new Date(endMs).toLocaleTimeString("en-US", { hour: "numeric" });
+
+    const timeLabels = [
+      { x: 0, label: startLabel },
+      { x: width * 0.25, label: new Date(entryMs + 3 * 3600000).toLocaleTimeString("en-US", { hour: "numeric" }) },
+      { x: width * 0.5, label: new Date(entryMs + 6 * 3600000).toLocaleTimeString("en-US", { hour: "numeric" }) },
+      { x: width * 0.75, label: new Date(entryMs + 9 * 3600000).toLocaleTimeString("en-US", { hour: "numeric" }) },
+      { x: width, label: endLabel },
+    ];
 
     return {
       path: pathStr,
       area: areaStr,
-      peak: { x: peakX, y: peakY },
-      peakTimeLabel: timeLabel,
-      timeLabels: [
-        { x: 0, label: startLabel },
-        ...labels,
-        { x: width, label: endLabel },
-      ],
+      peak,
+      peakTimeLabel,
+      timeLabels,
     };
-  }, [entry, height, width]);
+  }, [entry, height, width, maxY, minY]);
 
   return { width, height, path, area, peak, peakTimeLabel, curveColor, caffeineStats, timeLabels };
 }
