@@ -26,7 +26,7 @@ import type { DrinkEntry } from "@/store/caffeineStore";
 import { getCaffeineSourceImage, resolveImageSource } from "@/utils/getCaffeineSourceImage";
 import { getServingLabel } from "@/utils/getServingLabel";
 import { calculateSingleEntryCurve } from "@/utils/singleEntryCurve";
-import { generateSmoothPath } from "@/utils/graphUtils";
+import { generateSmoothPath, remainingAfterHours } from "@/utils/graphUtils";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const SHEET_MAX_HEIGHT = SCREEN_HEIGHT * 0.9;
@@ -40,7 +40,6 @@ type CaffeineLogPopupProps = {
   onDelete?: (entry: DrinkEntry) => void;
 };
 
-// Build a simple decay curve for the single entry to mirror home graph color
 const CAFFEINE_HALF_LIFE_HOURS = 5;
 
 function calculateCaffeineStats(entry: DrinkEntry | null) {
@@ -62,8 +61,8 @@ function calculateCaffeineStats(entry: DrinkEntry | null) {
   const totalMg = entry.caffeineAmount;
   const peakMg = entry.caffeineAmount;
   
-  const remainingFactor = Math.pow(0.5, hoursElapsed / CAFFEINE_HALF_LIFE_HOURS);
-  const currentMg = totalMg * remainingFactor;
+  // Use proper decay formula from remainingAfterHours
+  const currentMg = remainingAfterHours(totalMg, hoursElapsed, CAFFEINE_HALF_LIFE_HOURS);
   
   const peakTimeLabel = entryTime.toLocaleTimeString("en-US", {
     hour: "numeric",
@@ -77,7 +76,7 @@ function calculateCaffeineStats(entry: DrinkEntry | null) {
 
   return {
     peakMg: Math.round(peakMg * 10) / 10,
-    currentMg: Math.round(currentMg * 10) / 10,
+    currentMg: Math.round(Math.max(0, currentMg) * 10) / 10,
     totalMg: Math.round(totalMg * 10) / 10,
     peakTimeLabel,
     currentTimeLabel,
