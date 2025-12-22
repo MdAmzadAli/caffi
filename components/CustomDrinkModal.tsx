@@ -68,6 +68,7 @@ const getUnitForDrink = (name: string, category?: string, sizes?: { name: string
 };
 
 const UNITS = ["cup", "shot", "ml", "oz", "teaspoon", "tablespoon", "glass", "can", "bottle", "scoop", "pint", "liter", "fl oz", "mug"];
+const INBUILT_CATEGORIES = ["coffee", "tea", "energy", "soda", "chocolate"];
 
 export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDrink, editCustomDrink, onSaveCustomDrink }: CustomDrinkModalProps) {
   const { theme } = useTheme();
@@ -79,6 +80,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
   const MODAL_HEIGHT = windowHeight * 0.75;
   const isEditMode = !!editEntry;
   const isEditingCustomDrink = !!editCustomDrink;
+  const isEditingInbuiltSource = isEditMode && editEntry && INBUILT_CATEGORIES.includes(editEntry.category);
 
   const [drinkName, setDrinkName] = useState("");
   const [quantity, setQuantity] = useState(1);
@@ -455,6 +457,41 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
                       </View>
                     </Pressable>
                   )}
+                </View>
+              ) : isEditingInbuiltSource ? (
+                <View style={styles.prefillUnitSection}>
+                  <Pressable
+                    onPress={() => setSelectedUnit(getUnitForDrink(editEntry.name, editEntry.category))}
+                    style={styles.radioRow}
+                  >
+                    <View style={[styles.radioCircle, selectedUnit !== "ml" && styles.radioCircleActive]}>
+                      {selectedUnit !== "ml" && <View style={styles.radioInner} />}
+                    </View>
+                    <ThemedText type="body" style={{ flex: 1 }}>
+                      {getUnitForDrink(editEntry.name, editEntry.category)}
+                    </ThemedText>
+                    <View style={styles.caffeineInputWrapper}>
+                      <ThemedText type="body" style={{ color: theme.text }}>
+                        {(parseInt(caffeineMg) || 0) * quantity}
+                      </ThemedText>
+                      <ThemedText type="body" muted> mg</ThemedText>
+                    </View>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => setSelectedUnit("ml")}
+                    style={styles.radioRow}
+                  >
+                    <View style={[styles.radioCircle, selectedUnit === "ml" && styles.radioCircleActive]}>
+                      {selectedUnit === "ml" && <View style={styles.radioInner} />}
+                    </View>
+                    <ThemedText type="body" style={{ flex: 1 }}>ml</ThemedText>
+                    <View style={styles.caffeineInputWrapper}>
+                      <ThemedText type="body" style={{ color: theme.text }}>
+                        {formatCaffeine(((parseInt(caffeineMg) || 0) / 100) * quantity)}
+                      </ThemedText>
+                      <ThemedText type="body" muted> mg</ThemedText>
+                    </View>
+                  </Pressable>
                 </View>
               ) : (
                 <View style={styles.unitCaffeineRow}>

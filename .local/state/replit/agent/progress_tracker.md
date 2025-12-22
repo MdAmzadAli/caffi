@@ -16,3 +16,10 @@
    - Key insight: Entries are rendered from HomeScreen.tsx (lines 377-418), NOT ConsumptionList.tsx
 [x] 9. Upgraded Node.js from v20.19.3 to v22.17.0 to meet package requirements (>= 20.19.4)
 [x] 10. Import completed and application running successfully
+[x] 11. Fixed unit selector in CustomDrinkModal edit interface for inbuilt vs custom sources
+   - Added INBUILT_CATEGORIES constant: coffee, tea, energy, soda, chocolate
+   - Added isEditingInbuiltSource flag to detect when editing inbuilt source entries
+   - Conditional rendering: shows radio buttons for inbuilt sources (like add modal), dropdown for custom drinks
+   - For inbuilt source edits: displays standard unit + ml options as radio buttons
+   - For custom drink edits: keeps current dropdown interface with multiple unit options
+   - Reused existing styles (prefillUnitSection, radioRow, radioCircle) for consistency and responsiveness
