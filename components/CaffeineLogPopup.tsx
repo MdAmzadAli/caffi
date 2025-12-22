@@ -51,6 +51,7 @@ function calculateCaffeineStats(entry: DrinkEntry | null, nowMs: number) {
       currentMg: 0,
       totalMg: 0,
       peakTimeLabel: "",
+      peakDateLabel: "",
       currentTimeLabel: "",
       hoursElapsed: 0,
     };
@@ -61,13 +62,29 @@ function calculateCaffeineStats(entry: DrinkEntry | null, nowMs: number) {
   const hoursElapsed = (now.getTime() - entryTime.getTime()) / (1000 * 60 * 60);
   
   const totalMg = entry.caffeineAmount;
-  const peakMg = entry.caffeineAmount;
   const currentMg = remainingAfterHours(totalMg, hoursElapsed, CAFFEINE_HALF_LIFE_HOURS);
   
-  const peakTimeLabel = entryTime.toLocaleTimeString("en-US", {
+  // Calculate actual peak from decay curve
+  const samples = calculateSingleEntryCurve(entry, 5, CAFFEINE_HALF_LIFE_HOURS);
+  let peakMg = 0;
+  let peakIdx = 0;
+  for (let i = 0; i < samples.length; i++) {
+    if (samples[i].mg > peakMg) {
+      peakMg = samples[i].mg;
+      peakIdx = i;
+    }
+  }
+  
+  const peakTime = new Date(samples[peakIdx].t);
+  const peakTimeLabel = peakTime.toLocaleTimeString("en-US", {
     hour: "numeric",
     minute: "2-digit",
   });
+  
+  const peakDateLabel = peakTime.getTime() < now.getTime() ? peakTime.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  }) : "";
   
   const currentTimeLabel = now.toLocaleTimeString("en-US", {
     hour: "numeric",
@@ -79,6 +96,7 @@ function calculateCaffeineStats(entry: DrinkEntry | null, nowMs: number) {
     currentMg: Math.round(currentMg * 10) / 10,
     totalMg: Math.round(totalMg * 10) / 10,
     peakTimeLabel,
+    peakDateLabel,
     currentTimeLabel,
     hoursElapsed,
   };
@@ -354,7 +372,7 @@ export function CaffeineLogPopup({
                     Drink contribution to caffeine levels
                   </Text>
                   <View style={[styles.divider, { borderBottomColor: theme.divider }]} />
-                  <Row label={`At peak (${caffeineStats.peakTimeLabel})`} value={`${caffeineStats.peakMg} mg`} themeColor={theme} />
+                  <Row label={`At peak (${caffeineStats.peakTimeLabel}${caffeineStats.peakDateLabel ? `, ${caffeineStats.peakDateLabel}` : ""})`} value={`${caffeineStats.peakMg} mg`} themeColor={theme} />
                   <Row label="Now" value={`${caffeineStats.currentMg} mg`} themeColor={theme} />
                   <Row label="In total (over time)" value={`${caffeineStats.totalMg} mg`} themeColor={theme} />
                 </View>
