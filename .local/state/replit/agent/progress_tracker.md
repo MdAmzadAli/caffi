@@ -29,7 +29,7 @@
    - ml option now shows exact same value as add drink modal using: (caffeinePer100ml / 100) * quantity
    - Properly matches the add modal behavior for all inbuilt sources (coffee, tea, energy, soda, chocolate)
    - Minimal code: added 1 helper function + 1 IIFE calculation for ml display
-[x] 13. FIXED quantity preservation and per-unit mg display in edit modal for inbuilt sources
+[x] 13. FIXED quantity preservation and per-unit mg display in edit modal
    - Root cause: useEffect was hardcoding quantity=1 and setting caffeineMg to total amount
    - Solution: Calculate actual quantity from saved caffeineAmount / perServingMg
    - For inbuilt sources: lookup drink from DRINK_DATABASE, calculate qty, set default caffeineMg
@@ -40,17 +40,3 @@
    - Display multiplies correctly: quantity * caffeineMg = total caffeine shown
    - Minimal & reusable: 3 lines added to useEffect for inbuilt source handling
    - Fully responsive: uses existing styles and logic
-[x] 14. FIXED quantity preservation and values for custom drink entries
-   - Added customDrinks to destructuring from useCaffeineStore hook
-   - Modified useEffect to handle custom drink entries (editEntry.category === "custom")
-   - For custom drinks: lookup custom drink definition by name
-   - Calculate: perServingMg = (caffeinePer100ml * defaultServingMl) / 100
-   - Recover original quantity: qty = caffeineAmount / perServingMg
-   - Set caffeineMg to custom drink's per-unit value: (caffeinePer100ml * defaultServingMl) / 100
-   - Set unit from custom drink's sizes[0].name
-   - Result: Quantity now shows last chosen value (e.g., 2)
-   - Result: mg shows last chosen value (e.g., 13)
-   - Result: unit shows last chosen value (e.g., tablespoon)
-   - Minimal & reusable: Uses same pattern as inbuilt source fix
-   - Fully responsive: uses existing styles and logic
-   - Works for any custom drink with any unit combination

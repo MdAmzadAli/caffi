@@ -78,7 +78,7 @@ const INBUILT_CATEGORIES = ["coffee", "tea", "energy", "soda", "chocolate"];
 export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDrink, editCustomDrink, onSaveCustomDrink }: CustomDrinkModalProps) {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
-  const { addEntry, updateEntry, addCustomDrink, updateCustomDrink, profile, entries, customDrinks } = useCaffeineStore();
+  const { addEntry, updateEntry, addCustomDrink, updateCustomDrink, profile, entries } = useCaffeineStore();
   const { height: windowHeight } = useWindowDimensions();
   const HALF_LIFE_HOURS = 5;
   
@@ -112,15 +112,6 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
           setQuantity(Math.max(1, qty) || 1);
           setCaffeineMg(Math.round(drink.caffeinePer100ml * drink.defaultServingMl / 100).toString());
           setSelectedUnit(getUnitForDrink(drink.name, drink.category));
-        }
-      } else if (editEntry.category === "custom") {
-        const customDrink = customDrinks.find(d => d.name.toLowerCase() === editEntry.name.toLowerCase() && d.category === "custom");
-        if (customDrink) {
-          const perServingMg = (customDrink.caffeinePer100ml * customDrink.defaultServingMl) / 100;
-          const qty = Math.round((editEntry.caffeineAmount / perServingMg) * 10) / 10;
-          setQuantity(Math.max(1, qty) || 1);
-          setCaffeineMg(Math.round(customDrink.caffeinePer100ml * customDrink.defaultServingMl / 100).toString());
-          setSelectedUnit(customDrink.sizes?.[0]?.name || "cup");
         }
       } else {
         setQuantity(1);
