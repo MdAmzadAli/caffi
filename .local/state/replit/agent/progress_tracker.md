@@ -22,4 +22,10 @@
    - Conditional rendering: shows radio buttons for inbuilt sources (like add modal), dropdown for custom drinks
    - For inbuilt source edits: displays standard unit + ml options as radio buttons
    - For custom drink edits: keeps current dropdown interface with multiple unit options
-   - Reused existing styles (prefillUnitSection, radioRow, radioCircle) for consistency and responsiveness
+   - Reused existing styles for consistency and responsiveness
+[x] 12. FIXED ml/mg calculation for inbuilt sources in edit modal
+   - Created getInbuiltDrinkCaffeinePer100ml helper function to lookup original drink data
+   - Imported DRINK_DATABASE from store to access caffeine per 100ml values
+   - ml option now shows exact same value as add drink modal using: (caffeinePer100ml / 100) * quantity
+   - Properly matches the add modal behavior for all inbuilt sources (coffee, tea, energy, soda, chocolate)
+   - Minimal code: added 1 helper function + 1 IIFE calculation for ml display

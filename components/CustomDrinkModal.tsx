@@ -24,7 +24,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { ImagePickerModal, PRESET_IMAGES } from "@/components/ImagePickerModal";
 import { TimePickerModal } from "@/components/TimePickerModal";
 import { GlowIndicator } from "@/components/GlowIndicator";
-import { useCaffeineStore, DrinkEntry } from "@/store/caffeineStore";
+import { useCaffeineStore, DrinkEntry, DRINK_DATABASE } from "@/store/caffeineStore";
 import { useTheme } from "@/hooks/useTheme";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import {
@@ -65,6 +65,11 @@ const getUnitForDrink = (name: string, category?: string, sizes?: { name: string
   if (sizes?.[0]?.name) return sizes[0].name;
   if (category === "tea" || category === "coffee" || category === "chocolate") return "cup";
   return "cup";
+};
+
+const getInbuiltDrinkCaffeinePer100ml = (name: string, category: string): number | null => {
+  const drink = DRINK_DATABASE.find(d => d.name.toLowerCase() === name.toLowerCase() && d.category === category);
+  return drink ? drink.caffeinePer100ml : null;
 };
 
 const UNITS = ["cup", "shot", "ml", "oz", "teaspoon", "tablespoon", "glass", "can", "bottle", "scoop", "pint", "liter", "fl oz", "mug"];
@@ -487,7 +492,10 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
                     <ThemedText type="body" style={{ flex: 1 }}>ml</ThemedText>
                     <View style={styles.caffeineInputWrapper}>
                       <ThemedText type="body" style={{ color: theme.text }}>
-                        {formatCaffeine(((parseInt(caffeineMg) || 0) / 100) * quantity)}
+                        {(() => {
+                          const cpml = getInbuiltDrinkCaffeinePer100ml(editEntry.name, editEntry.category);
+                          return cpml ? formatCaffeine((cpml / 100) * quantity) : "-";
+                        })()}
                       </ThemedText>
                       <ThemedText type="body" muted> mg</ThemedText>
                     </View>
