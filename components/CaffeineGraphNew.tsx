@@ -164,7 +164,7 @@ export function CaffeineGraphNew({
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   
   const viewWindowHours = (dayWindowEnd - dayWindowStart + 1) * HOURS_PER_DAY;
-  const graphHeight = windowHeight * 0.36;
+  const graphHeight = windowHeight * 0.32;
   const chartHeight = graphHeight - X_AXIS_HEIGHT - GRAPH_PADDING_TOP - GRAPH_PADDING_BOTTOM;
   const scrollContentWidth = windowWidth * (viewWindowHours / HOURS_VISIBLE);
   const chartWidth = scrollContentWidth;
