@@ -93,7 +93,10 @@ export function HomeGraphController({
   return (
     <View
       style={styles.container}
-      onLayout={(e) => onHeight?.(e.nativeEvent.layout.height)}
+      onLayout={(e) => {
+        const fullHeight = e.nativeEvent.layout.height;
+        onHeight?.(fullHeight);
+      }}
     >
       <CaffeineGraphNew
         events={events}
