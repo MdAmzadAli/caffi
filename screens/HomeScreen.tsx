@@ -145,6 +145,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const DEFAULT_GRAPH_HEIGHT = Dimensions.get("window").height * 0.36; // Graph height (36% of screen)
   const HEADER_HEIGHT = 60; // Screen header height
   const RING_ROW_HEIGHT = 72; // Ring progress row height
+  const GRAPH_BOTTOM_PADDING = Spacing.xl; // Keep sticky content below x-axis labels
 
   const todayEntries = useMemo(() => getTodayEntries(), [entries]);
   const todayCaffeine = useMemo(() => getTodayCaffeine(), [entries]);
@@ -512,7 +513,12 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         </View>
         
         {/* Fixed Graph Section */}
-        <View style={styles.fixedGraphContainer}>
+        <View
+          style={[
+            styles.fixedGraphContainer,
+            { paddingBottom: GRAPH_BOTTOM_PADDING },
+          ]}
+        >
           <HomeGraphController
             events={caffeineEvents}
             bedtime={profile.sleepTime}
