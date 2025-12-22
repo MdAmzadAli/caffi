@@ -471,15 +471,15 @@ export function CaffeineGraphNew({
       {showLegend && (
         <>
           <Pressable style={styles.legendOverlay} onPress={() => setShowLegend(false)} />
-          <View style={[styles.legendCard, { backgroundColor: GRAPH_COLORS.bg }]}>
+          <View style={[styles.legendCard, { backgroundColor: GRAPH_COLORS.bg, maxWidth: windowWidth * 0.55 }]}>
             <Text style={[styles.legendTitle, { color: GRAPH_COLORS.darkBrown2 }]}>Graph Legend</Text>
             <View style={styles.legendRow}>
               <View style={[styles.legendLine, { backgroundColor: GRAPH_COLORS.green }]} />
-              <Text style={[styles.legendText, { color: GRAPH_COLORS.darkBrown }]}>Sleep threshold - caffeine below this won't affect sleep</Text>
+              <Text style={[styles.legendText, { color: GRAPH_COLORS.darkBrown }]} numberOfLines={0}>Sleep threshold - caffeine below this won't affect sleep</Text>
             </View>
             <View style={styles.legendRow}>
               <View style={[styles.legendLineDashed, { borderColor: GRAPH_COLORS.accentGold }]} />
-              <Text style={[styles.legendText, { color: GRAPH_COLORS.darkBrown }]}>Your optimal daily caffeine level</Text>
+              <Text style={[styles.legendText, { color: GRAPH_COLORS.darkBrown }]} numberOfLines={0}>Your optimal daily caffeine level</Text>
             </View>
           </View>
         </>
@@ -848,7 +848,6 @@ const styles = StyleSheet.create({
     left: Y_AXIS_WIDTH + 8,
     padding: 12,
     borderRadius: 8,
-    maxWidth: 240,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
@@ -863,8 +862,9 @@ const styles = StyleSheet.create({
   },
   legendRow: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     marginBottom: 10,
+    flexWrap: "wrap",
   },
   legendLine: {
     width: 24,
@@ -879,8 +879,9 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   legendText: {
-    fontSize: 13,
+    fontSize: 11,
     flex: 1,
+    flexWrap: "wrap",
   },
 });
 
