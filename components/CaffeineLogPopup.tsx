@@ -93,9 +93,9 @@ function useDecayPath(entry: DrinkEntry | null, curveColor: string) {
 
   const caffeineStats = useMemo(() => calculateCaffeineStats(entry), [entry]);
 
-  const { path, area, peak, peakTimeLabel, timeLabels } = useMemo(() => {
+  const { path, area, peak, peakTimeLabel, peakDateLabel, timeLabels } = useMemo(() => {
     if (!entry) {
-      return { path: "", area: "", peak: { x: 0, y: height }, peakTimeLabel: "", timeLabels: [] };
+      return { path: "", area: "", peak: { x: 0, y: height }, peakTimeLabel: "", peakDateLabel: "", timeLabels: [] };
     }
 
     // Get decay curve samples
@@ -134,10 +134,18 @@ function useDecayPath(entry: DrinkEntry | null, curveColor: string) {
     // Time labels
     const date = new Date(entry.timestamp);
     const peakTime = new Date(samples[peakIdx].t);
+    const now = new Date();
+    const peakPassed = peakTime.getTime() < now.getTime();
+    
     const peakTimeLabel = peakTime.toLocaleTimeString("en-US", {
       hour: "numeric",
       minute: "2-digit",
     });
+    
+    const peakDateLabel = peakPassed ? peakTime.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    }) : "";
 
     const startLabel = date.toLocaleTimeString("en-US", { hour: "numeric" });
     const endLabel = new Date(endMs).toLocaleTimeString("en-US", { hour: "numeric" });
@@ -155,11 +163,12 @@ function useDecayPath(entry: DrinkEntry | null, curveColor: string) {
       area: areaStr,
       peak,
       peakTimeLabel,
+      peakDateLabel,
       timeLabels,
     };
   }, [entry, height, width, maxY, minY]);
 
-  return { width, height, path, area, peak, peakTimeLabel, curveColor, caffeineStats, timeLabels };
+  return { width, height, path, area, peak, peakTimeLabel, peakDateLabel, curveColor, caffeineStats, timeLabels };
 }
 
 export function CaffeineLogPopup({
@@ -179,7 +188,7 @@ export function CaffeineLogPopup({
   const areaStart = isDark ? theme.backgroundTertiary : theme.accentGold + "1A";
   const areaEnd = isDark ? theme.backgroundSecondary : theme.accentGold + "0D";
 
-  const { width, height, path, area, peak, peakTimeLabel, caffeineStats, timeLabels } = useDecayPath(entry, curveColor);
+  const { width, height, path, area, peak, peakTimeLabel, peakDateLabel, caffeineStats, timeLabels } = useDecayPath(entry, curveColor);
   const startY = useSharedValue(0);
 
   useEffect(() => {
@@ -292,9 +301,20 @@ export function CaffeineLogPopup({
 
                     {/* Peak marker */}
                     <Circle cx={peak.x} cy={peak.y} r={6} fill={theme.danger} />
+                    {peakDateLabel && (
+                      <SvgText
+                        x={peak.x}
+                        y={peak.y - 25}
+                        fontSize={11}
+                        fill={theme.danger}
+                        textAnchor="middle"
+                      >
+                        {peakDateLabel}
+                      </SvgText>
+                    )}
                     <SvgText
                       x={peak.x}
-                      y={peak.y - 10}
+                      y={peak.y - (peakDateLabel ? 12 : 10)}
                       fontSize={12}
                       fill={theme.danger}
                       textAnchor="middle"
