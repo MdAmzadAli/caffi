@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import {
   Modal,
   View,
@@ -91,16 +91,7 @@ function useDecayPath(entry: DrinkEntry | null, curveColor: string) {
   const maxY = height - 10;
   const minY = 10;
 
-  const [realTimeNow, setRealTimeNow] = useState(Date.now());
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setRealTimeNow(Date.now());
-    }, 60000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const caffeineStats = useMemo(() => calculateCaffeineStats(entry), [entry, realTimeNow]);
+  const caffeineStats = useMemo(() => calculateCaffeineStats(entry), [entry]);
 
   const { path, area, peak, peakTimeLabel, peakDateLabel, timeLabels } = useMemo(() => {
     if (!entry) {
