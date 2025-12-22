@@ -29,3 +29,14 @@
    - ml option now shows exact same value as add drink modal using: (caffeinePer100ml / 100) * quantity
    - Properly matches the add modal behavior for all inbuilt sources (coffee, tea, energy, soda, chocolate)
    - Minimal code: added 1 helper function + 1 IIFE calculation for ml display
+[x] 13. FIXED quantity preservation and per-unit mg display in edit modal
+   - Root cause: useEffect was hardcoding quantity=1 and setting caffeineMg to total amount
+   - Solution: Calculate actual quantity from saved caffeineAmount / perServingMg
+   - For inbuilt sources: lookup drink from DRINK_DATABASE, calculate qty, set default caffeineMg
+   - For custom drinks: keep existing logic (qty=1, use stored amount)
+   - Formula: perServingMg = (caffeinePer100ml * defaultServingMl) / 100; qty = caffeineAmount / perServingMg
+   - Result: Quantity field now shows last chosen value (e.g., 2 for 2 cups)
+   - Result: Per-cup/per-unit radio shows ONLY default value (e.g., 62 mg), not multiplied
+   - Display multiplies correctly: quantity * caffeineMg = total caffeine shown
+   - Minimal & reusable: 3 lines added to useEffect for inbuilt source handling
+   - Fully responsive: uses existing styles and logic

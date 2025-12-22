@@ -101,12 +101,23 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
   useEffect(() => {
     if (editEntry && visible) {
       setDrinkName(editEntry.name || "");
-      setQuantity(1);
-      setCaffeineMg(editEntry.caffeineAmount?.toString() || "10");
-      setSelectedUnit("cup");
       setStartTime(new Date(editEntry.timestamp));
-      // Initialize image from entry
       setSelectedImage(editEntry.imageUri || null);
+      
+      if (isEditingInbuiltSource) {
+        const drink = DRINK_DATABASE.find(d => d.name.toLowerCase() === editEntry.name.toLowerCase() && d.category === editEntry.category);
+        if (drink) {
+          const perServingMg = (drink.caffeinePer100ml * drink.defaultServingMl) / 100;
+          const qty = Math.round((editEntry.caffeineAmount / perServingMg) * 10) / 10;
+          setQuantity(Math.max(1, qty) || 1);
+          setCaffeineMg(Math.round(drink.caffeinePer100ml * drink.defaultServingMl / 100).toString());
+          setSelectedUnit(getUnitForDrink(drink.name, drink.category));
+        }
+      } else {
+        setQuantity(1);
+        setCaffeineMg(editEntry.caffeineAmount?.toString() || "10");
+        setSelectedUnit("cup");
+      }
       const entryDate = new Date(editEntry.timestamp);
       const now = new Date();
       const isToday = entryDate.toDateString() === now.toDateString();
