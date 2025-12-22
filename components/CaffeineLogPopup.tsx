@@ -24,6 +24,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { DrinkEntry } from "@/store/caffeineStore";
 import { getCaffeineSourceImage, resolveImageSource } from "@/utils/getCaffeineSourceImage";
+import { getServingLabel } from "@/utils/getServingLabel";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const SHEET_MAX_HEIGHT = SCREEN_HEIGHT * 0.9;
@@ -265,7 +266,7 @@ export function CaffeineLogPopup({
                   </View>
                   <View style={styles.headerTextWrap}>
                     <Text style={[styles.mutedText, { color: theme.mutedGrey }]}>
-                      You drank 1 cup of
+                      You drank {getServingLabel(entry.servingSize).quantity} {getServingLabel(entry.servingSize).unit} of
                     </Text>
                     <Text style={[styles.title, { color: theme.text }]}>{entry.name}</Text>
                   </View>
