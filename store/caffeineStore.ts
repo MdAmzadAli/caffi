@@ -179,7 +179,6 @@ export const DRINK_DATABASE: DrinkItem[] = Object.entries(caffeineDB).flatMap(
       defaultServingMl: drink.serving_size_ml,
       sizes: [{ name: "Default", ml: drink.serving_size_ml }],
       icon: ICON_MAP[category],
-      imageUri: `category:${category}`,
     }));
   }
 );

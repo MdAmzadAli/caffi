@@ -27,28 +27,6 @@ import type { DrinkEntry } from "@/store/caffeineStore";
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const SHEET_MAX_HEIGHT = SCREEN_HEIGHT * 0.9;
 
-const CATEGORY_IMAGES: Record<string, any> = {
-  coffee: require("@/assets/CaffeineSourceImages/coffee.png"),
-  tea: require("@/assets/CaffeineSourceImages/tea.jpg"),
-  energy: require("@/assets/CaffeineSourceImages/energy.png"),
-  soda: require("@/assets/CaffeineSourceImages/soda.png"),
-  chocolate: require("@/assets/CaffeineSourceImages/chocolate.png"),
-};
-
-const resolveImageSource = (imageUri: string | undefined): any => {
-  if (!imageUri) return null;
-  if (imageUri.startsWith("category:")) {
-    const category = imageUri.replace("category:", "");
-    return CATEGORY_IMAGES[category];
-  }
-  if (imageUri.startsWith("preset:")) {
-    const { PRESET_IMAGES } = require("@/components/ImagePickerModal");
-    const preset = PRESET_IMAGES.find((p: any) => p.id === imageUri.replace("preset:", ""));
-    return preset?.image;
-  }
-  return { uri: imageUri };
-};
-
 type CaffeineLogPopupProps = {
   visible: boolean;
   entry: DrinkEntry | null;
@@ -59,7 +37,7 @@ type CaffeineLogPopupProps = {
 };
 
 // Build a simple decay curve for the single entry to mirror home graph color
-const CAFFEINE_HALF_LIFE_HOURS = 5.5;
+const CAFFEINE_HALF_LIFE_HOURS = 5;
 
 function calculateCaffeineStats(entry: DrinkEntry | null) {
   if (!entry) {
@@ -269,14 +247,14 @@ export function CaffeineLogPopup({
                 <View style={styles.headerRow}>
                   <View style={[styles.iconWrap, { backgroundColor: theme.backgroundSecondary }]}>
                     <Image
-                      source={resolveImageSource(entry.imageUri) || require("@/assets/images/icon.png")}
+                      source={require("@/assets/images/icon.png")}
                       style={styles.icon}
                       resizeMode="cover"
                     />
                   </View>
                   <View style={styles.headerTextWrap}>
                     <Text style={[styles.mutedText, { color: theme.mutedGrey }]}>
-                      You drank {entry.servingSize} {entry.servingSize === 1 ? "cup" : "cups"} of
+                      You drank 1 cup of
                     </Text>
                     <Text style={[styles.title, { color: theme.text }]}>{entry.name}</Text>
                   </View>
