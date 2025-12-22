@@ -44,7 +44,7 @@ type CaffeineLogPopupProps = {
 // Build a simple decay curve for the single entry to mirror home graph color
 const CAFFEINE_HALF_LIFE_HOURS = 5;
 
-function calculateCaffeineStats(entry: DrinkEntry | null) {
+function calculateCaffeineStats(entry: DrinkEntry | null, nowMs: number) {
   if (!entry) {
     return {
       peakMg: 0,
@@ -56,7 +56,7 @@ function calculateCaffeineStats(entry: DrinkEntry | null) {
     };
   }
 
-  const now = new Date();
+  const now = new Date(nowMs);
   const entryTime = new Date(entry.timestamp);
   const hoursElapsed = (now.getTime() - entryTime.getTime()) / (1000 * 60 * 60);
   
@@ -92,7 +92,7 @@ function useDecayPath(entry: DrinkEntry | null, curveColor: string) {
 
   const realTimeNow = useRealTimeNow();
 
-  const caffeineStats = useMemo(() => calculateCaffeineStats(entry), [entry, realTimeNow]);
+  const caffeineStats = useMemo(() => calculateCaffeineStats(entry, realTimeNow), [entry, realTimeNow]);
 
   const { path, area, peak, peakTimeLabel, peakDateLabel, timeLabels } = useMemo(() => {
     if (!entry) {
