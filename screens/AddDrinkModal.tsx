@@ -518,12 +518,10 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
                   )}
 
                   <View 
-                    style={styles.spacer}
+                    style={styles.section}
                     onLayout={(e) => {
                       categoryHeaderY.value = e.nativeEvent.layout.y;
-                    }}
-                  />
-                  <View style={styles.section}>
+                    }}>
                     <ThemedText type="small" muted style={styles.sectionLabel}>
                       {searchQuery ? "RESULTS" : selectedCategory!.toUpperCase()}
                     </ThemedText>
@@ -1077,9 +1075,6 @@ const styles = StyleSheet.create({
     top: SEARCH_BAR_HEIGHT,
     paddingTop: Spacing.xs,
     paddingBottom: Spacing.xs,
-  },
-  spacer: {
-    height: SEARCH_BAR_HEIGHT,
   },
   scrollContent: {
     paddingHorizontal: Spacing.xl,
