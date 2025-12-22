@@ -5,11 +5,12 @@
 [x] 5. Fixed image display in CustomDrinkModal edit interface
 [x] 6. Fixed image persistence in My Consumption logs for custom images
 [x] 7. Fixed preset image resolution in My Consumption logs
-[x] 8. Fixed inbuilt source image persistence - Initial attempt
-[x] 9. FINAL FIX - Inbuilt sources now show edited images in My Consumption logs
-   - Root cause: ConsumptionList.tsx line 124 had problematic double conditional check
-   - The original: {item.imageUri && resolveImageSource(item.imageUri) ? (
-   - Problem: Called resolveImageSource in condition AND in Image source (redundant and unreliable)
-   - Solution: Separate resolution logic - resolve image once, then check result
-   - Changes: Store resolvedImage = item.imageUri ? resolveImageSource(item.imageUri) : null
-   - Result: Changed images now display CORRECTLY in My Consumption logs for BOTH inbuilt AND custom sources
+[x] 8. Fixed inbuilt source image persistence - FINAL ROOT CAUSE FOUND AND FIXED
+   - Root cause: HomeScreen.tsx (lines 96-107) getDrinkImageSource function had incorrect logic
+   - Bug: Line 98 checked "if (item.category === 'custom' && imageUri)" - only checking custom drinks
+   - Result: For inbuilt sources (coffee, tea, energy, soda, chocolate), it ALWAYS returned default CATEGORY_IMAGE
+   - This ignored ANY saved imageUri for inbuilt sources, which is why edited images didn't show
+   - Solution: Removed the "item.category === 'custom' &&" condition
+   - Now checks "if (imageUri)" for ALL entries, whether custom or inbuilt
+   - This properly uses saved imageUri for BOTH custom AND inbuilt sources
+   - Key insight: Entries are rendered from HomeScreen.tsx (lines 377-418), NOT ConsumptionList.tsx

@@ -95,7 +95,7 @@ const CATEGORY_IMAGES: Record<string, any> = {
 
 function getDrinkImageSource(item: DrinkEntry): { uri?: string; source?: any } {
   const imageUri = item.imageUri;
-  if (item.category === "custom" && imageUri) {
+  if (imageUri) {
     if (imageUri.startsWith("preset:")) {
       const { PRESET_IMAGES } = require("@/components/ImagePickerModal");
       const preset = PRESET_IMAGES.find((p: any) => p.id === imageUri.replace("preset:", ""));
