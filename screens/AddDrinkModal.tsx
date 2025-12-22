@@ -209,7 +209,6 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
       sizes: [],
     };
     addEntry(drink, entry.servingSize, entry.notes, entry.isFavorite, new Date());
-    deleteEntry(entry.id);
     handleCloseAnimated();
   };
 
