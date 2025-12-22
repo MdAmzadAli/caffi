@@ -5,10 +5,11 @@
 [x] 5. Fixed image display in CustomDrinkModal edit interface
 [x] 6. Fixed image persistence in My Consumption logs for custom images
 [x] 7. Fixed preset image resolution in My Consumption logs
-[x] 8. Fixed inbuilt source image persistence - ROOT CAUSE FOUND AND FIXED
-   - Root cause: Line 279 in CustomDrinkModal had overly restrictive filtering for inbuilt source entries
-   - The line was filtering out "category:" URIs: imageUri: selectedImage && !selectedImage.startsWith("category:") ? selectedImage : undefined
-   - This filtering was inconsistent with custom drink definition logic (line 288/303)
-   - Solution 1: Changed line 279 to save all selected images consistently: imageUri: selectedImage || undefined
-   - Solution 2: Updated resolveImageSource to handle "category:" URIs properly (lines 21-24)
-   - Result: Changed images now display correctly in My Consumption logs for BOTH inbuilt AND custom sources
+[x] 8. Fixed inbuilt source image persistence - Initial attempt
+[x] 9. FINAL FIX - Inbuilt sources now show edited images in My Consumption logs
+   - Root cause: ConsumptionList.tsx line 124 had problematic double conditional check
+   - The original: {item.imageUri && resolveImageSource(item.imageUri) ? (
+   - Problem: Called resolveImageSource in condition AND in Image source (redundant and unreliable)
+   - Solution: Separate resolution logic - resolve image once, then check result
+   - Changes: Store resolvedImage = item.imageUri ? resolveImageSource(item.imageUri) : null
+   - Result: Changed images now display CORRECTLY in My Consumption logs for BOTH inbuilt AND custom sources

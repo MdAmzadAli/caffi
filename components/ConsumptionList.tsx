@@ -109,6 +109,9 @@ export function ConsumptionList({
   }, [entries]);
 
   const renderItem = ({ item }: { item: DrinkEntry }) => {
+    const resolvedImage = item.imageUri ? resolveImageSource(item.imageUri) : null;
+    const categoryImage = getCaffeineSourceImage(item.category);
+    
     return (
       <Pressable
         style={({ pressed }) => [
@@ -121,14 +124,14 @@ export function ConsumptionList({
         onPress={() => onEntryPress?.(item)}
       >
         <View style={[styles.iconContainer, { backgroundColor: theme.backgroundTertiary }]}>
-          {item.imageUri && resolveImageSource(item.imageUri) ? (
+          {resolvedImage ? (
             <Image
-              source={resolveImageSource(item.imageUri)}
+              source={resolvedImage}
               style={styles.entryImage}
             />
-          ) : getCaffeineSourceImage(item.category) ? (
+          ) : categoryImage ? (
             <Image
-              source={getCaffeineSourceImage(item.category)}
+              source={categoryImage}
               style={styles.entryImage}
             />
           ) : (
