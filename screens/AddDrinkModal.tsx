@@ -129,9 +129,13 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
   const favoriteDrinks = getFavoriteDrinks();
 
   const recentEntries = useMemo(() => {
-    return [...entries]
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-      .slice(0, 5);
+    const sorted = [...entries].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    const seen = new Set<string>();
+    return sorted.filter(entry => {
+      if (seen.has(entry.name)) return false;
+      seen.add(entry.name);
+      return true;
+    }).slice(0, 5);
   }, [entries]);
 
   const filteredDrinks = useMemo(() => {
