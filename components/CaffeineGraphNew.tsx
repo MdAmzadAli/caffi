@@ -312,7 +312,7 @@ export function CaffeineGraphNew({
       ? GRAPH_COLORS.green
       : sleepColor === "brown"
         ? GRAPH_COLORS.darkBrown2
-        : GRAPH_COLORS.dangerRed;
+        : GRAPH_COLORS.darkBrown;
 
   const defaultScrollX = useMemo(() => {
     if (nowMs >= startMs && nowMs <= endMs) {
