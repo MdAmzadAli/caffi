@@ -40,6 +40,7 @@ type CaffeineLogPopupProps = {
   onDelete?: (entry: DrinkEntry) => void;
 };
 
+// Build a simple decay curve for the single entry to mirror home graph color
 const CAFFEINE_HALF_LIFE_HOURS = 5;
 
 function calculateCaffeineStats(entry: DrinkEntry | null) {
@@ -61,7 +62,6 @@ function calculateCaffeineStats(entry: DrinkEntry | null) {
   const totalMg = entry.caffeineAmount;
   const peakMg = entry.caffeineAmount;
   
-  // Use exponential decay: at t=0 shows full dose, decays with 5-hour half-life
   const remainingFactor = Math.pow(0.5, hoursElapsed / CAFFEINE_HALF_LIFE_HOURS);
   const currentMg = totalMg * remainingFactor;
   
@@ -77,7 +77,7 @@ function calculateCaffeineStats(entry: DrinkEntry | null) {
 
   return {
     peakMg: Math.round(peakMg * 10) / 10,
-    currentMg: Math.round(Math.max(0, currentMg) * 10) / 10,
+    currentMg: Math.round(currentMg * 10) / 10,
     totalMg: Math.round(totalMg * 10) / 10,
     peakTimeLabel,
     currentTimeLabel,
@@ -90,16 +90,17 @@ function useDecayPath(entry: DrinkEntry | null, curveColor: string) {
   const height = 160;
   const maxY = height - 10;
   const minY = 10;
-  const [updateTrigger, setUpdateTrigger] = useState(0);
+
+  const [realTimeNow, setRealTimeNow] = useState(Date.now());
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setUpdateTrigger(prev => prev + 1);
-    }, 60000); // Update every 60 seconds (1 minute)
+      setRealTimeNow(Date.now());
+    }, 60000);
     return () => clearInterval(interval);
   }, []);
 
-  const caffeineStats = useMemo(() => calculateCaffeineStats(entry), [entry, updateTrigger]);
+  const caffeineStats = useMemo(() => calculateCaffeineStats(entry), [entry, realTimeNow]);
 
   const { path, area, peak, peakTimeLabel, peakDateLabel, timeLabels } = useMemo(() => {
     if (!entry) {
