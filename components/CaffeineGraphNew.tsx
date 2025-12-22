@@ -311,7 +311,7 @@ export function CaffeineGraphNew({
     sleepColor === "green"
       ? GRAPH_COLORS.green
       : sleepColor === "brown"
-        ? GRAPH_COLORS.darkBrown2
+        ? GRAPH_COLORS.accentGold
         : GRAPH_COLORS.darkBrown;
 
   const defaultScrollX = useMemo(() => {
