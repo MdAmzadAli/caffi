@@ -26,7 +26,7 @@ import type { DrinkEntry } from "@/store/caffeineStore";
 import { getCaffeineSourceImage, resolveImageSource } from "@/utils/getCaffeineSourceImage";
 import { getServingLabel } from "@/utils/getServingLabel";
 import { calculateSingleEntryCurve } from "@/utils/singleEntryCurve";
-import { generateSmoothPath, remainingAfterHours } from "@/utils/graphUtils";
+import { generateSmoothPath } from "@/utils/graphUtils";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const SHEET_MAX_HEIGHT = SCREEN_HEIGHT * 0.9;
@@ -61,8 +61,9 @@ function calculateCaffeineStats(entry: DrinkEntry | null) {
   const totalMg = entry.caffeineAmount;
   const peakMg = entry.caffeineAmount;
   
-  // Use proper decay formula from remainingAfterHours
-  const currentMg = remainingAfterHours(totalMg, hoursElapsed, CAFFEINE_HALF_LIFE_HOURS);
+  // Use exponential decay: at t=0 shows full dose, decays with 5-hour half-life
+  const remainingFactor = Math.pow(0.5, hoursElapsed / CAFFEINE_HALF_LIFE_HOURS);
+  const currentMg = totalMg * remainingFactor;
   
   const peakTimeLabel = entryTime.toLocaleTimeString("en-US", {
     hour: "numeric",
