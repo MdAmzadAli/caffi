@@ -647,9 +647,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
   },
   recommendationsSection: {
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.md,
   },
   consumptionHeader: {
+    marginTop:-25,
     marginBottom: Spacing.md,
   },
   sectionTitle: {

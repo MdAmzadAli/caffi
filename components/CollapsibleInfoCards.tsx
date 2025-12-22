@@ -179,7 +179,7 @@ export function ExpandButton({
 const styles = StyleSheet.create({
   wrapper: {
     position: "relative",
-    marginBottom: Spacing.xl,
+    // marginBottom: Spacing.xl,
   },
   cardsContainer: {
     overflow: "hidden",
