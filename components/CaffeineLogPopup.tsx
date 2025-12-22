@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Modal,
   View,
@@ -90,8 +90,16 @@ function useDecayPath(entry: DrinkEntry | null, curveColor: string) {
   const height = 160;
   const maxY = height - 10;
   const minY = 10;
+  const [updateTrigger, setUpdateTrigger] = useState(0);
 
-  const caffeineStats = useMemo(() => calculateCaffeineStats(entry), [entry]);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setUpdateTrigger(prev => prev + 1);
+    }, 60000); // Update every 60 seconds (1 minute)
+    return () => clearInterval(interval);
+  }, []);
+
+  const caffeineStats = useMemo(() => calculateCaffeineStats(entry), [entry, updateTrigger]);
 
   const { path, area, peak, peakTimeLabel, peakDateLabel, timeLabels } = useMemo(() => {
     if (!entry) {
