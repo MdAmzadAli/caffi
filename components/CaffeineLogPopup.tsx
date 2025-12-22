@@ -37,7 +37,7 @@ type CaffeineLogPopupProps = {
 };
 
 // Build a simple decay curve for the single entry to mirror home graph color
-const CAFFEINE_HALF_LIFE_HOURS = 5;
+const CAFFEINE_HALF_LIFE_HOURS = 5.5;
 
 function calculateCaffeineStats(entry: DrinkEntry | null) {
   if (!entry) {
@@ -246,15 +246,23 @@ export function CaffeineLogPopup({
                 {/* Header */}
                 <View style={styles.headerRow}>
                   <View style={[styles.iconWrap, { backgroundColor: theme.backgroundSecondary }]}>
-                    <Image
-                      source={require("@/assets/images/icon.png")}
-                      style={styles.icon}
-                      resizeMode="cover"
-                    />
+                    {entry.imageUri ? (
+                      <Image
+                        source={{ uri: entry.imageUri }}
+                        style={styles.icon}
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <Image
+                        source={require("@/assets/images/icon.png")}
+                        style={styles.icon}
+                        resizeMode="cover"
+                      />
+                    )}
                   </View>
                   <View style={styles.headerTextWrap}>
                     <Text style={[styles.mutedText, { color: theme.mutedGrey }]}>
-                      You drank 1 cup of
+                      You drank {entry.servingSize} {entry.servingSize === 1 ? "cup" : "cups"} of
                     </Text>
                     <Text style={[styles.title, { color: theme.text }]}>{entry.name}</Text>
                   </View>
