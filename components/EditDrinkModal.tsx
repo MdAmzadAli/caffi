@@ -8,6 +8,7 @@ import {
   ScrollView,
   Dimensions,
   Platform,
+  Image,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
@@ -18,8 +19,10 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import { ImagePickerModal } from "@/components/ImagePickerModal";
 import { useCaffeineStore, DrinkEntry } from "@/store/caffeineStore";
 import { useTheme } from "@/hooks/useTheme";
+import { getCaffeineSourceImage, resolveImageSource } from "@/utils/getCaffeineSourceImage";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -38,12 +41,15 @@ export default function EditDrinkModal({ visible, entry, onClose }: EditDrinkMod
   const [servingSize, setServingSize] = useState<string>("");
   const [caffeineAmount, setCaffeineAmount] = useState<string>("");
   const [notes, setNotes] = useState<string>("");
+  const [imageUri, setImageUri] = useState<string | undefined>();
+  const [showImagePicker, setShowImagePicker] = useState(false);
 
   useEffect(() => {
     if (entry) {
       setServingSize(entry.servingSize.toString());
       setCaffeineAmount(entry.caffeineAmount.toString());
       setNotes(entry.notes || "");
+      setImageUri(entry.imageUri);
     }
   }, [entry]);
 
@@ -57,9 +63,15 @@ export default function EditDrinkModal({ visible, entry, onClose }: EditDrinkMod
       servingSize: newServingSize,
       caffeineAmount: newCaffeineAmount,
       notes: notes.trim() || undefined,
+      imageUri: imageUri !== entry.imageUri ? imageUri : undefined,
     });
 
     onClose();
+  };
+
+  const handleSelectImage = (uri: string) => {
+    setImageUri(uri);
+    setShowImagePicker(false);
   };
 
   const handleClose = () => {
@@ -104,13 +116,30 @@ export default function EditDrinkModal({ visible, entry, onClose }: EditDrinkMod
           >
             <ThemedView elevation={1} style={styles.drinkCard}>
               <View style={styles.drinkHeader}>
-                <View style={styles.drinkIconLarge}>
-                  <Feather
-                    name={getCategoryIcon(entry.category)}
-                    size={28}
-                    color={Colors.light.accent}
-                  />
-                </View>
+                <Pressable 
+                  onPress={() => setShowImagePicker(true)}
+                  style={[styles.drinkIconLarge, { backgroundColor: theme.backgroundSecondary }]}
+                >
+                  {imageUri && resolveImageSource(imageUri) ? (
+                    <Image
+                      source={resolveImageSource(imageUri)}
+                      style={styles.drinkImage}
+                      resizeMode="cover"
+                    />
+                  ) : getCaffeineSourceImage(entry.category) ? (
+                    <Image
+                      source={getCaffeineSourceImage(entry.category)}
+                      style={styles.drinkImage}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <Feather
+                      name={getCategoryIcon(entry.category)}
+                      size={28}
+                      color={Colors.light.accent}
+                    />
+                  )}
+                </Pressable>
                 <View style={styles.drinkInfo}>
                   <ThemedText type="h4">{entry.name}</ThemedText>
                   <ThemedText type="small" muted>
@@ -218,6 +247,12 @@ export default function EditDrinkModal({ visible, entry, onClose }: EditDrinkMod
           </ScrollView>
         </Animated.View>
       </View>
+
+      <ImagePickerModal
+        visible={showImagePicker}
+        onClose={() => setShowImagePicker(false)}
+        onSelectImage={handleSelectImage}
+      />
     </Modal>
   );
 }
@@ -288,10 +323,15 @@ const styles = StyleSheet.create({
   drinkIconLarge: {
     width: 56,
     height: 56,
-    borderRadius: 28,
-    backgroundColor: `${Colors.light.accent}20`,
+    borderRadius: 14,
+    overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
+  },
+  drinkImage: {
+    width: 56,
+    height: 56,
+    borderRadius: 14,
   },
   drinkInfo: {
     flex: 1,
