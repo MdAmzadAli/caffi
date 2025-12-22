@@ -472,7 +472,7 @@ export function CaffeineGraphNew({
         <>
           <Pressable style={styles.legendOverlay} onPress={() => setShowLegend(false)} />
           <View style={[styles.legendCard, { backgroundColor: GRAPH_COLORS.bg }]}>
-            <Text style={[styles.legendTitle, { color: GRAPH_COLORS.darkBrown2 }]}>Graph Legend</Text>
+            {/* <Text style={[styles.legendTitle, { color: GRAPH_COLORS.darkBrown2 }]}>Graph Legend</Text> */}
             <View style={styles.legendRow}>
               <View style={[styles.legendLine, { backgroundColor: GRAPH_COLORS.green }]} />
               <Text style={[styles.legendText, { color: GRAPH_COLORS.darkBrown }]}>Sleep threshold - caffeine below this won't affect sleep</Text>
@@ -848,7 +848,7 @@ const styles = StyleSheet.create({
     left: Y_AXIS_WIDTH + 8,
     padding: 12,
     borderRadius: 8,
-    maxWidth: 240,
+    width: "55%",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
