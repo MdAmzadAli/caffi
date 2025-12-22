@@ -15,6 +15,11 @@ const PRESET_IMAGES = [
 export function resolveImageSource(imageUri?: string): any {
   if (!imageUri) return null;
   
+  if (imageUri.startsWith("category:")) {
+    const category = imageUri.replace("category:", "");
+    return getCaffeineSourceImage(category);
+  }
+  
   if (imageUri.startsWith("preset:")) {
     const preset = PRESET_IMAGES.find((p: any) => p.id === imageUri.replace("preset:", ""));
     return preset?.image;

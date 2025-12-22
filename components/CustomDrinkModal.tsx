@@ -276,7 +276,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
           name: drinkName.trim(),
           caffeineAmount: totalCaffeine,
           timestamp: startTime,
-          imageUri: selectedImage && !selectedImage.startsWith("category:") ? selectedImage : undefined,
+          imageUri: selectedImage || undefined,
         });
         closeModal();
         onAdd?.();
