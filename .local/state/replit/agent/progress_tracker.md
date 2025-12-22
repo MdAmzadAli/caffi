@@ -6,3 +6,7 @@
    - Initialize selectedImage from editEntry.imageUri or category when editing
    - Added imageUri to updateEntry call to persist image changes
    - Image picker modal already wired to open when image is clicked
+[x] 6. Fixed image persistence in My Consumption logs
+   - Only save actual image URIs (not category: prefixed ones) 
+   - Category images now properly fall back to default behavior
+   - Changed images now display correctly in My Consumption logs

@@ -99,11 +99,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
       setSelectedUnit("cup");
       setStartTime(new Date(editEntry.timestamp));
       // Initialize image from entry
-      if (editEntry.imageUri) {
-        setSelectedImage(editEntry.imageUri);
-      } else {
-        setSelectedImage(`category:${editEntry.category}`);
-      }
+      setSelectedImage(editEntry.imageUri || null);
       const entryDate = new Date(editEntry.timestamp);
       const now = new Date();
       const isToday = entryDate.toDateString() === now.toDateString();
@@ -280,7 +276,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
           name: drinkName.trim(),
           caffeineAmount: totalCaffeine,
           timestamp: startTime,
-          imageUri: selectedImage || undefined,
+          imageUri: selectedImage && !selectedImage.startsWith("category:") ? selectedImage : undefined,
         });
         closeModal();
         onAdd?.();
