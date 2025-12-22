@@ -122,6 +122,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
   const quickAddY = useSharedValue(0);
   const customDrinksY = useSharedValue(0);
   const categoryHeaderY = useSharedValue(0);
+  const activeSectionY = useSharedValue(0);
   const [currentStickyLabel, setCurrentStickyLabel] = useState<string>("");
 
   const allDrinks = getAllDrinks();
@@ -230,6 +231,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
     quickAddY.value = 0;
     customDrinksY.value = 0;
     categoryHeaderY.value = 0;
+    activeSectionY.value = 0;
     setCurrentStickyLabel("");
   };
 
@@ -239,13 +241,18 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
       const currentY = e.contentOffset.y;
       
       let activeLabel = "";
+      let activeY = 0;
       if (categoryHeaderY.value > 0 && currentY >= categoryHeaderY.value) {
         activeLabel = searchQuery ? "RESULTS" : selectedCategory!.toUpperCase();
+        activeY = categoryHeaderY.value;
       } else if (customDrinksY.value > 0 && currentY >= customDrinksY.value) {
         activeLabel = "MY CUSTOM DRINKS";
+        activeY = customDrinksY.value;
       } else if (quickAddY.value > 0 && currentY >= quickAddY.value) {
         activeLabel = "QUICK ADD";
+        activeY = quickAddY.value;
       }
+      activeSectionY.value = activeY;
       runOnJS(setCurrentStickyLabel)(activeLabel);
     },
   });
@@ -357,22 +364,10 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
     borderTopRightRadius: borderRadius.value,
   }));
 
-  const getStickyThreshold = () => {
-    if (categoryHeaderY.value > 0 && scrollY.value >= categoryHeaderY.value) {
-      return categoryHeaderY.value;
-    } else if (customDrinksY.value > 0 && scrollY.value >= customDrinksY.value) {
-      return customDrinksY.value;
-    } else if (quickAddY.value > 0 && scrollY.value >= quickAddY.value) {
-      return quickAddY.value;
-    }
-    return categoryHeaderY.value;
-  };
-
   const animatedStickyStyle = useAnimatedStyle(() => {
-    const threshold = getStickyThreshold();
     const opacity = interpolate(
       scrollY.value,
-      [threshold - 4, threshold + 12],
+      [activeSectionY.value - 4, activeSectionY.value + 12],
       [0, 1],
       Extrapolation.CLAMP
     );
