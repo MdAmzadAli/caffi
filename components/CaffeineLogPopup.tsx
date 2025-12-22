@@ -23,7 +23,7 @@ import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/useTheme";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { DrinkEntry } from "@/store/caffeineStore";
-import { getCaffeineSourceImage } from "@/utils/getCaffeineSourceImage";
+import { getCaffeineSourceImage, resolveImageSource } from "@/utils/getCaffeineSourceImage";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const SHEET_MAX_HEIGHT = SCREEN_HEIGHT * 0.9;
@@ -247,7 +247,13 @@ export function CaffeineLogPopup({
                 {/* Header */}
                 <View style={styles.headerRow}>
                   <View style={[styles.iconWrap, { backgroundColor: theme.backgroundSecondary }]}>
-                    {getCaffeineSourceImage(entry.category) ? (
+                    {entry.imageUri && resolveImageSource(entry.imageUri) ? (
+                      <Image
+                        source={resolveImageSource(entry.imageUri)}
+                        style={styles.icon}
+                        resizeMode="cover"
+                      />
+                    ) : getCaffeineSourceImage(entry.category) ? (
                       <Image
                         source={getCaffeineSourceImage(entry.category)}
                         style={styles.icon}

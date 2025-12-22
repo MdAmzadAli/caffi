@@ -4,7 +4,7 @@ import { Feather } from "@expo/vector-icons";
 import { Spacing } from "@/constants/theme";
 import { DrinkEntry } from "@/store/caffeineStore";
 import { useTheme } from "@/hooks/useTheme";
-import { getCaffeineSourceImage } from "@/utils/getCaffeineSourceImage";
+import { getCaffeineSourceImage, resolveImageSource } from "@/utils/getCaffeineSourceImage";
 
 interface ConsumptionListProps {
   entries: DrinkEntry[];
@@ -121,7 +121,12 @@ export function ConsumptionList({
         onPress={() => onEntryPress?.(item)}
       >
         <View style={[styles.iconContainer, { backgroundColor: theme.backgroundTertiary }]}>
-          {getCaffeineSourceImage(item.category) ? (
+          {item.imageUri && resolveImageSource(item.imageUri) ? (
+            <Image
+              source={resolveImageSource(item.imageUri)}
+              style={styles.entryImage}
+            />
+          ) : getCaffeineSourceImage(item.category) ? (
             <Image
               source={getCaffeineSourceImage(item.category)}
               style={styles.entryImage}
