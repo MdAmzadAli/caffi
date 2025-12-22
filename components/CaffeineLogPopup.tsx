@@ -27,6 +27,7 @@ import { getCaffeineSourceImage, resolveImageSource } from "@/utils/getCaffeineS
 import { getServingLabel } from "@/utils/getServingLabel";
 import { calculateSingleEntryCurve } from "@/utils/singleEntryCurve";
 import { generateSmoothPath, remainingAfterHours } from "@/utils/graphUtils";
+import { useRealTimeNow } from "@/hooks/useRealTimeNow";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const SHEET_MAX_HEIGHT = SCREEN_HEIGHT * 0.9;
@@ -89,14 +90,7 @@ function useDecayPath(entry: DrinkEntry | null, curveColor: string) {
   const maxY = height - 10;
   const minY = 10;
 
-  const [realTimeNow, setRealTimeNow] = useState(Date.now());
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setRealTimeNow(Date.now());
-    }, 60000);
-    return () => clearInterval(interval);
-  }, []);
+  const realTimeNow = useRealTimeNow();
 
   const caffeineStats = useMemo(() => calculateCaffeineStats(entry), [entry, realTimeNow]);
 

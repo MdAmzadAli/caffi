@@ -34,6 +34,7 @@ import {
   getSleepWindowStatusMessage,
   parseBedtimeToMs,
 } from "@/utils/graphUtils";
+import { useRealTimeNow } from "@/hooks/useRealTimeNow";
 
 interface GraphColors {
   bg: string;
@@ -169,15 +170,7 @@ export function CaffeineGraphNew({
   const scrollContentWidth = windowWidth * (viewWindowHours / HOURS_VISIBLE);
   const chartWidth = scrollContentWidth;
 
-  const [realTimeNow, setRealTimeNow] = useState(Date.now());
-  
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setRealTimeNow(Date.now());
-    }, 60000);
-    return () => clearInterval(interval);
-  }, []);
-
+  const realTimeNow = useRealTimeNow();
   const nowMs = realTimeNow;
   const nowDate = new Date(nowMs);
 
