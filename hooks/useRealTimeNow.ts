@@ -1,31 +1,34 @@
 import { useState, useEffect } from "react";
 
-// Shared real-time state for synchronized updates across components
-let globalRealTimeNow = Date.now();
-const listeners: Set<(time: number) => void> = new Set();
+let globalTime = Date.now();
+const listeners = new Set<(time: number) => void>();
+let interval: ReturnType<typeof setInterval> | null = null;
 
 export function useRealTimeNow(): number {
-  const [realTimeNow, setRealTimeNow] = useState(globalRealTimeNow);
+  const [time, setTime] = useState(globalTime);
 
   useEffect(() => {
-    const handleUpdate = (time: number) => {
-      setRealTimeNow(time);
-    };
-    listeners.add(handleUpdate);
+    // Register listener
+    const listener = (newTime: number) => setTime(newTime);
+    listeners.add(listener);
 
+    // Create global interval only if it doesn't exist
+    if (!interval) {
+      interval = setInterval(() => {
+        globalTime = Date.now();
+        listeners.forEach((l) => l(globalTime));
+      }, 60000);
+    }
+
+    // Cleanup: remove listener and stop interval if no listeners remain
     return () => {
-      listeners.delete(handleUpdate);
+      listeners.delete(listener);
+      if (listeners.size === 0 && interval) {
+        clearInterval(interval);
+        interval = null;
+      }
     };
   }, []);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      globalRealTimeNow = Date.now();
-      listeners.forEach((listener) => listener(globalRealTimeNow));
-    }, 60000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  return realTimeNow;
+  return time;
 }
