@@ -491,8 +491,8 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 
   const effectiveHeaderHeight = headerHeight || HEADER_HEIGHT;
   const effectiveGraphHeight = graphHeight || DEFAULT_GRAPH_HEIGHT;
-  // Calculate sticky offset: measured header + measured graph + a small responsive gap
-  const stickyOffset = effectiveHeaderHeight + effectiveGraphHeight + Spacing.sm;
+  // Calculate sticky offset: measured header + measured graph + bottom padding (for x-axis labels)
+  const stickyOffset = effectiveHeaderHeight + effectiveGraphHeight + GRAPH_BOTTOM_PADDING;
 
   return (
     <View style={[styles.outerContainer, { backgroundColor: theme.bg }]}>
