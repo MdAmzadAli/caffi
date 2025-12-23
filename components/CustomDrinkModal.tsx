@@ -429,7 +429,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
 
                 <View style={styles.nameInputSection}>
                   <ThemedText type="caption" muted>
-                    You are {prefillDrink?.category === "chocolate" ? "eating" : "drinking"} {quantity} {selectedUnit} of
+                    You are {(prefillDrink?.category === "chocolate" || editEntry?.category === "chocolate") ? "eating" : "drinking"} {quantity} {selectedUnit} of
                   </ThemedText>
                   <TextInput
                     style={[styles.nameInput, { color: theme.text, borderBottomColor: theme.divider }]}
