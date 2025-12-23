@@ -1,45 +1,14 @@
-[x] COMPLETE: Inbuilt caffeine sources with "default" unit now show correct radio options on edit
+[x] COMPLETE: Project import migration to Replit environment
 
-## ROOT CAUSE:
-For inbuilt sources that have "default" as their unit in the sizes array:
-- When editing, the radio buttons showed "cup" and "ml" instead of "default" and "ml"
-- This was because getUnitForDrink() always returns "cup" for coffee/tea/chocolate categories
+## IMPORT COMPLETED:
+1. [x] Upgraded Node.js from v20.19.3 to v22.17.0 to meet package requirements
+2. [x] Reinstalled npm packages with new Node version
+3. [x] Restarted workflow - Expo is running successfully
+4. [x] Verified project is working - web server running on port 5000
 
-## THE FIX:
-Updated isEditingInbuiltSource section (lines 494-537):
-1. Look up the drink from DRINK_DATABASE by name and category
-2. Get unit from: drink.sizes[0].name (if exists) OR getUnitForDrink() fallback
-3. Display that unit in the radio button text
-4. Use it when selectedUnit is updated
+## NOTES:
+- Some packages have minor version warnings (datetimepicker, react-native-svg) but are functional
+- Metro Bundler is running and serving the Expo web application
+- Project is ready for use
 
-## CODE PATTERN:
-```javascript
-{(() => {
-  const drink = DRINK_DATABASE.find(d => d.name.toLowerCase() === editEntry.name.toLowerCase() && d.category === editEntry.category);
-  const drinkUnit = drink?.sizes?.[0]?.name || getUnitForDrink(editEntry.name, editEntry.category);
-  return (
-    <Pressable onPress={() => setSelectedUnit(drinkUnit)}>
-      ...
-      <ThemedText>{drinkUnit}</ThemedText>
-      ...
-    </Pressable>
-  );
-})()}
-```
-
-## DATA FLOW:
-User edits entry from "Instant Coffee" (which has sizes: [{name: "default", ml: 237}]):
-→ isEditingInbuiltSource = true
-→ Look up drink from DRINK_DATABASE
-→ drink.sizes[0].name = "default"
-→ Show radio option: "default" ✓
-→ Show radio option: "ml" ✓
-→ NOT "cup" ✓
-
-## COVERAGE:
-[x] Inbuilt sources with "default" unit show "default" radio option ✓
-[x] "ml" option still shown ✓
-[x] Fallback to getUnitForDrink() for sources without sizes ✓
-[x] No changes to other flows ✓
-
-COMPLETE AND FOCUSED ✓
+IMPORT COMPLETE ✓
