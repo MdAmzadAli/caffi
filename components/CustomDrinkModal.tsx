@@ -63,8 +63,8 @@ const getUnitForDrink = (name: string, category?: string, sizes?: { name: string
   if (lowerName.includes("can") || category === "energy" || category === "soda") return "can";
   if (lowerName.includes("bottle")) return "bottle";
   if (sizes?.[0]?.name) return sizes[0].name;
-  if (category === "tea" || category === "coffee" || category === "chocolate") return "cup";
-  return "cup";
+  if (category === "tea" || category === "coffee" || category === "chocolate") return "Default";
+  return "Default";
 };
 
 const getInbuiltDrinkCaffeinePer100ml = (name: string, category: string): number | null => {
