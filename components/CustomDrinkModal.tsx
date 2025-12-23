@@ -299,12 +299,16 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
   const handleAdd = () => {
     if (drinkName.trim() && totalCaffeine > 0) {
       if (isEditMode && editEntry) {
-        updateEntry(editEntry.id, {
+        const updates: any = {
           name: drinkName.trim(),
           caffeineAmount: totalCaffeine,
           timestamp: startTime,
           imageUri: selectedImage || undefined,
-        });
+        };
+        if (editEntry.category === "custom") {
+          updates.servingSize = 100 * quantity;
+        }
+        updateEntry(editEntry.id, updates);
         closeModal();
         onAdd?.();
       } else if (isEditingCustomDrink && editCustomDrink) {

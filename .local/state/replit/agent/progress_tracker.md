@@ -1,3 +1,4 @@
+[x] COMPLETED: All custom drink and inbuilt drink edit features fixed
 [x] 1. Install the required packages
 [x] 2. Restart the workflow to see if the project is working
 [x] 3. Verify the project is working using the feedback tool
@@ -12,13 +13,18 @@
 [x] 12. FIXED quantity preservation and per-unit mg display for INBUILT drinks
 [x] 13. FIXED quantity and mg preservation for CUSTOM drinks (definition editing)
 [x] 14. FIXED custom drink entry editing - preserve total amount
-[x] 15. FIXED custom drink entry editing - preserve quantity and per-unit mg
-    - Solution: Reverse-calculate from servingSize and caffeineAmount
-    - Formula 1: quantity = servingSize / defaultServingMl
-    - Formula 2: perUnitMg = caffeineAmount / quantity
-    - Look up custom drink definition ONLY to get defaultServingMl
-    - Example: Saved qty=2, mg=30 (total=60) → servingSize=200 (100*2)
-    - On reopen: qty = 200/100 = 2, mg = 60/2 = 30 ✓
-    - Fallback: If custom drink not found, use entry's total as mg with qty=1
-    - Minimal code: 7 lines, reuses existing patterns
-    - Fully responsive: uses existing styles and getUnitForDrink
+[x] 15. FIXED custom drink entry editing - preserve quantity and per-unit mg (with proper DB storage)
+    - Root cause analysis: Only caffeineAmount (total) was being saved, servingSize was lost
+    - Problem: When reopening, couldn't distinguish qty=2,mg=30 from qty=1,mg=60
+    - Solution: Save servingSize = 100 * quantity for custom drink entries
+    - Now: When editing custom drink entry, updates both caffeineAmount AND servingSize
+    - On reopen: qty = servingSize/100, mg = caffeineAmount/qty
+    - Example flow:
+      * User saves: qty=2, mg=30 (total=60)
+      * Saved to DB: caffeineAmount=60, servingSize=200
+      * On reopen: qty = 200/100 = 2, mg = 60/2 = 30 ✓
+    - No reverse calculation needed: Data is properly stored in DB
+    - Inbuilt drinks use DRINK_DATABASE to recover from standard definitions
+    - Custom drinks use servingSize to recover user-saved quantities
+    - Minimal code: 4 lines added to handleAdd for custom drink servingSize update
+    - Fully responsive: uses existing patterns and styles
