@@ -306,7 +306,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
           imageUri: selectedImage || undefined,
           unit: selectedUnit,
         };
-        if (editEntry.category === "custom") {
+        if (editEntry.category === "custom" || INBUILT_CATEGORIES.includes(editEntry.category)) {
           updates.servingSize = 100 * quantity;
         }
         updateEntry(editEntry.id, updates);
@@ -321,7 +321,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
         });
         onSaveCustomDrink?.();
       } else if (prefillDrink?.id && !prefillDrink.id.startsWith('custom-')) {
-        addEntry(prefillDrink as any, prefillDrink.defaultServingMl * quantity, undefined, false, startTime, selectedUnit);
+        addEntry(prefillDrink as any, 100 * quantity, undefined, false, startTime, selectedUnit);
         closeModal();
         onAdd?.();
       } else {
