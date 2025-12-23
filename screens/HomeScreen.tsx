@@ -298,7 +298,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     const allDrinks = getAllDrinks();
     const drink = allDrinks.find((d) => d.id === entry.drinkId);
     if (drink) {
-      addEntry(drink, entry.servingSize, entry.notes, entry.isFavorite, undefined, entry.unit);
+      addEntry(drink, entry.servingSize, entry.notes, entry.isFavorite, undefined, entry.unit, entry.imageUri);
     }
     setPopupVisible(false);
     setSelectedEntry(null);

@@ -291,6 +291,7 @@ export function useCaffeineStore() {
       isFavorite?: boolean,
       timestamp?: Date,
       unit?: string,
+      imageUri?: string,
     ) => {
       const caffeineAmount = Math.round(
         (drink.caffeinePer100ml * servingSize) / 100,
@@ -305,7 +306,7 @@ export function useCaffeineStore() {
         timestamp: timestamp || new Date(),
         notes,
         isFavorite,
-        imageUri: drink.imageUri,
+        imageUri: imageUri || drink.imageUri,
         unit,
       };
       globalEntries = [entry, ...globalEntries];

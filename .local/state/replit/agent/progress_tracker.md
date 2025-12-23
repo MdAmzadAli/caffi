@@ -35,10 +35,19 @@
     - Fix: Added entry.unit as 6th parameter to preserve unit from original entry
     - Impact: Duplicated entries now show exact same text ("2 cups") as original, not recalculated values
 
+13. [x] Fixed missing image in duplicated caffeine entries
+    - File: store/caffeineStore.ts (line 297, 312)
+    - File: screens/HomeScreen.tsx (line 304)
+    - Root cause: addEntry always used drink.imageUri (default) instead of entry.imageUri (edited)
+    - Fix: Added imageUri as 7th optional parameter to addEntry
+    - Impact: When duplicating, the edited image is now properly preserved and copied
+    - Logic: imageUri: imageUri || drink.imageUri (uses passed value or falls back to drink default)
+
 ## NOTES:
 - All fixes are minimal, responsive, and laser-focused
-- Twelve separate issues identified and fixed without touching other code
+- Thirteen separate issues identified and fixed without touching other code
 - App verified running on port 5000 with all changes live
 - Each fix is reusable and maintains consistency across flows
+- All parameters properly ordered and optional where needed
 
 ALL FIXES COMPLETE ✓
