@@ -11,15 +11,14 @@
 [x] 11. FIXED ml/mg calculation for inbuilt sources in edit modal
 [x] 12. FIXED quantity preservation and per-unit mg display for INBUILT drinks
 [x] 13. FIXED quantity and mg preservation for CUSTOM drinks (definition editing)
-[x] 14. FIXED custom drink entry editing - quantity and mg now persist correctly
-    - Root cause: Code was looking up custom drink DEFINITION and using ITS stored caffeine value
-    - Problem: If user edited qty=2, mg=15 (total=30) and saved, reopening looked up definition
-    - Result: Would recalculate as qty=1.2, mg=25 (original definition values)
-    - Solution: Removed custom drink lookup for ENTRY edits (not definition edits)
-    - Now: For custom drink entries, uses entry's caffeineAmount directly as quantity=1, caffeineMg=total
-    - This preserves the exact total amount user saved without recalculation
-    - Example: Edit to qty=2, mg=15 (total=30) → saves caffeineAmount=30 → reopens as qty=1, caffeineMg=30
-    - User can then modify quantity/mg again, and it recalculates totalCaffeine correctly
-    - Key insight: Each logged entry stands alone - don't look up drink definition for past entries
-    - Minimal fix: Removed 8 lines of custom drink lookup logic
-    - Fully responsive: Uses existing styles and totalCaffeine calculation
+[x] 14. FIXED custom drink entry editing - preserve total amount
+[x] 15. FIXED custom drink entry editing - preserve quantity and per-unit mg
+    - Solution: Reverse-calculate from servingSize and caffeineAmount
+    - Formula 1: quantity = servingSize / defaultServingMl
+    - Formula 2: perUnitMg = caffeineAmount / quantity
+    - Look up custom drink definition ONLY to get defaultServingMl
+    - Example: Saved qty=2, mg=30 (total=60) → servingSize=200 (100*2)
+    - On reopen: qty = 200/100 = 2, mg = 60/2 = 30 ✓
+    - Fallback: If custom drink not found, use entry's total as mg with qty=1
+    - Minimal code: 7 lines, reuses existing patterns
+    - Fully responsive: uses existing styles and getUnitForDrink

@@ -114,9 +114,18 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
           setSelectedUnit(getUnitForDrink(drink.name, drink.category));
         }
       } else {
-        setQuantity(1);
-        setCaffeineMg(editEntry.caffeineAmount?.toString() || "10");
-        setSelectedUnit("cup");
+        const customDrink = customDrinks.find(d => d.name.toLowerCase() === editEntry.name.toLowerCase());
+        if (customDrink) {
+          const qty = Math.round((editEntry.servingSize / customDrink.defaultServingMl) * 10) / 10;
+          const perUnitMg = Math.round((editEntry.caffeineAmount / qty) * 10) / 10;
+          setQuantity(Math.max(1, qty) || 1);
+          setCaffeineMg(perUnitMg.toString());
+          setSelectedUnit(getUnitForDrink(customDrink.name, customDrink.category, customDrink.sizes));
+        } else {
+          setQuantity(1);
+          setCaffeineMg(editEntry.caffeineAmount?.toString() || "10");
+          setSelectedUnit("cup");
+        }
       }
       const entryDate = new Date(editEntry.timestamp);
       const now = new Date();
