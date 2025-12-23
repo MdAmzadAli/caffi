@@ -174,12 +174,17 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
   const startY = useSharedValue(0);
 
   const totalCaffeine = useMemo(() => {
-    if (prefillDrink && selectedUnit === "ml") {
-      return (prefillDrink.caffeinePer100ml / 100) * quantity;
+    if (selectedUnit === "ml") {
+      if (prefillDrink) {
+        return (prefillDrink.caffeinePer100ml / 100) * quantity;
+      } else if (isEditingInbuiltSource && editEntry) {
+        const cpml = getInbuiltDrinkCaffeinePer100ml(editEntry.name, editEntry.category);
+        return cpml ? (cpml / 100) * quantity : 0;
+      }
     }
     const mg = parseInt(caffeineMg) || 0;
     return mg * quantity;
-  }, [caffeineMg, quantity, selectedUnit, prefillDrink]);
+  }, [caffeineMg, quantity, selectedUnit, prefillDrink, isEditingInbuiltSource, editEntry]);
 
   const formatCaffeine = (value: number) => value.toFixed(3).replace(/\.?0+$/, '') || '0';
 
@@ -311,7 +316,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
         } else if (isEditingInbuiltSource) {
           const drink = DRINK_DATABASE.find(d => d.name.toLowerCase() === editEntry.name.toLowerCase() && d.category === editEntry.category);
           if (drink) {
-            updates.servingSize = drink.defaultServingMl * quantity;
+            updates.servingSize = selectedUnit === "ml" ? quantity : drink.defaultServingMl * quantity;
           }
         }
         updateEntry(editEntry.id, updates);
