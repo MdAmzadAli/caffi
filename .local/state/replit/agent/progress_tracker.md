@@ -23,15 +23,21 @@
    - File: components/CustomDrinkModal.tsx (line 435)
 
 10. [x] Changed "drank" to "ate" for chocolate in CaffeineLogPopup
-   - File: components/CaffeineLogPopup.tsx (line 311)
+    - File: components/CaffeineLogPopup.tsx (line 311)
 
 11. [x] Changed "drinking" to "eating" for chocolate in CustomDrinkModal (edit mode)
-   - File: components/CustomDrinkModal.tsx (line 435)
-   - Now checks both prefillDrink?.category and editEntry?.category for chocolate
+    - File: components/CustomDrinkModal.tsx (line 435)
+    - Now checks both prefillDrink?.category and editEntry?.category for chocolate
+
+12. [x] Fixed duplicate entry unit loss in CaffeineLogPopup display
+    - File: screens/HomeScreen.tsx (line 304)
+    - Root cause: unit parameter was not passed to addEntry in handleDuplicateEntry
+    - Fix: Added entry.unit as 6th parameter to preserve unit from original entry
+    - Impact: Duplicated entries now show exact same text ("2 cups") as original, not recalculated values
 
 ## NOTES:
 - All fixes are minimal, responsive, and laser-focused
-- Seven separate issues identified and fixed without touching other code
+- Twelve separate issues identified and fixed without touching other code
 - App verified running on port 5000 with all changes live
 - Each fix is reusable and maintains consistency across flows
 
