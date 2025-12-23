@@ -497,7 +497,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
                 <View style={styles.prefillUnitSection}>
                   {(() => {
                     const drink = DRINK_DATABASE.find(d => d.name.toLowerCase() === editEntry.name.toLowerCase() && d.category === editEntry.category);
-                    const drinkUnit = drink?.sizes?.[0]?.name || getUnitForDrink(editEntry.name, editEntry.category);
+                    const drinkUnit = drink?.sizes?.[0]?.name || getUnitForDrink(editEntry.name, editEntry.category, drink?.sizes);
                     return (
                       <Pressable
                         onPress={() => setSelectedUnit(drinkUnit)}
