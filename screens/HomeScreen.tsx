@@ -258,6 +258,16 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     }
   }, [sections, currentStickyDate]);
 
+  // Refresh selectedEntry when entries change (after edit save)
+  useEffect(() => {
+    if (selectedEntry && isEditingFromPopup) {
+      const updatedEntry = entries.find(e => e.id === selectedEntry.id);
+      if (updatedEntry) {
+        setSelectedEntry(updatedEntry);
+      }
+    }
+  }, [entries, isEditingFromPopup]);
+
   const handleSelectEntry = (entry: DrinkEntry) => {
     setSelectedEntry(entry);
     setPopupVisible(true);
