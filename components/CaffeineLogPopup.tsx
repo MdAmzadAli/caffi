@@ -300,7 +300,7 @@ export function CaffeineLogPopup({
                   </View>
                   <View style={styles.headerTextWrap}>
                     <Text style={[styles.mutedText, { color: theme.mutedGrey }]}>
-                      You drank {getServingLabel(entry.servingSize).quantity} {getServingLabel(entry.servingSize).unit} of
+                      You drank {getServingLabel(entry.servingSize, entry.unit).quantity} {getServingLabel(entry.servingSize, entry.unit).unit} of
                     </Text>
                     <Text style={[styles.title, { color: theme.text }]}>{entry.name}</Text>
                   </View>
