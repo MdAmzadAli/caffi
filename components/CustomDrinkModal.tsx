@@ -308,6 +308,11 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
         };
         if (editEntry.category === "custom") {
           updates.servingSize = 100 * quantity;
+        } else if (isEditingInbuiltSource) {
+          const drink = DRINK_DATABASE.find(d => d.name.toLowerCase() === editEntry.name.toLowerCase() && d.category === editEntry.category);
+          if (drink) {
+            updates.servingSize = drink.defaultServingMl * quantity;
+          }
         }
         updateEntry(editEntry.id, updates);
         closeModal();
