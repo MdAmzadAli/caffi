@@ -326,7 +326,8 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
         });
         onSaveCustomDrink?.();
       } else if (prefillDrink?.id && !prefillDrink.id.startsWith('custom-')) {
-        addEntry(prefillDrink as any, prefillDrink.defaultServingMl * quantity, undefined, false, startTime, selectedUnit);
+        const servingSize = selectedUnit === "ml" ? quantity : prefillDrink.defaultServingMl * quantity;
+        addEntry(prefillDrink as any, servingSize, undefined, false, startTime, selectedUnit);
         closeModal();
         onAdd?.();
       } else {
