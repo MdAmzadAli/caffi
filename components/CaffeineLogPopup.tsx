@@ -305,7 +305,7 @@ export function CaffeineLogPopup({
                       const label = getServingLabel(entry.servingSize, entry.unit, drink?.defaultServingMl);
                       return (
                         <Text style={[styles.mutedText, { color: theme.mutedGrey }]}>
-                          You drank {label.quantity} {label.unit} of
+                          You {entry.category === "chocolate" ? "ate" : "drank"} {label.quantity} {label.unit} of
                         </Text>
                       );
                     })()}
