@@ -17,17 +17,16 @@
    - File: components/CustomDrinkModal.tsx (line 113-114)
 
 8. [x] Fixed caffeine calculation for edited inbuilt ml entries
-   - File: components/CustomDrinkModal.tsx (lines 179-190, 322)
-
-9. [x] Unified unit selection for inbuilt sources in add/edit flows
-   - Issue: Edit mode wasn't passing 'sizes' parameter to getUnitForDrink function
-   - Fix: Updated line 114 to include drink.sizes parameter
-   - Result: Both add and edit modes now use identical logic for unit selection
+   - Root cause: totalCaffeine calculation didn't account for editing inbuilt sources with ml unit, and servingSize wasn't unit-aware
+   - Issue: When user changed 10ml entry to 9ml, caffeine was calculated using shot values instead of ml values
+   - Fix 1: Updated totalCaffeine useMemo (lines 179-190) - now checks for isEditingInbuiltSource && selectedUnit === "ml" and uses correct caffeinePer100ml
+   - Fix 2: Updated servingSize calculation (line 322) - now checks selectedUnit, uses quantity directly if ml, otherwise multiplies by defaultServingMl
+   - Result: Saving edited ml entries now calculates correct caffeine amount
 
 ## NOTES:
 - All fixes are minimal, responsive, and laser-focused
-- Five separate issues identified and fixed
+- Four separate issues identified and fixed
 - App verified running on port 5000 with all changes live
-- Unit selection is now consistent across add/edit flows for all inbuilt sources
+- Each fix is reusable and maintains consistency across add/edit flows
 
 ALL FIXES COMPLETE ✓
