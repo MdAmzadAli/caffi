@@ -1,47 +1,45 @@
-[x] COMPLETE: Inbuilt caffeine sources now display exact quantity with proper unit handling
+[x] COMPLETE: Inbuilt caffeine sources with "default" unit now show correct radio options on edit
 
-## ROOT CAUSE ANALYSIS:
-For inbuilt sources with "cup" unit:
-- When adding: servingSize = defaultServingMl * quantity (e.g., 237 * 2 = 474)
-- When displaying with getServingLabel(474, "cup"): divided by 100 → "4.74 cup" (WRONG!)
-- Should divide by defaultServingMl → "2 cup" (CORRECT!)
+## ROOT CAUSE:
+For inbuilt sources that have "default" as their unit in the sizes array:
+- When editing, the radio buttons showed "cup" and "ml" instead of "default" and "ml"
+- This was because getUnitForDrink() always returns "cup" for coffee/tea/chocolate categories
 
-## FIX APPLIED:
-1. Updated getServingLabel signature:
-   - Added defaultServingMl?: number parameter
-   - Logic: if unit provided, divisor = defaultServingMl || 100
-   - For inbuilt with "cup": divisor = 237
-   - For custom drinks: divisor = 100
+## THE FIX:
+Updated isEditingInbuiltSource section (lines 494-537):
+1. Look up the drink from DRINK_DATABASE by name and category
+2. Get unit from: drink.sizes[0].name (if exists) OR getUnitForDrink() fallback
+3. Display that unit in the radio button text
+4. Use it when selectedUnit is updated
 
-2. Updated CaffeineLogPopup header:
-   - Looks up drink from DRINK_DATABASE
-   - Gets defaultServingMl
-   - Passes to getServingLabel for correct calculation
-
-3. Updated RecentEntryItem (Quick Add section):
-   - Looks up drink from DRINK_DATABASE
-   - Gets defaultServingMl
-   - Uses correct divisor for quantity calculation
+## CODE PATTERN:
+```javascript
+{(() => {
+  const drink = DRINK_DATABASE.find(d => d.name.toLowerCase() === editEntry.name.toLowerCase() && d.category === editEntry.category);
+  const drinkUnit = drink?.sizes?.[0]?.name || getUnitForDrink(editEntry.name, editEntry.category);
+  return (
+    <Pressable onPress={() => setSelectedUnit(drinkUnit)}>
+      ...
+      <ThemedText>{drinkUnit}</ThemedText>
+      ...
+    </Pressable>
+  );
+})()}
+```
 
 ## DATA FLOW:
-User adds "2 cup of instant coffee":
-→ addEntry saves: servingSize=474, unit="cup"
-→ CaffeineLogPopup loads: looks up defaultServingMl=237
-→ getServingLabel(474, "cup", 237) = 474/237 = 2 cup ✓
-→ Quick Add shows: "2 cup" ✓
-
-## EDITING BEHAVIOR:
-User edits entry:
-→ Edit modal recovers: qty = servingSize / defaultServingMl = 474 / 237 = 2
-→ Shows quantity=2 with radio="cup" and mg=124 ✓
-→ On save, updates stored correctly ✓
+User edits entry from "Instant Coffee" (which has sizes: [{name: "default", ml: 237}]):
+→ isEditingInbuiltSource = true
+→ Look up drink from DRINK_DATABASE
+→ drink.sizes[0].name = "default"
+→ Show radio option: "default" ✓
+→ Show radio option: "ml" ✓
+→ NOT "cup" ✓
 
 ## COVERAGE:
-[x] Inbuilt sources show exact quantity (no conversion)
-[x] Display uses correct unit from selection (cup, ml, etc)
-[x] CaffeineLogPopup shows "2 cup" not "4.74 cup" ✓
-[x] Quick Add section shows "2 cup" not "4.74 cup" ✓
-[x] Edit modal shows quantity=2 with unit="cup" ✓
-[x] Custom drinks still work with divisor=100 ✓
+[x] Inbuilt sources with "default" unit show "default" radio option ✓
+[x] "ml" option still shown ✓
+[x] Fallback to getUnitForDrink() for sources without sizes ✓
+[x] No changes to other flows ✓
 
-ALL INBUILT SOURCE FEATURES COMPLETE AND WORKING ✓
+COMPLETE AND FOCUSED ✓
