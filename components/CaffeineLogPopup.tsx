@@ -299,9 +299,16 @@ export function CaffeineLogPopup({
                     )}
                   </View>
                   <View style={styles.headerTextWrap}>
-                    <Text style={[styles.mutedText, { color: theme.mutedGrey }]}>
-                      You drank {getServingLabel(entry.servingSize, entry.unit).quantity} {getServingLabel(entry.servingSize, entry.unit).unit} of
-                    </Text>
+                    {(() => {
+                      const INBUILT_CATEGORIES = ["coffee", "tea", "energy", "soda", "chocolate"];
+                      const drink = INBUILT_CATEGORIES.includes(entry.category) ? require("@/store/caffeineStore").DRINK_DATABASE.find((d: any) => d.name.toLowerCase() === entry.name.toLowerCase() && d.category === entry.category) : null;
+                      const label = getServingLabel(entry.servingSize, entry.unit, drink?.defaultServingMl);
+                      return (
+                        <Text style={[styles.mutedText, { color: theme.mutedGrey }]}>
+                          You drank {label.quantity} {label.unit} of
+                        </Text>
+                      );
+                    })()}
                     <Text style={[styles.title, { color: theme.text }]}>{entry.name}</Text>
                   </View>
                 </View>

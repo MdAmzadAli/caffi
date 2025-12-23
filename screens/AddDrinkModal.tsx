@@ -924,9 +924,15 @@ function RecentEntryItem({ entry, onPress }: RecentEntryItemProps) {
     return new Date(date).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
   };
 
-  const servingLabel = entry.unit
-    ? `${(entry.servingSize / 100).toFixed(2).replace(/\.?0+$/, '')} ${entry.unit}`
-    : entry.servingSize >= 100 ? `${(entry.servingSize / 100).toFixed(2).replace(/\.?0+$/, '')} cup` : `${entry.servingSize}ml`;
+  const servingLabel = (() => {
+    if (!entry.unit) {
+      return entry.servingSize >= 100 ? `${(entry.servingSize / 100).toFixed(2).replace(/\.?0+$/, '')} cup` : `${entry.servingSize}ml`;
+    }
+    const INBUILT_CATEGORIES = ["coffee", "tea", "energy", "soda", "chocolate"];
+    const drink = INBUILT_CATEGORIES.includes(entry.category) ? require("@/store/caffeineStore").DRINK_DATABASE.find((d: any) => d.name.toLowerCase() === entry.name.toLowerCase() && d.category === entry.category) : null;
+    const divisor = drink?.defaultServingMl || 100;
+    return `${(entry.servingSize / divisor).toFixed(2).replace(/\.?0+$/, '')} ${entry.unit}`;
+  })();
   const imageSource = getImageSourceForDrinkModal(entry);
 
   return (
