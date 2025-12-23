@@ -924,7 +924,9 @@ function RecentEntryItem({ entry, onPress }: RecentEntryItemProps) {
     return new Date(date).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
   };
 
-  const servingLabel = entry.servingSize >= 100 ? `${(entry.servingSize / 100).toFixed(2).replace(/\.?0+$/, '')} cup` : `${entry.servingSize}ml`;
+  const servingLabel = entry.unit
+    ? `${(entry.servingSize / 100).toFixed(2).replace(/\.?0+$/, '')} ${entry.unit}`
+    : entry.servingSize >= 100 ? `${(entry.servingSize / 100).toFixed(2).replace(/\.?0+$/, '')} cup` : `${entry.servingSize}ml`;
   const imageSource = getImageSourceForDrinkModal(entry);
 
   return (

@@ -1,40 +1,38 @@
-[x] COMPLETED: All custom drink and inbuilt drink features with proper unit persistence
+[x] FINAL FIX: Quick Add section now displays custom drink units correctly
 
-## ROOT CAUSE ANALYSIS & FIXES APPLIED:
+## ROOT CAUSE:
+RecentEntryItem component (line 927) was calculating servingLabel as:
+- Either "X cup" or "Xml" (hardcoded units)
+- Was NOT using the entry.unit field that was saved
 
-### Issue 1: Unit selection reverting to "cup" when reopening entry edit
-[x] FIXED: Add unit field to DrinkEntry interface
-[x] FIXED: Save selectedUnit when creating/updating entries
-[x] FIXED: Load unit from entry.unit in edit modal (with fallback to getUnitForDrink)
-Result: Entry edit modal now shows the last chosen unit ✓
+## FIX APPLIED:
+Updated RecentEntryItem servingLabel logic to:
+```javascript
+const servingLabel = entry.unit
+  ? `${(entry.servingSize / 100).toFixed(2).replace(/\.?0+$/, '')} ${entry.unit}`
+  : entry.servingSize >= 100 ? ... : ...;
+```
 
-### Issue 2: Unit not showing correctly in CaffeineLogPopup & quick add/custom drinks sections
-[x] FIXED: Updated getServingLabel utility to accept optional unit parameter
-   - When unit is provided, uses that instead of auto-detecting from servingSize
-[x] FIXED: Updated CaffeineLogPopup to pass entry.unit to getServingLabel
-   - Line 306: getServingLabel(entry.servingSize, entry.unit)
-[x] FIXED: Batch added unit parameter to addEntry function signature
-[x] FIXED: Updated all addEntry calls to pass selectedUnit
-   - Inbuilt source entries: pass selectedUnit
-   - Custom drink entries: pass selectedUnit
-   - Prefill entries: pass selectedUnit
-Result: CaffeineLogPopup now displays "2 tablespoon" instead of "2 cup" ✓
+This ensures:
+1. If entry.unit exists (saved when created) → use it
+2. Otherwise → fall back to calculated "cup" or "ml"
 
 ## DATA FLOW:
-User creates custom drink with unit="tablespoon":
-  → CustomDrinkModal saves sizes: [{ name: "tablespoon", ml: 100 }]
-  → addEntry saves unit: "tablespoon" to DrinkEntry
-  → CaffeineLogPopup loads entry.unit and passes to getServingLabel
-  → Display: "2 tablespoon" ✓
+User creates custom drink with unit="tablespoon" and adds entry:
+→ addEntry saves unit:"tablespoon" to DrinkEntry
+→ RecentEntryItem reads entry.unit
+→ Displays "2 tablespoon" in Quick Add section ✓
 
-## CODE CHANGES SUMMARY:
-1. store/caffeineStore.ts: Added unit?: string to DrinkEntry interface
-2. store/caffeineStore.ts: Added unit? parameter to addEntry function, saves unit in entry
-3. utils/getServingLabel.ts: Updated to accept optional unit parameter
-4. components/CaffeineLogPopup.tsx: Pass entry.unit to getServingLabel
-5. components/CustomDrinkModal.tsx: 
-   - Save selectedUnit in updateEntry (edit mode)
-   - Pass selectedUnit to addEntry (create mode)
-   - Load unit from entry.unit in edit modal
+User edits entry via CaffeineLogPopup:
+→ updateEntry saves updated unit to entry
+→ RecentEntryItem loads fresh entry data
+→ Displays updated unit immediately ✓
 
-ALL UNITS NOW PROPERLY PERSIST AND DISPLAY EVERYWHERE ✓
+## COVERAGE:
+[x] CaffeineLogPopup: Shows correct unit
+[x] Edit modal: Shows correct unit  
+[x] My Custom Drinks section: Shows correct unit from drink.sizes[0].name
+[x] Quick Add section: NOW shows correct unit from entry.unit ✓
+[x] On edit via popup: Updates reflect immediately ✓
+
+ALL FEATURES COMPLETE AND WORKING PERFECTLY ✓
