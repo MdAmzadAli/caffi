@@ -4,6 +4,14 @@
 export function getServingLabel(servingSize: number, unit?: string, defaultServingMl?: number): { quantity: string; unit: string } {
   // If unit is provided, use it with calculated quantity
   if (unit) {
+    if (unit === "ml") {
+      // For ml, servingSize is already in ml, no conversion needed
+      const formattedQty = servingSize.toString();
+      return {
+        quantity: formattedQty,
+        unit: unit,
+      };
+    }
     const divisor = defaultServingMl || 100;
     const quantity = servingSize / divisor;
     const formattedQty = quantity.toFixed(2).replace(/\.?0+$/, "");
