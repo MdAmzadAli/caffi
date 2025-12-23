@@ -497,8 +497,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
               ) : isEditingInbuiltSource ? (
                 <View style={styles.prefillUnitSection}>
                   {(() => {
-                    const drink = DRINK_DATABASE.find(d => d.name.toLowerCase() === editEntry.name.toLowerCase() && d.category === editEntry.category);
-                    const drinkUnit = editEntry.unit || getUnitForDrink(editEntry.name, editEntry.category);
+                    const drinkUnit = getUnitForDrink(editEntry.name, editEntry.category);
                     return (
                       <Pressable
                         onPress={() => setSelectedUnit(drinkUnit)}
