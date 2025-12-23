@@ -178,7 +178,7 @@ export const DRINK_DATABASE: DrinkItem[] = Object.entries(caffeineDB).flatMap(
       category,
       caffeinePer100ml: parseFloat(((drink.caffeine_mg_per_ml ?? 0) * 100).toFixed(3)),
       defaultServingMl: drink.serving_size_ml,
-      sizes: [{ name: "Default", ml: drink.serving_size_ml }],
+      // sizes: [{ name: "Default", ml: drink.serving_size_ml }],
       icon: ICON_MAP[category],
     }));
   }
