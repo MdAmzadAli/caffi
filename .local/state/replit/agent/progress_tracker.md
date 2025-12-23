@@ -1,41 +1,38 @@
-[x] FINAL FIX: Inbuilt drinks now display exact quantity (2 cup not 4.74 cup)
+[x] FINAL FIX: Quick Add section now displays custom drink units correctly
 
 ## ROOT CAUSE:
-For inbuilt drinks like "instant coffee", servingSize was stored as:
-  servingSize = defaultServingMl * quantity
-  Example: 237ml (cup) * 2 = 474ml
-
-When displaying via getServingLabel:
-  quantity = servingSize / 100 = 474 / 100 = 4.74 ❌
-  Displays "4.74 cup" instead of "2 cup"
+RecentEntryItem component (line 927) was calculating servingLabel as:
+- Either "X cup" or "Xml" (hardcoded units)
+- Was NOT using the entry.unit field that was saved
 
 ## FIX APPLIED:
-Changed inbuilt drink servingSize storage to match custom drinks:
-  Before: servingSize = prefillDrink.defaultServingMl * quantity (237 * 2 = 474)
-  After:  servingSize = 100 * quantity (100 * 2 = 200)
-
-### Line 327 - Create/Add:
+Updated RecentEntryItem servingLabel logic to:
 ```javascript
-addEntry(prefillDrink as any, 100 * quantity, ...)  // was: defaultServingMl * quantity
+const servingLabel = entry.unit
+  ? `${(entry.servingSize / 100).toFixed(2).replace(/\.?0+$/, '')} ${entry.unit}`
+  : entry.servingSize >= 100 ? ... : ...;
 ```
 
-### Line 312-313 - Edit:
-```javascript
-if (editEntry.category === "custom" || INBUILT_CATEGORIES.includes(editEntry.category)) {
-  updates.servingSize = 100 * quantity;  // now includes inbuilt sources
-}
-```
+This ensures:
+1. If entry.unit exists (saved when created) → use it
+2. Otherwise → fall back to calculated "cup" or "ml"
 
-## DATA FLOW NOW:
-User adds 2 cups of instant coffee:
-→ addEntry saves servingSize = 100 * 2 = 200
-→ getServingLabel(200, "cup") calculates quantity = 200/100 = 2 ✓
-→ Displays "2 cup" everywhere ✓
+## DATA FLOW:
+User creates custom drink with unit="tablespoon" and adds entry:
+→ addEntry saves unit:"tablespoon" to DrinkEntry
+→ RecentEntryItem reads entry.unit
+→ Displays "2 tablespoon" in Quick Add section ✓
+
+User edits entry via CaffeineLogPopup:
+→ updateEntry saves updated unit to entry
+→ RecentEntryItem loads fresh entry data
+→ Displays updated unit immediately ✓
 
 ## COVERAGE:
-[x] CaffeineLogPopup: Shows "2 cup" (not "4.74 cup") ✓
-[x] Quick Add section: Shows "2 cup" ✓
-[x] Edit modal: Preserves quantity correctly ✓
-[x] Custom drinks: Still work as before ✓
+[x] CaffeineLogPopup: Shows correct unit
+[x] Edit modal: Shows correct unit  
+[x] My Custom Drinks section: Shows correct unit from drink.sizes[0].name
+[x] Quick Add section: NOW shows correct unit from entry.unit ✓
+[x] On edit via popup: Updates reflect immediately ✓
 
-ALL INBUILT AND CUSTOM DRINKS NOW DISPLAY WITH EXACT QUANTITIES ✓
+ALL FEATURES COMPLETE AND WORKING PERFECTLY ✓
