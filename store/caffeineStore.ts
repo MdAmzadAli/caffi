@@ -13,6 +13,7 @@ export interface DrinkEntry {
   notes?: string;
   isFavorite?: boolean;
   imageUri?: string;
+  unit?: string;
 }
 
 export interface DrinkItem {
@@ -289,6 +290,7 @@ export function useCaffeineStore() {
       notes?: string,
       isFavorite?: boolean,
       timestamp?: Date,
+      unit?: string,
     ) => {
       const caffeineAmount = Math.round(
         (drink.caffeinePer100ml * servingSize) / 100,
@@ -304,6 +306,7 @@ export function useCaffeineStore() {
         notes,
         isFavorite,
         imageUri: drink.imageUri,
+        unit,
       };
       globalEntries = [entry, ...globalEntries];
       if (isFavorite && !globalFavorites.includes(drink.id)) {

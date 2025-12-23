@@ -111,7 +111,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
           const qty = Math.round((editEntry.caffeineAmount / perServingMg) * 10) / 10;
           setQuantity(Math.max(1, qty) || 1);
           setCaffeineMg(Math.round(drink.caffeinePer100ml * drink.defaultServingMl / 100).toString());
-          setSelectedUnit(getUnitForDrink(drink.name, drink.category));
+          setSelectedUnit(editEntry.unit || getUnitForDrink(drink.name, drink.category));
         }
       } else {
         const customDrink = customDrinks.find(d => d.name.toLowerCase() === editEntry.name.toLowerCase());
@@ -120,11 +120,11 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
           const perUnitMg = Math.round((editEntry.caffeineAmount / qty) * 10) / 10;
           setQuantity(Math.max(1, qty) || 1);
           setCaffeineMg(perUnitMg.toString());
-          setSelectedUnit(getUnitForDrink(customDrink.name, customDrink.category, customDrink.sizes));
+          setSelectedUnit(editEntry.unit || getUnitForDrink(customDrink.name, customDrink.category, customDrink.sizes));
         } else {
           setQuantity(1);
           setCaffeineMg(editEntry.caffeineAmount?.toString() || "10");
-          setSelectedUnit("cup");
+          setSelectedUnit(editEntry.unit || "cup");
         }
       }
       const entryDate = new Date(editEntry.timestamp);
@@ -304,6 +304,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
           caffeineAmount: totalCaffeine,
           timestamp: startTime,
           imageUri: selectedImage || undefined,
+          unit: selectedUnit,
         };
         if (editEntry.category === "custom") {
           updates.servingSize = 100 * quantity;
@@ -320,7 +321,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
         });
         onSaveCustomDrink?.();
       } else if (prefillDrink?.id && !prefillDrink.id.startsWith('custom-')) {
-        addEntry(prefillDrink as any, prefillDrink.defaultServingMl * quantity, undefined, false, startTime);
+        addEntry(prefillDrink as any, prefillDrink.defaultServingMl * quantity, undefined, false, startTime, selectedUnit);
         closeModal();
         onAdd?.();
       } else {
@@ -333,7 +334,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
           sizes: [{ name: selectedUnit, ml: 100 }],
           imageUri: selectedImage || undefined,
         });
-        addEntry(savedDrink, 100 * quantity, undefined, false, startTime);
+        addEntry(savedDrink, 100 * quantity, undefined, false, startTime, selectedUnit);
         closeModal();
         onAdd?.();
       }
