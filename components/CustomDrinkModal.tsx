@@ -107,11 +107,11 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
       if (isEditingInbuiltSource) {
         const drink = DRINK_DATABASE.find(d => d.name.toLowerCase() === editEntry.name.toLowerCase() && d.category === editEntry.category);
         if (drink) {
-          const perServingMg = (drink.caffeinePer100ml * drink.defaultServingMl) / 100;
-          const qty = Math.round((editEntry.caffeineAmount / perServingMg) * 10) / 10;
+          const unit = editEntry.unit || getUnitForDrink(drink.name, drink.category);
+          const qty = unit === "ml" ? editEntry.servingSize : Math.round((editEntry.caffeineAmount / ((drink.caffeinePer100ml * drink.defaultServingMl) / 100)) * 10) / 10;
           setQuantity(Math.max(1, qty) || 1);
           setCaffeineMg(Math.round(drink.caffeinePer100ml * drink.defaultServingMl / 100).toString());
-          setSelectedUnit(editEntry.unit || getUnitForDrink(drink.name, drink.category));
+          setSelectedUnit(unit);
         }
       } else {
         const customDrink = customDrinks.find(d => d.name.toLowerCase() === editEntry.name.toLowerCase());
