@@ -43,9 +43,16 @@
     - Impact: When duplicating, the edited image is now properly preserved and copied
     - Logic: imageUri: imageUri || drink.imageUri (uses passed value or falls back to drink default)
 
+14. [x] Removed quantity limit in CustomDrinkModal
+    - File: components/CustomDrinkModal.tsx (line 359)
+    - Root cause: Math.min(q + 1, 10) capped maximum quantity at 10
+    - Fix: Changed incrementQuantity to () => q + 1 (no upper limit)
+    - Impact: Users can now enter any quantity (11, 12, 15, 20+, etc.)
+    - Decrement still maintains minimum of 1 via Math.max(q - 1, 1)
+
 ## NOTES:
 - All fixes are minimal, responsive, and laser-focused
-- Thirteen separate issues identified and fixed without touching other code
+- Fourteen separate issues identified and fixed without touching other code
 - App verified running on port 5000 with all changes live
 - Each fix is reusable and maintains consistency across flows
 - All parameters properly ordered and optional where needed

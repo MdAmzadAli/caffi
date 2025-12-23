@@ -73,7 +73,7 @@ const getInbuiltDrinkCaffeinePer100ml = (name: string, category: string): number
   return drink ? drink.caffeinePer100ml : null;
 };
 
-const UNITS = ["cup", "shot", "ml", "oz", "teaspoon", "tablespoon", "glass", "can", "bottle", "scoop", "pint", "liter", "fl oz", "mug"];
+const UNITS = ["cup", "shot", "ml", "oz", "teaspoon", "tablespoon", "glass", "can", "bottle", "scoop", "pint", "liter", "fl oz", "mug", "bar"];
 const INBUILT_CATEGORIES = ["coffee", "tea", "energy", "soda", "chocolate"];
 
 export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDrink, editCustomDrink, onSaveCustomDrink }: CustomDrinkModalProps) {
@@ -353,7 +353,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
     }
   };
 
-  const incrementQuantity = () => setQuantity((q) => Math.min(q + 1, 10));
+  const incrementQuantity = () => setQuantity((q) => q + 1);
   const decrementQuantity = () => setQuantity((q) => Math.max(q - 1, 1));
 
   if (!visible) return null;
