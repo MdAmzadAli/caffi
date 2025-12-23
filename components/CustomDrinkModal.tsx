@@ -387,14 +387,17 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
               <View style={[styles.handle, { backgroundColor: Colors.light.accent }]} />
             </View>
 
-            <ScrollView
+            {/* <ScrollView
               style={styles.scrollContent}
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
               bounces={false}
               overScrollMode="never"
               scrollEventThrottle={16}
-            >
+            > */}
+            <View
+              style={styles.scrollContent}
+              >
               <View style={styles.topSection}>
                 <Pressable 
                   onPress={() => setShowImagePicker(true)}
@@ -632,7 +635,9 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
               >
                 <ThemedText type="body" style={styles.addButtonText}>{isEditMode || isEditingCustomDrink ? "Save" : "Add"}</ThemedText>
               </Pressable>
-            </ScrollView>
+              </View>
+            {/* </ScrollView> */}
+            {/* <View style={{ height: insets.bottom }} /> */}
           </Animated.View>
         </GestureDetector>
 
