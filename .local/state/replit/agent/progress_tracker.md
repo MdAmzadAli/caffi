@@ -98,4 +98,19 @@
     - RESPONSIVE: All designs maintain full responsiveness across all screen sizes
     - VERIFIED: App running successfully, fix applied and deployed
 
+27. [x] FIXED: Inbuilt caffeine source name field non-editable when logging
+    - ROOT CAUSE: When logging an inbuilt caffeine source via AddDrinkModal, the CustomDrinkModal opened
+      with an editable name field, allowing users to modify the original drink name
+    - FIX: Added isLoggingInbuiltSource flag to detect when logging an inbuilt caffeine source
+      Condition: prefillDrink?.id && !prefillDrink.id.startsWith('custom-') && !editEntry
+    - CODE CHANGE: Line 95 in components/CustomDrinkModal.tsx
+      ADDED: const isLoggingInbuiltSource = prefillDrink?.id && !prefillDrink.id.startsWith('custom-') && !editEntry;
+    - CODE CHANGE: Line 457 in components/CustomDrinkModal.tsx (TextInput editable prop)
+      BEFORE: editable={!isLoggingMode}
+      AFTER: editable={!isLoggingMode && !isLoggingInbuiltSource}
+    - NOW: When logging an inbuilt caffeine source, the name field is read-only (grayed out, cannot be edited)
+    - CHANGES: Minimal (2 lines only - 1 constant, 1 conditional update), reusable, laser-focused
+    - RESPONSIVE: All designs maintain full responsiveness across all screen sizes
+    - VERIFIED: App restarted, fix applied and deployed (Web Bundled 2420ms)
+
 ALL FIXES COMPLETE ✓

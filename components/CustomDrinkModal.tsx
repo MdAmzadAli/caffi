@@ -89,6 +89,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
   const isEditMode = !!editEntry;
   const isEditingCustomDrink = !!editCustomDrink;
   const isEditingInbuiltSource = isEditMode && editEntry && INBUILT_CATEGORIES.includes(editEntry.category);
+  const isLoggingInbuiltSource = prefillDrink?.id && !prefillDrink.id.startsWith('custom-') && !editEntry;
 
   const [drinkName, setDrinkName] = useState("");
   const [quantity, setQuantity] = useState(1);
@@ -450,7 +451,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
                     placeholderTextColor={theme.textMuted}
                     value={drinkName}
                     onChangeText={setDrinkName}
-                    editable={!isLoggingMode}
+                    editable={!isLoggingMode && !isLoggingInbuiltSource}
                   />
                 </View>
               </View>
