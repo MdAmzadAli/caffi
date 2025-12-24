@@ -44,6 +44,7 @@ interface CustomDrinkModalProps {
   prefillDrink?: { id?: string; name: string; caffeinePer100ml: number; defaultServingMl: number; category?: string; sizes?: { name: string; ml: number }[] } | null;
   editCustomDrink?: { id: string; name: string; caffeinePer100ml: number; defaultServingMl: number; category?: string; sizes?: { name: string; ml: number }[] } | null;
   onSaveCustomDrink?: () => void;
+  isLoggingMode?: boolean;
 }
 
 const getCategoryImageSource = (category: string) => {
@@ -76,7 +77,7 @@ const getInbuiltDrinkCaffeinePer100ml = (name: string, category: string): number
 const UNITS = ["cup", "shot", "ml", "oz", "teaspoon", "tablespoon", "glass", "can", "bottle", "scoop", "pint", "liter", "fl oz", "mug", "bar"];
 const INBUILT_CATEGORIES = ["coffee", "tea", "energy", "soda", "chocolate"];
 
-export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDrink, editCustomDrink, onSaveCustomDrink }: CustomDrinkModalProps) {
+export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDrink, editCustomDrink, onSaveCustomDrink, isLoggingMode }: CustomDrinkModalProps) {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const { addEntry, updateEntry, addCustomDrink, updateCustomDrink, profile, entries, customDrinks } = useCaffeineStore();
@@ -400,8 +401,9 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
               >
               <View style={styles.topSection}>
                 <Pressable 
-                  onPress={() => setShowImagePicker(true)}
-                  style={[styles.chooseIconBox, { backgroundColor: theme.backgroundSecondary }]}
+                  onPress={() => !isLoggingMode && setShowImagePicker(true)}
+                  disabled={isLoggingMode}
+                  style={[styles.chooseIconBox, { backgroundColor: theme.backgroundSecondary, opacity: isLoggingMode ? 0.5 : 1 }]}
                 >
                   {selectedImage ? (
                     selectedImage.startsWith("category:") ? (
@@ -435,11 +437,12 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
                     You are {(prefillDrink?.category === "chocolate" || editEntry?.category === "chocolate") ? "eating" : "drinking"} {quantity} {selectedUnit} of
                   </ThemedText>
                   <TextInput
-                    style={[styles.nameInput, { color: theme.text, borderBottomColor: theme.divider }]}
+                    style={[styles.nameInput, { color: theme.text, borderBottomColor: theme.divider, opacity: isLoggingMode ? 0.6 : 1 }]}
                     placeholder="Enter name"
                     placeholderTextColor={theme.textMuted}
                     value={drinkName}
                     onChangeText={setDrinkName}
+                    editable={!isLoggingMode}
                   />
                 </View>
               </View>
@@ -550,10 +553,9 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
                 <View style={styles.unitCaffeineRow}>
                   <View style={styles.unitSelectorContainer}>
                     <Pressable
-                      onPress={() => {
-                        setShowUnitPicker(!showUnitPicker);
-                      }}
-                      style={styles.unitSelector}
+                      onPress={() => !isLoggingMode && setShowUnitPicker(!showUnitPicker)}
+                      disabled={isLoggingMode}
+                      style={[styles.unitSelector, { opacity: isLoggingMode ? 0.5 : 1 }]}
                     >
                       <Feather name="chevron-down" size={16} color={theme.textMuted} />
                       <ThemedText type="body">{selectedUnit}</ThemedText>
@@ -563,11 +565,12 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
 
                   <View style={styles.caffeineInputWrapper}>
                     <TextInput
-                      style={[styles.caffeineInput, { color: theme.text }]}
+                      style={[styles.caffeineInput, { color: theme.text, opacity: isLoggingMode ? 0.6 : 1 }]}
                       value={caffeineMg}
                       onChangeText={setCaffeineMg}
                       keyboardType="numeric"
                       maxLength={4}
+                      editable={!isLoggingMode}
                     />
                     <ThemedText type="body" muted> mg</ThemedText>
                   </View>

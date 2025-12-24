@@ -8,53 +8,23 @@
 
 ## FIXES COMPLETED:
 5. [x] Fixed Quick Add section display showing incorrect quantity for ml units
-   - File: screens/AddDrinkModal.tsx (line 934-936)
-
 6. [x] Fixed radio options duplication in inbuilt source edit mode
-   - File: components/CustomDrinkModal.tsx (line 503)
-
 7. [x] Fixed quantity field showing "1" instead of actual value when editing inbuilt ml entries
-   - File: components/CustomDrinkModal.tsx (line 113-114)
-
 8. [x] Fixed caffeine calculation for edited inbuilt ml entries
-   - File: components/CustomDrinkModal.tsx (lines 179-190, 322)
+9. [x] Changed "drinking" to "eating" for chocolate
+10. [x] Fixed duplicate entry unit loss in CaffeineLogPopup display
+11. [x] Fixed missing image in duplicated caffeine entries
+12. [x] Removed quantity limit in CustomDrinkModal
 
-9. [x] Changed "drinking" to "eating" for chocolate in CustomDrinkModal (add mode)
-   - File: components/CustomDrinkModal.tsx (line 435)
+## LATEST CHANGES (Current Session):
+13. [x] Fixed custom drink logging behavior
+    - When clicking a custom drink from "My Custom Drinks", only quantity and finishing time are editable
+    - Name, image, and caffeine mg fields are now disabled/read-only when in logging mode
+    - Edit button functionality remains unchanged for editing drink definitions
+    - All fields remain visible but grayed out (opacity 0.5-0.6) when in logging mode
+    - File: screens/AddDrinkModal.tsx (added isLoggingCustomDrink state, passes to modal)
+    - File: components/CustomDrinkModal.tsx (added isLoggingMode prop, disabled fields conditionally)
+    - Changes are laser-focused and minimal - only modified behavior without touching design or other features
+    - Design remains responsive on all screen sizes
 
-10. [x] Changed "drank" to "ate" for chocolate in CaffeineLogPopup
-    - File: components/CaffeineLogPopup.tsx (line 311)
-
-11. [x] Changed "drinking" to "eating" for chocolate in CustomDrinkModal (edit mode)
-    - File: components/CustomDrinkModal.tsx (line 435)
-    - Now checks both prefillDrink?.category and editEntry?.category for chocolate
-
-12. [x] Fixed duplicate entry unit loss in CaffeineLogPopup display
-    - File: screens/HomeScreen.tsx (line 304)
-    - Root cause: unit parameter was not passed to addEntry in handleDuplicateEntry
-    - Fix: Added entry.unit as 6th parameter to preserve unit from original entry
-    - Impact: Duplicated entries now show exact same text ("2 cups") as original, not recalculated values
-
-13. [x] Fixed missing image in duplicated caffeine entries
-    - File: store/caffeineStore.ts (line 297, 312)
-    - File: screens/HomeScreen.tsx (line 304)
-    - Root cause: addEntry always used drink.imageUri (default) instead of entry.imageUri (edited)
-    - Fix: Added imageUri as 7th optional parameter to addEntry
-    - Impact: When duplicating, the edited image is now properly preserved and copied
-    - Logic: imageUri: imageUri || drink.imageUri (uses passed value or falls back to drink default)
-
-14. [x] Removed quantity limit in CustomDrinkModal
-    - File: components/CustomDrinkModal.tsx (line 359)
-    - Root cause: Math.min(q + 1, 10) capped maximum quantity at 10
-    - Fix: Changed incrementQuantity to () => q + 1 (no upper limit)
-    - Impact: Users can now enter any quantity (11, 12, 15, 20+, etc.)
-    - Decrement still maintains minimum of 1 via Math.max(q - 1, 1)
-
-## NOTES:
-- All fixes are minimal, responsive, and laser-focused
-- Fourteen separate issues identified and fixed without touching other code
-- App verified running on port 5000 with all changes live
-- Each fix is reusable and maintains consistency across flows
-- All parameters properly ordered and optional where needed
-
-ALL FIXES COMPLETE [x]
+ALL FIXES COMPLETE ✓
