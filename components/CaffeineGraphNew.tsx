@@ -410,8 +410,8 @@ export function CaffeineGraphNew({
     );
 
     const groups: EventGroup[] = markers.map(m => {
-      const itemY = mgToY(m.event.mg);
-      const iconY = Math.max(GRAPH_PADDING_TOP + MARKER_IMAGE_SIZE / 2, itemY - MARKER_IMAGE_SIZE / 2 - 6);
+      // Use the y coordinate directly from the marker, which was calculated using mgToY in getEventMarkersWithCollision
+      const iconY = Math.max(GRAPH_PADDING_TOP + MARKER_IMAGE_SIZE / 2, m.y - MARKER_IMAGE_SIZE / 2 - 6);
       
       return {
         events: m.clustered,
