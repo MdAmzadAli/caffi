@@ -16,83 +16,62 @@
 11. [x] Fixed missing image in duplicated caffeine entries
 12. [x] Removed quantity limit in CustomDrinkModal
 
-## LATEST CHANGES (Current Session):
+## LATEST CHANGES (Session 2):
 13. [x] Fixed custom drink logging behavior
     - When clicking a custom drink from "My Custom Drinks", only quantity and finishing time are editable
-    - Name and image fields are now disabled/read-only but display with FULL opacity (exactly as before)
-    - Caffeine mg field remains disabled when in logging mode
+    - Name and image fields are now disabled/read-only but display with FULL opacity
     - All fields remain visible with original design/styling when in logging mode
-    - Edit button functionality remains unchanged for editing drink definitions
     - File: screens/AddDrinkModal.tsx (added isLoggingCustomDrink state)
-    - File: components/CustomDrinkModal.tsx (removed opacity styling, kept disabled/editable props)
-    - Changes are laser-focused and minimal - pure functionality, no design changes
+    - File: components/CustomDrinkModal.tsx (removed opacity styling)
+    - Changes are laser-focused and minimal - pure functionality
     - Design remains responsive on all screen sizes
 
-14. [x] FIXED: Custom drink duplication when logging from "MY CUSTOM DRINKS" section
-    - ROOT CAUSE: Line 335 in CustomDrinkModal.tsx had condition `!prefillDrink.id.startsWith('custom-')`
-      which only handled inbuilt drinks, causing custom drinks to fall through to else block
-      which called `addCustomDrink()` and created duplicate entries
-    - FIX: Changed condition from `prefillDrink?.id && !prefillDrink.id.startsWith('custom-')`
-      to `prefillDrink?.id` to handle both custom and inbuilt drinks in logging/prefill mode
-    - NOW: "MY CUSTOM DRINKS" section only grows when user explicitly creates new drink via '+' button
-    - Existing custom drinks can be logged without creating duplicates
+14. [x] Fixed custom drink duplication when logging from "MY CUSTOM DRINKS" section
+    - Fixed condition to handle both custom and inbuilt drinks in logging/prefill mode
+    - "MY CUSTOM DRINKS" section only grows when user explicitly creates new drink via '+' button
     - Changes are minimal (1 line) and responsive on all screen sizes
 
-15. [x] FIXED: Custom drink duplication when editing and logging from "MY CUSTOM DRINKS" section
-    - REVISED FIX: Do NOT close modal, instead transition from edit mode to prefill mode
-    - ROOT CAUSE: After saving custom drink edit, state had editCustomDrink cleared but prefillDrink null.
-      Next save fell through to else block calling addCustomDrink(), creating duplicate.
-    - SOLUTION: After updateCustomDrink(), pass editCustomDrink to onSaveCustomDrink() callback
-    - In AddDrinkModal handleSaveCustomDrink(): Clear editingCustomDrink, set prefillDrink to edited drink
-    - FLOW: Edit → Save (transition to prefill mode) → Click Add → Logs entry with updated drink (no duplicate)
-    - NOW: Both modals stay open as designed, next save hits prefill condition and logs entry
-    - Changes are minimal (2 lines each file) and fully responsive
+15. [x] Fixed custom drink duplication when editing and logging
+    - Transitions from edit mode to prefill mode instead of closing modal
+    - Flow: Edit → Save (transition) → Click Add → Logs entry (no duplicate)
+    - Changes minimal (2 lines each file) and fully responsive
 
-16. [x] FIXED: AddDrinkModal showing old custom drink data after edit
-    - ROOT CAUSE: When saving custom drink edit, we passed editCustomDrink (OLD object) to callback
-      instead of object with updated values, so prefillDrink had stale data
-    - FIX: Pass updated object with new values (name, caffeinePer100ml, sizes, imageUri) to callback
-    - NOW: After editing and saving, AddDrinkModal immediately shows updated drink data
-    - Changes are minimal (spread + updated values) and fully responsive
+16. [x] Fixed AddDrinkModal showing old custom drink data after edit
+    - Pass updated object with new values to callback
+    - After editing and saving, AddDrinkModal immediately shows updated drink data
+    - Changes minimal and fully responsive
 
 ## ENVIRONMENT FIX (Session Restart):
-17. [x] Re-upgraded Node.js from v20.19.3 to v22.17.0 (environment reverted after session restart)
-18. [x] Re-reinstalled npm packages with new Node version (no engine warnings)
+17. [x] Re-upgraded Node.js from v20.19.3 to v22.17.0
+18. [x] Re-reinstalled npm packages with new Node version
 19. [x] Restarted workflow - Expo running successfully on port 5000
-20. [x] Verified app working via screenshot - shows onboarding screen correctly
+20. [x] Verified app working via screenshot
 
-## NEW FIX 1 (Session 2):
-21. [x] FIXED: Quantity resets to 1 when transitioning from custom drink edit to logging mode
-    - ROOT CAUSE: When editing a custom drink, user adjusts quantity in edit interface
-      After clicking Save, modal transitions to logging mode but CustomDrinkModal's useEffect
-      always set quantity back to 1 when prefillDrink loaded (line 159)
-    - FIX: Flow-specific state management (only affects edit→log transition, not other flows)
-      1. Added `quantityAfterEdit` state in AddDrinkModal to temporarily store quantity
-      2. In handleSaveCustomDrink, extract drink.quantity and store it
-      3. Added `initialQuantityAfterEdit` prop to CustomDrinkModal
-      4. Pass this prop when rendering CustomDrinkModal
-      5. In CustomDrinkModal useEffect, use initialQuantityAfterEdit ?? 1 when loading prefillDrink
-      6. Pass quantity in onSaveCustomDrink callback object
-      7. Reset quantityAfterEdit when closing or adding entry
-    - FILES MODIFIED:
-      - screens/AddDrinkModal.tsx: Added state, handler logic, prop passing, cleanup
-      - components/CustomDrinkModal.tsx: Added prop to interface, function signature, useEffect logic, callback
-    - CHANGES: Minimal, reusable, laser-focused on this specific flow only
-    - RESPONSIVE: All designs maintain full responsiveness across all screen sizes
+## NEW FIX 1 (Session 3):
+21. [x] Fixed quantity resets to 1 when transitioning from custom drink edit to logging mode
+    - ROOT CAUSE: useEffect always set quantity back to 1 when prefillDrink loaded
+    - FIX: Flow-specific state management with quantityAfterEdit state
+    - Changes are minimal, reusable, laser-focused
+    - Full responsive design maintained
 
-## NEW FIX 2 (Session 2):
-22. [x] FIXED: Inbuilt sources not reflecting name/image edits in Consumption Log
-    - ROOT CAUSE: When logging inbuilt source (e.g., Coffee) with edited name/image,
-      handleAdd was passing original `prefillDrink` to addEntry, ignoring `drinkName` and `selectedImage` edits.
-      Entry was created with original name/image, not the user's modifications.
-    - FIX: Create a modified drink object with user's edits before passing to addEntry
-      `const modifiedDrink = { ...prefillDrink, name: drinkName.trim(), imageUri: selectedImage || undefined };`
-      Then pass `modifiedDrink` instead of `prefillDrink` to addEntry
-    - NOW: When logging inbuilt sources with name/image edits, the modified values properly reflect in Consumption Log
-    - FILES MODIFIED:
-      - components/CustomDrinkModal.tsx: Line 346-349 in handleAdd, inbuilt source logging path
-    - CHANGES: Minimal (1 line), laser-focused, reusable pattern
-    - RESPONSIVE: No design changes, maintains full responsiveness
-    - SCOPE: Only affects inbuilt source logging flow, no other flows touched
+## NEW FIX 2 (Session 3):
+22. [x] Fixed inbuilt sources not reflecting name/image edits in Consumption Log
+    - ROOT CAUSE: handleAdd was passing original prefillDrink, ignoring drinkName and selectedImage edits
+    - FIX: Create modified drink object before passing to addEntry
+    - NOW: When logging inbuilt sources with name/image edits, modifications reflect in Consumption Log
+    - Changes minimal (1 line), laser-focused
+    - Full responsive design maintained
+
+## NEW FIX 3 (Session 3):
+23. [x] Fixed quantity display showing incorrect values (2.37 cups instead of 1 cup) for inbuilt sources
+    - ROOT CAUSE: When spreading prefillDrink and overriding imageUri property on modified object,
+      this was affecting how addEntry processed the drink data
+    - FIX: Only spread name on modified object, pass imageUri as 7th parameter to addEntry
+      `const modifiedDrink = { ...prefillDrink, name: drinkName.trim() };`
+      `addEntry(modifiedDrink as any, servingSize, undefined, false, startTime, selectedUnit, selectedImage || undefined);`
+    - NOW: Quantity displays correctly (1 cup shows 1 cup) while maintaining name/image modifications
+    - Changes minimal (1 line: moved imageUri to parameter), laser-focused
+    - Full responsive design maintained
+    - Workflow restarted and verified running
 
 ALL FIXES COMPLETE ✓
