@@ -86,25 +86,4 @@
 24. [x] Restarted workflow - Expo running successfully on port 5000
 25. [x] Verified app working via screenshot - shows onboarding screen correctly
 
-26. [x] FIXED: Inbuilt caffeine source modified name and image not reflected in My Consumption Log
-    - ROOT CAUSE: When user modifies an inbuilt drink (name/image) in CustomDrinkModal and logs it,
-      the addEntry() call at line 345 passed the original prefillDrink object. The addEntry function
-      ALWAYS used drink.name (line 302), ignoring user modifications. Modified imageUri was also not passed.
-    - SOLUTION: Minimal backward-compatible fix to preserve unit/value preservation:
-      1. Added optional `customName?: string` parameter to addEntry() function
-      2. Updated entry creation to use `customName || drink.name` (line 306)
-      3. Updated addEntry call in CustomDrinkModal to pass both modified values:
-         - selectedImage (imageUri parameter)
-         - drinkName.trim() (new customName parameter)
-    - FLOW: User modifies name/image → Calls addEntry with customName and imageUri → Entry saved with modifications
-    - VALUE/UNIT PRESERVATION: Unchanged
-      - caffeinePer100ml and servingSize calculations remain identical
-      - unit parameter flow unchanged
-      - Backward compatible - all existing addEntry calls work without customName
-    - FILES MODIFIED:
-      - store/caffeineStore.ts: Added customName parameter, line 306 uses it
-      - components/CustomDrinkModal.tsx: Line 348 passes selectedImage and drinkName.trim()
-    - CHANGES: 1 parameter addition, 1 line modification, 1 function call update - pure functionality
-    - RESPONSIVE: Design maintains full responsiveness
-
 ALL FIXES COMPLETE ✓
