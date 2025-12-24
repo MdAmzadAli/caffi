@@ -342,7 +342,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
         });
       } else if (prefillDrink?.id) {
         const servingSize = selectedUnit === "ml" ? quantity : prefillDrink.defaultServingMl * quantity;
-        addEntry(prefillDrink as any, servingSize, undefined, false, startTime, selectedUnit, selectedImage || undefined);
+        addEntry(prefillDrink as any, servingSize, undefined, false, startTime, selectedUnit);
         closeModal();
         onAdd?.();
       } else {
@@ -450,7 +450,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
                     placeholderTextColor={theme.textMuted}
                     value={drinkName}
                     onChangeText={setDrinkName}
-                    editable={!isLoggingMode && !isEditingInbuiltSource}
+                    editable={!isLoggingMode}
                   />
                 </View>
               </View>
