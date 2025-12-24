@@ -50,20 +50,23 @@
     - Impact: Users can now enter any quantity (11, 12, 15, 20+, etc.)
     - Decrement still maintains minimum of 1 via Math.max(q - 1, 1)
 
-15. [x] Fixed custom drink logging to only allow quantity and time modifications
+15. [x] Fixed custom drink logging to restrict editing to quantity and time only
     - Files: components/CustomDrinkModal.tsx, screens/AddDrinkModal.tsx
-    - Added: isLoggingCustomDrinkOnly prop to detect when logging a custom drink (vs editing it)
-    - Conditional rendering: Hides name input, image picker, and caffeine editing fields
-    - Display-only: Shows drink name in header and unit/caffeine info as read-only
-    - Responsive: Minimal code changes, reusable approach
-    - Impact: When clicking a custom drink in "My Custom Drinks", only quantity and time can be modified
+    - Added: isLoggingCustomDrinkOnly prop to detect when logging a custom drink
+    - Image section: Remains visible but Pressable is disabled (cannot open image picker)
+    - Name input: Remains visible with "You are drinking X unit of" text, but TextInput is read-only (editable={false})
+    - Unit/caffeine info: Displayed as read-only text (cannot switch between ml/unit options)
+    - Quantity control: Fully editable with +/- buttons
+    - Time picker: Fully editable for "Finished Drinking" time
+    - Responsive: Minimal code changes using conditional disabling, reusable approach
+    - Implementation: disabled={isLoggingCustomDrinkOnly} on Pressable, editable={!isLoggingCustomDrinkOnly} on TextInput
 
 ## NOTES:
 - All fixes are minimal, responsive, and laser-focused
 - Fifteen separate issues identified and fixed without touching other code
-- App verified running on port 5000 with all changes live and compiling successfully
+- App verified running on port 5000 with all changes compiled and live
 - Each fix is reusable and maintains consistency across flows
 - All parameters properly ordered and optional where needed
-- Latest fix distinguishes between logging a custom drink entry vs editing the drink definition
+- All UI elements remain visible while restricting editing based on context
 
-ALL FIXES COMPLETE [x]
+ALL FIXES COMPLETE AND VERIFIED [x]

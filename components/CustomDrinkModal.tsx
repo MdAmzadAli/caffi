@@ -406,68 +406,55 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
             <View
               style={styles.scrollContent}
               >
-              {!isLoggingCustomDrinkOnly && (
-                <>
-                  <View style={styles.topSection}>
-                    <Pressable 
-                      onPress={() => setShowImagePicker(true)}
-                      style={[styles.chooseIconBox, { backgroundColor: theme.backgroundSecondary }]}
-                    >
-                      {selectedImage ? (
-                        selectedImage.startsWith("category:") ? (
-                          <Image 
-                            source={getCategoryImageSource(selectedImage.replace("category:", ""))} 
-                            style={styles.selectedImage} 
-                            resizeMode="cover" 
-                          />
-                        ) : selectedImage.startsWith("preset:") ? (
-                          (() => {
-                            const preset = PRESET_IMAGES.find(p => p.id === selectedImage.replace("preset:", ""));
-                            return preset ? (
-                              <Image source={preset.image} style={styles.selectedImage} resizeMode="cover" />
-                            ) : (
-                              <Feather name="coffee" size={32} color={Colors.light.accent} />
-                            );
-                          })()
-                        ) : (
-                          <Image source={{ uri: selectedImage }} style={styles.selectedImage} />
-                        )
-                      ) : (
-                        <>
-                          <Feather name="plus" size={28} color={theme.textMuted} />
-                          <ThemedText type="caption" muted>Choose</ThemedText>
-                        </>
-                      )}
-                    </Pressable>
-
-                    <View style={styles.nameInputSection}>
-                      <ThemedText type="caption" muted>
-                        You are {(prefillDrink?.category === "chocolate" || editEntry?.category === "chocolate") ? "eating" : "drinking"} {quantity} {selectedUnit} of
-                      </ThemedText>
-                      <TextInput
-                        style={[styles.nameInput, { color: theme.text, borderBottomColor: theme.divider }]}
-                        placeholder="Enter name"
-                        placeholderTextColor={theme.textMuted}
-                        value={drinkName}
-                        onChangeText={setDrinkName}
+              <View style={styles.topSection}>
+                <Pressable 
+                  onPress={() => !isLoggingCustomDrinkOnly && setShowImagePicker(true)}
+                  disabled={isLoggingCustomDrinkOnly}
+                  style={[styles.chooseIconBox, { backgroundColor: theme.backgroundSecondary }]}
+                >
+                  {selectedImage ? (
+                    selectedImage.startsWith("category:") ? (
+                      <Image 
+                        source={getCategoryImageSource(selectedImage.replace("category:", ""))} 
+                        style={styles.selectedImage} 
+                        resizeMode="cover" 
                       />
-                    </View>
-                  </View>
+                    ) : selectedImage.startsWith("preset:") ? (
+                      (() => {
+                        const preset = PRESET_IMAGES.find(p => p.id === selectedImage.replace("preset:", ""));
+                        return preset ? (
+                          <Image source={preset.image} style={styles.selectedImage} resizeMode="cover" />
+                        ) : (
+                          <Feather name="coffee" size={32} color={Colors.light.accent} />
+                        );
+                      })()
+                    ) : (
+                      <Image source={{ uri: selectedImage }} style={styles.selectedImage} />
+                    )
+                  ) : (
+                    <>
+                      <Feather name="plus" size={28} color={theme.textMuted} />
+                      <ThemedText type="caption" muted>Choose</ThemedText>
+                    </>
+                  )}
+                </Pressable>
 
-                  <View style={[styles.divider, { backgroundColor: theme.divider }]} />
-                </>
-              )}
+                <View style={styles.nameInputSection}>
+                  <ThemedText type="caption" muted>
+                    You are {(prefillDrink?.category === "chocolate" || editEntry?.category === "chocolate") ? "eating" : "drinking"} {quantity} {selectedUnit} of
+                  </ThemedText>
+                  <TextInput
+                    style={[styles.nameInput, { color: theme.text, borderBottomColor: theme.divider }]}
+                    placeholder="Enter name"
+                    placeholderTextColor={theme.textMuted}
+                    value={drinkName}
+                    onChangeText={isLoggingCustomDrinkOnly ? undefined : setDrinkName}
+                    editable={!isLoggingCustomDrinkOnly}
+                  />
+                </View>
+              </View>
 
-              {isLoggingCustomDrinkOnly && (
-                <>
-                  <View style={styles.loggingDrinkHeader}>
-                    <ThemedText type="h4" numberOfLines={2} style={{ flex: 1 }}>
-                      {drinkName}
-                    </ThemedText>
-                  </View>
-                  <View style={[styles.divider, { backgroundColor: theme.divider }]} />
-                </>
-              )}
+              <View style={[styles.divider, { backgroundColor: theme.divider }]} />
 
               <View style={styles.quantityRow}>
                 <ThemedText type="h1" style={styles.quantityNumber}>{quantity}</ThemedText>
@@ -727,11 +714,6 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
 }
 
 const styles = StyleSheet.create({
-  loggingDrinkHeader: {
-    padding: Spacing.lg,
-    borderRadius: BorderRadius.sm,
-    marginBottom: Spacing.sm,
-  },
   readOnlyUnitRow: {
     flexDirection: "row",
     alignItems: "center",
