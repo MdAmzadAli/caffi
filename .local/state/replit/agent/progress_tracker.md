@@ -38,4 +38,15 @@
     - Existing custom drinks can be logged without creating duplicates
     - Changes are minimal (1 line) and responsive on all screen sizes
 
+15. [x] FIXED: Custom drink duplication when editing from "MY CUSTOM DRINKS" section
+    - ROOT CAUSE: Line 334 in CustomDrinkModal.tsx edit custom drink case called onSaveCustomDrink?.()
+      but did NOT call closeModal(). Modal stayed open while AddDrinkModal visible below.
+      Without immediate modal close, state could become unstable and fall through to else block
+      that called addCustomDrink(), creating duplicate entry instead of updating existing one
+    - FIX: Added closeModal() call right after updateCustomDrink() in edit custom drink case (line 337)
+    - NOW: When editing a custom drink definition, modal closes immediately after saving
+    - Prevents any accidental secondary action or state confusion
+    - Pattern now consistent with prefill drink case (both close modal after action)
+    - Changes are minimal (1 line) and responsive on all screen sizes
+
 ALL FIXES COMPLETE ✓
