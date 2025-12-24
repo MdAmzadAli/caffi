@@ -48,4 +48,11 @@
     - NOW: Both modals stay open as designed, next save hits prefill condition and logs entry
     - Changes are minimal (2 lines each file) and fully responsive
 
+16. [x] FIXED: AddDrinkModal showing old custom drink data after edit
+    - ROOT CAUSE: When saving custom drink edit, we passed editCustomDrink (OLD object) to callback
+      instead of object with updated values, so prefillDrink had stale data
+    - FIX: Pass updated object with new values (name, caffeinePer100ml, sizes, imageUri) to callback
+    - NOW: After editing and saving, AddDrinkModal immediately shows updated drink data
+    - Changes are minimal (spread + updated values) and fully responsive
+
 ALL FIXES COMPLETE ✓

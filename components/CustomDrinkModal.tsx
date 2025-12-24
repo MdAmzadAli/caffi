@@ -331,7 +331,13 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
           sizes: [{ name: selectedUnit, ml: 100 }],
           imageUri: selectedImage || undefined,
         });
-        onSaveCustomDrink?.(editCustomDrink);
+        onSaveCustomDrink?.({
+          ...editCustomDrink,
+          name: drinkName.trim(),
+          caffeinePer100ml: parseInt(caffeineMg) || 0,
+          sizes: [{ name: selectedUnit, ml: 100 }],
+          imageUri: selectedImage || undefined,
+        });
       } else if (prefillDrink?.id) {
         const servingSize = selectedUnit === "ml" ? quantity : prefillDrink.defaultServingMl * quantity;
         addEntry(prefillDrink as any, servingSize, undefined, false, startTime, selectedUnit);
