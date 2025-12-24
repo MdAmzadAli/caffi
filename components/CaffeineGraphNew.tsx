@@ -789,10 +789,9 @@ const styles = StyleSheet.create({
   xAxisContainer: {
     height: X_AXIS_HEIGHT,
     position: "absolute",
-    bottom: GRAPH_PADDING_BOTTOM,
-    left: Y_AXIS_WIDTH,
+    bottom: X_AXIS_HEIGHT,
     right: 0,
-    zIndex: 5,
+    zIndex: 11,
   },
   xAxisTick: {
     position: "absolute",
@@ -806,9 +805,10 @@ const styles = StyleSheet.create({
   },
   currentTimeLabel: {
     position: "absolute",
+    zIndex:100,
     width: 36,
     alignItems: "center",
-    top: 8,
+    top: 10,
   },
   currentTimeLabelText: {
     fontSize: 8,

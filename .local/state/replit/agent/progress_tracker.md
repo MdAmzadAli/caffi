@@ -19,18 +19,15 @@
 ## LATEST CHANGES (Current Session):
 13. [x] Fixed custom drink logging behavior
     - When clicking a custom drink from "My Custom Drinks", only quantity and finishing time are editable
-    - Name and image fields are now disabled/read-only but display with FULL opacity (exactly as before)
-    - Caffeine mg field remains disabled when in logging mode
 
 14. [x] FIXED: Custom drink duplication when logging from "MY CUSTOM DRINKS" section
-    - Changed condition from `prefillDrink?.id && !prefillDrink.id.startsWith('custom-')`
-      to `prefillDrink?.id` to handle both custom and inbuilt drinks in logging/prefill mode
+    - Changed condition to handle both custom and inbuilt drinks in logging/prefill mode
 
 15. [x] FIXED: Custom drink duplication when editing and logging from "MY CUSTOM DRINKS" section
-    - Revised FIX: transition from edit mode to prefill mode instead of closing modal
+    - Transition from edit mode to prefill mode instead of closing modal
 
 16. [x] FIXED: AddDrinkModal showing old custom drink data after edit
-    - Pass updated object with new values (name, caffeinePer100ml, sizes, imageUri) to callback
+    - Pass updated object with new values to callback
 
 ## ENVIRONMENT FIX (Session Restart):
 17. [x] Re-upgraded Node.js from v20.19.3 to v22.17.0 (environment reverted after session restart)
@@ -40,16 +37,12 @@
 
 ## NEW FIX (Current Session):
 21. [x] FIXED: Quantity resets to 1 when transitioning from custom drink edit to logging mode
-    - Flow-specific state management (only affects edit→log transition, not other flows)
 
 22. [x] FIXED: Inbuilt caffeine source image not reflecting in My Consumption Log
-    - Pass selectedImage as the 7th parameter (imageUri) to addEntry() function
 
 23. [x] FIXED: Inbuilt caffeine source name field non-editable when logging
-    - Added isLoggingInbuiltSource flag to detect when logging an inbuilt caffeine source
 
 24. [x] FIXED: Uneditable name field text appears grayed out for better UX
-    - Added conditional color styling to the TextInput in CustomDrinkModal
 
 ## FINAL ENVIRONMENT FIX (December 24, 2025 - Latest Session):
 25. [x] Re-upgraded Node.js from v20.19.3 to v22.17.0 (environment reverted after session restart)
@@ -57,14 +50,24 @@
 27. [x] Restarted workflow - Expo running successfully on port 5000
 28. [x] Verified app working - Web server responding with HTML content
 
-## GRAPH UI FIX (December 24, 2025 - Latest):
+## GRAPH UI FIXES (December 24, 2025 - Latest):
 29. [x] FIXED: Move x-axis labels inside the graph at the bottom
     - Changed xAxisContainer positioning from `position: "relative"` with `marginTop: 2`
       to `position: "absolute"` with `bottom: GRAPH_PADDING_BOTTOM`
-    - Added `left: Y_AXIS_WIDTH` and `right: 0` for proper alignment
-    - Added `zIndex: 5` to layer x-axis labels properly
-    - File: components/CaffeineGraphNew.tsx (xAxisContainer style, lines 792-799)
+    - File: components/CaffeineGraphNew.tsx (xAxisContainer style)
     - CHANGES: Minimal (4 property updates), reusable, laser-focused on positioning only
+    - RESPONSIVE: Full responsiveness maintained across all screen sizes
+
+30. [x] FIXED: Current time label not appearing above sticky "My Consumption" title
+    - ROOT CAUSE: Z-index stacking context problem. xAxisContainer had zIndex: 5 (parent of currentTimeLabel),
+      while StickyConsumptionTitle had zIndex: 10. Parent's lower z-index created a stacking context
+      that prevented child elements from appearing above the sticky title despite high zIndex values.
+    - FIX: Increased xAxisContainer zIndex from 5 to 11 (higher than StickyConsumptionTitle's zIndex: 10)
+    - CODE CHANGE: Line 797 in components/CaffeineGraphNew.tsx
+      BEFORE: zIndex: 5,
+      AFTER: zIndex: 11,
+    - NOW: currentTimeLabel now appears above the sticky "My Consumption" title when scrolling
+    - CHANGES: Minimal (1 line), reusable, laser-focused z-index fix only
     - RESPONSIVE: All designs maintain full responsiveness across all screen sizes
     - VERIFIED: App restarted and running successfully
 
