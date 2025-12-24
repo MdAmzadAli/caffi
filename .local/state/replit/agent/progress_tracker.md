@@ -61,7 +61,7 @@
 19. [x] Restarted workflow - Expo running successfully on port 5000
 20. [x] Verified app working via screenshot - shows onboarding screen correctly
 
-## NEW FIX (Current Session):
+## NEW FIX (Previous Session):
 21. [x] FIXED: Quantity resets to 1 when transitioning from custom drink edit to logging mode
     - ROOT CAUSE: When editing a custom drink, user adjusts quantity in edit interface
       After clicking Save, modal transitions to logging mode but CustomDrinkModal's useEffect
@@ -85,5 +85,18 @@
 23. [x] Re-reinstalled npm packages with new Node version (no engine warnings)
 24. [x] Restarted workflow - Expo running successfully on port 5000
 25. [x] Verified app working via screenshot - shows onboarding screen correctly
+
+## INBUILT SOURCE FIXES (December 24, 2025 - Final):
+26. [x] FIXED: Image not reflecting in My Consumption log when editing inbuilt caffeine source
+    - ROOT CAUSE: When logging an inbuilt drink (prefillDrink), selectedImage was not being passed to addEntry()
+    - FIX: Added selectedImage as 7th parameter to addEntry() call at line 348 in CustomDrinkModal.tsx
+    - NOW: When user changes image of inbuilt drink while logging, the custom image is saved to the entry
+    - Change: Minimal (1 parameter addition) and fully responsive
+
+27. [x] FIXED: Inbuilt caffeine source name field was editable when it should be read-only
+    - ROOT CAUSE: The nameInput's editable prop only checked !isLoggingMode, but didn't account for isEditingInbuiltSource
+    - FIX: Changed editable prop from `!isLoggingMode` to `!isLoggingMode && !isEditingInbuiltSource` at line 456
+    - NOW: When editing an inbuilt entry, the name field is disabled and not editable (as intended)
+    - Change: Minimal (1 condition addition) and fully responsive
 
 ALL FIXES COMPLETE ✓
