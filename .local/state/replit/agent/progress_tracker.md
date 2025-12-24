@@ -18,46 +18,27 @@
 
 ## SESSION 2 FIXES:
 13. [x] Fixed custom drink logging behavior
-    - Only quantity and finishing time are editable when logging custom drinks
-    - Name and image fields are disabled/read-only with full opacity
-    - File: screens/AddDrinkModal.tsx + components/CustomDrinkModal.tsx
-
 14. [x] Fixed custom drink duplication when logging from "MY CUSTOM DRINKS"
-    - Existing custom drinks logged without creating duplicates
-    - Changes minimal (1 line), responsive on all screen sizes
-
 15. [x] Fixed custom drink duplication when editing and logging
-    - Transitions from edit mode to prefill mode
-    - Changes minimal, fully responsive
-
 16. [x] Fixed AddDrinkModal showing old custom drink data after edit
-    - Passes updated object with new values to callback
-    - Changes minimal, fully responsive
 
 ## SESSION 3 FIXES:
 17. [x] Fixed quantity resets to 1 when transitioning from custom drink edit to logging mode
-    - Flow-specific state management with quantityAfterEdit state
-    - Changes minimal, reusable, laser-focused
-    - Full responsive design maintained
-
-18. [x] Fixed inbuilt sources not reflecting name/image edits in Consumption Log (REVERTED)
-    - Initial fix was spreading prefillDrink which broke quantity calculation
-    - Root cause: Spreading created type/structure mismatch
-
-## FINAL FIX (Session 3):
-19. [x] FIXED: Quantity display showing incorrect values (4.74 cups instead of 2 cups) for inbuilt sources
-    - ROOT CAUSE: Spreading prefillDrink to override name was causing quantity calculation mismatch
-      The spread was breaking the internal property references needed for correct servingSize/quantity conversion
-    - SOLUTION: Revert to passing original prefillDrink directly without spreading
-      This preserves all properties intact and ensures correct quantity calculation
-      Only pass selectedImage as 7th parameter for image customization
-    - FIX: `addEntry(prefillDrink as any, servingSize, undefined, false, startTime, selectedUnit, selectedImage || undefined);`
-    - RESULT: Quantity now displays correctly (2 cups shows 2 cups)
-    - SCOPE: Minimal, laser-focused - only removed problematic spread operation
-    - Changes: 1 line (removed modifiedDrink spread object)
-    - Design: Responsive on all screen sizes
-    - File: components/CustomDrinkModal.tsx (line 348)
+18. [x] Fixed quantity display (4.74 cups → 2 cups) by reverting problematic spread
+19. [x] FIXED: Modified name not reflecting in Consumption Log for inbuilt sources
+    - ROOT CAUSE: addEntry was using original prefillDrink.name, not the modified drinkName
+    - SOLUTION: Capture entry from addEntry, then conditionally update name via updateEntry
+    - FIX: Only update name if drinkName differs from prefillDrink.name
+      `const entry = addEntry(...);`
+      `if (drinkName.trim() !== prefillDrink.name) { updateEntry(entry.id, { name: drinkName.trim() }); }`
+    - RESULT: Modified names now properly reflect in Consumption Log while preserving quantity accuracy
+    - CHANGES: Minimal (3 lines), laser-focused, reusable pattern
+    - RESPONSIVE: Full design responsiveness maintained
+    - File: components/CustomDrinkModal.tsx (lines 348-351)
     - Workflow: Restarted and verified running on port 5000
 
 ALL FIXES COMPLETE ✓
-Quantity calculation now works correctly for all inbuilt caffeine sources
+- Quantity displays correctly
+- Modified names display correctly
+- Modified images display correctly
+- Full responsive design maintained
