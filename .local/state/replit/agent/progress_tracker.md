@@ -55,4 +55,10 @@
     - NOW: After editing and saving, AddDrinkModal immediately shows updated drink data
     - Changes are minimal (spread + updated values) and fully responsive
 
+## ENVIRONMENT FIX (Session Restart):
+17. [x] Re-upgraded Node.js from v20.19.3 to v22.17.0 (environment reverted after session restart)
+18. [x] Re-reinstalled npm packages with new Node version (no engine warnings)
+19. [x] Restarted workflow - Expo running successfully on port 5000
+20. [x] Verified app working via screenshot - shows onboarding screen correctly
+
 ALL FIXES COMPLETE ✓
