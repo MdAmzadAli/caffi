@@ -407,24 +407,32 @@ export function CaffeineGraphNew({
       .sort((a, b) => a.eventMs - b.eventMs);
 
     const groups: EventGroup[] = [];
-    let lastX = -Infinity;
-    for (const item of visibleEvents) {
-      const lastGroup = groups[groups.length - 1];
-      if (lastGroup && Math.abs(item.x - lastX) <= GROUP_PROXIMITY_PX) {
-        lastGroup.events.push(item.evt);
-        lastX = item.x;
-      } else {
-        const iconY = Math.max(GRAPH_PADDING_TOP + MARKER_IMAGE_SIZE / 2, item.y - MARKER_IMAGE_SIZE / 2 - 6);
-        groups.push({
-          events: [item.evt],
-          x: item.x,
-          y: item.y,
-          iconY,
-          category: item.evt.category || 'coffee',
-          imageUri: item.evt.imageUri,
-        });
-        lastX = item.x;
+    let i = 0;
+    while (i < visibleEvents.length) {
+      const current = visibleEvents[i];
+      const clustered: CaffeineEvent[] = [current.evt];
+      
+      let j = i + 1;
+      while (j < visibleEvents.length) {
+        const next = visibleEvents[j];
+        if (Math.abs(next.x - current.x) <= 28 && Math.abs(next.y - current.y) <= 28) {
+          clustered.push(next.evt);
+          j++;
+        } else {
+          break;
+        }
       }
+
+      const iconY = Math.max(GRAPH_PADDING_TOP + MARKER_IMAGE_SIZE / 2, current.y - MARKER_IMAGE_SIZE / 2 - 6);
+      groups.push({
+        events: clustered,
+        x: current.x,
+        y: current.y,
+        iconY,
+        category: current.evt.category || 'coffee',
+        imageUri: current.evt.imageUri,
+      });
+      i = j;
     }
 
     return { visibleEvents, groups };

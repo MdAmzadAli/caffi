@@ -171,32 +171,38 @@ export function generateSmoothPath(
 export function getEventMarkersWithCollision(
   events: CaffeineEvent[],
   timeToX: (ms: number) => number,
+  mgToY: (mg: number) => number,
+  halfLifeHours: number,
   collisionThreshold: number = 28
-): { event: CaffeineEvent; x: number; clustered: CaffeineEvent[] }[] {
+): { event: CaffeineEvent; x: number; y: number; clustered: CaffeineEvent[] }[] {
   const sorted = [...events].sort(
     (a, b) => Date.parse(a.timestampISO) - Date.parse(b.timestampISO)
   );
 
-  const markers: { event: CaffeineEvent; x: number; clustered: CaffeineEvent[] }[] = [];
+  const markers: { event: CaffeineEvent; x: number; y: number; clustered: CaffeineEvent[] }[] = [];
   let i = 0;
 
   while (i < sorted.length) {
     const current = sorted[i];
     const currentX = timeToX(Date.parse(current.timestampISO));
+    const currentY = mgToY(getActiveAtTime(events, Date.parse(current.timestampISO), halfLifeHours));
     const clustered: CaffeineEvent[] = [current];
 
     let j = i + 1;
     while (j < sorted.length) {
-      const nextX = timeToX(Date.parse(sorted[j].timestampISO));
-      if (Math.abs(nextX - currentX) < collisionThreshold) {
-        clustered.push(sorted[j]);
+      const next = sorted[j];
+      const nextX = timeToX(Date.parse(next.timestampISO));
+      const nextY = mgToY(getActiveAtTime(events, Date.parse(next.timestampISO), halfLifeHours));
+      
+      if (Math.abs(nextX - currentX) < collisionThreshold && Math.abs(nextY - currentY) < collisionThreshold) {
+        clustered.push(next);
         j++;
       } else {
         break;
       }
     }
 
-    markers.push({ event: current, x: currentX, clustered });
+    markers.push({ event: current, x: currentX, y: currentY, clustered });
     i = j;
   }
 
