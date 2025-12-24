@@ -342,10 +342,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
         });
       } else if (prefillDrink?.id) {
         const servingSize = selectedUnit === "ml" ? quantity : prefillDrink.defaultServingMl * quantity;
-        const entry = addEntry(prefillDrink as any, servingSize, undefined, false, startTime, selectedUnit, selectedImage || undefined);
-        if (drinkName.trim() !== prefillDrink.name) {
-          updateEntry(entry.id, { name: drinkName.trim() });
-        }
+        addEntry(prefillDrink as any, servingSize, undefined, false, startTime, selectedUnit);
         closeModal();
         onAdd?.();
       } else {
