@@ -403,7 +403,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
                 <Pressable 
                   onPress={() => !isLoggingMode && setShowImagePicker(true)}
                   disabled={isLoggingMode}
-                  style={[styles.chooseIconBox, { backgroundColor: theme.backgroundSecondary, opacity: isLoggingMode ? 0.5 : 1 }]}
+                  style={[styles.chooseIconBox, { backgroundColor: theme.backgroundSecondary }]}
                 >
                   {selectedImage ? (
                     selectedImage.startsWith("category:") ? (
@@ -437,7 +437,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
                     You are {(prefillDrink?.category === "chocolate" || editEntry?.category === "chocolate") ? "eating" : "drinking"} {quantity} {selectedUnit} of
                   </ThemedText>
                   <TextInput
-                    style={[styles.nameInput, { color: theme.text, borderBottomColor: theme.divider, opacity: isLoggingMode ? 0.6 : 1 }]}
+                    style={[styles.nameInput, { color: theme.text, borderBottomColor: theme.divider }]}
                     placeholder="Enter name"
                     placeholderTextColor={theme.textMuted}
                     value={drinkName}

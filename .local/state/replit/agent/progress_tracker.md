@@ -19,12 +19,13 @@
 ## LATEST CHANGES (Current Session):
 13. [x] Fixed custom drink logging behavior
     - When clicking a custom drink from "My Custom Drinks", only quantity and finishing time are editable
-    - Name, image, and caffeine mg fields are now disabled/read-only when in logging mode
+    - Name and image fields are now disabled/read-only but display with FULL opacity (exactly as before)
+    - Caffeine mg field remains disabled when in logging mode
+    - All fields remain visible with original design/styling when in logging mode
     - Edit button functionality remains unchanged for editing drink definitions
-    - All fields remain visible but grayed out (opacity 0.5-0.6) when in logging mode
-    - File: screens/AddDrinkModal.tsx (added isLoggingCustomDrink state, passes to modal)
-    - File: components/CustomDrinkModal.tsx (added isLoggingMode prop, disabled fields conditionally)
-    - Changes are laser-focused and minimal - only modified behavior without touching design or other features
+    - File: screens/AddDrinkModal.tsx (added isLoggingCustomDrink state)
+    - File: components/CustomDrinkModal.tsx (removed opacity styling, kept disabled/editable props)
+    - Changes are laser-focused and minimal - pure functionality, no design changes
     - Design remains responsive on all screen sizes
 
 ALL FIXES COMPLETE ✓
