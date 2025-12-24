@@ -109,8 +109,11 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
     setShowCustomDrinkModal(true);
   };
 
-  const handleSaveCustomDrink = () => {
+  const handleSaveCustomDrink = (drink?: any) => {
     setEditingCustomDrink(null);
+    if (drink) {
+      setPrefillDrink(drink);
+    }
   };
 
   const [searchQuery, setSearchQuery] = useState("");

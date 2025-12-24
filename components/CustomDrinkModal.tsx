@@ -43,7 +43,7 @@ interface CustomDrinkModalProps {
   editEntry?: DrinkEntry | null;
   prefillDrink?: { id?: string; name: string; caffeinePer100ml: number; defaultServingMl: number; category?: string; sizes?: { name: string; ml: number }[] } | null;
   editCustomDrink?: { id: string; name: string; caffeinePer100ml: number; defaultServingMl: number; category?: string; sizes?: { name: string; ml: number }[] } | null;
-  onSaveCustomDrink?: () => void;
+  onSaveCustomDrink?: (drink?: any) => void;
   isLoggingMode?: boolean;
 }
 
@@ -331,8 +331,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
           sizes: [{ name: selectedUnit, ml: 100 }],
           imageUri: selectedImage || undefined,
         });
-        closeModal();
-        onSaveCustomDrink?.();
+        onSaveCustomDrink?.(editCustomDrink);
       } else if (prefillDrink?.id) {
         const servingSize = selectedUnit === "ml" ? quantity : prefillDrink.defaultServingMl * quantity;
         addEntry(prefillDrink as any, servingSize, undefined, false, startTime, selectedUnit);
