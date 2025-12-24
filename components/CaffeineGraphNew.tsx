@@ -415,7 +415,7 @@ export function CaffeineGraphNew({
       let j = i + 1;
       while (j < visibleEvents.length) {
         const next = visibleEvents[j];
-        if (Math.abs(next.x - current.x) <= 28 && Math.abs(next.y - current.y) <= 28) {
+        if (Math.abs(next.x - current.x) <= GROUP_PROXIMITY_PX && Math.abs(next.y - current.y) <= GROUP_PROXIMITY_PX) {
           clustered.push(next.evt);
           j++;
         } else {
