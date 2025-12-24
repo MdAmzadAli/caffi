@@ -18,118 +18,32 @@
 
 ## LATEST CHANGES (Current Session):
 13. [x] Fixed custom drink logging behavior
-    - When clicking a custom drink from "My Custom Drinks", only quantity and finishing time are editable
-    - Name and image fields are now disabled/read-only but display with FULL opacity (exactly as before)
-    - Caffeine mg field remains disabled when in logging mode
-    - All fields remain visible with original design/styling when in logging mode
-    - Edit button functionality remains unchanged for editing drink definitions
-    - File: screens/AddDrinkModal.tsx (added isLoggingCustomDrink state)
-    - File: components/CustomDrinkModal.tsx (removed opacity styling, kept disabled/editable props)
-    - Changes are laser-focused and minimal - pure functionality, no design changes
-    - Design remains responsive on all screen sizes
-
 14. [x] FIXED: Custom drink duplication when logging from "MY CUSTOM DRINKS" section
-    - ROOT CAUSE: Line 335 in CustomDrinkModal.tsx had condition `!prefillDrink.id.startsWith('custom-')`
-      which only handled inbuilt drinks, causing custom drinks to fall through to else block
-      which called `addCustomDrink()` and created duplicate entries
-    - FIX: Changed condition from `prefillDrink?.id && !prefillDrink.id.startsWith('custom-')`
-      to `prefillDrink?.id` to handle both custom and inbuilt drinks in logging/prefill mode
-    - NOW: "MY CUSTOM DRINKS" section only grows when user explicitly creates new drink via '+' button
-    - Existing custom drinks can be logged without creating duplicates
-    - Changes are minimal (1 line) and responsive on all screen sizes
-
 15. [x] FIXED: Custom drink duplication when editing and logging from "MY CUSTOM DRINKS" section
-    - REVISED FIX: Do NOT close modal, instead transition from edit mode to prefill mode
-    - ROOT CAUSE: After saving custom drink edit, state had editCustomDrink cleared but prefillDrink null.
-      Next save fell through to else block calling addCustomDrink(), creating duplicate.
-    - SOLUTION: After updateCustomDrink(), pass editCustomDrink to onSaveCustomDrink() callback
-    - In AddDrinkModal handleSaveCustomDrink(): Clear editingCustomDrink, set prefillDrink to edited drink
-    - FLOW: Edit → Save (transition to prefill mode) → Click Add → Logs entry with updated drink (no duplicate)
-    - NOW: Both modals stay open as designed, next save hits prefill condition and logs entry
-    - Changes are minimal (2 lines each file) and fully responsive
-
 16. [x] FIXED: AddDrinkModal showing old custom drink data after edit
-    - ROOT CAUSE: When saving custom drink edit, we passed editCustomDrink (OLD object) to callback
-      instead of object with updated values, so prefillDrink had stale data
-    - FIX: Pass updated object with new values (name, caffeinePer100ml, sizes, imageUri) to callback
-    - NOW: After editing and saving, AddDrinkModal immediately shows updated drink data
-    - Changes are minimal (spread + updated values) and fully responsive
 
 ## ENVIRONMENT FIX (Session Restart):
-17. [x] Re-upgraded Node.js from v20.19.3 to v22.17.0 (environment reverted after session restart)
-18. [x] Re-reinstalled npm packages with new Node version (no engine warnings)
-19. [x] Restarted workflow - Expo running successfully on port 5000
-20. [x] Verified app working via screenshot - shows onboarding screen correctly
+17-20. [x] Re-upgraded Node.js and verified app working
 
-## NEW FIX (Current Session):
-21. [x] FIXED: Quantity resets to 1 when transitioning from custom drink edit to logging mode
-    - ROOT CAUSE: When editing a custom drink, user adjusts quantity in edit interface
-      After clicking Save, modal transitions to logging mode but CustomDrinkModal's useEffect
-      always set quantity back to 1 when prefillDrink loaded (line 159)
-    - FIX: Flow-specific state management (only affects edit→log transition, not other flows)
-      1. Added `quantityAfterEdit` state in AddDrinkModal to temporarily store quantity
-      2. In handleSaveCustomDrink, extract drink.quantity and store it
-      3. Added `initialQuantityAfterEdit` prop to CustomDrinkModal
-      4. Pass this prop when rendering CustomDrinkModal
-      5. In CustomDrinkModal useEffect, use initialQuantityAfterEdit ?? 1 when loading prefillDrink
-      6. Pass quantity in onSaveCustomDrink callback object
-      7. Reset quantityAfterEdit when closing or adding entry
-    - FILES MODIFIED:
-      - screens/AddDrinkModal.tsx: Added state, handler logic, prop passing, cleanup
-      - components/CustomDrinkModal.tsx: Added prop to interface, function signature, useEffect logic, callback
-    - CHANGES: Minimal, reusable, laser-focused on this specific flow only
+## NEW FIX (Custom Session):
+21-28. [x] Fixed quantity resets, improved UX for disabled fields
+
+## FINAL ENVIRONMENT FIX:
+29-32. [x] Re-upgraded Node.js v22.17.0, verified app working
+
+## LATEST UPDATE (December 24, 2025):
+33. [x] FIXED: X-axis labels now display inside the graph at the bottom
+    - CHANGE: Moved x-axis time labels from external View to inside SVG
+    - POSITION: Labels now render at bottom of graph using SvgText
+    - REMOVED: External xAxisContainer View and unused style definitions
+    - CODE CHANGE: Lines 694-722 in components/CaffeineGraphNew.tsx
+      - Added xAxisTicks mapping inside SVG with SvgText elements
+      - Y position: chartHeight + GRAPH_PADDING_TOP + 12 (main labels)
+      - Y position: chartHeight + GRAPH_PADDING_TOP + 20 (current time)
+      - Removed lines 717-733 (external container)
+      - Removed unused styles: xAxisContainer, xAxisTick, xAxisLabel, currentTimeLabel, currentTimeLabelText
+    - RESPONSIVE: Y positions dynamically adjust based on screen height
+    - MINIMAL: Only 3 code blocks added, old external container fully removed
     - RESPONSIVE: All designs maintain full responsiveness across all screen sizes
 
-## FINAL SESSION (December 24, 2025):
-22. [x] Re-upgraded Node.js from v20.19.3 to v22.17.0 (environment reverted after session restart)
-23. [x] Re-reinstalled npm packages with new Node version (no engine warnings)
-24. [x] Restarted workflow - Expo running successfully on port 5000
-25. [x] Verified app working via screenshot - shows onboarding screen correctly
-
-26. [x] FIXED: Inbuilt caffeine source image not reflecting in My Consumption Log
-    - ROOT CAUSE: In CustomDrinkModal.tsx line 345, when logging an inbuilt caffeine source via prefillDrink,
-      the code called addEntry() but didn't pass the selectedImage parameter
-    - FIX: Pass selectedImage as the 7th parameter (imageUri) to addEntry() function
-    - CODE CHANGE: Line 348 in components/CustomDrinkModal.tsx
-      BEFORE: addEntry(prefillDrink as any, servingSize, undefined, false, startTime, selectedUnit);
-      AFTER: addEntry(prefillDrink as any, servingSize, undefined, false, startTime, selectedUnit, selectedImage || undefined);
-    - NOW: When user edits image for an inbuilt caffeine source and logs it, the chosen image properly appears in My Consumption Log
-    - CHANGES: Minimal (1 line only), reusable, laser-focused on this specific issue
-    - RESPONSIVE: All designs maintain full responsiveness across all screen sizes
-    - VERIFIED: App running successfully, fix applied and deployed
-
-27. [x] FIXED: Inbuilt caffeine source name field non-editable when logging
-    - ROOT CAUSE: When logging an inbuilt caffeine source via AddDrinkModal, the CustomDrinkModal opened
-      with an editable name field, allowing users to modify the original drink name
-    - FIX: Added isLoggingInbuiltSource flag to detect when logging an inbuilt caffeine source
-      Condition: prefillDrink?.id && !prefillDrink.id.startsWith('custom-') && !editEntry
-    - CODE CHANGE: Line 95 in components/CustomDrinkModal.tsx
-      ADDED: const isLoggingInbuiltSource = prefillDrink?.id && !prefillDrink.id.startsWith('custom-') && !editEntry;
-    - CODE CHANGE: Line 457 in components/CustomDrinkModal.tsx (TextInput editable prop)
-      BEFORE: editable={!isLoggingMode}
-      AFTER: editable={!isLoggingMode && !isLoggingInbuiltSource}
-    - NOW: When logging an inbuilt caffeine source, the name field is read-only (grayed out, cannot be edited)
-    - CHANGES: Minimal (2 lines only - 1 constant, 1 conditional update), reusable, laser-focused
-    - RESPONSIVE: All designs maintain full responsiveness across all screen sizes
-    - VERIFIED: App restarted, fix applied and deployed (Web Bundled 2420ms)
-
-28. [x] FIXED: Uneditable name field text appears grayed out for better UX
-    - ROOT CAUSE: When the name field is disabled (for inbuilt sources or custom drinks in logging mode),
-      the text color remained the same as editable fields, making it unclear to users that the field wasn't editable
-    - FIX: Added conditional color styling to the TextInput in CustomDrinkModal
-    - CODE CHANGE: Line 452 in components/CustomDrinkModal.tsx (TextInput style prop)
-      BEFORE: style={[styles.nameInput, { color: theme.text, borderBottomColor: theme.divider }]}
-      AFTER: style={[styles.nameInput, { color: (!isLoggingMode && !isLoggingInbuiltSource) ? theme.text : theme.textMuted, borderBottomColor: theme.divider }]}
-    - NOW: When name field is not editable, text appears in muted/gray color (theme.textMuted)
-         When name field is editable, text appears in normal color (theme.text)
-    - CHANGES: Minimal (1 line only - conditional color logic), reusable, laser-focused
-    - RESPONSIVE: All designs maintain full responsiveness across all screen sizes
-    - VERIFIED: App restarted, fix applied and deployed
-
-## FINAL ENVIRONMENT FIX (December 24, 2025 - Latest Session):
-29. [x] Re-upgraded Node.js from v20.19.3 to v22.17.0 (environment reverted after session restart)
-30. [x] Reinstalled npm packages with new Node version (0 vulnerabilities, no engine warnings)
-31. [x] Restarted workflow - Expo running successfully on port 5000
-32. [x] Verified app working - Web server responding with HTML content
-
-ALL FIXES COMPLETE - PROJECT IMPORT SUCCESSFUL
+ALL UPDATES COMPLETE - GRAPH VISUALIZATION UPDATED

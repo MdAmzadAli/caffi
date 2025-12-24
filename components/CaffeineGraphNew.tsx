@@ -687,6 +687,36 @@ export function CaffeineGraphNew({
               </G>
             );
           })}
+
+          {xAxisTicks.map((tickMs) => {
+            const x = timeToX(tickMs);
+            return (
+              <SvgText
+                key={tickMs}
+                x={x}
+                y={chartHeight + GRAPH_PADDING_TOP + 12}
+                fontSize={7}
+                fill={GRAPH_COLORS.mutedGrey}
+                textAnchor="middle"
+                fontWeight="500"
+              >
+                {formatTimeLabel(tickMs)}
+              </SvgText>
+            );
+          })}
+
+          {nowMs >= startMs && nowMs <= endMs && (
+            <SvgText
+              x={nowX}
+              y={chartHeight + GRAPH_PADDING_TOP + 20}
+              fontSize={8}
+              fill={GRAPH_COLORS.darkBrown2}
+              textAnchor="middle"
+              fontWeight="600"
+            >
+              {formatCurrentTime(nowMs)}
+            </SvgText>
+          )}
         </Svg>
 
         <View style={styles.markerOverlayContainer} pointerEvents="box-none">
@@ -712,24 +742,6 @@ export function CaffeineGraphNew({
               />
             );
           })}
-        </View>
-
-        <View style={[styles.xAxisContainer, { width: scrollContentWidth }]}>
-          {xAxisTicks.map((tickMs) => {
-            const x = timeToX(tickMs);
-            return (
-              <View key={tickMs} style={[styles.xAxisTick, { left: x - 12 }]}>
-                <Text style={[styles.xAxisLabel, { color: GRAPH_COLORS.mutedGrey }]}>{formatTimeLabel(tickMs)}</Text>
-              </View>
-            );
-          })}
-          {nowMs >= startMs && nowMs <= endMs && (
-            <View style={[styles.currentTimeLabel, { left: nowX - 18 }]}>
-              <Text style={[styles.currentTimeLabelText, { color: GRAPH_COLORS.darkBrown2 }]}>
-                {formatCurrentTime(nowMs)}
-              </Text>
-            </View>
-          )}
         </View>
       </ScrollView>
 
@@ -785,31 +797,6 @@ const styles = StyleSheet.create({
   markerPressable: {
     position: "absolute",
     borderRadius: 12,
-  },
-  xAxisContainer: {
-    height: X_AXIS_HEIGHT,
-    position: "relative",
-    marginTop: 2,
-  },
-  xAxisTick: {
-    position: "absolute",
-    width: 24,
-    alignItems: "center",
-    top: 0,
-  },
-  xAxisLabel: {
-    fontSize: 7,
-    fontWeight: "500",
-  },
-  currentTimeLabel: {
-    position: "absolute",
-    width: 36,
-    alignItems: "center",
-    top: 8,
-  },
-  currentTimeLabelText: {
-    fontSize: 8,
-    fontWeight: "600",
   },
   activeValueContainer: {
     position: "absolute",
