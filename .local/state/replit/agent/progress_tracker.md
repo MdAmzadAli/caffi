@@ -132,4 +132,12 @@
 31. [x] Restarted workflow - Expo running successfully on port 5000
 32. [x] Verified app working - Web Bundled 21529ms with 1458 modules
 
+## LATEST UPDATES (December 24, 2025):
+33. [x] FIXED: "ml" radio option hidden for chocolate category in CustomDrinkModal
+34. [x] IMPROVED: Graph stacking logic now checks both X and Y axis proximity (28px/15px threshold)
+    - Modified `getEventMarkersWithCollision` in `utils/graphUtils.ts` to include Y-axis distance check
+    - Updated `CaffeineGraphNew.tsx` to utilize the improved stacking logic
+    - Ensures events with significantly different caffeine levels are shown separately even if close in time
+    - Changes are minimal, reusable, and fully responsive across all screen sizes
+
 ALL FIXES COMPLETE

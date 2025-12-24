@@ -33,6 +33,7 @@ import {
   getMaxCaffeineInSleepWindowForDisplay,
   getSleepWindowStatusMessage,
   parseBedtimeToMs,
+  getEventMarkersWithCollision,
 } from "@/utils/graphUtils";
 import { useRealTimeNow } from "@/hooks/useRealTimeNow";
 
@@ -396,38 +397,33 @@ export function CaffeineGraphNew({
 
   const eventGroups = useMemo(() => {
     const visibleEvents = events
-      .map(evt => {
+      .filter(evt => {
         const eventMs = Date.parse(evt.timestampISO);
-        if (eventMs < startMs || eventMs > endMs) return null;
-        const x = timeToX(eventMs);
-        const y = mgToY(getActiveAtTime(events, eventMs, halfLifeHours));
-        return { evt, x, y, eventMs };
-      })
-      .filter((e): e is NonNullable<typeof e> => e !== null)
-      .sort((a, b) => a.eventMs - b.eventMs);
+        return eventMs >= startMs && eventMs <= endMs;
+      });
 
-    const groups: EventGroup[] = [];
-    let lastX = -Infinity;
-    for (const item of visibleEvents) {
-      const lastGroup = groups[groups.length - 1];
-      if (lastGroup && Math.abs(item.x - lastX) <= GROUP_PROXIMITY_PX) {
-        lastGroup.events.push(item.evt);
-        lastX = item.x;
-      } else {
-        const iconY = Math.max(GRAPH_PADDING_TOP + MARKER_IMAGE_SIZE / 2, item.y - MARKER_IMAGE_SIZE / 2 - 6);
-        groups.push({
-          events: [item.evt],
-          x: item.x,
-          y: item.y,
-          iconY,
-          category: item.evt.category || 'coffee',
-          imageUri: item.evt.imageUri,
-        });
-        lastX = item.x;
-      }
-    }
+    const markers = getEventMarkersWithCollision(
+      visibleEvents,
+      timeToX,
+      mgToY,
+      GROUP_PROXIMITY_PX
+    );
 
-    return { visibleEvents, groups };
+    const groups: EventGroup[] = markers.map(m => {
+      const itemY = mgToY(m.event.mg);
+      const iconY = Math.max(GRAPH_PADDING_TOP + MARKER_IMAGE_SIZE / 2, itemY - MARKER_IMAGE_SIZE / 2 - 6);
+      
+      return {
+        events: m.clustered,
+        x: m.x,
+        y: m.y,
+        iconY,
+        category: m.event.category || 'coffee',
+        imageUri: m.event.imageUri,
+      };
+    });
+
+    return { visibleEvents: markers, groups };
   }, [events, startMs, endMs, timeToX, mgToY, halfLifeHours]);
 
   const handleMarkerPress = useCallback((group: EventGroup, pageX: number, pageY: number) => {
@@ -604,7 +600,7 @@ export function CaffeineGraphNew({
 
           {eventGroups.visibleEvents.map(item => (
             <Circle
-              key={`dot-${item.evt.id}`}
+              key={`dot-${item.event.id}`}
               cx={item.x}
               cy={item.y}
               r={3}
