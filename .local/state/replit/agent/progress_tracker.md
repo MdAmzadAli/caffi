@@ -28,4 +28,14 @@
     - Changes are laser-focused and minimal - pure functionality, no design changes
     - Design remains responsive on all screen sizes
 
+14. [x] FIXED: Custom drink duplication when logging from "MY CUSTOM DRINKS" section
+    - ROOT CAUSE: Line 335 in CustomDrinkModal.tsx had condition `!prefillDrink.id.startsWith('custom-')`
+      which only handled inbuilt drinks, causing custom drinks to fall through to else block
+      which called `addCustomDrink()` and created duplicate entries
+    - FIX: Changed condition from `prefillDrink?.id && !prefillDrink.id.startsWith('custom-')`
+      to `prefillDrink?.id` to handle both custom and inbuilt drinks in logging/prefill mode
+    - NOW: "MY CUSTOM DRINKS" section only grows when user explicitly creates new drink via '+' button
+    - Existing custom drinks can be logged without creating duplicates
+    - Changes are minimal (1 line) and responsive on all screen sizes
+
 ALL FIXES COMPLETE ✓
