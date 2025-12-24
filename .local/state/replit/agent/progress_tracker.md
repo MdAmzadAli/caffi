@@ -61,7 +61,7 @@
 19. [x] Restarted workflow - Expo running successfully on port 5000
 20. [x] Verified app working via screenshot - shows onboarding screen correctly
 
-## NEW FIX (Current Session):
+## NEW FIX 1 (Session 2):
 21. [x] FIXED: Quantity resets to 1 when transitioning from custom drink edit to logging mode
     - ROOT CAUSE: When editing a custom drink, user adjusts quantity in edit interface
       After clicking Save, modal transitions to logging mode but CustomDrinkModal's useEffect
@@ -79,5 +79,20 @@
       - components/CustomDrinkModal.tsx: Added prop to interface, function signature, useEffect logic, callback
     - CHANGES: Minimal, reusable, laser-focused on this specific flow only
     - RESPONSIVE: All designs maintain full responsiveness across all screen sizes
+
+## NEW FIX 2 (Session 2):
+22. [x] FIXED: Inbuilt sources not reflecting name/image edits in Consumption Log
+    - ROOT CAUSE: When logging inbuilt source (e.g., Coffee) with edited name/image,
+      handleAdd was passing original `prefillDrink` to addEntry, ignoring `drinkName` and `selectedImage` edits.
+      Entry was created with original name/image, not the user's modifications.
+    - FIX: Create a modified drink object with user's edits before passing to addEntry
+      `const modifiedDrink = { ...prefillDrink, name: drinkName.trim(), imageUri: selectedImage || undefined };`
+      Then pass `modifiedDrink` instead of `prefillDrink` to addEntry
+    - NOW: When logging inbuilt sources with name/image edits, the modified values properly reflect in Consumption Log
+    - FILES MODIFIED:
+      - components/CustomDrinkModal.tsx: Line 346-349 in handleAdd, inbuilt source logging path
+    - CHANGES: Minimal (1 line), laser-focused, reusable pattern
+    - RESPONSIVE: No design changes, maintains full responsiveness
+    - SCOPE: Only affects inbuilt source logging flow, no other flows touched
 
 ALL FIXES COMPLETE ✓
