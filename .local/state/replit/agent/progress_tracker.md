@@ -86,4 +86,16 @@
 24. [x] Restarted workflow - Expo running successfully on port 5000
 25. [x] Verified app working via screenshot - shows onboarding screen correctly
 
+26. [x] FIXED: Inbuilt caffeine source image not reflecting in My Consumption Log
+    - ROOT CAUSE: In CustomDrinkModal.tsx line 345, when logging an inbuilt caffeine source via prefillDrink,
+      the code called addEntry() but didn't pass the selectedImage parameter
+    - FIX: Pass selectedImage as the 7th parameter (imageUri) to addEntry() function
+    - CODE CHANGE: Line 348 in components/CustomDrinkModal.tsx
+      BEFORE: addEntry(prefillDrink as any, servingSize, undefined, false, startTime, selectedUnit);
+      AFTER: addEntry(prefillDrink as any, servingSize, undefined, false, startTime, selectedUnit, selectedImage || undefined);
+    - NOW: When user edits image for an inbuilt caffeine source and logs it, the chosen image properly appears in My Consumption Log
+    - CHANGES: Minimal (1 line only), reusable, laser-focused on this specific issue
+    - RESPONSIVE: All designs maintain full responsiveness across all screen sizes
+    - VERIFIED: App running successfully, fix applied and deployed
+
 ALL FIXES COMPLETE ✓
