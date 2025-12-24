@@ -44,6 +44,7 @@ interface CustomDrinkModalProps {
   prefillDrink?: { id?: string; name: string; caffeinePer100ml: number; defaultServingMl: number; category?: string; sizes?: { name: string; ml: number }[] } | null;
   editCustomDrink?: { id: string; name: string; caffeinePer100ml: number; defaultServingMl: number; category?: string; sizes?: { name: string; ml: number }[] } | null;
   onSaveCustomDrink?: () => void;
+  isLoggingCustomDrinkOnly?: boolean;
 }
 
 const getCategoryImageSource = (category: string) => {
@@ -76,7 +77,7 @@ const getInbuiltDrinkCaffeinePer100ml = (name: string, category: string): number
 const UNITS = ["cup", "shot", "ml", "oz", "teaspoon", "tablespoon", "glass", "can", "bottle", "scoop", "pint", "liter", "fl oz", "mug", "bar"];
 const INBUILT_CATEGORIES = ["coffee", "tea", "energy", "soda", "chocolate"];
 
-export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDrink, editCustomDrink, onSaveCustomDrink }: CustomDrinkModalProps) {
+export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDrink, editCustomDrink, onSaveCustomDrink, isLoggingCustomDrinkOnly }: CustomDrinkModalProps) {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const { addEntry, updateEntry, addCustomDrink, updateCustomDrink, profile, entries, customDrinks } = useCaffeineStore();
@@ -162,14 +163,21 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
       setCaffeineMg(caffeine.toString());
       setStartTime(new Date());
       setStartTimeLabel("now");
-      const imgUri = (prefillDrink as any).imageUri;
-      if (imgUri) {
-        setSelectedImage(imgUri);
-      } else if (prefillDrink.category) {
-        setSelectedImage(`category:${prefillDrink.category}`);
+      if (isLoggingCustomDrinkOnly) {
+        const imgUri = (prefillDrink as any).imageUri;
+        if (imgUri) {
+          setSelectedImage(imgUri);
+        }
+      } else {
+        const imgUri = (prefillDrink as any).imageUri;
+        if (imgUri) {
+          setSelectedImage(imgUri);
+        } else if (prefillDrink.category) {
+          setSelectedImage(`category:${prefillDrink.category}`);
+        }
       }
     }
-  }, [editEntry, prefillDrink, editCustomDrink, visible]);
+  }, [editEntry, prefillDrink, editCustomDrink, visible, isLoggingCustomDrinkOnly]);
 
   const translateY = useSharedValue(MODAL_HEIGHT);
   const startY = useSharedValue(0);
@@ -398,53 +406,68 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
             <View
               style={styles.scrollContent}
               >
-              <View style={styles.topSection}>
-                <Pressable 
-                  onPress={() => setShowImagePicker(true)}
-                  style={[styles.chooseIconBox, { backgroundColor: theme.backgroundSecondary }]}
-                >
-                  {selectedImage ? (
-                    selectedImage.startsWith("category:") ? (
-                      <Image 
-                        source={getCategoryImageSource(selectedImage.replace("category:", ""))} 
-                        style={styles.selectedImage} 
-                        resizeMode="cover" 
-                      />
-                    ) : selectedImage.startsWith("preset:") ? (
-                      (() => {
-                        const preset = PRESET_IMAGES.find(p => p.id === selectedImage.replace("preset:", ""));
-                        return preset ? (
-                          <Image source={preset.image} style={styles.selectedImage} resizeMode="cover" />
+              {!isLoggingCustomDrinkOnly && (
+                <>
+                  <View style={styles.topSection}>
+                    <Pressable 
+                      onPress={() => setShowImagePicker(true)}
+                      style={[styles.chooseIconBox, { backgroundColor: theme.backgroundSecondary }]}
+                    >
+                      {selectedImage ? (
+                        selectedImage.startsWith("category:") ? (
+                          <Image 
+                            source={getCategoryImageSource(selectedImage.replace("category:", ""))} 
+                            style={styles.selectedImage} 
+                            resizeMode="cover" 
+                          />
+                        ) : selectedImage.startsWith("preset:") ? (
+                          (() => {
+                            const preset = PRESET_IMAGES.find(p => p.id === selectedImage.replace("preset:", ""));
+                            return preset ? (
+                              <Image source={preset.image} style={styles.selectedImage} resizeMode="cover" />
+                            ) : (
+                              <Feather name="coffee" size={32} color={Colors.light.accent} />
+                            );
+                          })()
                         ) : (
-                          <Feather name="coffee" size={32} color={Colors.light.accent} />
-                        );
-                      })()
-                    ) : (
-                      <Image source={{ uri: selectedImage }} style={styles.selectedImage} />
-                    )
-                  ) : (
-                    <>
-                      <Feather name="plus" size={28} color={theme.textMuted} />
-                      <ThemedText type="caption" muted>Choose</ThemedText>
-                    </>
-                  )}
-                </Pressable>
+                          <Image source={{ uri: selectedImage }} style={styles.selectedImage} />
+                        )
+                      ) : (
+                        <>
+                          <Feather name="plus" size={28} color={theme.textMuted} />
+                          <ThemedText type="caption" muted>Choose</ThemedText>
+                        </>
+                      )}
+                    </Pressable>
 
-                <View style={styles.nameInputSection}>
-                  <ThemedText type="caption" muted>
-                    You are {(prefillDrink?.category === "chocolate" || editEntry?.category === "chocolate") ? "eating" : "drinking"} {quantity} {selectedUnit} of
-                  </ThemedText>
-                  <TextInput
-                    style={[styles.nameInput, { color: theme.text, borderBottomColor: theme.divider }]}
-                    placeholder="Enter name"
-                    placeholderTextColor={theme.textMuted}
-                    value={drinkName}
-                    onChangeText={setDrinkName}
-                  />
-                </View>
-              </View>
+                    <View style={styles.nameInputSection}>
+                      <ThemedText type="caption" muted>
+                        You are {(prefillDrink?.category === "chocolate" || editEntry?.category === "chocolate") ? "eating" : "drinking"} {quantity} {selectedUnit} of
+                      </ThemedText>
+                      <TextInput
+                        style={[styles.nameInput, { color: theme.text, borderBottomColor: theme.divider }]}
+                        placeholder="Enter name"
+                        placeholderTextColor={theme.textMuted}
+                        value={drinkName}
+                        onChangeText={setDrinkName}
+                      />
+                    </View>
+                  </View>
 
-              <View style={[styles.divider, { backgroundColor: theme.divider }]} />
+                  <View style={[styles.divider, { backgroundColor: theme.divider }]} />
+                </>
+              )}
+
+              {isLoggingCustomDrinkOnly && (
+                <>
+                  <View style={styles.loggingDrinkHeader}>
+                    <ThemedText type="h4" numberOfLines={2} style={{ flex: 1 }}>
+                      {drinkName}
+                    </ThemedText>
+                  </View>
+                  <View style={[styles.divider, { backgroundColor: theme.divider }]} />
+                </>
+              )}
 
               <View style={styles.quantityRow}>
                 <ThemedText type="h1" style={styles.quantityNumber}>{quantity}</ThemedText>
@@ -468,39 +491,55 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
 
               {prefillDrink ? (
                 <View style={styles.prefillUnitSection}>
-                  <Pressable
-                    onPress={() => setSelectedUnit(getUnitForDrink(prefillDrink.name, prefillDrink.category, prefillDrink.sizes))}
-                    style={styles.radioRow}
-                  >
-                    <View style={[styles.radioCircle, (selectedUnit !== "ml" || prefillDrink.category === "custom") && styles.radioCircleActive]}>
-                      {(selectedUnit !== "ml" || prefillDrink.category === "custom") && <View style={styles.radioInner} />}
-                    </View>
-                    <ThemedText type="body" style={{ flex: 1 }}>
-                      {getUnitForDrink(prefillDrink.name, prefillDrink.category, prefillDrink.sizes)}
-                    </ThemedText>
-                    <View style={styles.caffeineInputWrapper}>
-                      <ThemedText type="body" style={{ color: theme.text }}>
-                        {(parseInt(caffeineMg) || 0) * quantity}
+                  {isLoggingCustomDrinkOnly ? (
+                    <View style={styles.readOnlyUnitRow}>
+                      <ThemedText type="body" style={{ flex: 1 }}>
+                        {getUnitForDrink(prefillDrink.name, prefillDrink.category, prefillDrink.sizes)}
                       </ThemedText>
-                      <ThemedText type="body" muted> mg</ThemedText>
-                    </View>
-                  </Pressable>
-                  {prefillDrink.category !== "custom" && (
-                    <Pressable
-                      onPress={() => setSelectedUnit("ml")}
-                      style={styles.radioRow}
-                    >
-                      <View style={[styles.radioCircle, selectedUnit === "ml" && styles.radioCircleActive]}>
-                        {selectedUnit === "ml" && <View style={styles.radioInner} />}
-                      </View>
-                      <ThemedText type="body" style={{ flex: 1 }}>ml</ThemedText>
                       <View style={styles.caffeineInputWrapper}>
                         <ThemedText type="body" style={{ color: theme.text }}>
-                          {formatCaffeine((prefillDrink.caffeinePer100ml / 100) * quantity)}
+                          {(parseInt(caffeineMg) || 0) * quantity}
                         </ThemedText>
                         <ThemedText type="body" muted> mg</ThemedText>
                       </View>
-                    </Pressable>
+                    </View>
+                  ) : (
+                    <>
+                      <Pressable
+                        onPress={() => setSelectedUnit(getUnitForDrink(prefillDrink.name, prefillDrink.category, prefillDrink.sizes))}
+                        style={styles.radioRow}
+                      >
+                        <View style={[styles.radioCircle, (selectedUnit !== "ml" || prefillDrink.category === "custom") && styles.radioCircleActive]}>
+                          {(selectedUnit !== "ml" || prefillDrink.category === "custom") && <View style={styles.radioInner} />}
+                        </View>
+                        <ThemedText type="body" style={{ flex: 1 }}>
+                          {getUnitForDrink(prefillDrink.name, prefillDrink.category, prefillDrink.sizes)}
+                        </ThemedText>
+                        <View style={styles.caffeineInputWrapper}>
+                          <ThemedText type="body" style={{ color: theme.text }}>
+                            {(parseInt(caffeineMg) || 0) * quantity}
+                          </ThemedText>
+                          <ThemedText type="body" muted> mg</ThemedText>
+                        </View>
+                      </Pressable>
+                      {prefillDrink.category !== "custom" && (
+                        <Pressable
+                          onPress={() => setSelectedUnit("ml")}
+                          style={styles.radioRow}
+                        >
+                          <View style={[styles.radioCircle, selectedUnit === "ml" && styles.radioCircleActive]}>
+                            {selectedUnit === "ml" && <View style={styles.radioInner} />}
+                          </View>
+                          <ThemedText type="body" style={{ flex: 1 }}>ml</ThemedText>
+                          <View style={styles.caffeineInputWrapper}>
+                            <ThemedText type="body" style={{ color: theme.text }}>
+                              {formatCaffeine((prefillDrink.caffeinePer100ml / 100) * quantity)}
+                            </ThemedText>
+                            <ThemedText type="body" muted> mg</ThemedText>
+                          </View>
+                        </Pressable>
+                      )}
+                    </>
                   )}
                 </View>
               ) : isEditingInbuiltSource ? (
@@ -688,6 +727,17 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
 }
 
 const styles = StyleSheet.create({
+  loggingDrinkHeader: {
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.sm,
+    marginBottom: Spacing.sm,
+  },
+  readOnlyUnitRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: Spacing.md,
+    borderRadius: BorderRadius.sm,
+  },
   overlay: {
     ...StyleSheet.absoluteFillObject,
   },

@@ -742,6 +742,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
         prefillDrink={prefillDrink}
         editCustomDrink={editingCustomDrink}
         onSaveCustomDrink={handleSaveCustomDrink}
+        isLoggingCustomDrinkOnly={prefillDrink ? prefillDrink.id?.startsWith('custom-') : false}
       />
     </Modal>
   );

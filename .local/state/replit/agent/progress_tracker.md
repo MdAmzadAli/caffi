@@ -50,11 +50,20 @@
     - Impact: Users can now enter any quantity (11, 12, 15, 20+, etc.)
     - Decrement still maintains minimum of 1 via Math.max(q - 1, 1)
 
+15. [x] Fixed custom drink logging to only allow quantity and time modifications
+    - Files: components/CustomDrinkModal.tsx, screens/AddDrinkModal.tsx
+    - Added: isLoggingCustomDrinkOnly prop to detect when logging a custom drink (vs editing it)
+    - Conditional rendering: Hides name input, image picker, and caffeine editing fields
+    - Display-only: Shows drink name in header and unit/caffeine info as read-only
+    - Responsive: Minimal code changes, reusable approach
+    - Impact: When clicking a custom drink in "My Custom Drinks", only quantity and time can be modified
+
 ## NOTES:
 - All fixes are minimal, responsive, and laser-focused
-- Fourteen separate issues identified and fixed without touching other code
-- App verified running on port 5000 with all changes live
+- Fifteen separate issues identified and fixed without touching other code
+- App verified running on port 5000 with all changes live and compiling successfully
 - Each fix is reusable and maintains consistency across flows
 - All parameters properly ordered and optional where needed
+- Latest fix distinguishes between logging a custom drink entry vs editing the drink definition
 
 ALL FIXES COMPLETE [x]
