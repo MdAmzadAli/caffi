@@ -61,4 +61,23 @@
 19. [x] Restarted workflow - Expo running successfully on port 5000
 20. [x] Verified app working via screenshot - shows onboarding screen correctly
 
+## NEW FIX (Current Session):
+21. [x] FIXED: Quantity resets to 1 when transitioning from custom drink edit to logging mode
+    - ROOT CAUSE: When editing a custom drink, user adjusts quantity in edit interface
+      After clicking Save, modal transitions to logging mode but CustomDrinkModal's useEffect
+      always set quantity back to 1 when prefillDrink loaded (line 159)
+    - FIX: Flow-specific state management (only affects edit→log transition, not other flows)
+      1. Added `quantityAfterEdit` state in AddDrinkModal to temporarily store quantity
+      2. In handleSaveCustomDrink, extract drink.quantity and store it
+      3. Added `initialQuantityAfterEdit` prop to CustomDrinkModal
+      4. Pass this prop when rendering CustomDrinkModal
+      5. In CustomDrinkModal useEffect, use initialQuantityAfterEdit ?? 1 when loading prefillDrink
+      6. Pass quantity in onSaveCustomDrink callback object
+      7. Reset quantityAfterEdit when closing or adding entry
+    - FILES MODIFIED:
+      - screens/AddDrinkModal.tsx: Added state, handler logic, prop passing, cleanup
+      - components/CustomDrinkModal.tsx: Added prop to interface, function signature, useEffect logic, callback
+    - CHANGES: Minimal, reusable, laser-focused on this specific flow only
+    - RESPONSIVE: All designs maintain full responsiveness across all screen sizes
+
 ALL FIXES COMPLETE ✓

@@ -45,6 +45,7 @@ interface CustomDrinkModalProps {
   editCustomDrink?: { id: string; name: string; caffeinePer100ml: number; defaultServingMl: number; category?: string; sizes?: { name: string; ml: number }[] } | null;
   onSaveCustomDrink?: (drink?: any) => void;
   isLoggingMode?: boolean;
+  initialQuantityAfterEdit?: number;
 }
 
 const getCategoryImageSource = (category: string) => {
@@ -77,7 +78,7 @@ const getInbuiltDrinkCaffeinePer100ml = (name: string, category: string): number
 const UNITS = ["cup", "shot", "ml", "oz", "teaspoon", "tablespoon", "glass", "can", "bottle", "scoop", "pint", "liter", "fl oz", "mug", "bar"];
 const INBUILT_CATEGORIES = ["coffee", "tea", "energy", "soda", "chocolate"];
 
-export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDrink, editCustomDrink, onSaveCustomDrink, isLoggingMode }: CustomDrinkModalProps) {
+export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDrink, editCustomDrink, onSaveCustomDrink, isLoggingMode, initialQuantityAfterEdit }: CustomDrinkModalProps) {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const { addEntry, updateEntry, addCustomDrink, updateCustomDrink, profile, entries, customDrinks } = useCaffeineStore();
@@ -156,7 +157,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
       }
     } else if (prefillDrink && visible && !editEntry) {
       setDrinkName(prefillDrink.name);
-      setQuantity(1);
+      setQuantity(initialQuantityAfterEdit ?? 1);
       const bestUnit = getUnitForDrink(prefillDrink.name, prefillDrink.category, prefillDrink.sizes);
       setSelectedUnit(bestUnit);
       const caffeine = Math.round((prefillDrink.caffeinePer100ml * prefillDrink.defaultServingMl) / 100);
@@ -170,7 +171,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
         setSelectedImage(`category:${prefillDrink.category}`);
       }
     }
-  }, [editEntry, prefillDrink, editCustomDrink, visible]);
+  }, [editEntry, prefillDrink, editCustomDrink, visible, initialQuantityAfterEdit]);
 
   const translateY = useSharedValue(MODAL_HEIGHT);
   const startY = useSharedValue(0);
@@ -337,6 +338,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
           caffeinePer100ml: parseInt(caffeineMg) || 0,
           sizes: [{ name: selectedUnit, ml: 100 }],
           imageUri: selectedImage || undefined,
+          quantity,
         });
       } else if (prefillDrink?.id) {
         const servingSize = selectedUnit === "ml" ? quantity : prefillDrink.defaultServingMl * quantity;
