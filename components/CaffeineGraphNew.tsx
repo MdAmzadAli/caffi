@@ -788,8 +788,11 @@ const styles = StyleSheet.create({
   },
   xAxisContainer: {
     height: X_AXIS_HEIGHT,
-    position: "relative",
-    marginTop: 2,
+    position: "absolute",
+    bottom: GRAPH_PADDING_BOTTOM,
+    left: Y_AXIS_WIDTH,
+    right: 0,
+    zIndex: 5,
   },
   xAxisTick: {
     position: "absolute",
