@@ -113,4 +113,17 @@
     - RESPONSIVE: All designs maintain full responsiveness across all screen sizes
     - VERIFIED: App restarted, fix applied and deployed (Web Bundled 2420ms)
 
+28. [x] FIXED: Uneditable name field text appears grayed out for better UX
+    - ROOT CAUSE: When the name field is disabled (for inbuilt sources or custom drinks in logging mode),
+      the text color remained the same as editable fields, making it unclear to users that the field wasn't editable
+    - FIX: Added conditional color styling to the TextInput in CustomDrinkModal
+    - CODE CHANGE: Line 452 in components/CustomDrinkModal.tsx (TextInput style prop)
+      BEFORE: style={[styles.nameInput, { color: theme.text, borderBottomColor: theme.divider }]}
+      AFTER: style={[styles.nameInput, { color: (!isLoggingMode && !isLoggingInbuiltSource) ? theme.text : theme.textMuted, borderBottomColor: theme.divider }]}
+    - NOW: When name field is not editable, text appears in muted/gray color (theme.textMuted)
+         When name field is editable, text appears in normal color (theme.text)
+    - CHANGES: Minimal (1 line only - conditional color logic), reusable, laser-focused
+    - RESPONSIVE: All designs maintain full responsiveness across all screen sizes
+    - VERIFIED: App restarted, fix applied and deployed
+
 ALL FIXES COMPLETE ✓
