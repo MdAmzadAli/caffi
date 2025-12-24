@@ -497,7 +497,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
                       <ThemedText type="body" muted> mg</ThemedText>
                     </View>
                   </Pressable>
-                  {prefillDrink.category !== "custom" && (
+                  {prefillDrink.category !== "custom" && prefillDrink.category !== "chocolate" && (
                     <Pressable
                       onPress={() => setSelectedUnit("ml")}
                       style={styles.radioRow}
