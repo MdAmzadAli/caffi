@@ -944,16 +944,11 @@ function RecentEntryItem({ entry, onPress }: RecentEntryItemProps) {
   };
 
   const servingLabel = (() => {
-    if (!entry.unit) {
-      return entry.servingSize >= 100 ? `${(entry.servingSize / 100).toFixed(2).replace(/\.?0+$/, '')} cup` : `${entry.servingSize}ml`;
-    }
-    if (entry.unit === "ml") {
-      return `${entry.servingSize}ml`;
-    }
     const INBUILT_CATEGORIES = ["coffee", "tea", "energy", "soda", "chocolate"];
-    const drink = INBUILT_CATEGORIES.includes(entry.category) ? require("@/store/caffeineStore").DRINK_DATABASE.find((d: any) => d.name.toLowerCase() === entry.name.toLowerCase() && d.category === entry.category) : null;
-    const divisor = drink?.defaultServingMl || 100;
-    return `${(entry.servingSize / divisor).toFixed(2).replace(/\.?0+$/, '')} ${entry.unit}`;
+    const isCustom = entry.category === "custom" || !INBUILT_CATEGORIES.includes(entry.category);
+    const drink = !isCustom ? require("@/store/caffeineStore").DRINK_DATABASE.find((d: any) => d.name.toLowerCase() === entry.name.toLowerCase() && d.category === entry.category) : null;
+    const label = require("@/utils/getServingLabel").getServingLabel(entry.servingSize, entry.unit, drink?.defaultServingMl, isCustom);
+    return `${label.quantity} ${label.unit}`;
   })();
   const imageSource = getImageSourceForDrinkModal(entry);
 

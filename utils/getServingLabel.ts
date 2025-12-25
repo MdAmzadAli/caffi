@@ -1,7 +1,14 @@
 // Utility to format serving size into a human-readable label
 // Used to show dynamic serving amounts like "2 cups", "3 tablespoon", "250 ml"
 
-export function getServingLabel(servingSize: number, unit?: string, defaultServingMl?: number): { quantity: string; unit: string } {
+export function getServingLabel(servingSize: number, unit?: string, defaultServingMl?: number, isCustom?: boolean): { quantity: string; unit: string } {
+  // For custom drinks, servingSize is exactly the quantity
+  if (isCustom) {
+    return {
+      quantity: servingSize.toFixed(2).replace(/\.?0+$/, ""),
+      unit: unit || "cup",
+    };
+  }
   // If unit is provided, use it with calculated quantity
   if (unit) {
     if (unit === "ml") {

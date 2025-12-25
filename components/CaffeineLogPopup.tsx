@@ -301,8 +301,9 @@ export function CaffeineLogPopup({
                   <View style={styles.headerTextWrap}>
                     {(() => {
                       const INBUILT_CATEGORIES = ["coffee", "tea", "energy", "soda", "chocolate"];
-                      const drink = INBUILT_CATEGORIES.includes(entry.category) ? require("@/store/caffeineStore").DRINK_DATABASE.find((d: any) => d.name.toLowerCase() === entry.name.toLowerCase() && d.category === entry.category) : null;
-                      const label = getServingLabel(entry.servingSize, entry.unit, drink?.defaultServingMl);
+                      const isCustom = entry.category === "custom" || !INBUILT_CATEGORIES.includes(entry.category);
+                      const drink = !isCustom ? require("@/store/caffeineStore").DRINK_DATABASE.find((d: any) => d.name.toLowerCase() === entry.name.toLowerCase() && d.category === entry.category) : null;
+                      const label = getServingLabel(entry.servingSize, entry.unit, drink?.defaultServingMl, isCustom);
                       return (
                         <Text style={[styles.mutedText, { color: theme.mutedGrey }]}>
                           You {entry.category === "chocolate" ? "ate" : "drank"} {label.quantity} {label.unit} of
