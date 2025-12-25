@@ -723,16 +723,15 @@ export function CaffeineGraphNew({
               </View>
             );
           })}
+          {nowMs >= startMs && nowMs <= endMs && (
+            <View style={[styles.currentTimeLabel, { left: nowX - 18 }]}>
+              <Text style={[styles.currentTimeLabelText, { color: GRAPH_COLORS.darkBrown2 }]}>
+                {formatCurrentTime(nowMs)}
+              </Text>
+            </View>
+          )}
         </View>
       </ScrollView>
-
-      {nowMs >= startMs && nowMs <= endMs && (
-        <View style={[styles.currentTimeLabel, { left: nowX - 18 }]}>
-          <Text style={[styles.currentTimeLabelText, { color: GRAPH_COLORS.darkBrown2 }]}>
-            {formatCurrentTime(nowMs)}
-          </Text>
-        </View>
-      )}
 
       <View style={styles.activeValueContainer}>
         <Text style={[styles.activeValueText, { color: GRAPH_COLORS.darkBrown2 }]}>
@@ -789,10 +788,8 @@ const styles = StyleSheet.create({
   },
   xAxisContainer: {
     height: X_AXIS_HEIGHT,
-    position: "absolute",
-    bottom: X_AXIS_HEIGHT,
-    right: 0,
-    zIndex: 12,
+    position: "relative",
+    marginTop: 2,
   },
   xAxisTick: {
     position: "absolute",
@@ -806,10 +803,9 @@ const styles = StyleSheet.create({
   },
   currentTimeLabel: {
     position: "absolute",
-    zIndex:100,
     width: 36,
     alignItems: "center",
-    top: 0,
+    top: 8,
   },
   currentTimeLabelText: {
     fontSize: 8,
