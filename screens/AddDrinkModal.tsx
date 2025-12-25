@@ -94,6 +94,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
 
   const handleAddCustomDrink = () => {
     setPrefillDrink(null);
+    setCustomDrinkQuantities({});
     setShowCustomDrinkModal(true);
   };
 
@@ -103,7 +104,6 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
     setEditingCustomDrink(null);
     setIsLoggingCustomDrink(false);
     setQuantityAfterEdit(1);
-    setCustomDrinkQuantities({});
     handleCloseAnimated();
   };
 
