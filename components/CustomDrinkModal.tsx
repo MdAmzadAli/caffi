@@ -358,6 +358,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
           imageUri: selectedImage || undefined,
         });
         addEntry(savedDrink, 100 * quantity, undefined, false, startTime, selectedUnit);
+        onSaveCustomDrink?.(savedDrink && { ...savedDrink, quantity });
         closeModal();
         onAdd?.();
       }
