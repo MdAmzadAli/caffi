@@ -71,8 +71,8 @@ const getUnitForDrink = (name: string, category?: string, sizes?: { name: string
   return "cup";
 };
 
-const getInbuiltDrinkCaffeinePer100ml = (name: string, category: string): number | null => {
-  const drink = DRINK_DATABASE.find(d => d.name.toLowerCase() === name.toLowerCase() && d.category === category);
+const getInbuiltDrinkCaffeinePer100ml = (id: string, category: string): number | null => {
+  const drink = DRINK_DATABASE.find(d => d.id === id && d.category === category);
   return drink ? drink.caffeinePer100ml : null;
 };
 
@@ -110,7 +110,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
       setSelectedImage(editEntry.imageUri || null);
       
       if (isEditingInbuiltSource) {
-        const drink = DRINK_DATABASE.find(d => d.name.toLowerCase() === editEntry.name.toLowerCase() && d.category === editEntry.category);
+        const drink = DRINK_DATABASE.find(d => d.id === editEntry.drinkId && d.category === editEntry.category);
         if (drink) {
           const unit = editEntry.unit || getUnitForDrink(drink.name, drink.category);
           const qty = unit === "ml" ? editEntry.servingSize : Math.round((editEntry.caffeineAmount / ((drink.caffeinePer100ml * drink.defaultServingMl) / 100)) * 10) / 10;
@@ -191,7 +191,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
       if (prefillDrink && prefillDrink.category !== "custom") {
         return (prefillDrink.caffeinePer100ml / 100) * quantity;
       } else if (isEditingInbuiltSource && editEntry) {
-        const cpml = getInbuiltDrinkCaffeinePer100ml(editEntry.name, editEntry.category);
+        const cpml = getInbuiltDrinkCaffeinePer100ml(editEntry.drinkId, editEntry.category);
         return cpml ? (cpml / 100) * quantity : 0;
       }
     }
@@ -327,7 +327,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
         if (editEntry.category === "custom") {
           updates.servingSize = quantity;
         } else if (isEditingInbuiltSource) {
-          const drink = DRINK_DATABASE.find(d => d.name.toLowerCase() === editEntry.name.toLowerCase() && d.category === editEntry.category);
+          const drink = DRINK_DATABASE.find(d => d.id === editEntry.drinkId && d.category === editEntry.category);
           if (drink) {
             updates.servingSize = selectedUnit === "ml" ? quantity : drink.defaultServingMl * quantity;
           }
