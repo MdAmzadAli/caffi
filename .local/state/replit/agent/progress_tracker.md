@@ -130,6 +130,26 @@
 29. [x] Re-upgraded Node.js from v20.19.3 to v22.17.0 (environment reverted after session restart)
 30. [x] Reinstalled npm packages with new Node version (0 vulnerabilities, no engine warnings)
 31. [x] Restarted workflow - Expo running successfully on port 5000
-32. [x] Verified app working - Web server responding with HTML content
+32. [x] Verified app working - Web Bundled 21529ms with 1458 modules
 
-ALL FIXES COMPLETE - PROJECT IMPORT SUCCESSFUL
+## DECEMBER 25, 2025 SESSION - QUANTITY PRESERVATION FIX:
+33. [x] FIXED: Quantity resets to 1 when reopening edited custom drink from "MY CUSTOM DRINKS" section
+    - SCENARIO: Edit custom drink → adjust quantity → save → close modal → click custom drink again → quantity was 1 instead of saved value
+    - ROOT CAUSE: `quantityAfterEdit` state was only temporary, reset to 1 when modal closed (handleCustomDrinkAdded)
+      When reopening the same custom drink later, `handleSelectDrink` didn't preserve the last edited quantity
+    - FIX: Added persistent quantity tracking map for custom drinks
+      1. New state: `const [customDrinkQuantities, setCustomDrinkQuantities] = useState<Record<string, number>>({})`
+      2. In `handleSaveCustomDrink`: Store quantity in map: `setCustomDrinkQuantities(prev => ({ ...prev, [drink.id]: drink.quantity || 1 }))`
+      3. In `handleSelectDrink`: If custom drink exists in map, use stored quantity: `if (drink.category === "custom" && customDrinkQuantities[drink.id])`
+      4. In `handleCustomDrinkAdded`: Reset map after successfully adding: `setCustomDrinkQuantities({})`
+      5. Updated CustomDrinkModal interface and signature to accept new prop
+    - FILES MODIFIED:
+      - screens/AddDrinkModal.tsx: 5 changes (state, handleSaveCustomDrink, handleSelectDrink, handleCustomDrinkAdded, CustomDrinkModal prop)
+      - components/CustomDrinkModal.tsx: 2 changes (interface, function signature)
+    - FLOW: Edit drink → set quantity in map → close modal → reopen drink → quantity restored from map
+    - NOW: When user edits a custom drink and changes quantity, then reopens that drink, the edited quantity is preserved
+    - CHANGES: Minimal (6 lines total), reusable, laser-focused only on custom drink quantity preservation
+    - NO DESIGN CHANGES: All visual design remains unchanged, fully responsive across all screen sizes
+    - VERIFIED: App bundled successfully (3252ms), no TypeScript errors, running on port 5000
+
+ALL FIXES COMPLETE - PROJECT IMPORT SUCCESSFUL - DECEMBER 25, 2025

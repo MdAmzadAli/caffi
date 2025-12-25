@@ -46,6 +46,7 @@ interface CustomDrinkModalProps {
   onSaveCustomDrink?: (drink?: any) => void;
   isLoggingMode?: boolean;
   initialQuantityAfterEdit?: number;
+  preserveCustomDrinkQuantities?: Record<string, number>;
 }
 
 const getCategoryImageSource = (category: string) => {
@@ -78,7 +79,7 @@ const getInbuiltDrinkCaffeinePer100ml = (name: string, category: string): number
 const UNITS = ["cup", "shot", "ml", "oz", "teaspoon", "tablespoon", "glass", "can", "bottle", "scoop", "pint", "liter", "fl oz", "mug", "bar"];
 const INBUILT_CATEGORIES = ["coffee", "tea", "energy", "soda", "chocolate"];
 
-export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDrink, editCustomDrink, onSaveCustomDrink, isLoggingMode, initialQuantityAfterEdit }: CustomDrinkModalProps) {
+export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDrink, editCustomDrink, onSaveCustomDrink, isLoggingMode, initialQuantityAfterEdit, preserveCustomDrinkQuantities }: CustomDrinkModalProps) {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const { addEntry, updateEntry, addCustomDrink, updateCustomDrink, profile, entries, customDrinks } = useCaffeineStore();

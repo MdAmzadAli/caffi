@@ -90,6 +90,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
   const [editingCustomDrink, setEditingCustomDrink] = useState<DrinkItem | null>(null);
   const [isLoggingCustomDrink, setIsLoggingCustomDrink] = useState(false);
   const [quantityAfterEdit, setQuantityAfterEdit] = useState(1);
+  const [customDrinkQuantities, setCustomDrinkQuantities] = useState<Record<string, number>>({});
 
   const handleAddCustomDrink = () => {
     setPrefillDrink(null);
@@ -102,6 +103,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
     setEditingCustomDrink(null);
     setIsLoggingCustomDrink(false);
     setQuantityAfterEdit(1);
+    setCustomDrinkQuantities({});
     handleCloseAnimated();
   };
 
@@ -115,6 +117,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
     setEditingCustomDrink(null);
     if (drink) {
       setQuantityAfterEdit(drink.quantity || 1);
+      setCustomDrinkQuantities(prev => ({ ...prev, [drink.id]: drink.quantity || 1 }));
       setPrefillDrink(drink);
     }
   };
@@ -208,6 +211,11 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
   const handleSelectDrink = (drink: DrinkItem) => {
     setPrefillDrink(drink);
     setIsLoggingCustomDrink(drink.category === "custom");
+    if (drink.category === "custom" && customDrinkQuantities[drink.id]) {
+      setQuantityAfterEdit(customDrinkQuantities[drink.id]);
+    } else {
+      setQuantityAfterEdit(1);
+    }
     setShowCustomDrinkModal(true);
   };
 
@@ -753,6 +761,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
         onSaveCustomDrink={handleSaveCustomDrink}
         isLoggingMode={isLoggingCustomDrink}
         initialQuantityAfterEdit={quantityAfterEdit}
+        preserveCustomDrinkQuantities={customDrinkQuantities}
       />
     </Modal>
   );
