@@ -343,10 +343,11 @@ export function useCaffeineStore() {
     saveToStorage();
   }, []);
 
-  const addCustomDrink = useCallback((drink: Omit<DrinkItem, "id">) => {
+  const addCustomDrink = useCallback((drink: Omit<DrinkItem, "id">, quantity?: number) => {
     const newDrink: DrinkItem = {
       ...drink,
       id: `custom-${Date.now()}`,
+      defaultServingMl: quantity || drink.defaultServingMl,
     };
     globalCustomDrinks = [...globalCustomDrinks, newDrink];
     notifyListeners();

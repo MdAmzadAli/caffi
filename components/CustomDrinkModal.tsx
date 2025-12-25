@@ -361,11 +361,11 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
           name: drinkName.trim(),
           category: "custom" as const,
           caffeinePer100ml: (parseFloat(caffeineMg) || 0),
-          defaultServingMl: 1,
+          defaultServingMl: quantity,
           icon: "coffee",
           sizes: [{ name: selectedUnit, ml: 1 }],
           imageUri: selectedImage || undefined,
-        });
+        }, quantity);
         addEntry(savedDrink, quantity, undefined, false, startTime, selectedUnit);
         onSaveCustomDrink?.(savedDrink && { ...savedDrink, quantity });
         closeModal();
