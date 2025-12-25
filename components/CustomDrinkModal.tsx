@@ -168,7 +168,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
         // For custom drinks, prefillDrink.caffeinePer100ml actually stores the total mg per quantity
         caffeine = prefillDrink.caffeinePer100ml;
       } else {
-        caffeine = Math.round((prefillDrink.caffeinePer100ml * prefillDrink.defaultServingMl) / 100);
+        caffeine = (prefillDrink.caffeinePer100ml * prefillDrink.defaultServingMl) / 100;
       }
       
       setCaffeineMg(caffeine.toString());
@@ -506,7 +506,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
                     </ThemedText>
                     <View style={styles.caffeineInputWrapper}>
                       <ThemedText type="body" style={{ color: theme.text }}>
-                        {(parseInt(caffeineMg) || 0) * quantity}
+                        {formatCaffeine((parseFloat(caffeineMg) || 0) * quantity)}
                       </ThemedText>
                       <ThemedText type="body" muted> mg</ThemedText>
                     </View>
@@ -541,12 +541,12 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
                         <View style={[styles.radioCircle, selectedUnit !== "ml" && styles.radioCircleActive]}>
                           {selectedUnit !== "ml" && <View style={styles.radioInner} />}
                         </View>
-                        <ThemedText type="body" style={{ flex: 1 }}>
+                    <ThemedText type="body" style={{ flex: 1 }}>
                           {drinkUnit}
                         </ThemedText>
                         <View style={styles.caffeineInputWrapper}>
                           <ThemedText type="body" style={{ color: theme.text }}>
-                            {(parseInt(caffeineMg) || 0) * quantity}
+                            {formatCaffeine((parseFloat(caffeineMg) || 0) * quantity)}
                           </ThemedText>
                           <ThemedText type="body" muted> mg</ThemedText>
                         </View>
