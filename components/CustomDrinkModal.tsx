@@ -162,7 +162,15 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
       setQuantity(initialQuantityAfterEdit ?? 1);
       const bestUnit = getUnitForDrink(prefillDrink.name, prefillDrink.category, prefillDrink.sizes);
       setSelectedUnit(bestUnit);
-      const caffeine = Math.round((prefillDrink.caffeinePer100ml * prefillDrink.defaultServingMl) / 100);
+      
+      let caffeine = 0;
+      if (prefillDrink.category === "custom") {
+        // For custom drinks, prefillDrink.caffeinePer100ml actually stores the total mg per quantity
+        caffeine = prefillDrink.caffeinePer100ml;
+      } else {
+        caffeine = Math.round((prefillDrink.caffeinePer100ml * prefillDrink.defaultServingMl) / 100);
+      }
+      
       setCaffeineMg(caffeine.toString());
       setStartTime(new Date());
       setStartTimeLabel("now");
