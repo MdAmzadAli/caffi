@@ -959,7 +959,7 @@ function RecentEntryItem({ entry, onPress }: RecentEntryItemProps) {
   const servingLabel = (() => {
     const INBUILT_CATEGORIES = ["coffee", "tea", "energy", "soda", "chocolate"];
     const isCustom = entry.category === "custom" || !INBUILT_CATEGORIES.includes(entry.category);
-    const drink = !isCustom ? require("@/store/caffeineStore").DRINK_DATABASE.find((d: any) => d.name.toLowerCase() === entry.name.toLowerCase() && d.category === entry.category) : null;
+    const drink = !isCustom ? require("@/store/caffeineStore").DRINK_DATABASE.find((d: any) => d.id === entry.drinkId && d.category === entry.category) : null;
     const label = require("@/utils/getServingLabel").getServingLabel(entry.servingSize, entry.unit, drink?.defaultServingMl, isCustom);
     return `${label.quantity} ${label.unit}`;
   })();
