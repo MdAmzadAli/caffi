@@ -353,7 +353,8 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
       } else if (prefillDrink?.id) {
         const isCustom = prefillDrink.category === "custom";
         const servingSize = isCustom ? quantity : (selectedUnit === "ml" ? quantity : prefillDrink.defaultServingMl * quantity);
-        addEntry(prefillDrink as any, servingSize, undefined, false, startTime, selectedUnit, selectedImage || undefined);
+        const drinkToLog = { ...prefillDrink, name: drinkName.trim() };
+        addEntry(drinkToLog as any, servingSize, undefined, false, startTime, selectedUnit, selectedImage || undefined);
         closeModal();
         onAdd?.();
       } else {
