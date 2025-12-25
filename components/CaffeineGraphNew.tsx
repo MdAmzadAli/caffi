@@ -809,7 +809,7 @@ const styles = StyleSheet.create({
     zIndex:100,
     width: 36,
     alignItems: "center",
-    top: 10,
+    top: 0,
   },
   currentTimeLabelText: {
     fontSize: 8,
