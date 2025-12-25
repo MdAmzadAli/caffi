@@ -457,12 +457,12 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
                     You are {(prefillDrink?.category === "chocolate" || editEntry?.category === "chocolate") ? "eating" : "drinking"} {quantity} {selectedUnit} of
                   </ThemedText>
                   <TextInput
-                    style={[styles.nameInput, { color: (!isLoggingMode && !isLoggingInbuiltSource) ? theme.text : theme.textMuted, borderBottomColor: theme.divider }]}
+                    style={[styles.nameInput, { color: !isLoggingMode ? theme.text : theme.textMuted, borderBottomColor: theme.divider }]}
                     placeholder="Enter name"
                     placeholderTextColor={theme.textMuted}
                     value={drinkName}
                     onChangeText={setDrinkName}
-                    editable={!isLoggingMode && !isLoggingInbuiltSource}
+                    editable={!isLoggingMode}
                   />
                 </View>
               </View>
