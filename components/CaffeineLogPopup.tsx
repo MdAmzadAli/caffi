@@ -397,7 +397,40 @@ export function CaffeineLogPopup({
                   <ActionButton
                     label="Duplicate"
                     icon="copy"
-                    onPress={() => onDuplicate?.(entry)}
+                    onPress={() => {
+                      if (entry) {
+                        const INBUILT_CATEGORIES = ["coffee", "tea", "energy", "soda", "chocolate"];
+                        const isCustom = entry.category === "custom" || !INBUILT_CATEGORIES.includes(entry.category);
+                        
+                        // Create a snapshot of the historical entry to preserve its exact state
+                        const drinkSnapshot = {
+                          id: entry.drinkId,
+                          name: entry.name,
+                          category: entry.category as any,
+                          // Use the exact caffeine concentration from the historical log
+                          caffeinePer100ml: isCustom 
+                            ? entry.caffeineAmount / entry.servingSize 
+                            : (entry.caffeineAmount / entry.servingSize) * 100,
+                          defaultServingMl: entry.servingSize,
+                          icon: "coffee" as const,
+                          sizes: [],
+                          imageUri: entry.imageUri,
+                        };
+
+                        // Use the store's addEntry with the historical snapshot
+                        const { addEntry } = require("@/store/caffeineStore");
+                        addEntry(
+                          drinkSnapshot,
+                          entry.servingSize,
+                          entry.notes,
+                          entry.isFavorite,
+                          new Date(),
+                          entry.unit,
+                          entry.imageUri
+                        );
+                        onClose();
+                      }
+                    }}
                     themeColor={theme.text}
                     bg={theme.backgroundSecondary}
                   />
