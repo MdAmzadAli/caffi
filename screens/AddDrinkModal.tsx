@@ -94,7 +94,6 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
 
   const handleAddCustomDrink = () => {
     setPrefillDrink(null);
-    setCustomDrinkQuantities({});
     setShowCustomDrinkModal(true);
   };
 
