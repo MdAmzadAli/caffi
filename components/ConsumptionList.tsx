@@ -6,8 +6,6 @@ import { DrinkEntry } from "@/store/caffeineStore";
 import { useTheme } from "@/hooks/useTheme";
 import { getCaffeineSourceImage, resolveImageSource } from "@/utils/getCaffeineSourceImage";
 
-import { getServingLabel } from "@/utils/getServingLabel";
-
 interface ConsumptionListProps {
   entries: DrinkEntry[];
   onEntryPress?: (entry: DrinkEntry) => void;
@@ -145,22 +143,9 @@ export function ConsumptionList({
           <Text style={[styles.entryName, { color: theme.darkBrown }]}>
             {item.name}
           </Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text style={[styles.entryTime, { color: theme.mutedGrey }]}>
-              {formatTime(item.timestamp)}
-            </Text>
-            {(() => {
-              const INBUILT_CATEGORIES = ["coffee", "tea", "energy", "soda", "chocolate"];
-              const isCustom = item.category === "custom" || !INBUILT_CATEGORIES.includes(item.category);
-              const drink = !isCustom ? require("@/store/caffeineStore").DRINK_DATABASE.find((d: any) => d.id === item.drinkId && d.category === item.category) : null;
-              const label = getServingLabel(item.servingSize, item.unit, drink?.defaultServingMl, isCustom);
-              return (
-                <Text style={[styles.entryTime, { color: theme.mutedGrey }]}>
-                  {" • "}{label.quantity} {label.unit}
-                </Text>
-              );
-            })()}
-          </View>
+          <Text style={[styles.entryTime, { color: theme.mutedGrey }]}>
+            {formatTime(item.timestamp)}
+          </Text>
         </View>
 
         <Text style={[styles.entryMg, { color: theme.darkBrown }]}>
