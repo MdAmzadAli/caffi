@@ -219,16 +219,29 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
   };
 
   const handleQuickAdd = (entry: DrinkEntry) => {
-    const drink = allDrinks.find(d => d.id === entry.drinkId) || {
+    // For quick add, we want to replicate the EXACT details of the historical entry
+    // We create a temporary drink item that carries the properties from the history
+    const drink: DrinkItem = {
       id: entry.drinkId,
       name: entry.name,
-      category: entry.category as Category,
-      caffeinePer100ml: (entry.caffeineAmount / entry.servingSize) * 100,
+      category: entry.category as any,
+      caffeinePer100ml: entry.category === "custom" 
+        ? entry.caffeineAmount / entry.servingSize // This ensures addEntry recalculates to the same caffeineAmount
+        : (entry.caffeineAmount / entry.servingSize) * 100,
       defaultServingMl: entry.servingSize,
       icon: "coffee",
       sizes: [],
     };
-    addEntry(drink, entry.servingSize, entry.notes, entry.isFavorite, new Date());
+    
+    addEntry(
+      drink, 
+      entry.servingSize, 
+      entry.notes, 
+      entry.isFavorite, 
+      new Date(), 
+      entry.unit,
+      entry.imageUri
+    );
     handleCloseAnimated();
   };
 
