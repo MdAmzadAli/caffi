@@ -119,13 +119,13 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
           setSelectedUnit(unit);
         }
       } else {
-        const customDrink = customDrinks.find(d => d.name.toLowerCase() === editEntry.name.toLowerCase());
-        if (customDrink) {
-          const qty = Math.round((editEntry.servingSize / customDrink.defaultServingMl) * 10) / 10;
-          const perUnitMg = Math.round((editEntry.caffeineAmount / qty) * 10) / 10;
+        const customDrink = customDrinks.find(d => d.id === editEntry.drinkId || d.name.toLowerCase() === editEntry.name.toLowerCase());
+        if (customDrink || editEntry.category === "custom") {
+          const qty = editEntry.servingSize;
+          const perUnitMg = Math.round((editEntry.caffeineAmount / Math.max(1, qty)) * 10) / 10;
           setQuantity(Math.max(1, qty) || 1);
           setCaffeineMg(perUnitMg.toString());
-          setSelectedUnit(editEntry.unit || getUnitForDrink(customDrink.name, customDrink.category, customDrink.sizes));
+          setSelectedUnit(editEntry.unit || "cup");
         } else {
           setQuantity(1);
           setCaffeineMg(editEntry.caffeineAmount?.toString() || "10");
@@ -180,14 +180,14 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
 
   const totalCaffeine = useMemo(() => {
     if (selectedUnit === "ml") {
-      if (prefillDrink) {
+      if (prefillDrink && prefillDrink.category !== "custom") {
         return (prefillDrink.caffeinePer100ml / 100) * quantity;
       } else if (isEditingInbuiltSource && editEntry) {
         const cpml = getInbuiltDrinkCaffeinePer100ml(editEntry.name, editEntry.category);
         return cpml ? (cpml / 100) * quantity : 0;
       }
     }
-    const mg = parseInt(caffeineMg) || 0;
+    const mg = parseFloat(caffeineMg) || 0;
     return mg * quantity;
   }, [caffeineMg, quantity, selectedUnit, prefillDrink, isEditingInbuiltSource, editEntry]);
 
@@ -317,7 +317,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
           unit: selectedUnit,
         };
         if (editEntry.category === "custom") {
-          updates.servingSize = 100 * quantity;
+          updates.servingSize = quantity;
         } else if (isEditingInbuiltSource) {
           const drink = DRINK_DATABASE.find(d => d.name.toLowerCase() === editEntry.name.toLowerCase() && d.category === editEntry.category);
           if (drink) {
@@ -343,7 +343,8 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
           quantity,
         });
       } else if (prefillDrink?.id) {
-        const servingSize = selectedUnit === "ml" ? quantity : prefillDrink.defaultServingMl * quantity;
+        const isCustom = prefillDrink.category === "custom";
+        const servingSize = isCustom ? quantity : (selectedUnit === "ml" ? quantity : prefillDrink.defaultServingMl * quantity);
         addEntry(prefillDrink as any, servingSize, undefined, false, startTime, selectedUnit, selectedImage || undefined);
         closeModal();
         onAdd?.();
@@ -351,13 +352,13 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
         const savedDrink = addCustomDrink({
           name: drinkName.trim(),
           category: "custom" as const,
-          caffeinePer100ml: (parseInt(caffeineMg) || 0),
-          defaultServingMl: 100,
+          caffeinePer100ml: (parseFloat(caffeineMg) || 0),
+          defaultServingMl: 1,
           icon: "coffee",
-          sizes: [{ name: selectedUnit, ml: 100 }],
+          sizes: [{ name: selectedUnit, ml: 1 }],
           imageUri: selectedImage || undefined,
         });
-        addEntry(savedDrink, 100 * quantity, undefined, false, startTime, selectedUnit);
+        addEntry(savedDrink, quantity, undefined, false, startTime, selectedUnit);
         onSaveCustomDrink?.(savedDrink && { ...savedDrink, quantity });
         closeModal();
         onAdd?.();

@@ -293,9 +293,9 @@ export function useCaffeineStore() {
       unit?: string,
       imageUri?: string,
     ) => {
-      const caffeineAmount = Math.round(
-        (drink.caffeinePer100ml * servingSize) / 100,
-      );
+      const caffeineAmount = drink.category === "custom" 
+        ? Math.round((drink.caffeinePer100ml * servingSize)) 
+        : Math.round((drink.caffeinePer100ml * servingSize) / 100);
       const entry: DrinkEntry = {
         id: Date.now().toString(),
         drinkId: drink.id,
