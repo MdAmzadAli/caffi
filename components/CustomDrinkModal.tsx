@@ -561,7 +561,10 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
                     <ThemedText type="body" style={{ flex: 1 }}>ml</ThemedText>
                     <View style={styles.caffeineInputWrapper}>
                       <ThemedText type="body" style={{ color: theme.text }}>
-                        {formatCaffeine(totalCaffeine)}
+                        {(() => {
+                          const cpml = getInbuiltDrinkCaffeinePer100ml(editEntry.drinkId, editEntry.category);
+                          return cpml ? formatCaffeine((cpml / 100) * quantity) : "-";
+                        })()}
                       </ThemedText>
                       <ThemedText type="body" muted> mg</ThemedText>
                     </View>
