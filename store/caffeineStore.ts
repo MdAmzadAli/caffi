@@ -348,6 +348,7 @@ export function useCaffeineStore() {
       ...drink,
       id: `custom-${Date.now()}`,
       defaultServingMl: quantity || drink.defaultServingMl,
+      caffeinePer100ml: drink.caffeinePer100ml,
     };
     globalCustomDrinks = [...globalCustomDrinks, newDrink];
     notifyListeners();

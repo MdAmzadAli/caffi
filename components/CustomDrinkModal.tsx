@@ -340,14 +340,14 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
       } else if (isEditingCustomDrink && editCustomDrink) {
         updateCustomDrink(editCustomDrink.id, {
           name: drinkName.trim(),
-          caffeinePer100ml: parseInt(caffeineMg) || 0,
+          caffeinePer100ml: parseFloat(caffeineMg) || 0,
           sizes: [{ name: selectedUnit, ml: 100 }],
           imageUri: selectedImage || undefined,
         });
         onSaveCustomDrink?.({
           ...editCustomDrink,
           name: drinkName.trim(),
-          caffeinePer100ml: parseInt(caffeineMg) || 0,
+          caffeinePer100ml: parseFloat(caffeineMg) || 0,
           sizes: [{ name: selectedUnit, ml: 100 }],
           imageUri: selectedImage || undefined,
           quantity,
