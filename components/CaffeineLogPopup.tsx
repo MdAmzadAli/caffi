@@ -29,6 +29,8 @@ import { calculateSingleEntryCurve } from "@/utils/singleEntryCurve";
 import { generateSmoothPath, remainingAfterHours } from "@/utils/graphUtils";
 import { useRealTimeNow } from "@/hooks/useRealTimeNow";
 
+import { useCaffeineStore } from "@/store/caffeineStore";
+
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const SHEET_MAX_HEIGHT = SCREEN_HEIGHT * 0.9;
 
@@ -199,6 +201,7 @@ export function CaffeineLogPopup({
   onDelete,
 }: CaffeineLogPopupProps) {
   const { theme, isDark } = useTheme();
+  const { addEntry } = useCaffeineStore();
   const insets = useSafeAreaInsets();
   const sheetHeight = Math.min(SHEET_MAX_HEIGHT, SCREEN_HEIGHT - 40);
   const translateY = useSharedValue(sheetHeight);
@@ -418,7 +421,6 @@ export function CaffeineLogPopup({
                         };
 
                         // Use the store's addEntry with the historical snapshot
-                        const { addEntry } = require("@/store/caffeineStore");
                         addEntry(
                           drinkSnapshot,
                           entry.servingSize,
