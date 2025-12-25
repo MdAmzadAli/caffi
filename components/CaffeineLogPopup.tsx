@@ -305,7 +305,11 @@ export function CaffeineLogPopup({
                     {(() => {
                       const INBUILT_CATEGORIES = ["coffee", "tea", "energy", "soda", "chocolate"];
                       const isCustom = entry.category === "custom" || !INBUILT_CATEGORIES.includes(entry.category);
-                      const drink = !isCustom ? require("@/store/caffeineStore").DRINK_DATABASE.find((d: any) => d.name.toLowerCase() === entry.name.toLowerCase() && d.category === entry.category) : null;
+                      
+                      // For inbuilt sources, we need to find the original drink to get its defaultServingMl
+                      // We use drinkId + category for accurate lookup (since name might be edited)
+                      const drink = !isCustom ? require("@/store/caffeineStore").DRINK_DATABASE.find((d: any) => d.id === entry.drinkId && d.category === entry.category) : null;
+                      
                       const label = getServingLabel(entry.servingSize, entry.unit, drink?.defaultServingMl, isCustom);
                       return (
                         <Text style={[styles.mutedText, { color: theme.mutedGrey }]}>
