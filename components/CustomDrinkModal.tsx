@@ -357,8 +357,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
           sizes: [{ name: selectedUnit, ml: 100 }],
           imageUri: selectedImage || undefined,
         });
-        const servingSize = selectedUnit === "ml" ? quantity : 100 * quantity;
-        addEntry(savedDrink, servingSize, undefined, false, startTime, selectedUnit);
+        addEntry(savedDrink, 100 * quantity, undefined, false, startTime, selectedUnit);
         onSaveCustomDrink?.(savedDrink && { ...savedDrink, quantity });
         closeModal();
         onAdd?.();
