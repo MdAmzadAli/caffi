@@ -149,7 +149,7 @@ export function ConsumptionList({
         </View>
 
         <Text style={[styles.entryMg, { color: theme.darkBrown }]}>
-          {item.caffeineAmount} mg
+          {item.caffeineAmount.toFixed(3).replace(/\.?0+$/, "")} mg
         </Text>
       </Pressable>
     );

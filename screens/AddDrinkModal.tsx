@@ -988,7 +988,7 @@ function RecentEntryItem({ entry, onPress }: RecentEntryItemProps) {
         </ThemedText>
       </View>
       <ThemedText type="body" style={{ fontWeight: "600" }}>
-        {entry.caffeineAmount} mg
+        {entry.caffeineAmount.toFixed(3).replace(/\.?0+$/, "")} mg
       </ThemedText>
     </AnimatedPressable>
   );

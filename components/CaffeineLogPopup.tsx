@@ -371,7 +371,7 @@ export function CaffeineLogPopup({
                     ))}
                   </Svg>
                   <View style={styles.graphRightText}>
-                    <Text style={[styles.addsText, { color: theme.darkBrown }]}>adds {caffeineStats.currentMg} mg</Text>
+                    <Text style={[styles.addsText, { color: theme.darkBrown }]}>adds {caffeineStats.currentMg.toFixed(3).replace(/\.?0+$/, "")} mg</Text>
                     <Text style={[styles.nowText, { color: theme.mutedGrey }]}>now</Text>
                   </View>
                   {/* Start/End time labels */}
@@ -387,9 +387,9 @@ export function CaffeineLogPopup({
                     Drink contribution to caffeine levels
                   </Text>
                   <View style={[styles.divider, { borderBottomColor: theme.divider }]} />
-                  <Row label={`At peak (${caffeineStats.peakTimeLabel}${caffeineStats.peakDateLabel ? `, ${caffeineStats.peakDateLabel}` : ""})`} value={`${caffeineStats.peakMg} mg`} themeColor={theme} />
-                  <Row label="Now" value={`${caffeineStats.currentMg} mg`} themeColor={theme} />
-                  <Row label="In total (over time)" value={`${caffeineStats.totalMg} mg`} themeColor={theme} />
+                  <Row label={`At peak (${caffeineStats.peakTimeLabel}${caffeineStats.peakDateLabel ? `, ${caffeineStats.peakDateLabel}` : ""})`} value={`${caffeineStats.peakMg.toFixed(3).replace(/\.?0+$/, "")} mg`} themeColor={theme} />
+                  <Row label="Now" value={`${caffeineStats.currentMg.toFixed(3).replace(/\.?0+$/, "")} mg`} themeColor={theme} />
+                  <Row label="In total (over time)" value={`${caffeineStats.totalMg.toFixed(3).replace(/\.?0+$/, "")} mg`} themeColor={theme} />
                 </View>
 
                 {/* Actions */}

@@ -199,7 +199,9 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
     return mg * quantity;
   }, [caffeineMg, quantity, selectedUnit, prefillDrink, isEditingInbuiltSource, editEntry]);
 
-  const formatCaffeine = (value: number) => value.toFixed(3).replace(/\.?0+$/, '') || '0';
+  const formatCaffeine = (value: number) => {
+    return value.toFixed(3).replace(/\.?0+$/, '') || '0';
+  };
 
   const caffeineEvents: CaffeineEvent[] = useMemo(() => {
     const filteredEntries = isEditMode && editEntry 
