@@ -887,9 +887,9 @@ function CustomDrinkListItem({ drink, onPress, onEdit }: CustomDrinkListItemProp
     transform: [{ scale: scale.value }],
   }));
 
-  const caffeineMg = Math.round(
-    (drink.caffeinePer100ml * drink.defaultServingMl) / 100,
-  );
+  // For custom drinks, we use the stored caffeine amount directly (saved in caffeinePer100ml for simplicity in our store)
+  // and the quantity/unit from the first size entry
+  const caffeineMg = drink.caffeinePer100ml;
   const servingLabel = drink.sizes?.[0]?.name || "cup";
   const imageSource = getImageSourceForDrinkModal(drink);
 
