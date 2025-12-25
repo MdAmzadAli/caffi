@@ -147,7 +147,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
       }
     } else if (editCustomDrink && visible) {
       setDrinkName(editCustomDrink.name);
-      setQuantity(1);
+      setQuantity(preserveCustomDrinkQuantities?.[editCustomDrink.id] || 1);
       const bestUnit = getUnitForDrink(editCustomDrink.name, editCustomDrink.category, editCustomDrink.sizes);
       setSelectedUnit(bestUnit);
       setCaffeineMg(editCustomDrink.caffeinePer100ml.toString());

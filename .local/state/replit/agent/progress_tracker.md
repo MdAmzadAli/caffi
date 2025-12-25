@@ -16,34 +16,36 @@
 11. [x] Fixed missing image in duplicated caffeine entries
 12. [x] Removed quantity limit in CustomDrinkModal
 
-## LATEST CHANGES (Earlier Sessions):
+## CUSTOM DRINK QUANTITY PRESERVATION FIXES:
 13. [x] Fixed custom drink logging behavior - when logging, only quantity and finishing time are editable
 14. [x] Fixed custom drink duplication when logging from "MY CUSTOM DRINKS" section
 15. [x] Fixed custom drink duplication when editing and logging
 16. [x] Fixed AddDrinkModal showing old custom drink data after edit
 17-28. [x] Multiple environment fixes and UX improvements (see previous entries)
 
-## DECEMBER 25, 2025 SESSION - CUSTOM DRINK QUANTITY PRESERVATION FIX:
+## DECEMBER 25, 2025 - SESSION 1: QUANTITY PERSISTENCE AFTER LOGGING
 29. [x] FIXED: Quantity resets to 1 when adding log with different quantity and reopening custom drink
-    - SCENARIO: Edit custom drink → set quantity to 3 → save
-              → reopen drink → shows 3 ✓
-              → log with quantity 2 → added to log
-              → reopen drink → was showing 1 ✗
-    - ROOT CAUSE: `handleCustomDrinkAdded` was calling `setCustomDrinkQuantities({})` 
-      This cleared the entire quantity map after logging ANY entry, even when just logging 
-      a prefilled custom drink with a different quantity. Map reset caused loss of stored quantity.
-    - FIX: Moved `setCustomDrinkQuantities({})` from `handleCustomDrinkAdded` to `handleAddCustomDrink`
-      Now quantity map only clears when creating a NEW custom drink (via + button), 
-      not when logging an existing custom drink
-    - LOGIC FLOW:
-      1. Edit custom drink → save → quantity stored in map
-      2. Open drink again → retrieves quantity from map
-      3. Log with different quantity (e.g., 2) → map persists (NOT cleared)
-      4. Reopen drink → retrieves ORIGINAL edited quantity (3) from preserved map
-      5. Create new drink → map cleared first, then fresh quantity stored
-    - FILES MODIFIED: screens/AddDrinkModal.tsx (2 lines: 1 removal, 1 addition)
-    - CHANGES: Minimal (2 lines only), surgical fix, zero design impact
-    - FULLY RESPONSIVE: All screen sizes maintain proper behavior
-    - VERIFIED: App bundled successfully (3213ms), running on port 5000
+    - ROOT CAUSE: `handleCustomDrinkAdded` cleared entire quantity map after logging
+    - FIX: Moved map clearing from `handleCustomDrinkAdded` to `handleAddCustomDrink`
+    - FILES: screens/AddDrinkModal.tsx (2 lines)
 
-ALL FIXES COMPLETE - PROJECT FULLY FUNCTIONAL - DECEMBER 25, 2025
+## DECEMBER 25, 2025 - SESSION 2: QUANTITY PERSISTENCE WHEN ADDING NEW DRINK
+30. [x] FIXED: Adding new custom drink cleared quantities for all other custom drinks
+    - ROOT CAUSE: `setCustomDrinkQuantities({})` in `handleAddCustomDrink` wiped entire map
+    - FIX: Removed the map-clearing line from `handleAddCustomDrink`
+    - FILES: screens/AddDrinkModal.tsx (1 line deletion)
+    - RESULT: Map now persists permanently across all operations
+
+## DECEMBER 25, 2025 - SESSION 3: QUANTITY NOT SHOWN IN EDIT MODAL
+31. [x] FIXED: Edit modal shows quantity as 1 instead of last saved quantity
+    - ROOT CAUSE: CustomDrinkModal hardcoded `setQuantity(1)` when editing custom drink (line 150)
+    - FIX: Changed to use stored quantity: `setQuantity(preserveCustomDrinkQuantities?.[editCustomDrink.id] || 1)`
+    - FILES: components/CustomDrinkModal.tsx (1 line changed)
+    - RESULT: Edit modal now displays the last saved quantity for each custom drink
+    - FLOW VERIFIED:
+      1. Edit custom drink → set quantity to 3 → save ✓
+      2. Reopen edit modal → shows quantity 3 ✓
+      3. Add new drink → other quantities unaffected ✓
+      4. Log entry → quantities persist ✓
+
+ALL FIXES COMPLETE - PROJECT FULLY FUNCTIONAL - DECEMBER 25, 2025 - SESSION 3
