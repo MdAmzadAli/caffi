@@ -90,6 +90,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
   const [editingCustomDrink, setEditingCustomDrink] = useState<DrinkItem | null>(null);
   const [isLoggingCustomDrink, setIsLoggingCustomDrink] = useState(false);
   const [quantityAfterEdit, setQuantityAfterEdit] = useState(1);
+  const [lastEditedCustomDrinkId, setLastEditedCustomDrinkId] = useState<string | null>(null);
 
   const handleAddCustomDrink = () => {
     setPrefillDrink(null);
@@ -115,6 +116,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
     setEditingCustomDrink(null);
     if (drink) {
       setQuantityAfterEdit(drink.quantity || 1);
+      setLastEditedCustomDrinkId(drink.id);
       setPrefillDrink(drink);
     }
   };
@@ -206,9 +208,13 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
   }, [caffeineMg, profile.dailyLimit]);
 
   const handleSelectDrink = (drink: DrinkItem) => {
+    const shouldUseStoredQuantity = drink.id === lastEditedCustomDrinkId;
     setPrefillDrink(drink);
     setIsLoggingCustomDrink(drink.category === "custom");
     setShowCustomDrinkModal(true);
+    if (!shouldUseStoredQuantity) {
+      setQuantityAfterEdit(1);
+    }
   };
 
   const handleQuickAdd = (entry: DrinkEntry) => {
@@ -746,7 +752,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
       </GestureHandlerRootView>
       <CustomDrinkModal
         visible={showCustomDrinkModal}
-        onClose={() => { setShowCustomDrinkModal(false); setPrefillDrink(null); setEditingCustomDrink(null); setIsLoggingCustomDrink(false); setQuantityAfterEdit(1); }}
+        onClose={() => { setShowCustomDrinkModal(false); setPrefillDrink(null); setEditingCustomDrink(null); setIsLoggingCustomDrink(false); setQuantityAfterEdit(1); setLastEditedCustomDrinkId(null); }}
         onAdd={handleCustomDrinkAdded}
         prefillDrink={prefillDrink}
         editCustomDrink={editingCustomDrink}
