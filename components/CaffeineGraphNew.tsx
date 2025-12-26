@@ -147,7 +147,7 @@ export function CaffeineGraphNew({
   now = new Date().toISOString(),
   halfLifeHours = 5.5,
   sampleResolutionMinutes = 5,
-  yMax = 450,
+  yMax = 300,
   sleepThresholdMg = 100,
   optimalCaffeineMg = 200,
   bedtime,
@@ -243,7 +243,7 @@ export function CaffeineGraphNew({
 
   const yAxisTicks = useMemo(() => {
     const ticks = [50];
-    const step = yMax <= 200 ? 50 : 100;
+    const step = 50;
     for (let mg = step; mg <= yMax; mg += step) {
       if (mg !== 50) ticks.push(mg);
     }
