@@ -939,6 +939,35 @@ function CustomDrinkListItem({ drink, onPress, onEdit }: CustomDrinkListItemProp
   );
 }
 
+function formatRelativeTime(date: Date): string {
+  const now = new Date();
+  const entryDate = new Date(date);
+  const diffMs = now.getTime() - entryDate.getTime();
+  const diffHours = diffMs / (1000 * 60 * 60);
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  
+  const entryDay = new Date(entryDate);
+  entryDay.setHours(0, 0, 0, 0);
+
+  if (diffHours >= 0 && diffHours <= 5) {
+    return "Recently added";
+  } else if (entryDay.getTime() === today.getTime()) {
+    return "Today";
+  } else if (entryDay.getTime() === yesterday.getTime()) {
+    return "Yesterday";
+  } else {
+    return entryDate.toLocaleDateString("en-US", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  }
+}
+
 interface RecentEntryItemProps {
   entry: DrinkEntry;
   onPress: () => void;
@@ -951,10 +980,6 @@ function RecentEntryItem({ entry, onPress }: RecentEntryItemProps) {
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
-
-  const formatTime = (date: Date) => {
-    return new Date(date).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
-  };
 
   const servingLabel = (() => {
     const INBUILT_CATEGORIES = ["coffee", "tea", "energy", "soda", "chocolate"];
@@ -984,7 +1009,7 @@ function RecentEntryItem({ entry, onPress }: RecentEntryItemProps) {
           {entry.name}, {servingLabel}
         </ThemedText>
         <ThemedText type="caption" muted>
-          Recently added: {formatTime(entry.timestamp)}
+          {formatRelativeTime(entry.timestamp)}
         </ThemedText>
       </View>
       <ThemedText type="body" style={{ fontWeight: "600" }}>
