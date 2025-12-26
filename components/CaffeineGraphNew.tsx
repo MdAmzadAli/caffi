@@ -362,8 +362,11 @@ export function CaffeineGraphNew({
       const viewportWidth = event.nativeEvent.layoutMeasurement.width;
       const maxScrollX = contentWidth - viewportWidth;
 
+      // Only update the ref, don't trigger state changes that might affect ScrollView props
       currentScrollXRef.current = scrollX;
 
+      // debounce or throttle this if needed, but the main issue is likely the interaction 
+      // between contentOffset prop and manual scrolling
       if (onScrollOffsetChange) {
         const centerX = scrollX + windowWidth / 2;
         const nowPosition = nowMs >= startMs && nowMs <= endMs 
@@ -380,10 +383,11 @@ export function CaffeineGraphNew({
       if (now - lastExtendRef.current < 300) return;
 
       if (onExtendDays) {
-        if (scrollX <= EDGE_THRESHOLD) {
+        // Use a small buffer to prevent accidental triggers at exact boundaries
+        if (scrollX <= 10) { 
           lastExtendRef.current = now;
           onExtendDays('left');
-        } else if (scrollX >= maxScrollX - EDGE_THRESHOLD) {
+        } else if (scrollX >= maxScrollX - 10) {
           lastExtendRef.current = now;
           onExtendDays('right');
         }
@@ -490,7 +494,6 @@ export function CaffeineGraphNew({
         ref={scrollViewRef}
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentOffset={{ x: defaultScrollX, y: 0 }}
         onScroll={handleScroll}
         scrollEventThrottle={16}
         style={styles.scrollView}
