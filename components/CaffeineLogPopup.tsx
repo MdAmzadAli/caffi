@@ -374,10 +374,15 @@ export function CaffeineLogPopup({
                     <Text style={[styles.addsText, { color: theme.darkBrown }]}>adds {caffeineStats.currentMg.toFixed(3).replace(/\.?0+$/, "")} mg</Text>
                     <Text style={[styles.nowText, { color: theme.mutedGrey }]}>now</Text>
                   </View>
-                  {/* Start/End time labels */}
+                  {/* Start time label (Extreme Left) */}
                   <View style={styles.graphTimeRow}>
-                    <Text style={[styles.graphTimeLabel, { color: theme.mutedGrey }]}>{caffeineStats.peakTimeLabel}</Text>
-                    <Text style={[styles.graphTimeLabel, { color: theme.mutedGrey }]}>{caffeineStats.currentTimeLabel}</Text>
+                    <Text style={[styles.graphTimeLabel, { color: theme.mutedGrey }]}>
+                      {new Date(entry.timestamp).toLocaleTimeString("en-US", {
+                        hour: "numeric",
+                        minute: "2-digit",
+                      })}
+                    </Text>
+                    <View />
                   </View>
                 </View>
 
