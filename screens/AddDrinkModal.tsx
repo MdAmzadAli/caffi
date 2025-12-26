@@ -55,6 +55,9 @@ const getImageSourceForDrinkModal = (item: DrinkItem | DrinkEntry): { uri?: stri
       const preset = PRESET_IMAGES.find((p: any) => p.id === imgUri.replace("preset:", ""));
       return preset ? { source: preset.image } : { source: getCategoryImageSource((item as any).category) };
     }
+    if (imgUri.startsWith("category:")) {
+      return { source: getCategoryImageSource(imgUri.replace("category:", "")) };
+    }
     return { uri: imgUri };
   }
   return { source: getCategoryImageSource((item as any).category) };

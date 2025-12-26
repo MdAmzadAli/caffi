@@ -101,6 +101,10 @@ function getDrinkImageSource(item: DrinkEntry): { uri?: string; source?: any } {
       const preset = PRESET_IMAGES.find((p: any) => p.id === imageUri.replace("preset:", ""));
       return preset ? { source: preset.image } : {};
     }
+    if (imageUri.startsWith("category:")) {
+      const category = imageUri.replace("category:", "");
+      return CATEGORY_IMAGES[category] ? { source: CATEGORY_IMAGES[category] } : {};
+    }
     return { uri: imageUri };
   }
   return CATEGORY_IMAGES[item.category] ? { source: CATEGORY_IMAGES[item.category] } : {};
