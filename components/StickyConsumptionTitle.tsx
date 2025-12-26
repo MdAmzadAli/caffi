@@ -24,22 +24,14 @@ export function StickyConsumptionTitle({
   const { theme } = useTheme();
 
   const stickyStyle = useAnimatedStyle(() => {
+    const progress = Math.min(scrollY.value / collapseThreshold, 1);
     const isSticky = scrollY.value >= collapseThreshold;
     
-    // We remove the conditional check on 'isSticky' for the opacity calculation.
-    // By allowing 'interpolate' to handle the entire scroll range [0, threshold],
-    // we eliminate the "jump" that occurs when the 'isSticky' boolean flips.
-    const opacity = interpolate(
-      scrollY.value,
-      [collapseThreshold * 0.8, collapseThreshold],
-      [0, 1],
-      Extrapolation.CLAMP
-    );
-
     return {
-      opacity,
-      // Only enable pointer events when the title is visible/sticky
-      pointerEvents: scrollY.value >= collapseThreshold ? "auto" : "none",
+      opacity: isSticky
+        ? interpolate(progress, [0.8, 1], [0, 1], Extrapolation.CLAMP)
+        : 0,
+      pointerEvents: isSticky ? "auto" : "none",
     } as any;
   });
 
