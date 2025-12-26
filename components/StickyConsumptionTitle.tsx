@@ -29,7 +29,7 @@ export function StickyConsumptionTitle({
     
     // Add a small hysteresis or rounding to avoid floating point flickering
     const opacity = isSticky
-        ? interpolate(progress, [0.8, 0.99, 1], [0, 1, 1], Extrapolation.CLAMP)
+        ? interpolate(progress, [0.8, 0.95, 1], [0, 1, 1], Extrapolation.CLAMP)
         : 0;
 
     return {
