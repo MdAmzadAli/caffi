@@ -2,12 +2,13 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
-  interpolate,
-  Extrapolation,
+  useDerivedValue,
+  withTiming,
 } from "react-native-reanimated";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing } from "@/constants/theme";
-
+const STICKY_ENTER_OFFSET = 6;
+const STICKY_EXIT_OFFSET = 10;
 interface StickyConsumptionTitleProps {
   scrollY: Animated.SharedValue<number>;
   collapseThreshold: number;
@@ -23,16 +24,27 @@ export function StickyConsumptionTitle({
 }: StickyConsumptionTitleProps) {
   const { theme } = useTheme();
 
+  // Derived sticky state with hysteresis
+  const stickyVisible = useDerivedValue(() => {
+    if (scrollY.value > collapseThreshold + STICKY_ENTER_OFFSET) {
+      return 1;
+    }
+    if (scrollY.value < collapseThreshold - STICKY_EXIT_OFFSET) {
+      return 0;
+    }
+    return undefined;
+  });
+
+  const animatedOpacity = useDerivedValue(() => {
+    return withTiming(stickyVisible.value ?? 0, {
+      duration: 180,
+    });
+  });
+
   const stickyStyle = useAnimatedStyle(() => {
-    const progress = Math.min(scrollY.value / collapseThreshold, 1);
-    const isSticky = scrollY.value >= collapseThreshold;
-    
     return {
-      opacity: isSticky
-        ? interpolate(progress, [0.8, 1], [0, 1], Extrapolation.CLAMP)
-        : 0,
-      pointerEvents: isSticky ? "auto" : "none",
-    } as any;
+      opacity: animatedOpacity.value,
+    };
   });
 
   return (
@@ -43,6 +55,7 @@ export function StickyConsumptionTitle({
         stickyStyle,
       ]}
       onLayout={(event) => onHeight?.(event.nativeEvent.layout.height)}
+      pointerEvents="none"
     >
       <Text style={[styles.title, { color: theme.darkBrown }]}>
         My consumption

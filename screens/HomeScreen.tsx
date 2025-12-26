@@ -340,26 +340,43 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     setStackedModalVisible(false);
     setStackedEvents([]);
   }, []);
-
+  const isScrolling = useSharedValue(false);
+  const lastStickyDateRef = useRef<string | null>(null);
+  const dateUpdateTimeout = useRef<NodeJS.Timeout | null>(null);
   // Track current visible section for sticky date header
   const handleViewableItemsChanged = useCallback(({ viewableItems }: any) => {
-    if (viewableItems && viewableItems.length > 0) {
-      // Get the first viewable item's section
-      const firstItem = viewableItems.find((item: any) => item.isViewable) || viewableItems[0];
-      if (firstItem?.section?.title) {
-        setCurrentStickyDate(firstItem.section.title);
-      }
-    }
-  }, []);
+     if (viewableItems && viewableItems.length > 0) {
+       const firstItem = viewableItems.find((item: any) => item.isViewable) || viewableItems[0];
+       if (firstItem?.section?.title) {
+         const newDate = firstItem.section.title;
+
+         // Clear any pending update
+         if (dateUpdateTimeout.current) {
+           clearTimeout(dateUpdateTimeout.current);
+         }
+
+         // Debounce the state update
+         dateUpdateTimeout.current = setTimeout(() => {
+           setCurrentStickyDate(newDate);
+         }, 50); // 50ms debounce - adjust if needed
+       }
+     }
+   }, []);
 
   // Also update on scroll to ensure we track the correct section
   const scrollHandlerWithDateTracking = useAnimatedScrollHandler({
     onScroll: (event) => {
+      isScrolling.value = true;
       scrollY.value = event.contentOffset.y;
-      // Update current date based on scroll position
-      // This will be handled by onViewableItemsChanged, but we can add fallback logic here if needed
+    },
+    onEndDrag: () => {
+      isScrolling.value = false;
+    },
+    onMomentumEnd: () => {
+      isScrolling.value = false;
     },
   });
+
 
   const viewabilityConfig = useRef({
     itemVisiblePercentThreshold: 10,
@@ -383,9 +400,9 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     }
     
     // Reset scroll value after animation
-    setTimeout(() => {
-      scrollY.value = 0;
-    }, 300);
+    // setTimeout(() => {
+    //   scrollY.value = 0;
+    // }, 300);
   };
 
   const renderItem = ({ item }: { item: DrinkEntry }) => {
@@ -447,7 +464,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       return {
         opacity: interpolate(
           progress,
-          [0.7, 1],
+          [0.55, 0.75],
           [1, 0],
           Extrapolation.CLAMP
         ),
