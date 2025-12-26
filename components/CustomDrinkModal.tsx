@@ -506,7 +506,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
                     </ThemedText>
                     <View style={styles.caffeineInputWrapper}>
                       <ThemedText type="body" style={{ color: theme.text }}>
-                        {formatCaffeine((parseFloat(caffeineMg) || 0) * quantity)}
+                        {Math.round((parseFloat(caffeineMg) || 0) * quantity)}
                       </ThemedText>
                       <ThemedText type="body" muted> mg</ThemedText>
                     </View>
