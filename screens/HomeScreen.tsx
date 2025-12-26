@@ -378,7 +378,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         sectionIndex: 0,
         itemIndex: 0,
         animated: true,
-        viewOffset: 0,
+        viewOffset: 40, // Add offset to account for any sticky headers or spacing
       });
     }
     
