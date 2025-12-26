@@ -17,7 +17,7 @@ export function useRealTimeNow(): number {
       interval = setInterval(() => {
         globalTime = Date.now();
         listeners.forEach((l) => l(globalTime));
-      }, 60000);
+      }, 1000);
     }
 
     // Cleanup: remove listener and stop interval if no listeners remain
