@@ -2,7 +2,8 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
-  withTiming,
+  interpolate,
+  Extrapolation,
 } from "react-native-reanimated";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing } from "@/constants/theme";
@@ -23,14 +24,15 @@ export function StickyConsumptionTitle({
   const { theme } = useTheme();
 
   const stickyStyle = useAnimatedStyle(() => {
+    const progress = Math.min(scrollY.value / collapseThreshold, 1);
     const isSticky = scrollY.value >= collapseThreshold;
     
     return {
       opacity: isSticky
-        ? withTiming(1, { duration: 150 })
-        : withTiming(0, { duration: 50 }), // Faster fade-out to prevent flicker
-      pointerEvents: (isSticky ? "auto" : "none") as any,
-    };
+        ? interpolate(progress, [0.8, 1], [0, 1], Extrapolation.CLAMP)
+        : 0,
+      pointerEvents: isSticky ? "auto" : "none",
+    } as any;
   });
 
   return (

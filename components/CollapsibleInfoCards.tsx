@@ -2,6 +2,7 @@ import React from "react";
 import { View, StyleSheet, Pressable } from "react-native";
 import Animated, {
   useAnimatedStyle,
+  withSpring,
   interpolate,
   Extrapolation,
 } from "react-native-reanimated";
@@ -28,13 +29,16 @@ export function CollapsibleInfoCards({
   infoCard,
   scrollY,
   collapseThreshold,
-  // onExpand, // onExpand is not used in this component
-  graphHeight: _graphHeight, // prefixed with _ to avoid unused warning
-  headerHeight: _headerHeight,
-  topInset: _topInset,
+  onExpand,
+  graphHeight,
+  headerHeight,
+  topInset,
 }: CollapsibleInfoCardsProps) {
-  const { theme: _theme } = useTheme();
+  const { theme } = useTheme();
   
+  // Calculate position at bottom right of graph area
+  const expandButtonTop = headerHeight + graphHeight + topInset - 40; // Position near bottom of graph
+
   // Animate collapse based on scroll position
   const containerStyle = useAnimatedStyle(() => {
     const progress = Math.min(scrollY.value / collapseThreshold, 1);
@@ -53,6 +57,33 @@ export function CollapsibleInfoCards({
         Extrapolation.CLAMP
       ),
       overflow: "hidden" as const,
+    };
+  });
+
+  const expandButtonStyle = useAnimatedStyle(() => {
+    const progress = Math.min(scrollY.value / collapseThreshold, 1);
+    
+    return {
+      opacity: interpolate(
+        progress,
+        [0.3, 1],
+        [0, 1],
+        Extrapolation.CLAMP
+      ),
+      transform: [
+        {
+          translateX: interpolate(
+            progress,
+            [0.3, 1],
+            [20, 0],
+            Extrapolation.CLAMP
+          ),
+        },
+      ],
+      position: "absolute" as const,
+      top: expandButtonTop,
+      right: Spacing.lg,
+      zIndex: 100,
     };
   });
 
@@ -148,6 +179,7 @@ export function ExpandButton({
 const styles = StyleSheet.create({
   wrapper: {
     position: "relative",
+    // marginBottom: Spacing.xl,
   },
   cardsContainer: {
     overflow: "hidden",
