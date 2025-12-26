@@ -953,18 +953,21 @@ function formatRelativeTime(date: Date): string {
   const entryDay = new Date(entryDate);
   entryDay.setHours(0, 0, 0, 0);
 
+  const timeStr = entryDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+
   if (diffHours >= 0 && diffHours <= 5) {
-    return "Recently added";
+    return `Recently added: ${timeStr}`;
   } else if (entryDay.getTime() === today.getTime()) {
-    return "Today";
+    return `Today: ${timeStr}`;
   } else if (entryDay.getTime() === yesterday.getTime()) {
-    return "Yesterday";
+    return `Yesterday: ${timeStr}`;
   } else {
-    return entryDate.toLocaleDateString("en-US", {
+    const dateStr = entryDate.toLocaleDateString("en-US", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
     });
+    return `${dateStr}: ${timeStr}`;
   }
 }
 
