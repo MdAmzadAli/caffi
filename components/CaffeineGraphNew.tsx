@@ -497,8 +497,9 @@ export function CaffeineGraphNew({
         onScroll={handleScroll}
         scrollEventThrottle={16}
         style={styles.scrollView}
-        contentContainerStyle={{ width: scrollContentWidth, flexDirection: 'column' }}
+        contentContainerStyle={{ width: scrollContentWidth, flexDirection: 'column',  paddingBottom: 0  }}
       >
+        
         <Svg
           width={scrollContentWidth}
           height={graphHeight - X_AXIS_HEIGHT}
@@ -792,9 +793,9 @@ const styles = StyleSheet.create({
   xAxisContainer: {
     height: X_AXIS_HEIGHT,
     position: "relative",
-    marginTop: 2,
-    bottom:X_AXIS_HEIGHT,
-    
+    marginTop: -(X_AXIS_HEIGHT), // Negative margin to overlap
+    bottom: 0,
+    paddingBottom: 0,
   },
   xAxisTick: {
     position: "absolute",
