@@ -60,7 +60,7 @@ export function HomeGraphController({
 
   const colors = isDark ? DARK_COLORS : LIGHT_COLORS;
 
-  const now = useMemo(() => new Date().toISOString(), []);
+  const now = useMemo(() => new Date().toISOString(), [resetKey]);
 
   const handleScrollOffsetChange = useCallback((offCenter: boolean, direction: 'left' | 'right' | null) => {
     setIsOffCenter(offCenter);

@@ -313,7 +313,7 @@ export function CaffeineGraphNew({
       return Math.max(0, nowPosition - windowWidth / 2);
     }
     return scrollContentWidth / 2 - windowWidth / 2;
-  }, [nowMs, startMs, endMs, scrollContentWidth, windowWidth]);
+  }, [startMs, endMs, scrollContentWidth, windowWidth]);
 
   const lastExtendRef = useRef<number>(0);
   const hasInitialScrolled = useRef<boolean>(false);
