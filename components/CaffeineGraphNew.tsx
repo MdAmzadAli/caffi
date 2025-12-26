@@ -449,9 +449,9 @@ export function CaffeineGraphNew({
       onStackedEventsClick?.(group.events, { x: pageX, y: pageY });
     }
   }, [onEventClick, onStackedEventsClick]);
-
+// , backgroundColor: GRAPH_COLORS.bg 
   return (
-    <View style={[styles.container, { height: graphHeight, backgroundColor: GRAPH_COLORS.bg }]}>
+    <View style={[styles.container, { height: graphHeight}]}>
       <View style={[styles.yAxisContainer]}>
         {yAxisTicks.map((mg) => (
           <View
@@ -793,6 +793,8 @@ const styles = StyleSheet.create({
     height: X_AXIS_HEIGHT,
     position: "relative",
     marginTop: 2,
+    bottom:X_AXIS_HEIGHT,
+    
   },
   xAxisTick: {
     position: "absolute",
@@ -808,7 +810,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: 36,
     alignItems: "center",
-    top: 8,
+    top: 18,
   },
   currentTimeLabelText: {
     fontSize: 8,

@@ -629,7 +629,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   fixedGraphContainer: {
-    zIndex: 1,
+    zIndex: 11,
     backgroundColor: "transparent",
   },
   container: {

@@ -159,8 +159,8 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   graph:{
-    position:"absolute",
-    zIndex:100,
+    // position:"absolute",
+    // zIndex:100,
   },
   arrowButtonRight: {
     position: "absolute",
