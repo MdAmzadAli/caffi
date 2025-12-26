@@ -27,10 +27,13 @@ export function StickyConsumptionTitle({
     const progress = Math.min(scrollY.value / collapseThreshold, 1);
     const isSticky = scrollY.value >= collapseThreshold;
     
+    // Add a small hysteresis or rounding to avoid floating point flickering
+    const opacity = isSticky
+        ? interpolate(progress, [0.8, 0.99, 1], [0, 1, 1], Extrapolation.CLAMP)
+        : 0;
+
     return {
-      opacity: isSticky
-        ? interpolate(progress, [0.8, 1], [0, 1], Extrapolation.CLAMP)
-        : 0,
+      opacity,
       pointerEvents: isSticky ? "auto" : "none",
     } as any;
   });
