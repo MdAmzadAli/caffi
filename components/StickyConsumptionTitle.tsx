@@ -24,13 +24,12 @@ export function StickyConsumptionTitle({
   const { theme } = useTheme();
 
   const stickyStyle = useAnimatedStyle(() => {
-    const progress = Math.min(scrollY.value / collapseThreshold, 1);
     const isSticky = scrollY.value >= collapseThreshold;
     
     return {
       opacity: isSticky
-        ? interpolate(progress, [0.8, 1], [0, 1], Extrapolation.CLAMP)
-        : 0,
+        ? withTiming(1, { duration: 150 })
+        : withTiming(0, { duration: 150 }),
       pointerEvents: isSticky ? "auto" : "none",
     } as any;
   });
