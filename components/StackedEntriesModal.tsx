@@ -32,6 +32,10 @@ const resolveImageSource = (imageUri?: string): any => {
     const preset = PRESET_IMAGES.find((p: any) => p.id === imageUri.replace("preset:", ""));
     return preset?.image;
   }
+  if (imageUri.startsWith("category:")) {
+    const category = imageUri.replace("category:", "");
+    return CATEGORY_IMAGES[category];
+  }
   return { uri: imageUri };
 };
 
