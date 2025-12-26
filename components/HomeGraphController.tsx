@@ -114,6 +114,7 @@ export function HomeGraphController({
         resetKey={resetKey}
         onEventClick={onEventClick}
         onStackedEventsClick={onStackedEventsClick}
+        style={styles.graph}
       />
 
       {isOffCenter && scrollDirection === 'right' && (
@@ -156,6 +157,10 @@ export function HomeGraphController({
 const styles = StyleSheet.create({
   container: {
     position: "relative",
+  },
+  graph:{
+    position:"absolute",
+    zIndex:100,
   },
   arrowButtonRight: {
     position: "absolute",
