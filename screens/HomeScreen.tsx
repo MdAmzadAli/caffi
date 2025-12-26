@@ -342,53 +342,24 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   }, []);
 
   // Track current visible section for sticky date header
-  // const handleViewableItemsChanged = useCallback(({ viewableItems }: any) => {
-  //   if (viewableItems && viewableItems.length > 0) {
-  //     // Get the first viewable item's section
-  //     const firstItem = viewableItems.find((item: any) => item.isViewable) || viewableItems[0];
-  //     if (firstItem?.section?.title) {
-  //       setCurrentStickyDate(firstItem.section.title);
-  //     }
-  //   }
-  // }, []);
-  const isScrollingRef = useRef(false);
-  const pendingStickyDate = useRef<string | null>(null);
-
-  // Also update on scroll to ensure we track the correct section
-  const scrollHandlerWithDateTracking = useAnimatedScrollHandler({
-    onScroll: (event) => {
-      runOnJS(() => {
-        isScrollingRef.current = true;
-      })();
-      scrollY.value = event.contentOffset.y;
-    },
-    onEndDrag: () => {
-      runOnJS(() => {
-        isScrollingRef.current = false;
-      })();
-    },
-    onMomentumEnd: () => {
-      runOnJS(() => {
-        isScrollingRef.current = false;
-      })();
-    },
-  });
-
-
   const handleViewableItemsChanged = useCallback(({ viewableItems }: any) => {
-    if (isScrollingRef.current) return;
-
     if (viewableItems && viewableItems.length > 0) {
-      const firstItem =
-        viewableItems.find((item: any) => item.isViewable) || viewableItems[0];
-
+      // Get the first viewable item's section
+      const firstItem = viewableItems.find((item: any) => item.isViewable) || viewableItems[0];
       if (firstItem?.section?.title) {
         setCurrentStickyDate(firstItem.section.title);
       }
     }
   }, []);
 
-
+  // Also update on scroll to ensure we track the correct section
+  const scrollHandlerWithDateTracking = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+      // Update current date based on scroll position
+      // This will be handled by onViewableItemsChanged, but we can add fallback logic here if needed
+    },
+  });
 
   const viewabilityConfig = useRef({
     itemVisiblePercentThreshold: 10,
@@ -407,14 +378,14 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         sectionIndex: 0,
         itemIndex: 0,
         animated: true,
-        viewOffset: 0,
+        viewOffset: 40, // Add offset to account for any sticky headers or spacing
       });
     }
     
     // Reset scroll value after animation
-    // setTimeout(() => {
-    //   scrollY.value = 0;
-    // }, 300);
+    setTimeout(() => {
+      scrollY.value = 0;
+    }, 300);
   };
 
   const renderItem = ({ item }: { item: DrinkEntry }) => {
@@ -476,7 +447,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       return {
         opacity: interpolate(
           progress,
-          [0.55, 0.75],
+          [0.7, 1],
           [1, 0],
           Extrapolation.CLAMP
         ),
@@ -535,22 +506,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const effectiveHeaderHeight = headerHeight || HEADER_HEIGHT;
   const effectiveGraphHeight = graphHeight || DEFAULT_GRAPH_HEIGHT;
   // Calculate sticky offset: measured header + measured graph + bottom padding (for x-axis labels)
-  // const stickyOffset = effectiveHeaderHeight + effectiveGraphHeight + GRAPH_BOTTOM_PADDING;
-  const stickyOffsetRef = useRef<number | null>(null);
-
-  const stickyOffset = useMemo(() => {
-    if (stickyOffsetRef.current != null) {
-      return stickyOffsetRef.current;
-    }
-
-    const value =
-      effectiveHeaderHeight +
-      effectiveGraphHeight +
-      GRAPH_BOTTOM_PADDING;
-
-    stickyOffsetRef.current = value;
-    return value;
-  }, [effectiveHeaderHeight, effectiveGraphHeight]);
+  const stickyOffset = effectiveHeaderHeight + effectiveGraphHeight + GRAPH_BOTTOM_PADDING;
 
   return (
     <View style={[styles.outerContainer, { backgroundColor: theme.bg }]}>
