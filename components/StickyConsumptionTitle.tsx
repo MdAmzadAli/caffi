@@ -2,8 +2,7 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
-  interpolate,
-  Extrapolation,
+  withTiming,
 } from "react-native-reanimated";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing } from "@/constants/theme";
@@ -29,9 +28,9 @@ export function StickyConsumptionTitle({
     return {
       opacity: isSticky
         ? withTiming(1, { duration: 150 })
-        : withTiming(0, { duration: 150 }),
-      pointerEvents: isSticky ? "auto" : "none",
-    } as any;
+        : withTiming(0, { duration: 50 }), // Faster fade-out to prevent flicker
+      pointerEvents: (isSticky ? "auto" : "none") as any,
+    };
   });
 
   return (
