@@ -46,6 +46,27 @@ type CaffeineLogPopupProps = {
 // Build a simple decay curve for the single entry to mirror home graph color
 const CAFFEINE_HALF_LIFE_HOURS = 5;
 
+function formatRelativeDate(date: Date) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  
+  if (d.getTime() === today.getTime()) {
+    return "Today";
+  } else if (d.getTime() === yesterday.getTime()) {
+    return "Yesterday";
+  } else {
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+  }
+}
+
 function calculateCaffeineStats(entry: DrinkEntry | null, nowMs: number) {
   if (!entry) {
     return {
@@ -83,10 +104,8 @@ function calculateCaffeineStats(entry: DrinkEntry | null, nowMs: number) {
     minute: "2-digit",
   });
   
-  const peakDateLabel = peakTime.getTime() < now.getTime() ? peakTime.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-  }) : "";
+  const peakPassed = peakTime.getTime() < now.getTime();
+  const peakDateLabel = peakPassed ? formatRelativeDate(peakTime) : "";
   
   const currentTimeLabel = now.toLocaleTimeString("en-US", {
     hour: "numeric",
@@ -163,10 +182,7 @@ function useDecayPath(entry: DrinkEntry | null, curveColor: string) {
       minute: "2-digit",
     });
     
-    const peakDateLabel = peakPassed ? peakTime.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    }) : "";
+    const peakDateLabel = peakPassed ? formatRelativeDate(peakTime) : "";
 
     const startLabel = date.toLocaleTimeString("en-US", { hour: "numeric" });
     const endLabel = new Date(endMs).toLocaleTimeString("en-US", { hour: "numeric" });
