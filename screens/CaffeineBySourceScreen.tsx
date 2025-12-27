@@ -6,6 +6,7 @@ import {
   Pressable,
   ScrollView,
   Dimensions,
+  Image,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -44,6 +45,31 @@ const ITEM_COLORS = [
   "#607D8B",
   "#FF5722",
 ];
+
+const CATEGORY_IMAGES: Record<string, any> = {
+  coffee: require("@/assets/CaffeineSourceImages/coffee.png"),
+  tea: require("@/assets/CaffeineSourceImages/tea.jpg"),
+  energy: require("@/assets/CaffeineSourceImages/energy.png"),
+  soda: require("@/assets/CaffeineSourceImages/soda.png"),
+  chocolate: require("@/assets/CaffeineSourceImages/chocolate.png"),
+};
+
+function getDrinkImageSource(item: any): { uri?: string; source?: any } {
+  const imageUri = item.imageUri;
+  if (imageUri) {
+    if (imageUri.startsWith("preset:")) {
+      const { PRESET_IMAGES } = require("@/components/ImagePickerModal");
+      const preset = PRESET_IMAGES.find((p: any) => p.id === imageUri.replace("preset:", ""));
+      return preset ? { source: preset.image } : {};
+    }
+    if (imageUri.startsWith("category:")) {
+      const category = imageUri.replace("category:", "");
+      return CATEGORY_IMAGES[category] ? { source: CATEGORY_IMAGES[category] } : {};
+    }
+    return { uri: imageUri };
+  }
+  return CATEGORY_IMAGES[item.category] ? { source: CATEGORY_IMAGES[item.category] } : {};
+}
 
 const DATE_OPTION_LABELS: Record<DateRangeOption, string> = {
   today: "Today",
@@ -187,6 +213,7 @@ export default function CaffeineBySourceScreen() {
             percentage: (data.caffeine / total) * 100,
             color: ITEM_COLORS[index % ITEM_COLORS.length],
             category: data.category,
+            imageUri: entry?.imageUri,
           };
         })
         .sort((a, b) => b.caffeine - a.caffeine);
@@ -395,7 +422,11 @@ export default function CaffeineBySourceScreen() {
                     {viewMode === "category" ? (
                       <Feather name="coffee" size={24} color={item.color} />
                     ) : (
-                      <Feather name="coffee" size={24} color={item.color} />
+                      <Image
+                        source={getDrinkImageSource(item)}
+                        style={styles.itemImage}
+                        defaultSource={require("@/assets/CaffeineSourceImages/coffee.png")}
+                      />
                     )}
                   </View>
                   <View style={styles.itemInfo}>
@@ -567,6 +598,12 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     justifyContent: "center",
     alignItems: "center",
+    overflow: "hidden",
+  },
+  itemImage: {
+    width: 48,
+    height: 48,
+    resizeMode: "cover",
   },
   itemInfo: {
     flex: 1,
