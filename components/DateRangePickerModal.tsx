@@ -14,7 +14,7 @@ import Animated, {
   withTiming,
   runOnJS,
 } from "react-native-reanimated";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Calendar, registerTranslation, en } from "react-native-paper-dates";
 import { Button, Provider as PaperProvider, MD3DarkTheme, MD3LightTheme } from "react-native-paper";
@@ -168,9 +168,8 @@ export function DateRangePickerModal({
         setToDate(now);
       }
       translateY.value = MODAL_HEIGHT;
-      setTimeout(() => {
-        translateY.value = withSpring(0, { damping: 16, stiffness: 200 });
-      }, 50);
+       translateY.value = withSpring(0);
+     
     } else {
       translateY.value = MODAL_HEIGHT;
     }
@@ -281,6 +280,7 @@ export function DateRangePickerModal({
         animationType="fade"
         onRequestClose={closeModal}
       >
+        <GestureHandlerRootView style={{ flex: 1 }}>
         <View style={styles.overlay}>
           <Pressable style={styles.backdrop} onPress={closeModal} />
 
@@ -446,6 +446,7 @@ export function DateRangePickerModal({
             </View>
           </Modal>
         )}
+        </GestureHandlerRootView>
       </Modal>
     </PaperProvider>
   );
