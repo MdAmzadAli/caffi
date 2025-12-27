@@ -176,6 +176,7 @@ export default function CaffeineBySourceScreen() {
       const items = Object.entries(categoryMap)
         .map(([category, data]) => {
           const mostFrequent = Object.entries(data.items).sort((a, b) => b[1] - a[1])[0];
+          const mostFrequentEntry = filteredEntries.find(e => e.category === category && e.name === mostFrequent?.[0]);
           return {
             id: category,
             name: category.charAt(0).toUpperCase() + category.slice(1),
@@ -185,6 +186,7 @@ export default function CaffeineBySourceScreen() {
             color: CATEGORY_COLORS[category] || CATEGORY_COLORS.custom,
             mostFrequent: mostFrequent ? mostFrequent[0] : undefined,
             category,
+            imageUri: mostFrequentEntry?.imageUri,
           };
         })
         .sort((a, b) => b.caffeine - a.caffeine);
