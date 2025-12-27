@@ -345,7 +345,7 @@ export default function CaffeineBySourceScreen() {
             x={labelX}
             y={labelY}
             fill="#FFFFFF"
-            fontSize="12"
+            fontSize="10"
             fontWeight="600"
             textAnchor="middle"
             alignmentBaseline="middle"
@@ -595,7 +595,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   legendText: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "500",
   },
   noDataContainer: {
