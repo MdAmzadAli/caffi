@@ -202,8 +202,8 @@ export default function CaffeineBySourceScreen() {
         itemMap[key].count += 1;
       });
 
-      const items = Object.entries(itemMap)
-        .map(([id, data], index) => {
+      let items = Object.entries(itemMap)
+        .map(([id, data]) => {
           const entry = filteredEntries.find((e) => (e.drinkId || e.name) === id);
           return {
             id,
@@ -211,12 +211,40 @@ export default function CaffeineBySourceScreen() {
             caffeine: data.caffeine,
             count: data.count,
             percentage: (data.caffeine / total) * 100,
-            color: ITEM_COLORS[index % ITEM_COLORS.length],
+            color: "",
             category: data.category,
             imageUri: entry?.imageUri,
           };
         })
         .sort((a, b) => b.caffeine - a.caffeine);
+
+      if (items.length > 5) {
+        const top5 = items.slice(0, 5);
+        const others = items.slice(5);
+        const othersCaffeine = others.reduce((sum, item) => sum + item.caffeine, 0);
+        
+        top5.forEach((item, index) => {
+          item.color = ITEM_COLORS[index];
+        });
+        
+        items = [
+          ...top5,
+          {
+            id: "others",
+            name: "Others",
+            caffeine: othersCaffeine,
+            count: others.reduce((sum, item) => sum + item.count, 0),
+            percentage: (othersCaffeine / total) * 100,
+            color: "#888888",
+            category: "custom",
+            imageUri: undefined,
+          },
+        ];
+      } else {
+        items.forEach((item, index) => {
+          item.color = ITEM_COLORS[index];
+        });
+      }
 
       return { items, total };
     }
