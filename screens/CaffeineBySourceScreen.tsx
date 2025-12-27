@@ -398,42 +398,42 @@ export default function CaffeineBySourceScreen() {
         <View style={styles.headerSpacer} />
       </View>
 
+      <View style={styles.titleSection}>
+        <Text style={[styles.title, { color: theme.text }]}>Caffeine by source</Text>
+        <Text style={[styles.description, { color: theme.mutedGrey }]}>
+          Where does the caffeine you consume come from?
+        </Text>
+      </View>
+
+      <View style={styles.controlsRow}>
+        <Pressable
+          style={[styles.dateButton, { borderColor: theme.divider }]}
+          onPress={() => setShowDatePicker(true)}
+        >
+          <Text style={[styles.dateButtonText, { color: theme.text }]}>
+            {dateButtonLabel}
+          </Text>
+          <Feather name="chevron-down" size={16} color={theme.text} />
+        </Pressable>
+
+        <Pressable
+          style={[styles.viewModeButton, { backgroundColor: viewMode === "item" ? "#4A4A4A" : theme.accentGold }]}
+          onPress={() => setViewMode(viewMode === "item" ? "category" : "item")}
+        >
+          <Feather name="grid" size={16} color="#FFFFFF" />
+          <Text style={styles.viewModeButtonText}>
+            {viewMode === "item" ? "Item view" : "Category view"}
+          </Text>
+        </Pressable>
+      </View>
+
+      {renderDonutChart()}
+
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.titleSection}>
-          <Text style={[styles.title, { color: theme.text }]}>Caffeine by source</Text>
-          <Text style={[styles.description, { color: theme.mutedGrey }]}>
-            Where does the caffeine you consume come from?
-          </Text>
-        </View>
-
-        <View style={styles.controlsRow}>
-          <Pressable
-            style={[styles.dateButton, { borderColor: theme.divider }]}
-            onPress={() => setShowDatePicker(true)}
-          >
-            <Text style={[styles.dateButtonText, { color: theme.text }]}>
-              {dateButtonLabel}
-            </Text>
-            <Feather name="chevron-down" size={16} color={theme.text} />
-          </Pressable>
-
-          <Pressable
-            style={[styles.viewModeButton, { backgroundColor: viewMode === "item" ? "#4A4A4A" : theme.accentGold }]}
-            onPress={() => setViewMode(viewMode === "item" ? "category" : "item")}
-          >
-            <Feather name="grid" size={16} color="#FFFFFF" />
-            <Text style={styles.viewModeButtonText}>
-              {viewMode === "item" ? "Item view" : "Category view"}
-            </Text>
-          </Pressable>
-        </View>
-
-        {renderDonutChart()}
-
         {((chartData as any).allItems || []).length === 0 ? (
           <View style={styles.noDataContainer}>
             <Text style={[styles.noDataTitle, { color: theme.text }]}>No data</Text>
@@ -522,9 +522,11 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: Spacing.lg,
     paddingBottom: Spacing["3xl"],
+    paddingTop: 0,
   },
   titleSection: {
     marginBottom: Spacing.xl,
+    paddingHorizontal: Spacing.lg,
   },
   title: {
     fontSize: 24,
@@ -539,6 +541,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: Spacing.md,
     marginBottom: Spacing.xl,
+    paddingHorizontal: Spacing.lg,
   },
   dateButton: {
     flexDirection: "row",
