@@ -156,7 +156,7 @@ export default function CaffeineBySourceScreen() {
 
   const chartData = useMemo(() => {
     if (filteredEntries.length === 0) {
-      return { items: [], total: 0 };
+      return { chartItems: [], allItems: [], total: 0 };
     }
 
     const total = filteredEntries.reduce((sum, e) => sum + e.caffeineAmount, 0);
@@ -189,7 +189,7 @@ export default function CaffeineBySourceScreen() {
         })
         .sort((a, b) => b.caffeine - a.caffeine);
 
-      return { items, total };
+      return { chartItems: items, allItems: items, total };
     } else {
       const itemMap: Record<string, { caffeine: number; count: number; category: string }> = {};
       
@@ -202,7 +202,7 @@ export default function CaffeineBySourceScreen() {
         itemMap[key].count += 1;
       });
 
-      let items = Object.entries(itemMap)
+      let allItems = Object.entries(itemMap)
         .map(([id, data]) => {
           const entry = filteredEntries.find((e) => (e.drinkId || e.name) === id);
           return {
@@ -218,16 +218,17 @@ export default function CaffeineBySourceScreen() {
         })
         .sort((a, b) => b.caffeine - a.caffeine);
 
-      if (items.length > 5) {
-        const top5 = items.slice(0, 5);
-        const others = items.slice(5);
+      let chartItems = allItems;
+      if (allItems.length > 5) {
+        const top5 = allItems.slice(0, 5);
+        const others = allItems.slice(5);
         const othersCaffeine = others.reduce((sum, item) => sum + item.caffeine, 0);
         
         top5.forEach((item, index) => {
           item.color = ITEM_COLORS[index];
         });
         
-        items = [
+        chartItems = [
           ...top5,
           {
             id: "others",
@@ -241,12 +242,13 @@ export default function CaffeineBySourceScreen() {
           },
         ];
       } else {
-        items.forEach((item, index) => {
+        allItems.forEach((item, index) => {
           item.color = ITEM_COLORS[index];
         });
+        chartItems = allItems;
       }
 
-      return { items, total };
+      return { chartItems, allItems, total };
     }
   }, [filteredEntries, viewMode]);
 
@@ -265,7 +267,8 @@ export default function CaffeineBySourceScreen() {
   const INNER_RADIUS = RADIUS * 0.6;
 
   const renderDonutChart = () => {
-    if (chartData.items.length === 0) {
+    const chartItems = (chartData as any).chartItems || chartData.items || [];
+    if (chartItems.length === 0) {
       return (
         <View style={styles.chartContainer}>
           <View style={styles.chartWrapper}>
@@ -298,7 +301,7 @@ export default function CaffeineBySourceScreen() {
     const paths: React.ReactNode[] = [];
     const percentageLabels: React.ReactNode[] = [];
 
-    chartData.items.forEach((item, index) => {
+    chartItems.forEach((item, index) => {
       const angle = (item.percentage / 100) * 360;
       const endAngle = startAngle + angle;
       
@@ -370,7 +373,7 @@ export default function CaffeineBySourceScreen() {
           </Svg>
         </View>
         <View style={styles.legendContainer}>
-          {chartData.items.map((item) => (
+          {chartItems.map((item) => (
             <View key={item.id} style={styles.legendItem}>
               <View style={[styles.legendDot, { backgroundColor: item.color }]} />
               <Text style={[styles.legendText, { color: theme.text }]}>{item.name}</Text>
@@ -431,7 +434,7 @@ export default function CaffeineBySourceScreen() {
 
         {renderDonutChart()}
 
-        {chartData.items.length === 0 ? (
+        {((chartData as any).allItems || []).length === 0 ? (
           <View style={styles.noDataContainer}>
             <Text style={[styles.noDataTitle, { color: theme.text }]}>No data</Text>
             <Text style={[styles.noDataDescription, { color: theme.mutedGrey }]}>
@@ -440,7 +443,7 @@ export default function CaffeineBySourceScreen() {
           </View>
         ) : (
           <View style={styles.itemsList}>
-            {chartData.items.map((item) => (
+            {((chartData as any).allItems || []).map((item) => (
               <View
                 key={item.id}
                 style={[styles.itemRow, { borderBottomColor: theme.divider }]}
