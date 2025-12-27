@@ -32,12 +32,13 @@ export default function CaffeineIntakeDetailScreen() {
 
   const chartScrollRef = useRef<ScrollView>(null);
   const mainScrollRef = useRef<ScrollView>(null);
+  const isLoadingRef = useRef(false);
   const CHART_HEIGHT = Dimensions.get("window").height * 0.25;
   const BAR_WIDTH = 50;
 
   useEffect(() => {
     mainScrollRef.current?.scrollTo({ y: 0, animated: false });
-    setTimeout(() => chartScrollRef.current?.scrollToEnd({ animated: false }), 0);
+    setTimeout(() => chartScrollRef.current?.scrollToEnd({ animated: false }), 100);
   }, [selectedPeriod]);
 
   useEffect(() => {
@@ -89,24 +90,25 @@ export default function CaffeineIntakeDetailScreen() {
     };
 
     const maxIterations = selectedPeriod === "day" ? 365 : selectedPeriod === "week" ? 52 : 12;
+    const startIdx = Math.max(0, maxIterations - visibleBars);
 
     if (selectedPeriod === "day") {
-      for (let i = 364; i >= maxIterations - visibleBars; i--) {
+      for (let i = startIdx; i < maxIterations; i++) {
         const date = new Date(now);
-        date.setDate(now.getDate() - i);
+        date.setDate(now.getDate() - (maxIterations - 1 - i));
         const label = date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
         data.push({ label, value: getDayTotal(date) });
       }
     } else if (selectedPeriod === "week") {
-      for (let i = 51; i >= maxIterations - visibleBars; i--) {
+      for (let i = startIdx; i < maxIterations; i++) {
         const weekEnd = new Date(now);
-        weekEnd.setDate(now.getDate() - i * 7);
+        weekEnd.setDate(now.getDate() - (maxIterations - 1 - i) * 7);
         const label = weekEnd.toLocaleDateString("en-US", { month: "short", day: "numeric" });
         data.push({ label, value: getWeekTotal(weekEnd) });
       }
     } else if (selectedPeriod === "month") {
-      for (let i = 11; i >= maxIterations - visibleBars; i--) {
-        const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      for (let i = startIdx; i < maxIterations; i++) {
+        const date = new Date(now.getFullYear(), now.getMonth() - (maxIterations - 1 - i), 1);
         const label = date.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
         data.push({ label, value: getMonthTotal(date) });
       }
@@ -125,10 +127,13 @@ export default function CaffeineIntakeDetailScreen() {
   const maxValue = Math.max(...chartData.map((d) => d.value), 1);
 
   const handleChartScroll = (event: any) => {
+    if (isLoadingRef.current) return;
     const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
     const isNearEnd = contentOffset.x + layoutMeasurement.width >= contentSize.width - 100;
     if (isNearEnd && visibleBars < (selectedPeriod === "day" ? 365 : selectedPeriod === "week" ? 52 : 12)) {
+      isLoadingRef.current = true;
       setVisibleBars((prev) => prev + 30);
+      setTimeout(() => { isLoadingRef.current = false; }, 300);
     }
   };
 
