@@ -345,7 +345,7 @@ export default function CaffeineBySourceScreen() {
             x={labelX}
             y={labelY}
             fill="#FFFFFF"
-            fontSize="10"
+            fontSize="8"
             fontWeight="600"
             textAnchor="middle"
             alignmentBaseline="middle"
@@ -450,15 +450,11 @@ export default function CaffeineBySourceScreen() {
               >
                 <View style={styles.itemLeft}>
                   <View style={[styles.itemImageContainer, { backgroundColor: theme.backgroundSecondary }]}>
-                    {viewMode === "category" ? (
-                      <Feather name="coffee" size={24} color={item.color} />
-                    ) : (
-                      <Image
-                        source={getDrinkImageSource(item)}
-                        style={styles.itemImage}
-                        defaultSource={require("@/assets/CaffeineSourceImages/coffee.png")}
-                      />
-                    )}
+                    <Image
+                      source={getDrinkImageSource(item)}
+                      style={styles.itemImage}
+                      defaultSource={require("@/assets/CaffeineSourceImages/coffee.png")}
+                    />
                   </View>
                   <View style={styles.itemInfo}>
                     <Text style={[styles.itemName, { color: theme.text }]}>{item.name}</Text>
