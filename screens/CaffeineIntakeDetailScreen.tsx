@@ -42,10 +42,6 @@ export default function CaffeineIntakeDetailScreen() {
     setTimeout(() => chartScrollRef.current?.scrollToEnd({ animated: false }), 150);
   }, [selectedPeriod]);
 
-  useEffect(() => {
-    setTimeout(() => chartScrollRef.current?.scrollToEnd({ animated: false }), 0);
-  }, [visibleBars]);
-
   const { chartData, average } = useMemo(() => {
     const now = new Date();
     now.setHours(23, 59, 59, 999);
