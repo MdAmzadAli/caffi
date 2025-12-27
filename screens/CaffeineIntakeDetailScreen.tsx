@@ -30,11 +30,13 @@ export default function CaffeineIntakeDetailScreen() {
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("day");
 
   const chartScrollRef = useRef<ScrollView>(null);
+  const mainScrollRef = useRef<ScrollView>(null);
   const CHART_HEIGHT = Dimensions.get("window").height * 0.25;
   const BAR_WIDTH = 50;
 
   useEffect(() => {
-    chartScrollRef.current?.scrollToEnd({ animated: false });
+    mainScrollRef.current?.scrollTo({ y: 0, animated: false });
+    setTimeout(() => chartScrollRef.current?.scrollToEnd({ animated: false }), 0);
   }, [selectedPeriod]);
 
   const { chartData, average } = useMemo(() => {
@@ -142,6 +144,7 @@ export default function CaffeineIntakeDetailScreen() {
       </View>
 
       <ScrollView
+        ref={mainScrollRef}
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
