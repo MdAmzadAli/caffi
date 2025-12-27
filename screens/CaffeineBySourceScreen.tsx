@@ -320,15 +320,27 @@ export default function CaffeineBySourceScreen() {
       const x4 = CENTER + INNER_RADIUS * Math.cos(startRad);
       const y4 = CENTER + INNER_RADIUS * Math.sin(startRad);
       
-      const largeArcFlag = angle > 180 ? 1 : 0;
+      const largeArcFlag = angle >= 359.9 ? 1 : (angle > 180 ? 1 : 0);
       
-      const d = `
-        M ${x1} ${y1}
-        A ${RADIUS} ${RADIUS} 0 ${largeArcFlag} 1 ${x2} ${y2}
-        L ${x3} ${y3}
-        A ${INNER_RADIUS} ${INNER_RADIUS} 0 ${largeArcFlag} 0 ${x4} ${y4}
-        Z
-      `;
+      let d = "";
+      if (angle >= 359.9) {
+        // Full circle case
+        d = `
+          M ${CENTER} ${CENTER - RADIUS}
+          A ${RADIUS} ${RADIUS} 0 1 1 ${CENTER - 0.01} ${CENTER - RADIUS}
+          L ${CENTER - 0.01} ${CENTER - INNER_RADIUS}
+          A ${INNER_RADIUS} ${INNER_RADIUS} 0 1 0 ${CENTER} ${CENTER - INNER_RADIUS}
+          Z
+        `;
+      } else {
+        d = `
+          M ${x1} ${y1}
+          A ${RADIUS} ${RADIUS} 0 ${largeArcFlag} 1 ${x2} ${y2}
+          L ${x3} ${y3}
+          A ${INNER_RADIUS} ${INNER_RADIUS} 0 ${largeArcFlag} 0 ${x4} ${y4}
+          Z
+        `;
+      }
       
       paths.push(
         <Path key={item.id} d={d} fill={item.color} />
