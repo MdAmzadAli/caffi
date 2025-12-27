@@ -477,16 +477,19 @@ export function CaffeineGraphNew({
         <>
           <Pressable style={styles.legendOverlay} onPress={() => setShowLegend(false)} />
           <View style={[styles.legendCard, { backgroundColor: GRAPH_COLORS.bg }]}>
-            {/* <Text style={[styles.legendTitle, { color: GRAPH_COLORS.darkBrown2 }]}>Graph Legend</Text> */}
             <View style={styles.legendRow}>
               <View style={[styles.legendLine, { backgroundColor: GRAPH_COLORS.green }]} />
-              <Text style={[styles.legendText, { color: GRAPH_COLORS.darkBrown }]}> Your Sleep threshold </Text>
-              <Text>Caffeine level below this within your sleeping window won't disrupt sleep </Text>
+              <View style={styles.legendTextContainer}>
+                <Text style={[styles.legendText, { color: GRAPH_COLORS.darkBrown }]}>Your Sleep Threshold</Text>
+                <Text style={[styles.legendSubtext, { color: GRAPH_COLORS.mutedGrey }]}>Caffeine level below this within your sleeping window won't disrupt sleep</Text>
+              </View>
             </View>
             <View style={styles.legendRow}>
               <View style={[styles.legendLineDashed, { borderColor: GRAPH_COLORS.accentGold }]} />
-              <Text style={[styles.legendText, { color: GRAPH_COLORS.darkBrown }]}>Your Optimal Daily Caffeine Level</Text>
-              <Text style={[st]}>Above this level-Side effects like anxiety, jitters, or energy crashes become more likely</Text>
+              <View style={styles.legendTextContainer}>
+                <Text style={[styles.legendText, { color: GRAPH_COLORS.darkBrown }]}>Your Optimal Daily Caffeine Level</Text>
+                <Text style={[styles.legendSubtext, { color: GRAPH_COLORS.mutedGrey }]}>Above this level-Side effects like anxiety, jitters, or energy crashes become more likely</Text>
+              </View>
             </View>
           </View>
         </>
