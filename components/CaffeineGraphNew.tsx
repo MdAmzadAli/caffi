@@ -868,6 +868,38 @@ const styles = StyleSheet.create({
     elevation: 5,
     zIndex: 20,
   },
+  legendRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: Spacing.sm,
+    gap: Spacing.sm,
+  },
+  legendTextContainer: {
+    flex: 1,
+  },
+  legendLine: {
+    width: 20,
+    height: 3,
+    borderRadius: 1.5,
+    marginTop: 8,
+  },
+  legendLineDashed: {
+    width: 20,
+    height: 0,
+    borderWidth: 1,
+    borderStyle: "dashed",
+    marginTop: 8,
+  },
+  legendText: {
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  legendSubtext: {
+    fontSize: 11,
+    fontWeight: "400",
+    marginTop: 2,
+    lineHeight: 14,
+  },
   legendTitle: {
     fontSize: 16,
     fontWeight: "600",
