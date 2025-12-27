@@ -191,28 +191,31 @@ export default function CaffeineBySourceScreen() {
 
       return { chartItems: items, allItems: items, total };
     } else {
-      const itemMap: Record<string, { caffeine: number; count: number; category: string; imageUri?: string }> = {};
+      const itemMap: Record<string, { caffeine: number; count: number; category: string }> = {};
       
       filteredEntries.forEach((e) => {
         const key = e.drinkId || e.name;
         if (!itemMap[key]) {
-          itemMap[key] = { caffeine: 0, count: 0, category: e.category, imageUri: e.imageUri };
+          itemMap[key] = { caffeine: 0, count: 0, category: e.category };
         }
         itemMap[key].caffeine += e.caffeineAmount;
         itemMap[key].count += 1;
       });
 
-      const allItems = Object.entries(itemMap)
-        .map(([id, data]) => ({
-          id,
-          name: filteredEntries.find((e) => (e.drinkId || e.name) === id)?.name || id,
-          caffeine: data.caffeine,
-          count: data.count,
-          percentage: (data.caffeine / total) * 100,
-          color: "",
-          category: data.category,
-          imageUri: data.imageUri,
-        }))
+      let allItems = Object.entries(itemMap)
+        .map(([id, data]) => {
+          const entry = filteredEntries.find((e) => (e.drinkId || e.name) === id);
+          return {
+            id,
+            name: entry?.name || id,
+            caffeine: data.caffeine,
+            count: data.count,
+            percentage: (data.caffeine / total) * 100,
+            color: "",
+            category: data.category,
+            imageUri: entry?.imageUri,
+          };
+        })
         .sort((a, b) => b.caffeine - a.caffeine);
 
       let chartItems = allItems;
@@ -264,7 +267,7 @@ export default function CaffeineBySourceScreen() {
   const INNER_RADIUS = RADIUS * 0.6;
 
   const renderDonutChart = () => {
-    const chartItems = (chartData as any).chartItems || [];
+    const chartItems = (chartData as any).chartItems || chartData.items || [];
     if (chartItems.length === 0) {
       return (
         <View style={styles.chartContainer}>
@@ -298,7 +301,7 @@ export default function CaffeineBySourceScreen() {
     const paths: React.ReactNode[] = [];
     const percentageLabels: React.ReactNode[] = [];
 
-    chartItems.forEach((item: any) => {
+    chartItems.forEach((item, index) => {
       const angle = (item.percentage / 100) * 360;
       const endAngle = startAngle + angle;
       
@@ -347,7 +350,7 @@ export default function CaffeineBySourceScreen() {
             textAnchor="middle"
             alignmentBaseline="middle"
           >
-            {item.percentage.toFixed(0)}%
+            {item.percentage.toFixed(1)}%
           </SvgText>
         );
       }
@@ -370,12 +373,10 @@ export default function CaffeineBySourceScreen() {
           </Svg>
         </View>
         <View style={styles.legendContainer}>
-          {chartItems.map((item: any) => (
+          {chartItems.map((item) => (
             <View key={item.id} style={styles.legendItem}>
               <View style={[styles.legendDot, { backgroundColor: item.color }]} />
-              <Text style={[styles.legendText, { color: theme.text }]} numberOfLines={1}>
-                {item.name}
-              </Text>
+              <Text style={[styles.legendText, { color: theme.text }]}>{item.name}</Text>
             </View>
           ))}
         </View>
