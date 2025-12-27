@@ -54,21 +54,21 @@ const CATEGORY_IMAGES: Record<string, any> = {
   chocolate: require("@/assets/CaffeineSourceImages/chocolate.png"),
 };
 
-function getDrinkImageSource(item: any): { uri?: string; source?: any } {
+function getDrinkImageSource(item: any): any {
   const imageUri = item.imageUri;
   if (imageUri) {
     if (imageUri.startsWith("preset:")) {
       const { PRESET_IMAGES } = require("@/components/ImagePickerModal");
       const preset = PRESET_IMAGES.find((p: any) => p.id === imageUri.replace("preset:", ""));
-      return preset ? { source: preset.image } : {};
+      return preset ? preset.image : CATEGORY_IMAGES[item.category];
     }
     if (imageUri.startsWith("category:")) {
       const category = imageUri.replace("category:", "");
-      return CATEGORY_IMAGES[category] ? { source: CATEGORY_IMAGES[category] } : {};
+      return CATEGORY_IMAGES[category] || CATEGORY_IMAGES[item.category];
     }
     return { uri: imageUri };
   }
-  return CATEGORY_IMAGES[item.category] ? { source: CATEGORY_IMAGES[item.category] } : {};
+  return CATEGORY_IMAGES[item.category];
 }
 
 const DATE_OPTION_LABELS: Record<DateRangeOption, string> = {
