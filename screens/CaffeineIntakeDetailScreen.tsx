@@ -37,13 +37,10 @@ export default function CaffeineIntakeDetailScreen() {
   const BAR_WIDTH = 50;
 
   useEffect(() => {
+    setVisibleBars(30);
     mainScrollRef.current?.scrollTo({ y: 0, animated: false });
-    setTimeout(() => chartScrollRef.current?.scrollToEnd({ animated: false }), 100);
+    setTimeout(() => chartScrollRef.current?.scrollToEnd({ animated: false }), 150);
   }, [selectedPeriod]);
-
-  useEffect(() => {
-    return () => setVisibleBars(30);
-  }, []);
 
   const { chartData, average } = useMemo(() => {
     const now = new Date();
@@ -211,7 +208,6 @@ export default function CaffeineIntakeDetailScreen() {
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.chartScrollContent}
-            onContentSizeChange={() => chartScrollRef.current?.scrollToEnd({ animated: false })}
             onScroll={handleChartScroll}
             scrollEventThrottle={200}
           >
