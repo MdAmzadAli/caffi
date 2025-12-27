@@ -67,7 +67,7 @@ export default function StatisticsScreen() {
               <View style={styles.barWrapper}>
                 {item.value > 0 && (
                   <>
-                    <Text style={[styles.barLabel, { color: theme.backgroundRoot }]}>
+                    <Text style={[styles.barLabel, { color: theme.text }]}>
                       {item.value}
                     </Text>
                     <View
