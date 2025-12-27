@@ -25,25 +25,25 @@ interface DateRange {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  coffee: "#5D4037",
-  tea: "#7B8D42",
-  energy: "#FF6B35",
-  soda: "#E74C3C",
-  chocolate: "#8B4513",
-  custom: "#9B59B6",
+  coffee: "#3E2723",
+  tea: "#4E342E",
+  energy: "#5D4037",
+  soda: "#6D4C41",
+  chocolate: "#795548",
+  custom: "#8D6E63",
 };
 
 const ITEM_COLORS = [
+  "#3E2723",
+  "#4E342E",
   "#5D4037",
-  "#FF9800",
-  "#4CAF50",
-  "#2196F3",
-  "#9C27B0",
-  "#E91E63",
-  "#00BCD4",
+  "#6D4C41",
   "#795548",
-  "#607D8B",
-  "#FF5722",
+  "#8D6E63",
+  "#A1887F",
+  "#BCAAA4",
+  "#D7CCC8",
+  "#EFEBE9",
 ];
 
 const CATEGORY_IMAGES: Record<string, any> = {
