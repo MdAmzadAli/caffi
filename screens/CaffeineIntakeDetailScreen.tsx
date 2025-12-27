@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useRef } from "react";
+import React, { useMemo, useState, useRef, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -32,6 +32,10 @@ export default function CaffeineIntakeDetailScreen() {
   const chartScrollRef = useRef<ScrollView>(null);
   const CHART_HEIGHT = Dimensions.get("window").height * 0.25;
   const BAR_WIDTH = 50;
+
+  useEffect(() => {
+    chartScrollRef.current?.scrollToEnd({ animated: false });
+  }, [selectedPeriod]);
 
   const { chartData, average } = useMemo(() => {
     const now = new Date();
