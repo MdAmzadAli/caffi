@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useRef, useEffect } from "react";
+import React, { useMemo, useState, useRef } from "react";
 import {
   View,
   StyleSheet,
@@ -9,7 +9,7 @@ import {
   Dimensions,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCaffeineStore } from "@/store/caffeineStore";
 import { useTheme } from "@/hooks/useTheme";
@@ -30,17 +30,8 @@ export default function CaffeineIntakeDetailScreen() {
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("day");
 
   const chartScrollRef = useRef<ScrollView>(null);
-  const scrollPositions = useRef<Record<TimePeriod, number>>({ day: 0, week: 0, month: 0 });
-  const shouldScrollToEnd = useRef(true);
   const CHART_HEIGHT = Dimensions.get("window").height * 0.25;
   const BAR_WIDTH = 50;
-
-  useFocusEffect(
-    React.useCallback(() => {
-      scrollPositions.current = { day: 0, week: 0, month: 0 };
-      shouldScrollToEnd.current = true;
-    }, [])
-  );
 
   const { chartData, average } = useMemo(() => {
     const now = new Date();
@@ -131,25 +122,6 @@ export default function CaffeineIntakeDetailScreen() {
     }
   };
 
-  const handlePeriodChange = (period: TimePeriod) => {
-    chartScrollRef.current?.scrollToOffset?.({ offset: scrollPositions.current[selectedPeriod], animated: false });
-    setSelectedPeriod(period);
-    shouldScrollToEnd.current = true;
-  };
-
-  const handleScroll = (event: any) => {
-    scrollPositions.current[selectedPeriod] = event.nativeEvent.contentOffset.x;
-  };
-
-  const handleContentSizeChange = () => {
-    if (shouldScrollToEnd.current) {
-      chartScrollRef.current?.scrollToEnd({ animated: false });
-      shouldScrollToEnd.current = false;
-    } else {
-      chartScrollRef.current?.scrollToOffset?.({ offset: scrollPositions.current[selectedPeriod], animated: false });
-    }
-  };
-
 
   return (
     <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
@@ -190,7 +162,7 @@ export default function CaffeineIntakeDetailScreen() {
                   backgroundColor: theme.backgroundSecondary,
                 },
               ]}
-              onPress={() => handlePeriodChange(period)}
+              onPress={() => setSelectedPeriod(period)}
             >
               <Text
                 style={[
@@ -212,9 +184,7 @@ export default function CaffeineIntakeDetailScreen() {
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.chartScrollContent}
-            onContentSizeChange={handleContentSizeChange}
-            onScroll={handleScroll}
-            scrollEventThrottle={16}
+            onContentSizeChange={() => chartScrollRef.current?.scrollToEnd({ animated: false })}
           >
             {chartData.map((item, idx) => (
               <View key={idx} style={[styles.barColumn, { width: BAR_WIDTH }]}>
