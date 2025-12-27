@@ -521,7 +521,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: Spacing.lg,
-    paddingBottom: Spacing["3xl"],
+    paddingBottom: 100,
     paddingTop: 0,
   },
   titleSection: {
