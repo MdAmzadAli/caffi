@@ -28,6 +28,7 @@ export default function CaffeineIntakeDetailScreen() {
   const insets = useSafeAreaInsets();
   const { entries } = useCaffeineStore();
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("day");
+  const [visibleBars, setVisibleBars] = useState(30);
 
   const chartScrollRef = useRef<ScrollView>(null);
   const mainScrollRef = useRef<ScrollView>(null);
@@ -38,6 +39,10 @@ export default function CaffeineIntakeDetailScreen() {
     mainScrollRef.current?.scrollTo({ y: 0, animated: false });
     setTimeout(() => chartScrollRef.current?.scrollToEnd({ animated: false }), 0);
   }, [selectedPeriod]);
+
+  useEffect(() => {
+    return () => setVisibleBars(30);
+  }, []);
 
   const { chartData, average } = useMemo(() => {
     const now = new Date();
@@ -83,22 +88,24 @@ export default function CaffeineIntakeDetailScreen() {
         .reduce((sum, e) => sum + e.caffeineAmount, 0);
     };
 
+    const maxIterations = selectedPeriod === "day" ? 365 : selectedPeriod === "week" ? 52 : 12;
+
     if (selectedPeriod === "day") {
-      for (let i = 364; i >= 0; i--) {
+      for (let i = 364; i >= maxIterations - visibleBars; i--) {
         const date = new Date(now);
         date.setDate(now.getDate() - i);
         const label = date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
         data.push({ label, value: getDayTotal(date) });
       }
     } else if (selectedPeriod === "week") {
-      for (let i = 51; i >= 0; i--) {
+      for (let i = 51; i >= maxIterations - visibleBars; i--) {
         const weekEnd = new Date(now);
         weekEnd.setDate(now.getDate() - i * 7);
         const label = weekEnd.toLocaleDateString("en-US", { month: "short", day: "numeric" });
         data.push({ label, value: getWeekTotal(weekEnd) });
       }
     } else if (selectedPeriod === "month") {
-      for (let i = 11; i >= 0; i--) {
+      for (let i = 11; i >= maxIterations - visibleBars; i--) {
         const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
         const label = date.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
         data.push({ label, value: getMonthTotal(date) });
@@ -113,9 +120,17 @@ export default function CaffeineIntakeDetailScreen() {
       chartData: data,
       average: avg,
     };
-  }, [entries, selectedPeriod]);
+  }, [entries, selectedPeriod, visibleBars]);
 
   const maxValue = Math.max(...chartData.map((d) => d.value), 1);
+
+  const handleChartScroll = (event: any) => {
+    const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
+    const isNearEnd = contentOffset.x + layoutMeasurement.width >= contentSize.width - 100;
+    if (isNearEnd && visibleBars < (selectedPeriod === "day" ? 365 : selectedPeriod === "week" ? 52 : 12)) {
+      setVisibleBars((prev) => prev + 30);
+    }
+  };
 
   const getAverageLabel = () => {
     switch (selectedPeriod) {
@@ -192,6 +207,8 @@ export default function CaffeineIntakeDetailScreen() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.chartScrollContent}
             onContentSizeChange={() => chartScrollRef.current?.scrollToEnd({ animated: false })}
+            onScroll={handleChartScroll}
+            scrollEventThrottle={200}
           >
             {chartData.map((item, idx) => (
               <View key={idx} style={[styles.barColumn, { width: BAR_WIDTH }]}>
