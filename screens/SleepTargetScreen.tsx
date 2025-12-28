@@ -183,7 +183,7 @@ export default function SleepTargetScreen() {
     });
   };
 
-  const weekDays = ["1", "2", "3", "4", "5", "6", "7"];
+  const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   return (
     <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
