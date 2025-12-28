@@ -11,7 +11,6 @@ import { getActiveAtTime, getSleepWindowStatusMessage, CaffeineEvent } from "@/u
 interface DayData {
   day: number;
   caffeineAtSleep: number | null;
-  statusMessage: string;
   statusColor: string;
   isToday: boolean;
 }
@@ -76,13 +75,12 @@ export default function SleepTargetScreen() {
         days.push({
           day,
           caffeineAtSleep: null,
-          statusMessage: "",
           statusColor: theme.mutedGrey,
           isToday,
         });
       } else {
         const caffeineAtSleep = getMaxCaffeineInSleepWindow(date);
-        const { message, color } = getSleepWindowStatusMessage(caffeineAtSleep);
+        const { color } = getSleepWindowStatusMessage(caffeineAtSleep);
         const hexColor =
           color === "green"
             ? theme.blue
@@ -93,7 +91,6 @@ export default function SleepTargetScreen() {
         days.push({
           day,
           caffeineAtSleep,
-          statusMessage: message,
           statusColor: hexColor,
           isToday,
         });
@@ -200,20 +197,9 @@ export default function SleepTargetScreen() {
                     {dayData.day}
                   </Text>
                   {dayData.caffeineAtSleep !== null && (
-                    <>
-                      <Text
-                        style={[
-                          styles.statusMessage,
-                          { color: dayData.statusColor },
-                        ]}
-                        numberOfLines={2}
-                      >
-                        {dayData.statusMessage}
-                      </Text>
-                      <Text style={[styles.caffeineLabel, { color: theme.mutedGrey }]}>
-                        {dayData.caffeineAtSleep} mg
-                      </Text>
-                    </>
+                    <Text style={[styles.caffeineLabel, { color: dayData.statusColor }]}>
+                      {dayData.caffeineAtSleep} mg
+                    </Text>
                   )}
                 </View>
               ) : null}
@@ -322,16 +308,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "500",
   },
-  statusMessage: {
-    fontSize: 7,
-    textAlign: "center",
-    marginTop: 1,
-    lineHeight: 8,
-    maxWidth: "90%",
-  },
   caffeineLabel: {
-    fontSize: 8,
-    marginTop: 1,
+    fontSize: 10,
+    fontWeight: "600",
+    marginTop: 2,
   },
   summaryText: {
     fontSize: 16,
