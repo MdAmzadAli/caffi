@@ -104,26 +104,40 @@ export default function SleepTargetScreen() {
   }, [currentMonth, entries, optimalCaffeine, sleepHour, sleepMinute, theme, halfLifeHours]);
 
   const { successDays, currentStreak } = useMemo(() => {
+    if (entries.length === 0) return { successDays: 0, currentStreak: 0 };
+
+    // Find the first entry timestamp as the cutoff
+    const firstEntryTime = entries.reduce((min, e) => {
+      const t = new Date(e.timestamp).getTime();
+      return t < min ? t : min;
+    }, Date.now());
+
+    const cutoffDate = new Date(firstEntryTime);
+    cutoffDate.setHours(0, 0, 0, 0);
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+
     let streak = 0;
     let countSuccess = 0;
     let checkDate = new Date(today);
+    let streakBroken = false;
 
-    for (let i = 0; i < 365; i++) {
+    // We only go back as far as the cutoff date
+    while (checkDate >= cutoffDate) {
       const caffeine = getMaxCaffeineInSleepWindow(checkDate);
-      const isSuccess = caffeine < 30; // Threshold for green status
+      const isSuccess = caffeine <= 40; // Threshold per user request (<= 40mg)
 
       if (checkDate.getMonth() === currentMonth.getMonth() && 
           checkDate.getFullYear() === currentMonth.getFullYear()) {
         if (isSuccess) countSuccess++;
       }
 
-      if (i === 0 || streak > 0) {
+      if (!streakBroken) {
         if (isSuccess) {
           streak++;
-        } else if (i > 0) {
-          break;
+        } else {
+          streakBroken = true;
         }
       }
 
@@ -131,7 +145,7 @@ export default function SleepTargetScreen() {
     }
 
     return { successDays: countSuccess, currentStreak: streak };
-  }, [entries, optimalCaffeine, currentMonth, sleepHour, sleepMinute, halfLifeHours]);
+  }, [entries, currentMonth, sleepHour, sleepMinute, halfLifeHours]);
 
   const monthLabel = currentMonth.toLocaleDateString("en-US", {
     month: "long",
@@ -211,9 +225,10 @@ export default function SleepTargetScreen() {
                   { 
                     top: infoButtonLayout.y + infoButtonLayout.height,
                     right: Spacing.lg,
-                    backgroundColor: theme.card,
-                    borderColor: theme.border,
-                    zIndex: 9999,
+                    backgroundColor: theme.backgroundRoot,
+                    // backgroundColor: theme.card,
+                    // borderColor: theme.border,
+                    // zIndex: 9999,
                   }
                 ]}
               >
@@ -271,7 +286,7 @@ export default function SleepTargetScreen() {
         </View>
 
         <Text style={[styles.summaryText, { color: theme.text }]}>
-          Days where you had less than {optimalCaffeine} mg at your chosen bedtime.
+          Days where you had 40 mg or less at your chosen bedtime.
         </Text>
 
         <View style={styles.streakSection}>
@@ -359,13 +374,14 @@ const styles = StyleSheet.create({
     width: 240,
     padding: Spacing.md,
     borderRadius: BorderRadius.lg,
-    borderWidth: 1,
+    borderWidth: 0.4,
+    // backgroundColor:"#fff",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
-    opacity: 1,
+    // opacity: 1,
   },
   infoTitle: {
     fontSize: 16,
