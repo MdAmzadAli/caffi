@@ -191,7 +191,7 @@ export default function SleepTargetScreen() {
               style={StyleSheet.absoluteFill}
               onPress={() => setShowInfo(false)}
             >
-              <View style={[styles.infoModal, { backgroundColor: theme.backgroundRoot, borderColor: theme.border }]}>
+              <View style={[styles.infoModal, { backgroundColor: theme.backgroundRoot, borderColor: theme.divider || theme.mutedGrey }]}>
                 <Text style={[styles.infoText, { color: theme.text }]}>
                   The mg value below each date shows the peak caffeine level in your system from your bedtime to 6 hours after.
                 </Text>
