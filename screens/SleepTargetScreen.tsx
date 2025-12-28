@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from "react";
-import { View, StyleSheet, Text, Pressable, ScrollView } from "react-native";
+import React, { useMemo, useState, useRef } from "react";
+import { View, StyleSheet, Text, Pressable, ScrollView, Modal, LayoutRectangle } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -23,6 +23,9 @@ export default function SleepTargetScreen() {
   const insets = useSafeAreaInsets();
   const { entries, profile } = useCaffeineStore();
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [showInfo, setShowInfo] = useState(false);
+  const infoButtonRef = useRef<View>(null);
+  const [infoButtonLayout, setInfoButtonLayout] = useState<LayoutRectangle | null>(null);
 
   const optimalCaffeine = profile.optimalCaffeine || 100;
   const sleepTime = profile.sleepTime || "23:00";
@@ -141,6 +144,13 @@ export default function SleepTargetScreen() {
     setCurrentMonth(newMonth);
   };
 
+  const handleInfoPress = () => {
+    infoButtonRef.current?.measure((x, y, width, height, pageX, pageY) => {
+      setInfoButtonLayout({ x: pageX, y: pageY, width, height });
+      setShowInfo(true);
+    });
+  };
+
   const weekDays = ["1", "2", "3", "4", "5", "6", "7"];
 
   return (
@@ -167,15 +177,67 @@ export default function SleepTargetScreen() {
           How often are you going to bed with safe caffeine amounts?
         </Text>
 
-        <View style={styles.monthNavigator}>
-          <Pressable onPress={() => navigateMonth(-1)} hitSlop={12}>
-            <Feather name="chevron-left" size={20} color={theme.text} />
-          </Pressable>
-          <Text style={[styles.monthLabel, { color: theme.text }]}>{monthLabel}</Text>
-          <Pressable onPress={() => navigateMonth(1)} hitSlop={12}>
-            <Feather name="chevron-right" size={20} color={theme.text} />
+        <View style={styles.monthNavigatorContainer}>
+          <View style={styles.monthNavigator}>
+            <Pressable onPress={() => navigateMonth(-1)} hitSlop={12}>
+              <Feather name="chevron-left" size={20} color={theme.text} />
+            </Pressable>
+            <Text style={[styles.monthLabel, { color: theme.text }]}>{monthLabel}</Text>
+            <Pressable onPress={() => navigateMonth(1)} hitSlop={12}>
+              <Feather name="chevron-right" size={20} color={theme.text} />
+            </Pressable>
+          </View>
+          <Pressable 
+            ref={infoButtonRef}
+            onPress={handleInfoPress}
+            style={styles.infoButton}
+            hitSlop={12}
+          >
+            <Feather name="info" size={20} color={theme.mutedGrey} />
           </Pressable>
         </View>
+
+        <Modal
+          visible={showInfo}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowInfo(false)}
+        >
+          <Pressable style={styles.modalOverlay} onPress={() => setShowInfo(false)}>
+            {infoButtonLayout && (
+              <View 
+                style={[
+                  styles.infoModal, 
+                  { 
+                    top: infoButtonLayout.y + infoButtonLayout.height,
+                    right: Spacing.lg,
+                    backgroundColor: theme.card,
+                    borderColor: theme.border,
+                  }
+                ]}
+              >
+                <Text style={[styles.infoTitle, { color: theme.text }]}>Peak Caffeine</Text>
+                <Text style={[styles.infoText, { color: theme.mutedGrey }]}>
+                  The value below each date shows the maximum caffeine level (peak) from your bedtime to 6 hours after.
+                </Text>
+                <View style={styles.legendContainer}>
+                  <View style={styles.legendRow}>
+                    <View style={[styles.legendDot, { backgroundColor: theme.blue }]} />
+                    <Text style={[styles.legendLabel, { color: theme.text }]}>Safe (&lt;30mg)</Text>
+                  </View>
+                  <View style={styles.legendRow}>
+                    <View style={[styles.legendDot, { backgroundColor: theme.accentGold }]} />
+                    <Text style={[styles.legendLabel, { color: theme.text }]}>Warning (30-40mg)</Text>
+                  </View>
+                  <View style={styles.legendRow}>
+                    <View style={[styles.legendDot, { backgroundColor: "#D9534F" }]} />
+                    <Text style={[styles.legendLabel, { color: theme.text }]}>High (&gt;40mg)</Text>
+                  </View>
+                </View>
+              </View>
+            )}
+          </Pressable>
+        </Modal>
 
         <View style={styles.calendarGrid}>
           {weekDays.map((d) => (
@@ -264,21 +326,72 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     marginBottom: Spacing.xl,
   },
+  monthNavigatorContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: Spacing.xl,
+  },
   monthNavigator: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      paddingHorizontal: Spacing.lg,
-      paddingVertical: Spacing.md,
-      borderRadius: BorderRadius.lg,
-      marginBottom: Spacing.xl,
-      width: "48%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    width: "48%",
+  },
+  infoButton: {
+    padding: Spacing.xs,
   },
   monthLabel: {
     fontSize: 16,
     fontWeight: "600",
-    minWidth: 200,
+    minWidth: 120,
     textAlign: "center",
+  },
+  modalOverlay: {
+    flex: 1,
+  },
+  infoModal: {
+    position: "absolute",
+    width: 240,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+    opacity: 1,
+  },
+  infoTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: Spacing.xs,
+  },
+  infoText: {
+    fontSize: 12,
+    lineHeight: 16,
+    marginBottom: Spacing.md,
+  },
+  legendContainer: {
+    gap: Spacing.xs,
+  },
+  legendRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+  },
+  legendDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  legendLabel: {
+    fontSize: 12,
+    fontWeight: "500",
   },
   calendarGrid: {
     flexDirection: "row",
