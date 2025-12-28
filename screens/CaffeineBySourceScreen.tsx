@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import {
   View,
   StyleSheet,
@@ -7,6 +7,7 @@ import {
   ScrollView,
   Dimensions,
   Image,
+  Animated,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -81,7 +82,7 @@ const DATE_OPTION_LABELS: Record<DateRangeOption, string> = {
 
 function getDateRange(option: DateRangeOption, customRange?: DateRange): DateRange {
   const now = new Date();
-  
+
   switch (option) {
     case "today": {
       const start = new Date(now);
@@ -121,6 +122,8 @@ function getDateRange(option: DateRangeOption, customRange?: DateRange): DateRan
   }
 }
 
+const AnimatedPath = Animated.createAnimatedComponent(Path);
+
 export default function CaffeineBySourceScreen() {
   const { theme } = useTheme();
   const navigation = useNavigation();
@@ -130,6 +133,8 @@ export default function CaffeineBySourceScreen() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDateOption, setSelectedDateOption] = useState<DateRangeOption>("today");
   const [customDateRange, setCustomDateRange] = useState<DateRange | undefined>(undefined);
+  const animProgress = useRef(new Animated.Value(0)).current;
+  const [animatedPercentages, setAnimatedPercentages] = useState<number[]>([]);
 
   const currentDateRange = useMemo(() => {
     return getDateRange(selectedDateOption, customDateRange);
@@ -163,7 +168,7 @@ export default function CaffeineBySourceScreen() {
 
     if (viewMode === "category") {
       const categoryMap: Record<string, { caffeine: number; count: number; items: Record<string, number> }> = {};
-      
+
       filteredEntries.forEach((e) => {
         if (!categoryMap[e.category]) {
           categoryMap[e.category] = { caffeine: 0, count: 0, items: {} };
@@ -194,7 +199,7 @@ export default function CaffeineBySourceScreen() {
       return { chartItems: items, allItems: items, total };
     } else {
       const itemMap: Record<string, { caffeine: number; count: number; category: string }> = {};
-      
+
       filteredEntries.forEach((e) => {
         const key = e.drinkId || e.name;
         if (!itemMap[key]) {
@@ -225,11 +230,11 @@ export default function CaffeineBySourceScreen() {
         const top5 = allItems.slice(0, 5);
         const others = allItems.slice(5);
         const othersCaffeine = others.reduce((sum, item) => sum + item.caffeine, 0);
-        
+
         top5.forEach((item, index) => {
           item.color = ITEM_COLORS[index];
         });
-        
+
         chartItems = [
           ...top5,
           {
@@ -253,6 +258,28 @@ export default function CaffeineBySourceScreen() {
       return { chartItems, allItems, total };
     }
   }, [filteredEntries, viewMode]);
+
+  useEffect(() => {
+    const chartItems = (chartData as any).chartItems || [];
+    if (chartItems.length === 0) {
+      setAnimatedPercentages([]);
+      return;
+    }
+
+    animProgress.setValue(0);
+    const listener = animProgress.addListener(({ value }) => {
+      const animated = chartItems.map((item) => item.percentage * value);
+      setAnimatedPercentages(animated);
+    });
+
+    Animated.timing(animProgress, {
+      toValue: 1,
+      duration: 1000,
+      useNativeDriver: false,
+    }).start();
+
+    return () => animProgress.removeListener(listener);
+  }, [chartData, viewMode, selectedDateOption, customDateRange]);
 
   const handleDateRangeSelect = (option: DateRangeOption, range: DateRange) => {
     setSelectedDateOption(option);
@@ -304,27 +331,27 @@ export default function CaffeineBySourceScreen() {
     const percentageLabels: React.ReactNode[] = [];
 
     chartItems.forEach((item, index) => {
-      const angle = (item.percentage / 100) * 360;
+      const animatedPercentage = animatedPercentages[index] || 0;
+      const angle = (animatedPercentage / 100) * 360;
       const endAngle = startAngle + angle;
-      
+
       const startRad = (startAngle * Math.PI) / 180;
       const endRad = (endAngle * Math.PI) / 180;
-      
+
       const x1 = CENTER + RADIUS * Math.cos(startRad);
       const y1 = CENTER + RADIUS * Math.sin(startRad);
       const x2 = CENTER + RADIUS * Math.cos(endRad);
       const y2 = CENTER + RADIUS * Math.sin(endRad);
-      
+
       const x3 = CENTER + INNER_RADIUS * Math.cos(endRad);
       const y3 = CENTER + INNER_RADIUS * Math.sin(endRad);
       const x4 = CENTER + INNER_RADIUS * Math.cos(startRad);
       const y4 = CENTER + INNER_RADIUS * Math.sin(startRad);
-      
+
       const largeArcFlag = angle >= 359.9 ? 1 : (angle > 180 ? 1 : 0);
-      
+
       let d = "";
       if (angle >= 359.9) {
-        // Full circle case
         d = `
           M ${CENTER} ${CENTER - RADIUS}
           A ${RADIUS} ${RADIUS} 0 1 1 ${CENTER - 0.01} ${CENTER - RADIUS}
@@ -332,7 +359,7 @@ export default function CaffeineBySourceScreen() {
           A ${INNER_RADIUS} ${INNER_RADIUS} 0 1 0 ${CENTER} ${CENTER - INNER_RADIUS}
           Z
         `;
-      } else {
+      } else if (angle > 0) {
         d = `
           M ${x1} ${y1}
           A ${RADIUS} ${RADIUS} 0 ${largeArcFlag} 1 ${x2} ${y2}
@@ -341,18 +368,20 @@ export default function CaffeineBySourceScreen() {
           Z
         `;
       }
-      
-      paths.push(
-        <Path key={item.id} d={d} fill={item.color} />
-      );
 
-      if (item.percentage >= 10) {
+      if (d) {
+        paths.push(
+          <Path key={item.id} d={d} fill={item.color} />
+        );
+      }
+
+      if (item.percentage >= 10 && animatedPercentage >= item.percentage * 0.5) {
         const midAngle = startAngle + angle / 2;
         const midRad = (midAngle * Math.PI) / 180;
         const labelRadius = (RADIUS + INNER_RADIUS) / 2;
         const labelX = CENTER + labelRadius * Math.cos(midRad);
         const labelY = CENTER + labelRadius * Math.sin(midRad);
-        
+
         percentageLabels.push(
           <SvgText
             key={`label-${item.id}`}

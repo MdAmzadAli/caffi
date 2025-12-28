@@ -258,10 +258,14 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xl,
   },
   monthNavigator: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.md,
-    marginBottom: Spacing.xl,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: Spacing.lg,
+      paddingVertical: Spacing.md,
+      borderRadius: BorderRadius.lg,
+      marginBottom: Spacing.xl,
+      width: "48%",
   },
   monthLabel: {
     fontSize: 16,
