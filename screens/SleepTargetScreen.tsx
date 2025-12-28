@@ -178,7 +178,7 @@ export default function SleepTargetScreen() {
         </Text>
 
         <View style={styles.navigatorContainer}>
-          <View style={[styles.monthNavigator, { backgroundColor: theme.cardBg }]}>
+          <View style={[styles.monthNavigator, { backgroundColor: theme.card }]}>
             <Pressable onPress={() => navigateMonth(-1)} hitSlop={12}>
               <Feather name="chevron-left" size={20} color={theme.text} />
             </Pressable>
@@ -209,7 +209,7 @@ export default function SleepTargetScreen() {
               <View style={[
                 styles.popover, 
                 { 
-                  backgroundColor: theme.cardBg,
+                  backgroundColor: theme.card,
                   top: popoverPos.top,
                   right: popoverPos.right
                 }
@@ -228,7 +228,7 @@ export default function SleepTargetScreen() {
                     <Text style={[styles.legendLabel, { color: theme.text }]}>Warning (30-40mg)</Text>
                   </View>
                   <View style={styles.legendItem}>
-                    <View style={[styles.legendDot, { backgroundColor: "#D9534F" }]} />
+                    <View style={[styles.legendDot, { backgroundColor: theme.red }]} />
                     <Text style={[styles.legendLabel, { color: theme.text }]}>High ( &gt; 40mg)</Text>
                   </View>
                 </View>
