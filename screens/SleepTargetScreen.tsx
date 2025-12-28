@@ -145,8 +145,8 @@ export default function SleepTargetScreen() {
   };
 
   const handleInfoPress = () => {
-    infoButtonRef.current?.measure((x, y, width, height, pageX, pageY) => {
-      setInfoButtonLayout({ x: pageX, y: pageY, width, height });
+    infoButtonRef.current?.measureInWindow((x, y, width, height) => {
+      setInfoButtonLayout({ x, y, width, height });
       setShowInfo(true);
     });
   };
@@ -213,6 +213,7 @@ export default function SleepTargetScreen() {
                     right: Spacing.lg,
                     backgroundColor: theme.card,
                     borderColor: theme.border,
+                    zIndex: 9999,
                   }
                 ]}
               >
