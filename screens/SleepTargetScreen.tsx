@@ -159,10 +159,11 @@ export default function SleepTargetScreen() {
       </View>
 
       {showInfo && (
-        <Pressable
-          style={StyleSheet.absoluteFill}
-          onPress={() => setShowInfo(false)}
-        >
+        <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
+          <Pressable
+            style={StyleSheet.absoluteFill}
+            onPress={() => setShowInfo(false)}
+          />
           <View style={[styles.infoModal, { backgroundColor: theme.backgroundRoot, borderColor: theme.divider || theme.mutedGrey }]}>
             <Text style={[styles.infoText, { color: theme.text }]}>
               The mg value below each date shows the peak caffeine level in your system from your bedtime to 6 hours after.
@@ -182,7 +183,7 @@ export default function SleepTargetScreen() {
               </View>
             </View>
           </View>
-        </Pressable>
+        </View>
       )}
 
       <ScrollView
@@ -327,7 +328,7 @@ const styles = StyleSheet.create({
   infoModal: {
     position: "absolute",
     right: Spacing.lg,
-    top: 160, // Positioned below the header/navigator
+    top: 205, // Adjusted for responsive header positioning
     width: 240,
     padding: Spacing.md,
     borderRadius: BorderRadius.lg,
@@ -338,6 +339,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
     zIndex: 100,
+    opacity: 1, // Ensure full opacity
   },
   infoText: {
     fontSize: 12,
