@@ -23,7 +23,6 @@ export default function SleepTargetScreen() {
   const insets = useSafeAreaInsets();
   const { entries, profile } = useCaffeineStore();
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [showInfo, setShowInfo] = useState(false);
 
   const optimalCaffeine = profile.optimalCaffeine || 100;
   const sleepTime = profile.sleepTime || "23:00";
@@ -158,34 +157,6 @@ export default function SleepTargetScreen() {
         <View style={styles.headerSpacer} />
       </View>
 
-      {showInfo && (
-        <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
-          <Pressable
-            style={StyleSheet.absoluteFill}
-            onPress={() => setShowInfo(false)}
-          />
-          <View style={[styles.infoModal, { backgroundColor: theme.backgroundRoot, borderColor: theme.divider || theme.mutedGrey }]}>
-            <Text style={[styles.infoText, { color: theme.text }]}>
-              The mg value below each date shows the peak caffeine level in your system from your bedtime to 6 hours after.
-            </Text>
-            <View style={styles.infoLegend}>
-              <View style={styles.legendItem}>
-                <View style={[styles.dot, { backgroundColor: theme.blue }]} />
-                <Text style={[styles.legendText, { color: theme.mutedGrey }]}>Safe (&lt;30mg)</Text>
-              </View>
-              <View style={styles.legendItem}>
-                <View style={[styles.dot, { backgroundColor: theme.accentGold }]} />
-                <Text style={[styles.legendText, { color: theme.mutedGrey }]}>Warning (30-40mg)</Text>
-              </View>
-              <View style={styles.legendItem}>
-                <View style={[styles.dot, { backgroundColor: "#D9534F" }]} />
-                <Text style={[styles.legendText, { color: theme.mutedGrey }]}>High (&gt;40mg)</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
-
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -196,22 +167,13 @@ export default function SleepTargetScreen() {
           How often are you going to bed with safe caffeine amounts?
         </Text>
 
-        <View style={styles.monthNavigatorContainer}>
-          <View style={styles.monthNavigator}>
-            <Pressable onPress={() => navigateMonth(-1)} hitSlop={12}>
-              <Feather name="chevron-left" size={20} color={theme.text} />
-            </Pressable>
-            <Text style={[styles.monthLabel, { color: theme.text }]}>{monthLabel}</Text>
-            <Pressable onPress={() => navigateMonth(1)} hitSlop={12}>
-              <Feather name="chevron-right" size={20} color={theme.text} />
-            </Pressable>
-          </View>
-          <Pressable
-            onPress={() => setShowInfo(!showInfo)}
-            style={styles.infoButton}
-            hitSlop={12}
-          >
-            <Feather name="info" size={20} color={theme.mutedGrey} />
+        <View style={styles.monthNavigator}>
+          <Pressable onPress={() => navigateMonth(-1)} hitSlop={12}>
+            <Feather name="chevron-left" size={20} color={theme.text} />
+          </Pressable>
+          <Text style={[styles.monthLabel, { color: theme.text }]}>{monthLabel}</Text>
+          <Pressable onPress={() => navigateMonth(1)} hitSlop={12}>
+            <Feather name="chevron-right" size={20} color={theme.text} />
           </Pressable>
         </View>
 
@@ -302,65 +264,21 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     marginBottom: Spacing.xl,
   },
-  monthNavigatorContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: Spacing.xl,
-    zIndex: 10,
-  },
   monthNavigator: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "transparent",
-    paddingVertical: Spacing.sm,
-    width: "60%",
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: Spacing.lg,
+      paddingVertical: Spacing.md,
+      borderRadius: BorderRadius.lg,
+      marginBottom: Spacing.xl,
+      width: "48%",
   },
   monthLabel: {
     fontSize: 16,
     fontWeight: "600",
+    minWidth: 200,
     textAlign: "center",
-  },
-  infoButton: {
-    padding: Spacing.xs,
-  },
-  infoModal: {
-    position: "absolute",
-    right: Spacing.lg,
-    top: 205, // Adjusted for responsive header positioning
-    width: 240,
-    padding: Spacing.md,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 5,
-    zIndex: 100,
-    opacity: 1, // Ensure full opacity
-  },
-  infoText: {
-    fontSize: 12,
-    lineHeight: 16,
-    marginBottom: Spacing.sm,
-  },
-  infoLegend: {
-    gap: Spacing.xs,
-  },
-  legendItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.xs,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  legendText: {
-    fontSize: 11,
   },
   calendarGrid: {
     flexDirection: "row",
