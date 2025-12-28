@@ -109,10 +109,15 @@ export default function SleepTargetScreen() {
 
     let streak = 0;
     let countSuccess = 0;
-    let checkDate = new Date(today);
+    
+    // We start checking from yesterday because today is still in progress
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    let checkDate = new Date(yesterday);
     let streakBroken = false;
 
-    // Check last 365 days
+    // Check last 365 days starting from yesterday
     for (let i = 0; i < 365; i++) {
       const dateString = checkDate.toISOString().split('T')[0];
       const hasEntryForDay = entries.some(e => {
@@ -137,6 +142,21 @@ export default function SleepTargetScreen() {
       }
 
       checkDate.setDate(checkDate.getDate() - 1);
+    }
+
+    // Success days in the calendar should still include today if it's currently successful
+    const todayCaffeine = getMaxCaffeineInSleepWindow(today);
+    const todayDateString = today.toISOString().split('T')[0];
+    const hasEntryToday = entries.some(e => {
+      const entryDate = new Date(e.timestamp);
+      return entryDate.toISOString().split('T')[0] === todayDateString;
+    });
+    
+    if (today.getMonth() === currentMonth.getMonth() && 
+        today.getFullYear() === currentMonth.getFullYear()) {
+      if (hasEntryToday && todayCaffeine <= 40) {
+        countSuccess++;
+      }
     }
 
     return { successDays: countSuccess, currentStreak: streak };
