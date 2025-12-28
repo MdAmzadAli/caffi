@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from "react";
-import { View, StyleSheet, Text, Pressable, ScrollView } from "react-native";
+import React, { useMemo, useState, useRef } from "react";
+import { View, StyleSheet, Text, Pressable, ScrollView, Modal, TouchableWithoutFeedback } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -23,11 +23,21 @@ export default function SleepTargetScreen() {
   const insets = useSafeAreaInsets();
   const { entries, profile } = useCaffeineStore();
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [showInfo, setShowInfo] = useState(false);
+  const infoIconRef = useRef<View>(null);
+  const [popoverPos, setPopoverPos] = useState({ top: 0, right: 0 });
 
   const optimalCaffeine = profile.optimalCaffeine || 100;
   const sleepTime = profile.sleepTime || "23:00";
   const [sleepHour, sleepMinute] = sleepTime.split(":").map(Number);
   const halfLifeHours = 5.5;
+
+  const handleInfoPress = () => {
+    infoIconRef.current?.measure((x, y, width, height, pageX, pageY) => {
+      setPopoverPos({ top: pageY + height + 5, right: Spacing.lg });
+      setShowInfo(true);
+    });
+  };
 
   const getMaxCaffeineInSleepWindow = (date: Date): number => {
     const sleepDateTime = new Date(date);
@@ -116,7 +126,7 @@ export default function SleepTargetScreen() {
         if (isSuccess) countSuccess++;
       }
 
-      if (i === 0 || streak > 0) {
+      if (i === 0 || (streak > 0 || (i === 1 && getMaxCaffeineInSleepWindow(today) < 30))) {
         if (isSuccess) {
           streak++;
         } else if (i > 0) {
@@ -128,7 +138,7 @@ export default function SleepTargetScreen() {
     }
 
     return { successDays: countSuccess, currentStreak: streak };
-  }, [entries, optimalCaffeine, currentMonth, sleepHour, sleepMinute, halfLifeHours]);
+  }, [entries, currentMonth, sleepHour, sleepMinute]);
 
   const monthLabel = currentMonth.toLocaleDateString("en-US", {
     month: "long",
@@ -141,7 +151,7 @@ export default function SleepTargetScreen() {
     setCurrentMonth(newMonth);
   };
 
-  const weekDays = ["1", "2", "3", "4", "5", "6", "7"];
+  const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   return (
     <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
@@ -167,15 +177,65 @@ export default function SleepTargetScreen() {
           How often are you going to bed with safe caffeine amounts?
         </Text>
 
-        <View style={styles.monthNavigator}>
-          <Pressable onPress={() => navigateMonth(-1)} hitSlop={12}>
-            <Feather name="chevron-left" size={20} color={theme.text} />
-          </Pressable>
-          <Text style={[styles.monthLabel, { color: theme.text }]}>{monthLabel}</Text>
-          <Pressable onPress={() => navigateMonth(1)} hitSlop={12}>
-            <Feather name="chevron-right" size={20} color={theme.text} />
-          </Pressable>
+        <View style={styles.navigatorContainer}>
+          <View style={[styles.monthNavigator, { backgroundColor: theme.cardBg }]}>
+            <Pressable onPress={() => navigateMonth(-1)} hitSlop={12}>
+              <Feather name="chevron-left" size={20} color={theme.text} />
+            </Pressable>
+            <Text style={[styles.monthLabel, { color: theme.text }]}>{monthLabel}</Text>
+            <Pressable onPress={() => navigateMonth(1)} hitSlop={12}>
+              <Feather name="chevron-right" size={20} color={theme.text} />
+            </Pressable>
+          </View>
+          <View ref={infoIconRef}>
+            <Pressable 
+              onPress={handleInfoPress}
+              hitSlop={12}
+              style={styles.infoIcon}
+            >
+              <Feather name="info" size={20} color={theme.mutedGrey} />
+            </Pressable>
+          </View>
         </View>
+
+        <Modal
+          visible={showInfo}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setShowInfo(false)}
+        >
+          <TouchableWithoutFeedback onPress={() => setShowInfo(false)}>
+            <View style={styles.modalOverlay}>
+              <View style={[
+                styles.popover, 
+                { 
+                  backgroundColor: theme.cardBg,
+                  top: popoverPos.top,
+                  right: popoverPos.right
+                }
+              ]}>
+                <Text style={[styles.popoverTitle, { color: theme.text }]}>What this represents</Text>
+                <Text style={[styles.popoverText, { color: theme.text }]}>
+                  The mg value below each date shows the <Text style={{fontWeight: '700'}}>peak caffeine level</Text> predicted during your 6-hour sleep window (bedtime to +6 hours).
+                </Text>
+                <View style={styles.popoverLegend}>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.legendDot, { backgroundColor: theme.blue }]} />
+                    <Text style={[styles.legendLabel, { color: theme.text }]}>Safe ( &lt; 30mg)</Text>
+                  </View>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.legendDot, { backgroundColor: theme.accentGold }]} />
+                    <Text style={[styles.legendLabel, { color: theme.text }]}>Warning (30-40mg)</Text>
+                  </View>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.legendDot, { backgroundColor: "#D9534F" }]} />
+                    <Text style={[styles.legendLabel, { color: theme.text }]}>High ( &gt; 40mg)</Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
 
         <View style={styles.calendarGrid}>
           {weekDays.map((d) => (
@@ -208,7 +268,7 @@ export default function SleepTargetScreen() {
         </View>
 
         <Text style={[styles.summaryText, { color: theme.text }]}>
-          Days where you had less than {optimalCaffeine} mg at your chosen bedtime.
+          Days where you had less than 30 mg at your chosen bedtime window.
         </Text>
 
         <View style={styles.streakSection}>
@@ -264,21 +324,70 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     marginBottom: Spacing.xl,
   },
+  navigatorContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: Spacing.xl,
+  },
   monthNavigator: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      paddingHorizontal: Spacing.lg,
-      paddingVertical: Spacing.md,
-      borderRadius: BorderRadius.lg,
-      marginBottom: Spacing.xl,
-      width: "48%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.lg,
+    flex: 1,
+    marginRight: Spacing.md,
   },
   monthLabel: {
     fontSize: 16,
     fontWeight: "600",
-    minWidth: 200,
     textAlign: "center",
+  },
+  infoIcon: {
+    padding: Spacing.xs,
+  },
+  modalOverlay: {
+    flex: 1,
+  },
+  popover: {
+    position: 'absolute',
+    width: 260,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  popoverTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    marginBottom: Spacing.xs,
+  },
+  popoverText: {
+    fontSize: 13,
+    lineHeight: 18,
+    marginBottom: Spacing.sm,
+  },
+  popoverLegend: {
+    gap: 4,
+  },
+  legendItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.xs,
+  },
+  legendDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  legendLabel: {
+    fontSize: 11,
+    fontWeight: "500",
   },
   calendarGrid: {
     flexDirection: "row",
@@ -291,8 +400,9 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
   },
   weekDayText: {
-    fontSize: 14,
-    fontWeight: "500",
+    fontSize: 12,
+    fontWeight: "600",
+    textTransform: 'uppercase',
   },
   dayCell: {
     width: "14.28%",
