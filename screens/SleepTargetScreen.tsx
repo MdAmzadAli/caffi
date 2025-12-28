@@ -110,7 +110,6 @@ export default function SleepTargetScreen() {
     let streak = 0;
     let countSuccess = 0;
     
-    // We start checking from yesterday because today is still in progress
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
     
@@ -122,7 +121,10 @@ export default function SleepTargetScreen() {
       const dateString = checkDate.toISOString().split('T')[0];
       const hasEntryForDay = entries.some(e => {
         const entryDate = new Date(e.timestamp);
-        return entryDate.toISOString().split('T')[0] === dateString;
+        // Compare year, month, date specifically to avoid timezone ISO string issues
+        return entryDate.getFullYear() === checkDate.getFullYear() &&
+               entryDate.getMonth() === checkDate.getMonth() &&
+               entryDate.getDate() === checkDate.getDate();
       });
 
       const caffeine = getMaxCaffeineInSleepWindow(checkDate);
@@ -146,10 +148,11 @@ export default function SleepTargetScreen() {
 
     // Success days in the calendar should still include today if it's currently successful
     const todayCaffeine = getMaxCaffeineInSleepWindow(today);
-    const todayDateString = today.toISOString().split('T')[0];
     const hasEntryToday = entries.some(e => {
       const entryDate = new Date(e.timestamp);
-      return entryDate.toISOString().split('T')[0] === todayDateString;
+      return entryDate.getFullYear() === today.getFullYear() &&
+             entryDate.getMonth() === today.getMonth() &&
+             entryDate.getDate() === today.getDate();
     });
     
     if (today.getMonth() === currentMonth.getMonth() && 
