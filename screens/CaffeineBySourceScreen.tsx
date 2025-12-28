@@ -25,25 +25,25 @@ interface DateRange {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  coffee: "#D7CCC8",
-  tea: "#BCAAA4",
-  energy: "#A1887F",
-  soda: "#8D6E63",
-  chocolate: "#795548",
-  custom: "#6D4C41",
+  coffee: "#F3E6D8",
+  tea: "#E1C7A3",
+  energy: "#C19A6B",
+  soda: "#9B6B3F",
+  chocolate: "#6F4A2D",
+  custom: "#3B2416",
 };
 
 const ITEM_COLORS = [
-  "#D7CCC8", // Lightest
-  "#BCAAA4",
-  "#A1887F",
-  "#8D6E63",
-  "#795548",
-  "#6D4C41",
-  "#5D4037",
+  "#F3E6D8", // Lightest
+  "#DEC1A0",
+  "#C79B6A",
+  "#A87447",
+  "#835634",
+  "#5A3A22",
+  "#2F1C12",
   "#4E342E",
-  "#3E2723", // Darkest
-  "#2D1B16",
+  "#C19A6B", // Darkest
+  "#6F4A2D",
 ];
 
 const CATEGORY_IMAGES: Record<string, any> = {
@@ -605,7 +605,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   legendText: {
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: "500",
   },
   noDataContainer: {
