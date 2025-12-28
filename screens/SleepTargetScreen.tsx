@@ -6,11 +6,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCaffeineStore } from "@/store/caffeineStore";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
+import { getActiveAtTime, getSleepWindowStatusMessage } from "@/utils/graphUtils";
 
 interface DayData {
   day: number;
   caffeineAtSleep: number | null;
-  isBelowOptimal: boolean;
+  statusMessage: string;
+  statusColor: string;
   isToday: boolean;
 }
 
@@ -26,24 +28,27 @@ export default function SleepTargetScreen() {
   const optimalCaffeine = profile.optimalCaffeine || 100;
   const sleepTime = profile.sleepTime || "23:00";
   const [sleepHour, sleepMinute] = sleepTime.split(":").map(Number);
+  const halfLifeHours = profile.halfLifeHours || 5.5;
 
-  const getCaffeineAtSleepTime = (date: Date): number => {
+  const getMaxCaffeineInSleepWindow = (date: Date): number => {
     const sleepDateTime = new Date(date);
     sleepDateTime.setHours(sleepHour, sleepMinute, 0, 0);
+    const endSleepWindow = new Date(sleepDateTime.getTime() + 6 * 3600000);
 
-    let caffeine = 0;
-    entries.forEach((entry) => {
-      const entryTime = new Date(entry.timestamp);
-      if (entryTime <= sleepDateTime) {
-        const hoursElapsed =
-          (sleepDateTime.getTime() - entryTime.getTime()) / (1000 * 60 * 60);
-        if (hoursElapsed >= 0 && hoursElapsed < 48) {
-          const remainingFactor = Math.pow(0.5, hoursElapsed / CAFFEINE_HALF_LIFE_HOURS);
-          caffeine += entry.caffeineAmount * remainingFactor;
-        }
-      }
-    });
-    return Math.round(caffeine);
+    const graphEvents = entries.map((e) => ({
+      id: e.id,
+      name: e.name,
+      mg: e.caffeineAmount,
+      timestampISO: e.timestamp,
+    }));
+
+    let maxCaffeine = 0;
+    const stepMs = 15 * 60 * 1000;
+    for (let t = sleepDateTime.getTime(); t <= endSleepWindow.getTime(); t += stepMs) {
+      const mg = getActiveAtTime(graphEvents, t, halfLifeHours);
+      if (mg > maxCaffeine) maxCaffeine = mg;
+    }
+    return Math.round(maxCaffeine);
   };
 
   const monthData = useMemo(() => {
@@ -68,20 +73,35 @@ export default function SleepTargetScreen() {
       const isToday = date.getTime() === today.getTime();
 
       if (isFuture) {
-        days.push({ day, caffeineAtSleep: null, isBelowOptimal: false, isToday });
+        days.push({
+          day,
+          caffeineAtSleep: null,
+          statusMessage: "",
+          statusColor: theme.mutedGrey,
+          isToday,
+        });
       } else {
-        const caffeineAtSleep = getCaffeineAtSleepTime(date);
+        const caffeineAtSleep = getMaxCaffeineInSleepWindow(date);
+        const { message, color } = getSleepWindowStatusMessage(caffeineAtSleep);
+        const hexColor =
+          color === "green"
+            ? theme.blue
+            : color === "brown"
+              ? theme.accentGold
+              : "#D9534F"; // dangerRed
+
         days.push({
           day,
           caffeineAtSleep,
-          isBelowOptimal: caffeineAtSleep < optimalCaffeine,
+          statusMessage: message,
+          statusColor: hexColor,
           isToday,
         });
       }
     }
 
     return days;
-  }, [currentMonth, entries, optimalCaffeine, sleepHour, sleepMinute]);
+  }, [currentMonth, entries, optimalCaffeine, sleepHour, sleepMinute, theme, halfLifeHours]);
 
   const { successDays, currentStreak } = useMemo(() => {
     const today = new Date();
@@ -91,8 +111,8 @@ export default function SleepTargetScreen() {
     let checkDate = new Date(today);
 
     for (let i = 0; i < 365; i++) {
-      const caffeine = getCaffeineAtSleepTime(checkDate);
-      const isSuccess = caffeine < optimalCaffeine;
+      const caffeine = getMaxCaffeineInSleepWindow(checkDate);
+      const isSuccess = caffeine < 30; // Threshold for green status
 
       if (checkDate.getMonth() === currentMonth.getMonth() && 
           checkDate.getFullYear() === currentMonth.getFullYear()) {
@@ -111,7 +131,7 @@ export default function SleepTargetScreen() {
     }
 
     return { successDays: countSuccess, currentStreak: streak };
-  }, [entries, optimalCaffeine, currentMonth, sleepHour, sleepMinute]);
+  }, [entries, optimalCaffeine, currentMonth, sleepHour, sleepMinute, halfLifeHours]);
 
   const monthLabel = currentMonth.toLocaleDateString("en-US", {
     month: "long",
@@ -181,14 +201,15 @@ export default function SleepTargetScreen() {
                   </Text>
                   {dayData.caffeineAtSleep !== null && (
                     <>
-                      {dayData.isBelowOptimal && (
-                        <Feather
-                          name="check-circle"
-                          size={18}
-                          color={theme.blue}
-                          style={styles.checkIcon}
-                        />
-                      )}
+                      <Text
+                        style={[
+                          styles.statusMessage,
+                          { color: dayData.statusColor },
+                        ]}
+                        numberOfLines={2}
+                      >
+                        {dayData.statusMessage}
+                      </Text>
                       <Text style={[styles.caffeineLabel, { color: theme.mutedGrey }]}>
                         {dayData.caffeineAtSleep} mg
                       </Text>
@@ -301,12 +322,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "500",
   },
-  checkIcon: {
-    marginTop: 2,
+  statusMessage: {
+    fontSize: 7,
+    textAlign: "center",
+    marginTop: 1,
+    lineHeight: 8,
+    maxWidth: "90%",
   },
   caffeineLabel: {
-    fontSize: 10,
-    marginTop: 2,
+    fontSize: 8,
+    marginTop: 1,
   },
   summaryText: {
     fontSize: 16,
