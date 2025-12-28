@@ -158,6 +158,33 @@ export default function SleepTargetScreen() {
         <View style={styles.headerSpacer} />
       </View>
 
+      {showInfo && (
+        <Pressable
+          style={StyleSheet.absoluteFill}
+          onPress={() => setShowInfo(false)}
+        >
+          <View style={[styles.infoModal, { backgroundColor: theme.backgroundRoot, borderColor: theme.divider || theme.mutedGrey }]}>
+            <Text style={[styles.infoText, { color: theme.text }]}>
+              The mg value below each date shows the peak caffeine level in your system from your bedtime to 6 hours after.
+            </Text>
+            <View style={styles.infoLegend}>
+              <View style={styles.legendItem}>
+                <View style={[styles.dot, { backgroundColor: theme.blue }]} />
+                <Text style={[styles.legendText, { color: theme.mutedGrey }]}>Safe (&lt;30mg)</Text>
+              </View>
+              <View style={styles.legendItem}>
+                <View style={[styles.dot, { backgroundColor: theme.accentGold }]} />
+                <Text style={[styles.legendText, { color: theme.mutedGrey }]}>Warning (30-40mg)</Text>
+              </View>
+              <View style={styles.legendItem}>
+                <View style={[styles.dot, { backgroundColor: "#D9534F" }]} />
+                <Text style={[styles.legendText, { color: theme.mutedGrey }]}>High (&gt;40mg)</Text>
+              </View>
+            </View>
+          </View>
+        </Pressable>
+      )}
+
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -185,33 +212,6 @@ export default function SleepTargetScreen() {
           >
             <Feather name="info" size={20} color={theme.mutedGrey} />
           </Pressable>
-
-          {showInfo && (
-            <Pressable
-              style={StyleSheet.absoluteFill}
-              onPress={() => setShowInfo(false)}
-            >
-              <View style={[styles.infoModal, { backgroundColor: theme.backgroundRoot, borderColor: theme.divider || theme.mutedGrey }]}>
-                <Text style={[styles.infoText, { color: theme.text }]}>
-                  The mg value below each date shows the peak caffeine level in your system from your bedtime to 6 hours after.
-                </Text>
-                <View style={styles.infoLegend}>
-                  <View style={styles.legendItem}>
-                    <View style={[styles.dot, { backgroundColor: theme.blue }]} />
-                    <Text style={[styles.legendText, { color: theme.mutedGrey }]}>Safe (&lt;30mg)</Text>
-                  </View>
-                  <View style={styles.legendItem}>
-                    <View style={[styles.dot, { backgroundColor: theme.accentGold }]} />
-                    <Text style={[styles.legendText, { color: theme.mutedGrey }]}>Warning (30-40mg)</Text>
-                  </View>
-                  <View style={styles.legendItem}>
-                    <View style={[styles.dot, { backgroundColor: "#D9534F" }]} />
-                    <Text style={[styles.legendText, { color: theme.mutedGrey }]}>High (&gt;40mg)</Text>
-                  </View>
-                </View>
-              </View>
-            </Pressable>
-          )}
         </View>
 
         <View style={styles.calendarGrid}>
@@ -326,8 +326,8 @@ const styles = StyleSheet.create({
   },
   infoModal: {
     position: "absolute",
-    right: 0,
-    top: 40,
+    right: Spacing.lg,
+    top: 160, // Positioned below the header/navigator
     width: 240,
     padding: Spacing.md,
     borderRadius: BorderRadius.lg,
