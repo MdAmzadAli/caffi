@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCaffeineStore } from "@/store/caffeineStore";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
-import { getActiveAtTime, getSleepWindowStatusMessage } from "@/utils/graphUtils";
+import { getActiveAtTime, getSleepWindowStatusMessage, CaffeineEvent } from "@/utils/graphUtils";
 
 interface DayData {
   day: number;
@@ -28,18 +28,18 @@ export default function SleepTargetScreen() {
   const optimalCaffeine = profile.optimalCaffeine || 100;
   const sleepTime = profile.sleepTime || "23:00";
   const [sleepHour, sleepMinute] = sleepTime.split(":").map(Number);
-  const halfLifeHours = profile.halfLifeHours || 5.5;
+  const halfLifeHours = 5.5;
 
   const getMaxCaffeineInSleepWindow = (date: Date): number => {
     const sleepDateTime = new Date(date);
     sleepDateTime.setHours(sleepHour, sleepMinute, 0, 0);
     const endSleepWindow = new Date(sleepDateTime.getTime() + 6 * 3600000);
 
-    const graphEvents = entries.map((e) => ({
+    const graphEvents: CaffeineEvent[] = entries.map((e) => ({
       id: e.id,
       name: e.name,
       mg: e.caffeineAmount,
-      timestampISO: e.timestamp,
+      timestampISO: typeof e.timestamp === 'string' ? e.timestamp : new Date(e.timestamp).toISOString(),
     }));
 
     let maxCaffeine = 0;
