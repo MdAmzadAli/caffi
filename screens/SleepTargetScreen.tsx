@@ -104,17 +104,6 @@ export default function SleepTargetScreen() {
   }, [currentMonth, entries, optimalCaffeine, sleepHour, sleepMinute, theme, halfLifeHours]);
 
   const { successDays, currentStreak } = useMemo(() => {
-    if (entries.length === 0) return { successDays: 0, currentStreak: 0 };
-
-    // Find the first entry timestamp as the cutoff
-    const firstEntryTime = entries.reduce((min, e) => {
-      const t = new Date(e.timestamp).getTime();
-      return t < min ? t : min;
-    }, Date.now());
-
-    const cutoffDate = new Date(firstEntryTime);
-    cutoffDate.setHours(0, 0, 0, 0);
-
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -123,10 +112,16 @@ export default function SleepTargetScreen() {
     let checkDate = new Date(today);
     let streakBroken = false;
 
-    // We only go back as far as the cutoff date
-    while (checkDate >= cutoffDate) {
+    // Check last 365 days
+    for (let i = 0; i < 365; i++) {
+      const dateString = checkDate.toISOString().split('T')[0];
+      const hasEntryForDay = entries.some(e => {
+        const entryDate = new Date(e.timestamp);
+        return entryDate.toISOString().split('T')[0] === dateString;
+      });
+
       const caffeine = getMaxCaffeineInSleepWindow(checkDate);
-      const isSuccess = caffeine <= 40; // Threshold per user request (<= 40mg)
+      const isSuccess = hasEntryForDay && caffeine <= 40;
 
       if (checkDate.getMonth() === currentMonth.getMonth() && 
           checkDate.getFullYear() === currentMonth.getFullYear()) {
@@ -286,7 +281,7 @@ export default function SleepTargetScreen() {
         </View>
 
         <Text style={[styles.summaryText, { color: theme.text }]}>
-          Days where you had 40 mg or less at your chosen bedtime.
+          Days when caffeine intake was under 40 mg during your sleep window (from sleep time to 6 hours after).
         </Text>
 
         <View style={styles.streakSection}>
