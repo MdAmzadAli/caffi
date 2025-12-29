@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useCallback, useEffect } from "react";
-import { View, StyleSheet, Pressable, Text, Image, SectionList, NativeScrollEvent, NativeSyntheticEvent, Dimensions } from "react-native";
+import { View, StyleSheet, Pressable, Text, Image, SectionList, NativeScrollEvent, NativeSyntheticEvent, Dimensions, ActivityIndicator } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
@@ -27,7 +27,7 @@ import {
 } from "@/utils/recommendationEngine";
 import { CaffeineEvent } from "@/utils/graphUtils";
 import { calculateInfoCard, InfoCardResult } from "@/utils/infocardLogic";
-import { Spacing } from "@/constants/theme";
+import { Spacing, Colors } from "@/constants/theme";
 import { useTheme } from "@/hooks/useTheme";
 import type { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import { DUMMY_ENTRIES } from "@/utils/dummy_logs";
@@ -156,17 +156,24 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const activeCaffeine = useMemo(() => getActiveCaffeine(), [entries]);
 
   const [visibleCount, setVisibleCount] = useState(15);
-  
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   // Combine real entries with dummy data for testing
   const allEntries = useMemo(() => {
     return [...entries, ...DUMMY_ENTRIES].sort(
       (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     ).slice(0, visibleCount);
   }, [entries, visibleCount]);
+  const hasMoreEntries = entries.length + DUMMY_ENTRIES.length > visibleCount;
 
   const handleLoadMore = useCallback(() => {
-    setVisibleCount(prev => prev + 15);
-  }, []);
+    if (isLoadingMore || !hasMoreEntries) return;
+
+    setIsLoadingMore(true);
+    setTimeout(() => {
+      setVisibleCount(prev => prev + 15);
+      setIsLoadingMore(false);
+    }, 400);
+  }, [isLoadingMore, hasMoreEntries]);
 
   const caffeineEvents: CaffeineEvent[] = useMemo(() => {
     return entries.map((entry) => ({
@@ -411,7 +418,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const handleExpand = () => {
     // Save current scroll position
     savedScrollOffset.current = scrollY.value;
-    
+    // setVisibleCount(15);
     // Scroll back to top to show info cards
     if (scrollViewRef.current) {
       scrollViewRef.current.scrollToLocation({
@@ -423,9 +430,9 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     }
     
     // Reset scroll value after animation
-    // setTimeout(() => {
-    //   scrollY.value = 0;
-    // }, 300);
+    setTimeout(() => {
+      setVisibleCount(15);
+    }, 300);
   };
 
   const renderItem = ({ item }: { item: DrinkEntry }) => {
@@ -480,7 +487,16 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       </View>
     );
   };
+  const ListFooterComponent = () => {
+    if (!hasMoreEntries || !isLoadingMore) return null;
 
+    return (
+      <View style={styles.loadingFooter}>
+        <ActivityIndicator size="small" color={Colors.light.accent} />
+      </View>
+    );
+  };
+  
   const ListHeaderComponent = () => {
     const titleOpacity = useAnimatedStyle(() => {
       const progress = Math.min(scrollY.value / COLLAPSE_THRESHOLD, 1);
@@ -622,6 +638,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             renderItem={renderItem}
             renderSectionHeader={renderSectionHeader}
             ListHeaderComponent={ListHeaderComponent}
+            ListFooterComponent={ListFooterComponent}
             keyExtractor={(item) => item.id}
             stickySectionHeadersEnabled={false}
             contentContainerStyle={styles.listContent}
@@ -766,5 +783,9 @@ const styles = StyleSheet.create({
   },
   emptySubtext: {
     fontSize: 13,
+  },
+  loadingFooter: {
+    paddingVertical: Spacing.lg,
+    alignItems: "center",
   },
 });
