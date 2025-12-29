@@ -155,12 +155,18 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const todayCaffeine = useMemo(() => getTodayCaffeine(), [entries]);
   const activeCaffeine = useMemo(() => getActiveCaffeine(), [entries]);
 
+  const [visibleCount, setVisibleCount] = useState(15);
+  
   // Combine real entries with dummy data for testing
   const allEntries = useMemo(() => {
     return [...entries, ...DUMMY_ENTRIES].sort(
       (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-    );
-  }, [entries]);
+    ).slice(0, visibleCount);
+  }, [entries, visibleCount]);
+
+  const handleLoadMore = useCallback(() => {
+    setVisibleCount(prev => prev + 15);
+  }, []);
 
   const caffeineEvents: CaffeineEvent[] = useMemo(() => {
     return entries.map((entry) => ({
@@ -625,6 +631,8 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             scrollEventThrottle={16}
             onViewableItemsChanged={handleViewableItemsChanged}
             viewabilityConfig={viewabilityConfig}
+            onEndReached={handleLoadMore}
+            onEndReachedThreshold={0.5}
           />
         </View>
       </SafeAreaView>
