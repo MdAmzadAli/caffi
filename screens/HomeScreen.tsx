@@ -340,6 +340,23 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     setStackedModalVisible(false);
     setStackedEvents([]);
   }, []);
+
+  // Sync stackedEvents with current caffeineEvents to handle deletions in real-time
+  useEffect(() => {
+    if (stackedModalVisible && stackedEvents.length > 0) {
+      const updatedEvents = stackedEvents
+        .map(se => caffeineEvents.find(ce => ce.id === se.id))
+        .filter((ce): ce is CaffeineEvent => !!ce);
+      
+      if (updatedEvents.length === 0) {
+        setStackedModalVisible(false);
+        setStackedEvents([]);
+      } else if (updatedEvents.length !== stackedEvents.length) {
+        setStackedEvents(updatedEvents);
+      }
+    }
+  }, [caffeineEvents, stackedModalVisible]);
+
   const isScrolling = useSharedValue(false);
   const lastStickyDateRef = useRef<string | null>(null);
   const dateUpdateTimeout = useRef<NodeJS.Timeout | null>(null);
