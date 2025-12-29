@@ -105,10 +105,10 @@ const RIGHT_PADDING = 0;
 const X_AXIS_HEIGHT = 17;
 const GRAPH_PADDING_TOP = 8;
 const GRAPH_PADDING_BOTTOM = 8;
-const MARKER_SIZE = 24;
+const MARKER_SIZE = 18;
 const MARKER_IMAGE_SIZE = 20;
 const HOURS_VISIBLE = 12;
-const GROUP_PROXIMITY_PX = 15;
+const GROUP_PROXIMITY_PX = 20;
 const HOURS_PER_DAY = 24;
 const EDGE_THRESHOLD = 50;
 
@@ -634,11 +634,11 @@ export function CaffeineGraphNew({
             const categoryImage = CATEGORY_IMAGES[category];
             const resolvedImage = resolveImageSource(imageUri) || categoryImage;
             const hasImage = !!resolvedImage;
-            const clipId = `clip-group-${idx}`;
+            const clipId = `clip-${groupEvents[0].id}-${x.toFixed(0)}-${iconY.toFixed(0)}`;
             const count = groupEvents.length;
 
             return (
-              <G key={`group-${idx}`}>
+               <G key={`group-${groupEvents[0].id}-${x.toFixed(0)}`}>
                 <Defs>
                   <ClipPath id={clipId}>
                     <Circle cx={x} cy={iconY} r={MARKER_IMAGE_SIZE / 2} />

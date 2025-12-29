@@ -459,7 +459,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         </View>
 
         <Text style={[styles.entryMg, { color: theme.darkBrown }]}>
-          {item.caffeineAmount.toFixed(3).replace(/\.?0+$/, "")} mg
+          {Math.round(item.caffeineAmount)} mg
         </Text>
       </Pressable>
     );
