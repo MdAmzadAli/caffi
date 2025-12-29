@@ -493,7 +493,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
                   onScrollEndDrag={handleInfiniteScroll}
                 >
                   {/* Categories in ScrollView */}
-                  <View style={styles.categoriesRow}>
+                  <View style={styles.categoriesRow} pointerEvents="box-none">
                     {QUICK_CATEGORIES.map((cat) => (
                       <QuickCategoryCard
                         key={cat.key}
@@ -1186,7 +1186,7 @@ const styles = StyleSheet.create({
   },
   categoriesRow: {
     flexDirection: "row",
-    gap: Spacing.sm,
+    // gap: Spacing.sm,
     marginBottom: Spacing.md,
     marginHorizontal: Spacing.xl,
     paddingTop: Spacing.sm,
