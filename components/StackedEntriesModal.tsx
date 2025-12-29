@@ -14,7 +14,7 @@ import { CaffeineEvent } from "@/utils/graphUtils";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SCREEN_HEIGHT = Dimensions.get("window").height;
-const DEFAULT_MODAL_HEIGHT = SCREEN_HEIGHT * 0.38;
+const DEFAULT_MODAL_HEIGHT = SCREEN_HEIGHT * 0.18;
 const MODAL_WIDTH = SCREEN_WIDTH * 0.35;
 
 const CATEGORY_IMAGES: Record<string, any> = {
@@ -79,11 +79,10 @@ export function StackedEntriesModal({
     Math.max(position.y - 40, 60),
     SCREEN_HEIGHT - effectiveModalHeight - xAxisLabelHeight
   );
-
   const sortedEvents = React.useMemo(() => {
     return [...events].sort((a, b) => new Date(b.timestampISO).getTime() - new Date(a.timestampISO).getTime());
   }, [events]);
-
+  
   if (!visible || events.length === 0) return null;
 
   return (
@@ -102,7 +101,6 @@ export function StackedEntriesModal({
               left: modalLeft,
               top: modalTop,
               shadowColor: "#000",
-              maxHeight: effectiveModalHeight,
             },
           ]}
           onLayout={(e) => {
@@ -111,7 +109,7 @@ export function StackedEntriesModal({
           }}
         >
           <ScrollView
-            style={[styles.scrollView, { maxHeight: effectiveModalHeight }]}
+            style={[styles.scrollView, { maxHeight: DEFAULT_MODAL_HEIGHT }]}
             showsVerticalScrollIndicator={false}
           >
             {sortedEvents.map((event, index) => {
@@ -124,7 +122,7 @@ export function StackedEntriesModal({
                   style={({ pressed }) => [
                     styles.entryRow,
                     { backgroundColor: pressed ? theme.backgroundTertiary : "transparent" },
-                    index < sortedEvents.length - 1 && {
+                    index < events.length - 1 && {
                       borderBottomWidth: StyleSheet.hairlineWidth,
                       borderBottomColor: theme.mutedGrey + "30",
                     },
