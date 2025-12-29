@@ -255,7 +255,7 @@ export default function CaffeineIntakeDetailScreen() {
         </View>
 
         <View style={[styles.dateSelector, { backgroundColor: theme.backgroundSecondary }]}>
-          <Pressable onPress={() => navigatePeriod(-1)} hitSlop={12}>
+          <Pressable onPress={() => navigatePeriod(-1)} hitSlop={12} >
             <Feather name="chevron-left" size={20} color={theme.text} />
           </Pressable>
           <Text style={[styles.dateLabel, { color: theme.text }]}>
@@ -369,10 +369,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.md,
     borderRadius: BorderRadius.xl,
+    shadowColor: "#000",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      elevation: 5,
   },
   periodButtonText: {
     fontSize: 14,
     fontWeight: "600",
+  },
+  feather:{
+    // shadowColor: "#000",
+    //   shadowOffset: { width: 0, height: 4 },
+    //   shadowOpacity: 0.1,
+    //   shadowRadius: 8,
+    //   elevation: 5,
   },
   dateSelector: {
     flexDirection: "row",
@@ -383,6 +395,11 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.lg,
     marginBottom: Spacing.xl,
     width: "48%",
+    // shadowColor: "#000",
+    //   shadowOffset: { width: 0, height: 4 },
+    //   shadowOpacity: 0.1,
+    //   shadowRadius: 8,
+    //   elevation: 5,
     // alignSelf: "left",
   },
   dateLabel: {

@@ -365,6 +365,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: Spacing.xl,
+    
   },
   monthNavigator: {
     flexDirection: "row",
@@ -374,12 +375,13 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     borderRadius: BorderRadius.lg,
     width: "48%",
+    
   },
   infoButton: {
     padding: Spacing.xs,
   },
   monthLabel: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "600",
     minWidth: 120,
     textAlign: "center",
@@ -446,11 +448,13 @@ const styles = StyleSheet.create({
     width: "14.28%",
     aspectRatio: 1,
     padding: 2,
+    
   },
   dayCellContent: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    
   },
   dayNumber: {
     fontSize: 14,
@@ -472,7 +476,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   streakLabel: {
-    fontSize: 18,
+    fontSize: 25,
     fontWeight: "600",
   },
   streakValue: {

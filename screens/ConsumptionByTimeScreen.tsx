@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from "react";
-import { View, StyleSheet, Text, Pressable, ScrollView } from "react-native";
+import React, { useMemo, useState, useEffect, useRef } from "react";
+import { View, StyleSheet, Text, Pressable, ScrollView, Animated } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -24,10 +24,11 @@ const TIME_PERIODS: TimePeriod[] = [
 ];
 
 const BAR_COLORS = [
-  "#E8DCCC",
-  "#D4C4A8",
-  "#C9A36A",
-  "#5C4A3B",
+ "#DEC1A0",
+  // "#C79B6A",
+  "#C4A484",
+  "#A67C52",
+  "#6F4E37",
 ];
 
 export default function ConsumptionByTimeScreen() {
@@ -37,6 +38,7 @@ export default function ConsumptionByTimeScreen() {
   const { entries } = useCaffeineStore();
   const [viewMode, setViewMode] = useState<ViewMode>("Month");
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const animProgress = useRef(new Animated.Value(0)).current;
 
   const isInTimePeriod = (hour: number, period: TimePeriod): boolean => {
     if (period.startHour < period.endHour) {
@@ -92,6 +94,15 @@ export default function ConsumptionByTimeScreen() {
   }, [entries, getDateRange]);
 
   const maxTotal = Math.max(...periodData.map((p) => p.total), 1);
+
+  useEffect(() => {
+    animProgress.setValue(0);
+    Animated.timing(animProgress, {
+      toValue: 1,
+      duration: 800,
+      useNativeDriver: false,
+    }).start();
+  }, [periodData, viewMode, selectedDate]);
 
   const navigateDate = (direction: number) => {
     const newDate = new Date(selectedDate);
@@ -192,7 +203,13 @@ export default function ConsumptionByTimeScreen() {
             const barWidth = period.total > 0 ? (period.total / maxTotal) * 100 : 0;
             const barColor = BAR_COLORS[idx];
             const isDarkBar = idx >= 2;
-            const textOnBar = barWidth > 60;
+            const leftTextOnBar = barWidth > 30;
+            const rightTextOnBar = barWidth > 85;
+
+            const animatedWidth = animProgress.interpolate({
+              inputRange: [0, 1],
+              outputRange: ['0%', `${barWidth}%`],
+            });
 
             return (
               <View key={idx} style={styles.barRow}>
@@ -202,11 +219,11 @@ export default function ConsumptionByTimeScreen() {
                     { backgroundColor: theme.backgroundSecondary },
                   ]}
                 >
-                  <View
+                  <Animated.View
                     style={[
                       styles.barFill,
                       {
-                        width: `${barWidth}%`,
+                        width: animatedWidth,
                         backgroundColor: barColor,
                       },
                     ]}
@@ -217,7 +234,7 @@ export default function ConsumptionByTimeScreen() {
                       <Text
                         style={[
                           styles.barLabelText,
-                          { color: textOnBar && isDarkBar ? "#FFFFFF" : theme.text },
+                          { color: leftTextOnBar && isDarkBar ? "#FFFFFF" : theme.text },
                         ]}
                       >
                         {period.label}
@@ -226,7 +243,7 @@ export default function ConsumptionByTimeScreen() {
                     <Text
                       style={[
                         styles.barValueText,
-                        { color: textOnBar && isDarkBar ? "#FFFFFF" : theme.text },
+                        { color: rightTextOnBar && isDarkBar ? "#FFFFFF" : theme.text },
                       ]}
                     >
                       {period.total} mg
@@ -238,9 +255,9 @@ export default function ConsumptionByTimeScreen() {
           })}
         </View>
 
-        <Text style={[styles.summaryText, { color: theme.mutedGrey }]}>
+        {/* <Text style={[styles.summaryText, { color: theme.mutedGrey }]}>
           Average amount of caffeine consumed per time period.
-        </Text>
+        </Text> */}
       </ScrollView>
     </View>
   );
@@ -294,6 +311,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.md,
     borderRadius: BorderRadius.xl,
+    shadowColor: "#000",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      elevation: 5,
   },
   modeButtonText: {
     fontSize: 14,
@@ -301,28 +323,37 @@ const styles = StyleSheet.create({
   },
   dateNavigator: {
     flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.md,
-    marginBottom: Spacing["2xl"],
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: Spacing.lg,
+      paddingVertical: Spacing.md,
+      borderRadius: BorderRadius.lg,
+      marginBottom: Spacing.xl,
+      width: "48%",
+    
+      
   },
   dateLabel: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "600",
-    minWidth: 200,
+    
     textAlign: "center",
   },
   barsContainer: {
     gap: Spacing.lg,
     marginBottom: Spacing["2xl"],
+    
   },
   barRow: {
     width: "100%",
+    
   },
   barBackground: {
     height: 56,
     borderRadius: BorderRadius.md,
     overflow: "hidden",
     position: "relative",
+    
   },
   barFill: {
     position: "absolute",
@@ -330,6 +361,7 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     borderRadius: BorderRadius.md,
+    
   },
   barContent: {
     position: "absolute",
@@ -341,6 +373,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: Spacing.lg,
+    
   },
   barLabelContainer: {
     flexDirection: "row",

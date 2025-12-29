@@ -130,7 +130,8 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
   const [selectedSize, setSelectedSize] = useState<number | null>(null);
   const [notes, setNotes] = useState("");
   const [isFavorite, setIsFavorite] = useState(false);
-
+  const scrollViewRef = useRef<ScrollView>(null);
+  
   const scrollY = useSharedValue(0);
   const quickAddY = useSharedValue(0);
   const customDrinksY = useSharedValue(0);
@@ -152,11 +153,9 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
   }, [entries]);
 
   const filteredDrinks = useMemo(() => {
-    let drinks = allDrinks;
-
-    if (selectedCategory) {
-      drinks = drinks.filter((d) => d.category === selectedCategory);
-    }
+    let drinks = selectedCategory 
+      ? allDrinks.filter((d) => d.category === selectedCategory)
+      : allDrinks;
 
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
@@ -325,17 +324,12 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
     [isClosing, onClose, translateY, sheetHeight, borderRadius],
   );
 
-  const collapseToNormal = useCallback(() => {
-    sheetHeight.value = withSpring(INITIAL_HEIGHT, { damping: 18, stiffness: 200 });
-    translateY.value = withSpring(0, { damping: 18, stiffness: 200 });
-    borderRadius.value = withSpring(BorderRadius.lg, { damping: 18, stiffness: 200 });
-    setIsExpanded(false);
-  }, [sheetHeight, translateY, borderRadius]);
-
   useLayoutEffect(() => {
     if (visible) {
       setIsExpanded(false);
-      translateY.value = withSpring(0);
+      borderRadius.value = BorderRadius.lg;
+      translateY.value = withTiming(0, { duration: 300 });
+      sheetHeight.value = INITIAL_HEIGHT;
     } else {
       translateY.value = INITIAL_HEIGHT;
       sheetHeight.value = INITIAL_HEIGHT;
@@ -490,6 +484,7 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
 
                 {/* Scrollable Content - Categories Scroll With Content */}
                 <Animated.ScrollView
+                  ref={scrollViewRef}
                   style={styles.scrollContent}
                   showsVerticalScrollIndicator={false}
                   onScroll={handleScroll}
@@ -505,9 +500,12 @@ export default function AddDrinkModal({ visible, onClose, onNavigateToCustomDrin
                         label={cat.label}
                         icon={cat.icon}
                         isActive={selectedCategory === cat.key}
-                        onPress={() =>
-                          setSelectedCategory(selectedCategory === cat.key ? null : cat.key)
-                        }
+                        onPress={() => {
+                          const newCategory = selectedCategory === cat.key ? null : cat.key;
+                          setSelectedCategory(newCategory);
+                          setDisplayedCount(PAGE_SIZE);
+                          scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+                        }}
                       />
                     ))}
                   </View>
@@ -842,34 +840,25 @@ interface DrinkListItemProps {
 
 function DrinkListItem({ drink, onPress }: DrinkListItemProps) {
   const { theme } = useTheme();
-  const scale = useSharedValue(1);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-
-  const caffeineMg = Math.round(
-    (drink.caffeinePer100ml * drink.defaultServingMl) / 100,
+  const caffeineMg = useMemo(
+    () => Math.round((drink.caffeinePer100ml * drink.defaultServingMl) / 100),
+    [drink.caffeinePer100ml, drink.defaultServingMl]
   );
 
+  const imageSource = useMemo(() => getCategoryImageSource(drink.category), [drink.category]);
+
   return (
-    <AnimatedPressable
+    <Pressable
       onPress={onPress}
-      onPressIn={() => {
-        scale.value = withSpring(0.98);
-      }}
-      onPressOut={() => {
-        scale.value = withSpring(1);
-      }}
       style={[
         styles.drinkListItem,
         { backgroundColor: theme.backgroundDefault },
-        animatedStyle,
       ]}
     >
       <View style={styles.drinkIcon}>
         <Image
-          source={getCategoryImageSource(drink.category)}
+          source={imageSource}
           style={{ width: 40, height: 40, borderRadius: 20 }}
           resizeMode="cover"
         />
@@ -883,11 +872,14 @@ function DrinkListItem({ drink, onPress }: DrinkListItemProps) {
         </ThemedText>
       </View>
       <Feather name="chevron-right" size={20} color={theme.textMuted} />
-    </AnimatedPressable>
+    </Pressable>
   );
 }
 
-const MemoizedDrinkListItem = memo(DrinkListItem, (prev, next) => prev.drink.id === next.drink.id);
+const MemoizedDrinkListItem = memo(
+  DrinkListItem,
+  (prev, next) => prev.drink.id === next.drink.id && prev.onPress === next.onPress
+);
 
 interface CustomDrinkListItemProps {
   drink: DrinkItem;

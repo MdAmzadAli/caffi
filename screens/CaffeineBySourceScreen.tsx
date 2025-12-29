@@ -590,6 +590,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     borderRadius: BorderRadius.xl,
     borderWidth: 1,
+    
   },
   dateButtonText: {
     fontSize: 14,
