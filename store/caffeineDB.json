@@ -701,18 +701,6 @@
       "caffeine_mg_per_ml": 3.333
     },
     {
-      "name": "NoDoz Tablets (1 tablet)",
-      "serving_size_ml": 0,
-      "caffeine_mg": 100,
-      "caffeine_mg_per_ml": null
-    },
-    {
-      "name": "Vivarin (1 tablet)",
-      "serving_size_ml": 0,
-      "caffeine_mg": 200,
-      "caffeine_mg_per_ml": null
-    },
-    {
       "name": "Sobos Ultra (32 oz)",
       "serving_size_ml": 946,
       "caffeine_mg": 140,
@@ -785,28 +773,10 @@
       "caffeine_mg_per_ml": 0.571
     },
     {
-      "name": "MaXEnergy (energy gum, 2 pieces)",
-      "serving_size_ml": 0,
-      "caffeine_mg": 200,
-      "caffeine_mg_per_ml": null
-    },
-    {
-      "name": "MaXFocus (caffeine mint, 1 piece)",
-      "serving_size_ml": 0,
-      "caffeine_mg": 40,
-      "caffeine_mg_per_ml": null
-    },
-    {
       "name": "5-hour Energy Extra Strength (2 oz)",
       "serving_size_ml": 60,
       "caffeine_mg": 230,
       "caffeine_mg_per_ml": 3.833
-    },
-    {
-      "name": "VPX Bangster (1 tablet)",
-      "serving_size_ml": 0,
-      "caffeine_mg": 200,
-      "caffeine_mg_per_ml": null
     },
     {
       "name": "C4 Ultimate (1 serving)",
