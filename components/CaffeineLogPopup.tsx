@@ -226,22 +226,34 @@ export function CaffeineLogPopup({
   const areaStart = isDark ? theme.backgroundTertiary : theme.accentGold + "1A";
   const areaEnd = isDark ? theme.backgroundSecondary : theme.accentGold + "0D";
 
-  const { width, height, path, area, peak, peakTimeLabel, peakDateLabel, caffeineStats, timeLabels } = useDecayPath(entry, curveColor);
+  const [shouldRenderGraph, setShouldRenderGraph] = useState(false);
+
+  useEffect(() => {
+    if (visible) {
+      // Defer graph rendering until after animation starts
+      const timer = setTimeout(() => {
+        setShouldRenderGraph(true);
+      }, 50); // Small delay to prioritize animation
+      return () => clearTimeout(timer);
+    } else {
+      setShouldRenderGraph(false);
+    }
+  }, [visible]);
+
+  const { width, height, path, area, peak, peakTimeLabel, peakDateLabel, caffeineStats, timeLabels } = useDecayPath(
+    shouldRenderGraph ? entry : null, 
+    curveColor
+  );
   const startY = useSharedValue(0);
 
   useEffect(() => {
     if (visible) {
+      // Start animation immediately with faster spring config
       translateY.value = withSpring(0);
     } else {
       translateY.value = sheetHeight;
     }
   }, [visible, translateY, sheetHeight]);
-
-  const closeSheet = () => {
-    translateY.value = withTiming(sheetHeight, { duration: 180 }, () => {
-      runOnJS(onClose)();
-    });
-  };
 
   const panGesture = Gesture.Pan()
     .onStart(() => {
@@ -339,53 +351,57 @@ export function CaffeineLogPopup({
 
                 {/* Graph */}
                 <View style={styles.graphWrap}>
-                  <Svg width={width} height={height + 30}>
-                    <Defs>
-                      <LinearGradient id="decayArea" x1="0" y1="0" x2="0" y2="1">
-                        <Stop offset="0" stopColor={areaStart} stopOpacity="0.6" />
-                        <Stop offset="1" stopColor={areaEnd} stopOpacity="0.1" />
-                      </LinearGradient>
-                    </Defs>
-                    <Path d={area} fill="url(#decayArea)" />
-                    <Path d={path} stroke={curveColor} strokeWidth={3} fill="none" />
+                  {shouldRenderGraph ? (
+                    <Svg width={width} height={height + 30}>
+                      <Defs>
+                        <LinearGradient id="decayArea" x1="0" y1="0" x2="0" y2="1">
+                          <Stop offset="0" stopColor={areaStart} stopOpacity="0.6" />
+                          <Stop offset="1" stopColor={areaEnd} stopOpacity="0.1" />
+                        </LinearGradient>
+                      </Defs>
+                      <Path d={area} fill="url(#decayArea)" />
+                      <Path d={path} stroke={curveColor} strokeWidth={3} fill="none" />
 
-                    {/* Peak marker */}
-                    <Circle cx={peak.x} cy={peak.y} r={6} fill={theme.danger} />
-                    {peakDateLabel && (
+                      {/* Peak marker */}
+                      <Circle cx={peak.x} cy={peak.y} r={6} fill={theme.danger} />
+                      {peakDateLabel && (
+                        <SvgText
+                          x={peak.x}
+                          y={peak.y - 25}
+                          fontSize={11}
+                          fill={theme.danger}
+                          textAnchor="middle"
+                        >
+                          {peakDateLabel}
+                        </SvgText>
+                      )}
                       <SvgText
                         x={peak.x}
-                        y={peak.y - 25}
-                        fontSize={11}
+                        y={peak.y - (peakDateLabel ? 12 : 10)}
+                        fontSize={12}
                         fill={theme.danger}
                         textAnchor="middle"
                       >
-                        {peakDateLabel}
+                        {peakTimeLabel}
                       </SvgText>
-                    )}
-                    <SvgText
-                      x={peak.x}
-                      y={peak.y - (peakDateLabel ? 12 : 10)}
-                      fontSize={12}
-                      fill={theme.danger}
-                      textAnchor="middle"
-                    >
-                      {peakTimeLabel}
-                    </SvgText>
 
-                    {/* X-axis time labels */}
-                    {timeLabels.map((item, idx) => (
-                      <SvgText
-                        key={idx}
-                        x={item.x}
-                        y={height + 20}
-                        fontSize={11}
-                        fill={theme.mutedGrey}
-                        textAnchor={idx === 0 ? "start" : idx === timeLabels.length - 1 ? "end" : "middle"}
-                      >
-                        {item.label}
-                      </SvgText>
-                    ))}
-                  </Svg>
+                      {/* X-axis time labels */}
+                      {timeLabels.map((item, idx) => (
+                        <SvgText
+                          key={idx}
+                          x={item.x}
+                          y={height + 20}
+                          fontSize={11}
+                          fill={theme.mutedGrey}
+                          textAnchor={idx === 0 ? "start" : idx === timeLabels.length - 1 ? "end" : "middle"}
+                        >
+                          {item.label}
+                        </SvgText>
+                      ))}
+                    </Svg>
+                  ) : (
+                    <View style={{ width, height: height + 30 }} />
+                  )}
                   <View style={styles.graphRightText}>
                     <Text style={[styles.addsText, { color: theme.darkBrown }]}>adds {caffeineStats.currentMg.toFixed(3).replace(/\.?0+$/, "")} mg</Text>
                     <Text style={[styles.nowText, { color: theme.mutedGrey }]}>now</Text>
