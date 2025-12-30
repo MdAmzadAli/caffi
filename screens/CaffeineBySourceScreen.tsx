@@ -513,7 +513,7 @@ export default function CaffeineBySourceScreen() {
                     {item.percentage.toFixed(1)}%
                   </Text>
                   <Text style={[styles.itemCaffeine, { color: theme.mutedGrey }]}>
-                    {item.caffeine}mg
+                    {parseFloat(item.caffeine.toFixed(1))}mg
                   </Text>
                 </View>
               </View>
