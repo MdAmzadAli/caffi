@@ -85,7 +85,7 @@ const formatDateWithTime = (date: Date): string => {
   const timePart = new Date(date).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
   
   if (entryDate.getTime() === now.getTime()) {
-    return "Today";
+    return `Today, ${timePart}`;
   }
   
   const yesterday = new Date(now);
