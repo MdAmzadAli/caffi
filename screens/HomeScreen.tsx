@@ -161,7 +161,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   // Combine real entries with dummy data for testing
   const allEntries = useMemo(() => {
-    return [...entries, ...DUMMY_ENTRIES].sort(
+    return [...entries].sort(
       (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     ).slice(0, visibleCount);
   }, [entries, visibleCount]);

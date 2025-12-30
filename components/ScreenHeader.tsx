@@ -17,7 +17,7 @@ export function ScreenHeader({ title, showIcon = false, showBackButton = false }
   const navigation = useNavigation();
 
   return (
-    <View style={[styles.header, { backgroundColor: theme.backgroundRoot }]}>
+    <View style={[styles.header, { backgroundColor: "transparent" }]}>
       {showBackButton && (
         <Pressable
           onPress={() => navigation.goBack()}

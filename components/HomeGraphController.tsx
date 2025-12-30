@@ -105,20 +105,16 @@ export function HomeGraphController({
       withSpring(1, { damping: 10, stiffness: 400 })
     );
 
-    // Calculate today's offset from the initial reference
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    // Reset to initial window that includes today
-    const newStart = INITIAL_START_DAY;
-    const newEnd = INITIAL_END_DAY;
+    // Calculate window that centers today (day 0)
+    const halfWindow = Math.floor((INITIAL_END_DAY - INITIAL_START_DAY) / 2);
+    const newStart = -halfWindow;
+    const newEnd = halfWindow;
 
     setDayWindowStart(newStart);
     setDayWindowEnd(newEnd);
     setIsOffCenter(false);
     setScrollDirection(null);
 
-    // Small delay to ensure state propagates before triggering scroll
     requestAnimationFrame(() => {
       setTimeout(() => {
         setResetKey(prev => prev + 1);

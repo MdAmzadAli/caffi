@@ -144,7 +144,65 @@ const resolveImageSource = (imageUri: string | undefined): any => {
   }
   return imageUri;
 };
+// ADD this RIGHT BEFORE the CaffeineGraphNew export function:
 
+interface MarkerImageProps {
+  x: number;
+  y: number;
+  size: number;
+  imageUri?: string;
+  category: string;
+  clipId: string;
+  fallbackColor: string;
+}
+
+const MarkerImage = React.memo(({ x, y, size, imageUri, category, clipId, fallbackColor }: MarkerImageProps) => {
+  const [imageError, setImageError] = useState(false);
+  const resolvedImage = useMemo(() => {
+    const categoryImage = CATEGORY_IMAGES[category];
+    return resolveImageSource(imageUri) || categoryImage;
+  }, [imageUri, category]);
+
+  // Check if image is a valid require() module or URI
+  const isValidImage = useMemo(() => {
+    if (!resolvedImage) return false;
+    // Local requires return a number (module ID)
+    if (typeof resolvedImage === 'number') return true;
+    // Valid URI string
+    if (typeof resolvedImage === 'string' && resolvedImage.length > 0) return true;
+    // Object with uri property (React Native image source)
+    if (typeof resolvedImage === 'object' && resolvedImage?.uri) return true;
+    return false;
+  }, [resolvedImage]);
+
+  if (!isValidImage || imageError) {
+    // Fallback to emoji
+    return (
+      <SvgText
+        x={x}
+        y={y + 3}
+        fontSize={14}
+        textAnchor="middle"
+        fill={fallbackColor}
+      >
+        ☕
+      </SvgText>
+    );
+  }
+
+  return (
+    <SvgImage
+      x={x - size / 2}
+      y={y - size / 2}
+      width={size}
+      height={size}
+      href={resolvedImage}
+      clipPath={`url(#${clipId})`}
+      preserveAspectRatio="xMidYMid slice"
+      onError={() => setImageError(true)}
+    />
+  );
+});
 export function CaffeineGraphNew({
   events,
   now = new Date().toISOString(),
@@ -373,6 +431,8 @@ export function CaffeineGraphNew({
   }, [resetKey]);
   
 
+  // REPLACE the entire handleScroll function with this:
+
   const handleScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       const scrollX = event.nativeEvent.contentOffset.x;
@@ -402,20 +462,19 @@ export function CaffeineGraphNew({
         onScrollOffsetChange(isOffCenter, direction);
       }
 
-      if (now - lastExtendRef.current < 200) return; // Reduced from 300ms to 200ms
+      if (now - lastExtendRef.current < 100) return; // CHANGED: Reduced from 200ms to 100ms for faster response
 
       if (onExtendDays) {
-        // CRITICAL: Preemptive loading - trigger BEFORE reaching the edge
-        // Load new data when user is 2 screens away from the edge
-        const preloadThreshold = viewportWidthValue * 2;
+        // CRITICAL: Trigger 3 screens away (increased from 2) for earlier preloading
+        const preloadThreshold = viewportWidthValue * 3;
 
-        // Extend right (future) - preload when approaching right edge
+        // Extend right (future)
         if (scrollX >= maxScrollX - preloadThreshold) {
           lastExtendRef.current = now;
           onExtendDays('right');
         }
 
-        // Extend left (past) - preload when approaching left edge
+        // Extend left (past)
         if (scrollX <= preloadThreshold) {
           lastExtendRef.current = now;
           onExtendDays('left');
@@ -611,7 +670,7 @@ export function CaffeineGraphNew({
             strokeDasharray="4,3"
           />
 
-          {visibleDateMarkers.map((marker) => {
+          {dateMarkers.map((marker) => {
             const x = timeToX(marker.ms);
             return (
               <G key={`date-${marker.ms}`}>
@@ -690,11 +749,8 @@ export function CaffeineGraphNew({
               fill={GRAPH_COLORS.accentGold}
             />
           ))}
-          {visibleEventGroups.map((group, idx) => {
+          {eventGroups.groups.map((group, idx) => {
             const { x, iconY, category, imageUri, events: groupEvents } = group;
-            const categoryImage = CATEGORY_IMAGES[category];
-            const resolvedImage = resolveImageSource(imageUri) || categoryImage;
-            const hasImage = !!resolvedImage;
             const clipId = `clip-${groupEvents[0].id}-${groupEvents[0].timestampISO}`;
             const count = groupEvents.length;
 
@@ -714,27 +770,15 @@ export function CaffeineGraphNew({
                   strokeWidth={0.5}
                   strokeOpacity={0.3}
                 />
-                {hasImage ? (
-                  <SvgImage
-                    x={x - MARKER_IMAGE_SIZE / 2}
-                    y={iconY - MARKER_IMAGE_SIZE / 2}
-                    width={MARKER_IMAGE_SIZE}
-                    height={MARKER_IMAGE_SIZE}
-                    href={resolvedImage}
-                    clipPath={`url(#${clipId})`}
-                    preserveAspectRatio="xMidYMid slice"
-                  />
-                ) : (
-                  <SvgText
-                    x={x}
-                    y={iconY + 3}
-                    fontSize={8}
-                    textAnchor="middle"
-                    fill={GRAPH_COLORS.darkBrown}
-                  >
-                    ☕
-                  </SvgText>
-                )}
+                <MarkerImage
+                  x={x}
+                  y={iconY}
+                  size={MARKER_IMAGE_SIZE}
+                  imageUri={imageUri}
+                  category={category}
+                  clipId={clipId}
+                  fallbackColor={GRAPH_COLORS.darkBrown}
+                />
                 {count > 1 && (
                   <>
                     <Circle
@@ -761,7 +805,7 @@ export function CaffeineGraphNew({
         </Svg>
 
         <View style={styles.markerOverlayContainer} pointerEvents="box-none">
-          {visibleEventGroups.map((group, idx) => {
+          {eventGroups.groups.map((group, idx) => {
             const { x, iconY } = group;
             const hitSize = MARKER_SIZE + 8;
             return (
@@ -786,7 +830,7 @@ export function CaffeineGraphNew({
         </View>
 
         <View style={[styles.xAxisContainer, { width: scrollContentWidth }]}>
-          {visibleXAxisTicks.map((tickMs) => {
+          {xAxisTicks.map((tickMs) => {
             const x = timeToX(tickMs);
             return (
               <View key={tickMs} style={[styles.xAxisTick, { left: x - 12 }]}>

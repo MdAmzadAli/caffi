@@ -157,6 +157,7 @@ export function RecommendationCards({
                 shadowOpacity: isDark ? 0.3 : 0.25,
                 borderWidth: 1,
                 borderColor: isDark ? theme.divider : "#E8E4DC",
+          
               },
               pressed && { opacity: 0.8, transform: [{ scale: 0.98 }] },
             ]}
@@ -243,9 +244,11 @@ const styles = StyleSheet.create({
     minWidth: 120,
     maxWidth: 140,
     borderLeftWidth: 3,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 2,
+     shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.15,
+      shadowRadius: 4,
+      elevation: 3,
   },
   cardFlex: {
     flex: 1,
