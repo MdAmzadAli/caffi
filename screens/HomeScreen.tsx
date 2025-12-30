@@ -549,7 +549,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         >
           <ScreenHeader title="Caffi" showIcon={true} />
           <View style={styles.container}>
-            <ListHeaderComponent />
             <View style={[styles.emptyContainer, { backgroundColor: theme.backgroundDefault }]}>
               <Feather name="coffee" size={32} color={theme.mutedGrey} />
               <Text style={[styles.emptyText, { color: theme.mutedGrey }]}>No drinks logged</Text>
