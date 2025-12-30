@@ -814,7 +814,7 @@ function QuickCategoryCard({
         {
           backgroundColor: isActive
             ? Colors.light.accent
-            : theme.backgroundDefault,
+            : "transparent",
         },
         animatedStyle,
       ]}
@@ -1190,6 +1190,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
     marginHorizontal: Spacing.xl,
     paddingTop: Spacing.sm,
+    
   },
   quickCategoryCard: {
     flex: 1,
@@ -1222,6 +1223,12 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.sm,
     marginBottom: Spacing.sm,
     gap: Spacing.md,
+    // borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
   },
   drinkIcon: {
     width: 40,

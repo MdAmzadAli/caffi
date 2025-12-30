@@ -34,9 +34,10 @@ const DARK_COLORS = {
   darkBrown: "#F5EBDD",
 };
 
-const INITIAL_START_DAY = -3;
-const INITIAL_END_DAY = 1;
-const DAYS_TO_EXTEND = 5;
+const INITIAL_START_DAY = -2; // Start with more buffer
+const INITIAL_END_DAY = 2; // Start with more buffer
+const DAYS_TO_EXTEND = 4; // Extend 4 days at a time for smoother loading
+const SLIDING_WINDOW_DAYS = 16; // Keep 16 days total (increased for better buffer) // Keep 14 days total in memory
 
 export function HomeGraphController({
   events,
@@ -57,7 +58,7 @@ export function HomeGraphController({
   const [resetKey, setResetKey] = useState(0);
   const scrollViewRef = useRef<ScrollView>(null);
   const buttonScale = useSharedValue(1);
-
+  const isExtending = useRef(false);
   const colors = isDark ? DARK_COLORS : LIGHT_COLORS;
 
   const now = useMemo(() => new Date().toISOString(), [resetKey]);
@@ -68,12 +69,35 @@ export function HomeGraphController({
   }, []);
 
   const handleExtendDays = useCallback((direction: 'left' | 'right') => {
+    // Prevent duplicate requests while extending
+    if (isExtending.current) return;
+    isExtending.current = true;
+
+    const currentWindowSize = dayWindowEnd - dayWindowStart + 1;
+
     if (direction === 'left') {
+      // Extend backward (past)
       setDayWindowStart(prev => prev - DAYS_TO_EXTEND);
+
+      // Trim from the right if window exceeds limit
+      if (currentWindowSize + DAYS_TO_EXTEND > SLIDING_WINDOW_DAYS) {
+        setDayWindowEnd(prev => prev - DAYS_TO_EXTEND);
+      }
     } else {
+      // Extend forward (future)
       setDayWindowEnd(prev => prev + DAYS_TO_EXTEND);
+
+      // Trim from the left if window exceeds limit
+      if (currentWindowSize + DAYS_TO_EXTEND > SLIDING_WINDOW_DAYS) {
+        setDayWindowStart(prev => prev + DAYS_TO_EXTEND);
+      }
     }
-  }, []);
+
+    // Reset flag after state updates complete
+    setTimeout(() => {
+      isExtending.current = false;
+    }, 100);
+  }, [dayWindowStart, dayWindowEnd]);
 
   const handleJumpToNow = useCallback(() => {
     buttonScale.value = withSequence(
@@ -81,11 +105,25 @@ export function HomeGraphController({
       withSpring(1, { damping: 10, stiffness: 400 })
     );
 
-    setDayWindowStart(INITIAL_START_DAY);
-    setDayWindowEnd(INITIAL_END_DAY);
+    // Calculate today's offset from the initial reference
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Reset to initial window that includes today
+    const newStart = INITIAL_START_DAY;
+    const newEnd = INITIAL_END_DAY;
+
+    setDayWindowStart(newStart);
+    setDayWindowEnd(newEnd);
     setIsOffCenter(false);
     setScrollDirection(null);
-    setResetKey(prev => prev + 1);
+
+    // Small delay to ensure state propagates before triggering scroll
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        setResetKey(prev => prev + 1);
+      }, 100);
+    });
   }, [buttonScale]);
 
   const jumpButtonStyle = useAnimatedStyle(() => ({

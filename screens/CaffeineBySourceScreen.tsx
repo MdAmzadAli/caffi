@@ -26,7 +26,7 @@ interface DateRange {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  coffee: "#F3E6D8",
+  coffee: "#DEC1A0",
   tea: "#E1C7A3",
   energy: "#C19A6B",
   soda: "#9B6B3F",
@@ -35,7 +35,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 const ITEM_COLORS = [
-  "#F3E6D8", // Lightest
+  // "#F3E6D8", // Lightest
   "#DEC1A0",
   "#C79B6A",
   "#A87447",

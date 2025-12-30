@@ -149,13 +149,15 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const DEFAULT_GRAPH_HEIGHT = Dimensions.get("window").height * 0.36; // Graph height (36% of screen)
   const HEADER_HEIGHT = 60; // Screen header height
   const RING_ROW_HEIGHT = 72; // Ring progress row height
-  const GRAPH_BOTTOM_PADDING = Spacing.xl; // Keep sticky content below x-axis labels
+  const GRAPH_BOTTOM_PADDING = Spacing.xl;// Keep sticky content below x-axis labels
+  const INITIAL_VISIBLE_COUNT = 25;
+  const LOAD_MORE_THRESHOLD = 35;
 
   const todayEntries = useMemo(() => getTodayEntries(), [entries]);
   const todayCaffeine = useMemo(() => getTodayCaffeine(), [entries]);
   const activeCaffeine = useMemo(() => getActiveCaffeine(), [entries]);
 
-  const [visibleCount, setVisibleCount] = useState(15);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   // Combine real entries with dummy data for testing
   const allEntries = useMemo(() => {
@@ -170,9 +172,9 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 
     setIsLoadingMore(true);
     setTimeout(() => {
-      setVisibleCount(prev => prev + 15);
+      setVisibleCount(prev => prev + LOAD_MORE_THRESHOLD);
       setIsLoadingMore(false);
-    }, 400);
+    }, 100);
   }, [isLoadingMore, hasMoreEntries]);
 
   const caffeineEvents: CaffeineEvent[] = useMemo(() => {
@@ -418,7 +420,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const handleExpand = () => {
     // Save current scroll position
     savedScrollOffset.current = scrollY.value;
-    // setVisibleCount(15);
+    
     // Scroll back to top to show info cards
     if (scrollViewRef.current) {
       scrollViewRef.current.scrollToLocation({
@@ -431,7 +433,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     
     // Reset scroll value after animation
     setTimeout(() => {
-      setVisibleCount(15);
+      setVisibleCount(INITIAL_VISIBLE_COUNT);
     }, 300);
   };
 
@@ -441,7 +443,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         style={({ pressed }) => [
           styles.entryRow,
           {
-            backgroundColor: theme.backgroundSecondary,
+            // backgroundColor: theme.backgroundSecondary,
           },
           pressed && { backgroundColor: theme.backgroundTertiary },
         ]}
@@ -737,6 +739,13 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.lg,
     width: "100%",
+    // borderRadius: 12,
+    // shadowColor: "#000",
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.15,
+    // shadowRadius: 4,
+    // elevation: 3,
+    // gap:10,
   },
   iconContainer: {
     width: 44,
