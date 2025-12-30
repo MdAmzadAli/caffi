@@ -147,7 +147,7 @@ export function StackedEntriesModal({
                         {formatTime(event.timestampISO)}
                       </Text>
                       <Text style={[styles.entryMg, { color: theme.accentGold }]}>
-                        {event.mg} mg
+                        {parseFloat(event.mg.toFixed(1))} mg
                       </Text>
                     </View>
                   </View>
