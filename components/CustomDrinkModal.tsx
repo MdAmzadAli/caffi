@@ -76,6 +76,28 @@ const getInbuiltDrinkCaffeinePer100ml = (id: string, category: string): number |
   return drink ? drink.caffeinePer100ml : null;
 };
 
+const formatDateWithTime = (date: Date): string => {
+  const now = new Date();
+  const entryDate = new Date(date);
+  entryDate.setHours(0, 0, 0, 0);
+  now.setHours(0, 0, 0, 0);
+  
+  const timePart = new Date(date).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  
+  if (entryDate.getTime() === now.getTime()) {
+    return "Today";
+  }
+  
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (entryDate.getTime() === yesterday.getTime()) {
+    return `Yesterday, ${timePart}`;
+  }
+  
+  const datePart = new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return `${datePart}, ${timePart}`;
+};
+
 const UNITS = ["cup", "shot", "ml", "oz", "teaspoon", "tablespoon", "glass", "can", "bottle", "scoop", "pint", "liter", "fl oz", "mug", "bar"];
 const INBUILT_CATEGORIES = ["coffee", "tea", "energy", "soda", "chocolate"];
 
@@ -132,19 +154,8 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
           setSelectedUnit(editEntry.unit || "cup");
         }
       }
-      const entryDate = new Date(editEntry.timestamp);
-      const now = new Date();
-      const isToday = entryDate.toDateString() === now.toDateString();
-      if (isToday) {
-        const timeDiff = Math.abs(now.getTime() - entryDate.getTime());
-        if (timeDiff < 60000) {
-          setStartTimeLabel("now");
-        } else {
-          setStartTimeLabel(entryDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }));
-        }
-      } else {
-        setStartTimeLabel(entryDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }));
-      }
+      const timeDiff = Math.abs(new Date().getTime() - new Date(editEntry.timestamp).getTime());
+      setStartTimeLabel(timeDiff < 60000 ? "now" : formatDateWithTime(editEntry.timestamp));
     } else if (editCustomDrink && visible) {
       setDrinkName(editCustomDrink.name);
       setQuantity(preserveCustomDrinkQuantities?.[editCustomDrink.id] || 1);
