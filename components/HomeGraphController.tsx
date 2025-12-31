@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useMemo,useEffect } from "react";
+import React, { useState, useRef, useCallback, useMemo } from "react";
 import { View, StyleSheet, Pressable, ScrollView } from "react-native";
 import Animated, {
   useSharedValue,
@@ -34,11 +34,10 @@ const DARK_COLORS = {
   darkBrown: "#F5EBDD",
 };
 
-const INITIAL_START_DAY = -7; // Wider initial window
-const INITIAL_END_DAY = 7;
-const DAYS_TO_EXTEND = 7;
-const SLIDING_WINDOW_DAYS = 28; // Much larger buffer (4 weeks)
-const PRELOAD_BUFFER_DAYS = 10; // Keep 16 days total (increased for better buffer) // Keep 14 days total in memory
+const INITIAL_START_DAY = -2; // Start with more buffer
+const INITIAL_END_DAY = 2; // Start with more buffer
+const DAYS_TO_EXTEND = 4; // Extend 4 days at a time for smoother loading
+const SLIDING_WINDOW_DAYS = 16; // Keep 16 days total (increased for better buffer) // Keep 14 days total in memory
 
 export function HomeGraphController({
   events,
@@ -69,35 +68,36 @@ export function HomeGraphController({
     setScrollDirection(direction);
   }, []);
 
-  const extendTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const lastExtendDirectionRef = useRef<'left' | 'right' | null>(null);
-
-  const handleExtendDays = useCallback((direction: 'left' | 'right', immediate: boolean) => {
+  const handleExtendDays = useCallback((direction: 'left' | 'right') => {
+    // Prevent duplicate requests while extending
     if (isExtending.current) return;
-
     isExtending.current = true;
 
-    // Instead of extending, SHIFT the window (keeps size constant!)
+    const currentWindowSize = dayWindowEnd - dayWindowStart + 1;
+
     if (direction === 'left') {
+      // Extend backward (past)
       setDayWindowStart(prev => prev - DAYS_TO_EXTEND);
-      setDayWindowEnd(prev => prev - DAYS_TO_EXTEND);
+
+      // Trim from the right if window exceeds limit
+      if (currentWindowSize + DAYS_TO_EXTEND > SLIDING_WINDOW_DAYS) {
+        setDayWindowEnd(prev => prev - DAYS_TO_EXTEND);
+      }
     } else {
-      setDayWindowStart(prev => prev + DAYS_TO_EXTEND);
+      // Extend forward (future)
       setDayWindowEnd(prev => prev + DAYS_TO_EXTEND);
+
+      // Trim from the left if window exceeds limit
+      if (currentWindowSize + DAYS_TO_EXTEND > SLIDING_WINDOW_DAYS) {
+        setDayWindowStart(prev => prev + DAYS_TO_EXTEND);
+      }
     }
 
+    // Reset flag after state updates complete
     setTimeout(() => {
       isExtending.current = false;
     }, 100);
-  }, []);
-  
-  useEffect(() => {
-    return () => {
-      if (extendTimeoutRef.current) {
-        clearTimeout(extendTimeoutRef.current);
-      }
-    };
-  }, []);
+  }, [dayWindowStart, dayWindowEnd]);
 
   const handleJumpToNow = useCallback(() => {
     buttonScale.value = withSequence(
@@ -105,25 +105,20 @@ export function HomeGraphController({
       withSpring(1, { damping: 10, stiffness: 400 })
     );
 
-    // Immediately hide the arrow button to prevent lingering
-    setIsOffCenter(false);
-    setScrollDirection(null);
-
     // Calculate window that centers today (day 0)
     const halfWindow = Math.floor((INITIAL_END_DAY - INITIAL_START_DAY) / 2);
     const newStart = -halfWindow;
     const newEnd = halfWindow;
 
-    // Update window first
     setDayWindowStart(newStart);
     setDayWindowEnd(newEnd);
+    setIsOffCenter(false);
+    setScrollDirection(null);
 
-    // Wait for window state to propagate, then trigger smooth scroll
     requestAnimationFrame(() => {
       setTimeout(() => {
-        // Trigger resetKey which will scroll with animation in CaffeineGraphNew
         setResetKey(prev => prev + 1);
-      }, 50); // Reduced from 100ms for faster response
+      }, 100);
     });
   }, [buttonScale]);
 
