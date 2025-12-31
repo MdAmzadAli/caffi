@@ -93,7 +93,7 @@ interface CaffeineGraphProps {
   isDark?: boolean;
   dayWindowStart: number;
   dayWindowEnd: number;
-  onExtendDays?: (direction: 'left' | 'right') => void;
+  onExtendDays?: (direction: 'left' | 'right', immediate?: boolean) => void;
   resetKey?: number;
   onEventClick?: (event: CaffeineEvent) => void;
   onStackedEventsClick?: (events: CaffeineEvent[], position: { x: number; y: number }) => void;
@@ -266,9 +266,86 @@ export function CaffeineGraphNew({
     return samples;
   }, [startMs, endMs, sampleResolutionMinutes]);
 
+  const prevCurveDataRef = useRef<any[]>([]);
+  const prevSamplesHashRef = useRef<string>('');
+
+  const DAYS_TO_EXTEND =7;
+  const [preloadedData, setPreloadedData] = useState<{
+    left?: { samples: number[], curve: any[] },
+    right?: { samples: number[], curve: any[] }
+  }>({});
+
+  // Add async preload function BEFORE handleScroll
+  const preloadAdjacentData = useCallback(async (direction: 'left' | 'right') => {
+    // Calculate future time range
+    const preloadDays = DAYS_TO_EXTEND;
+    const todayStart = new Date(nowMs);
+    todayStart.setHours(0, 0, 0, 0);
+
+    let preloadStartMs, preloadEndMs;
+    if (direction === 'left') {
+      preloadStartMs = todayStart.getTime() + (dayWindowStart - preloadDays) * HOURS_PER_DAY * 3600000;
+      preloadEndMs = todayStart.getTime() + dayWindowStart * HOURS_PER_DAY * 3600000;
+    } else {
+      preloadStartMs = todayStart.getTime() + (dayWindowEnd + 1) * HOURS_PER_DAY * 3600000;
+      preloadEndMs = todayStart.getTime() + (dayWindowEnd + 1 + preloadDays) * HOURS_PER_DAY * 3600000;
+    }
+
+    // Compute in background using requestIdleCallback simulation
+    return new Promise<void>((resolve) => {
+      setTimeout(() => {
+        const samples: number[] = [];
+        const stepMs = sampleResolutionMinutes * 60000;
+
+        for (let t = preloadStartMs; t <= preloadEndMs; t += stepMs) {
+          samples.push(t);
+        }
+
+        const curve = computeActiveCurve(events, samples, halfLifeHours);
+
+        setPreloadedData(prev => ({
+          ...prev,
+          [direction]: { samples, curve }
+        }));
+
+        resolve();
+      }, 0); // Let main thread breathe
+    });
+  }, [dayWindowStart, dayWindowEnd, events, halfLifeHours, sampleResolutionMinutes, nowMs]);
+
   const curveData = useMemo(() => {
-    return computeActiveCurve(events, sampleTimesMs, halfLifeHours);
-  }, [events, sampleTimesMs, halfLifeHours]);
+    const samplesHash = `${sampleTimesMs.length}-${sampleTimesMs[0]}-${sampleTimesMs[sampleTimesMs.length - 1]}`;
+
+    if (samplesHash === prevSamplesHashRef.current && prevCurveDataRef.current.length > 0) {
+      return prevCurveDataRef.current;
+    }
+
+    // Check if we have preloaded data that matches
+    const preloadLeft = preloadedData.left;
+    const preloadRight = preloadedData.right;
+
+    // If extending left and have preloaded left data
+    if (preloadLeft && sampleTimesMs[0] === preloadLeft.samples[0]) {
+      const newCurve = [...preloadLeft.curve, ...prevCurveDataRef.current];
+      prevCurveDataRef.current = newCurve;
+      prevSamplesHashRef.current = samplesHash;
+      return newCurve;
+    }
+
+    // If extending right and have preloaded right data
+    if (preloadRight && sampleTimesMs[sampleTimesMs.length - 1] === preloadRight.samples[preloadRight.samples.length - 1]) {
+      const newCurve = [...prevCurveDataRef.current, ...preloadRight.curve];
+      prevCurveDataRef.current = newCurve;
+      prevSamplesHashRef.current = samplesHash;
+      return newCurve;
+    }
+
+    // Fallback: compute synchronously (should rarely happen)
+    const newCurve = computeActiveCurve(events, sampleTimesMs, halfLifeHours);
+    prevCurveDataRef.current = newCurve;
+    prevSamplesHashRef.current = samplesHash;
+    return newCurve;
+  }, [events, sampleTimesMs, halfLifeHours, preloadedData]);
 
   const currentActiveMg = useMemo(() => {
     return getActiveAtTime(events, nowMs, halfLifeHours);
@@ -394,7 +471,9 @@ export function CaffeineGraphNew({
   const hasInitialScrolled = useRef<boolean>(false);
   const prevDayWindowStartRef = useRef<number>(dayWindowStart);
   const currentScrollXRef = useRef<number>(defaultScrollX);
-
+  const isResettingRef = useRef(false);
+  const prevScrollXRef = useRef<number>(0);
+  
   useEffect(() => {
     if (scrollViewRef?.current && !hasInitialScrolled.current) {
       hasInitialScrolled.current = true;
@@ -406,7 +485,7 @@ export function CaffeineGraphNew({
 
   useEffect(() => {
     if (!hasInitialScrolled.current) return;
-    
+     if (isResettingRef.current) return;
     const daysDelta = prevDayWindowStartRef.current - dayWindowStart;
     if (daysDelta !== 0 && scrollViewRef?.current) {
       const pixelsPerDay = (windowWidth * HOURS_PER_DAY) / HOURS_VISIBLE;
@@ -422,16 +501,34 @@ export function CaffeineGraphNew({
 
   useEffect(() => {
     if (resetKey > 0 && scrollViewRef?.current) {
+      isResettingRef.current = true;
       prevDayWindowStartRef.current = dayWindowStart;
       currentScrollXRef.current = defaultScrollX;
+
+      // Smooth animated scroll with proper timing
       setTimeout(() => {
-        scrollViewRef.current?.scrollTo({ x: defaultScrollX, y: 0, animated: true });
+        scrollViewRef.current?.scrollTo({ 
+          x: defaultScrollX, 
+          y: 0, 
+          animated: true 
+        });
+
+        // Ensure button state is cleared after animation completes
+        // ScrollView animation typically takes ~300ms
+        setTimeout(() => {
+          if (onScrollOffsetChange) {
+            isResettingRef.current = false;
+            onScrollOffsetChange(false, null);
+          }
+        }, 350);
       }, 50);
     }
   }, [resetKey]);
   
 
   // REPLACE the entire handleScroll function with this:
+  // Add near top with other state
+
 
   const handleScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -440,8 +537,6 @@ export function CaffeineGraphNew({
       const viewportWidthValue = event.nativeEvent.layoutMeasurement.width;
       const maxScrollX = contentWidth - viewportWidthValue;
       const now = Date.now();
-
-      currentScrollXRef.current = scrollX;
 
       // Throttle viewport updates to every 100ms for performance
       if (now - lastScrollUpdate.current > 100) {
@@ -455,33 +550,64 @@ export function CaffeineGraphNew({
         const nowPosition = nowMs >= startMs && nowMs <= endMs 
           ? ((nowMs - startMs) / (endMs - startMs)) * scrollContentWidth 
           : -1;
-        const isOffCenter = nowPosition < 0 || Math.abs(centerX - nowPosition) > windowWidth * 0.1;
+
+        // More lenient threshold for "centered" detection (15% instead of 10%)
+        const threshold = windowWidth * 0.15;
+        const isOffCenter = nowPosition < 0 || Math.abs(centerX - nowPosition) > threshold;
+
         const direction: 'left' | 'right' | null = isOffCenter 
           ? (nowPosition < 0 ? (dayWindowEnd < 1 ? 'right' : 'left') : (centerX < nowPosition ? 'right' : 'left')) 
           : null;
+
         onScrollOffsetChange(isOffCenter, direction);
       }
 
-      if (now - lastExtendRef.current < 100) return; // CHANGED: Reduced from 200ms to 100ms for faster response
+      if (now - lastExtendRef.current < 100) return;
 
-      if (onExtendDays) {
-        // CRITICAL: Trigger 3 screens away (increased from 2) for earlier preloading
-        const preloadThreshold = viewportWidthValue * 3;
+    if (onExtendDays) {
+        // VERY EARLY preload trigger: 5 screens away
+        const preloadTrigger = viewportWidthValue * 5;
+        const criticalPreloadThreshold = viewportWidthValue * 1.5;
 
-        // Extend right (future)
-        if (scrollX >= maxScrollX - preloadThreshold) {
-          lastExtendRef.current = now;
-          onExtendDays('right');
+        const isScrollingRight = scrollX > prevScrollXRef.current;
+        const isScrollingLeft = scrollX < prevScrollXRef.current;
+
+        // RIGHT SCROLLING
+        if (isScrollingRight) {
+          const distanceFromEnd = maxScrollX - scrollX;
+
+          // Start async preloading VERY early
+          if (distanceFromEnd <= preloadTrigger && !preloadedData.right) {
+            preloadAdjacentData('right');
+          }
+
+          // Actual extension when preload is ready
+          if (distanceFromEnd <= criticalPreloadThreshold) {
+            lastExtendRef.current = now;
+            onExtendDays('right', true);
+          }
         }
 
-        // Extend left (past)
-        if (scrollX <= preloadThreshold) {
-          lastExtendRef.current = now;
-          onExtendDays('left');
+        // LEFT SCROLLING
+        if (isScrollingLeft) {
+          // Start async preloading VERY early
+          if (scrollX <= preloadTrigger && !preloadedData.left) {
+            preloadAdjacentData('left');
+          }
+
+          // Actual extension when preload is ready
+          if (scrollX <= criticalPreloadThreshold) {
+            lastExtendRef.current = now;
+            onExtendDays('left', true);
+          }
         }
       }
+
+      prevScrollXRef.current = scrollX;
+      currentScrollXRef.current = scrollX;
     },
-    [onScrollOffsetChange, onExtendDays, nowMs, startMs, endMs, scrollContentWidth, windowWidth, dayWindowEnd, dayWindowStart]
+    [onScrollOffsetChange, onExtendDays, nowMs, startMs, endMs, scrollContentWidth, 
+     windowWidth, dayWindowEnd, dayWindowStart, preloadedData, preloadAdjacentData]
   );
 
   const gradientId = isDark ? "curveGradientDark" : "curveGradientLight";
