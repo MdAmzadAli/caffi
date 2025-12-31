@@ -233,6 +233,7 @@ export function CaffeineGraphNew({
   const [viewportX, setViewportX] = useState(0);
   const [viewportWidth, setViewportWidth] = useState(windowWidth);
   const lastScrollUpdate = useRef<number>(0);
+  const isMomentumScrolling = useRef(false);
 
   const realTimeNow = useRealTimeNow();
   const nowMs = realTimeNow;
@@ -247,24 +248,29 @@ export function CaffeineGraphNew({
   }, [nowMs, dayWindowStart, dayWindowEnd]);
 
   const sampleTimesMs = useMemo(() => {
+    const centerMs = startMs + ((viewportX + viewportWidth / 2) / scrollContentWidth) * (endMs - startMs);
+    const halfWindowMs = (SLIDING_WINDOW_DAYS * HOURS_PER_DAY * 3600000) / 2;
+
+    const windowStart = Math.max(startMs, centerMs - halfWindowMs);
+    const windowEnd = Math.min(endMs, centerMs + halfWindowMs);
+
     const samples: number[] = [];
     const stepMs = sampleResolutionMinutes * 60000;
-    const totalPoints = Math.floor((endMs - startMs) / stepMs);
 
-    // Adaptive sampling to prevent memory overflow
-    if (totalPoints > MAX_SAMPLE_POINTS) {
-      const adaptiveStep = Math.ceil((endMs - startMs) / MAX_SAMPLE_POINTS);
-      for (let t = startMs; t <= endMs; t += adaptiveStep) {
-        samples.push(t);
-      }
-    } else {
-      for (let t = startMs; t <= endMs; t += stepMs) {
-        samples.push(t);
-      }
+    for (let t = windowStart; t <= windowEnd; t += stepMs) {
+      samples.push(t);
     }
 
     return samples;
-  }, [startMs, endMs, sampleResolutionMinutes]);
+  }, [
+    startMs,
+    endMs,
+    viewportX,
+    viewportWidth,
+    scrollContentWidth,
+    sampleResolutionMinutes
+  ]);
+
 
   const curveData = useMemo(() => {
     return computeActiveCurve(events, sampleTimesMs, halfLifeHours);
@@ -432,6 +438,31 @@ export function CaffeineGraphNew({
   
 
   // REPLACE the entire handleScroll function with this:
+  const curveIndex = useMemo(() => {
+    return curveData.map(pt => pt.t);
+  }, [curveData]);
+  const getActiveFromCurve = useCallback(
+    (t: number) => {
+      let l = 0;
+      let r = curveData.length - 1;
+
+      while (l <= r) {
+        const m = (l + r) >> 1;
+        if (curveData[m].t === t) return curveData[m].mg;
+        if (curveData[m].t < t) l = m + 1;
+        else r = m - 1;
+      }
+
+      // interpolate between r and l
+      if (r < 0 || l >= curveData.length) return 0;
+
+      const p1 = curveData[r];
+      const p2 = curveData[l];
+      const ratio = (t - p1.t) / (p2.t - p1.t);
+      return p1.mg + ratio * (p2.mg - p1.mg);
+    },
+    [curveData]
+  );
 
   const handleScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -463,6 +494,7 @@ export function CaffeineGraphNew({
       }
 
       if (now - lastExtendRef.current < 100) return; // CHANGED: Reduced from 200ms to 100ms for faster response
+      if (isMomentumScrolling.current) return;
 
       if (onExtendDays) {
         // CRITICAL: Trigger 3 screens away (increased from 2) for earlier preloading
@@ -487,27 +519,44 @@ export function CaffeineGraphNew({
   const gradientId = isDark ? "curveGradientDark" : "curveGradientLight";
 
   const eventGroups = useMemo(() => {
+    const bufferStart =
+      startMs + (viewportX / scrollContentWidth) * (endMs - startMs);
+    const bufferEnd =
+      startMs +
+      ((viewportX + viewportWidth) / scrollContentWidth) * (endMs - startMs);
+
     const visibleEvents = events
       .map(evt => {
         const eventMs = Date.parse(evt.timestampISO);
-        if (eventMs < startMs || eventMs > endMs) return null;
+        if (eventMs < bufferStart || eventMs > bufferEnd) return null;
+
+        return {
+          evt,
+          eventMs,
+        };
+      })
+      .filter((e): e is NonNullable<typeof e> => e !== null)
+      .map(({ evt, eventMs }) => {
         const x = timeToX(eventMs);
         const y = mgToY(getActiveAtTime(events, eventMs, halfLifeHours));
         return { evt, x, y, eventMs };
       })
-      .filter((e): e is NonNullable<typeof e> => e !== null)
       .sort((a, b) => a.eventMs - b.eventMs);
 
     const groups: EventGroup[] = [];
     let i = 0;
+
     while (i < visibleEvents.length) {
       const current = visibleEvents[i];
       const clustered: CaffeineEvent[] = [current.evt];
-      
+
       let j = i + 1;
       while (j < visibleEvents.length) {
         const next = visibleEvents[j];
-        if (Math.abs(next.x - current.x) <= GROUP_PROXIMITY_PX && Math.abs(next.y - current.y) <= GROUP_PROXIMITY_PX) {
+        if (
+          Math.abs(next.x - current.x) <= GROUP_PROXIMITY_PX &&
+          Math.abs(next.y - current.y) <= GROUP_PROXIMITY_PX
+        ) {
           clustered.push(next.evt);
           j++;
         } else {
@@ -515,20 +564,36 @@ export function CaffeineGraphNew({
         }
       }
 
-      const iconY = Math.max(GRAPH_PADDING_TOP + MARKER_IMAGE_SIZE / 2, current.y - MARKER_IMAGE_SIZE / 2 - 6);
+      const iconY = Math.max(
+        GRAPH_PADDING_TOP + MARKER_IMAGE_SIZE / 2,
+        current.y - MARKER_IMAGE_SIZE / 2 - 6
+      );
+
       groups.push({
         events: clustered,
         x: current.x,
         y: current.y,
         iconY,
-        category: current.evt.category || 'coffee',
+        category: current.evt.category || "coffee",
         imageUri: current.evt.imageUri,
       });
+
       i = j;
     }
 
     return { visibleEvents, groups };
-  }, [events, startMs, endMs, timeToX, mgToY, halfLifeHours]);
+  }, [
+    events,
+    startMs,
+    endMs,
+    viewportX,
+    viewportWidth,
+    scrollContentWidth,
+    timeToX,
+    mgToY,
+    halfLifeHours,
+  ]);
+
 
   const visibleEventGroups = useMemo(() => {
     const bufferZone = windowWidth * 0.5; // 50% buffer on each side
@@ -623,6 +688,12 @@ export function CaffeineGraphNew({
         scrollEventThrottle={32}
         removeClippedSubviews={true}
         style={styles.scrollView}
+        onMomentumScrollBegin={() => {
+          isMomentumScrolling.current = true;
+        }}
+        onMomentumScrollEnd={() => {
+          isMomentumScrolling.current = false;
+        }}
         contentContainerStyle={{ width: scrollContentWidth, flexDirection: 'column', paddingBottom: 0 }}
       >
         

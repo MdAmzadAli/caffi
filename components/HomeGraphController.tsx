@@ -36,7 +36,7 @@ const DARK_COLORS = {
 
 const INITIAL_START_DAY = -2; // Start with more buffer
 const INITIAL_END_DAY = 2; // Start with more buffer
-const DAYS_TO_EXTEND = 4; // Extend 4 days at a time for smoother loading
+const DAYS_TO_EXTEND = 6; // Extend 4 days at a time for smoother loading
 const SLIDING_WINDOW_DAYS = 16; // Keep 16 days total (increased for better buffer) // Keep 14 days total in memory
 
 export function HomeGraphController({
