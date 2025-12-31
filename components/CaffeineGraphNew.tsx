@@ -114,6 +114,7 @@ const EDGE_THRESHOLD = 50;
 const MAX_SAMPLE_POINTS = 5000; // Limit curve calculation points
 const SLIDING_WINDOW_DAYS = 14; 
 
+
 interface EventGroup {
   events: CaffeineEvent[];
   x: number;
@@ -228,7 +229,8 @@ export function CaffeineGraphNew({
   const viewWindowHours = (dayWindowEnd - dayWindowStart + 1) * HOURS_PER_DAY;
   const graphHeight = windowHeight * 0.32;
   const chartHeight = graphHeight - X_AXIS_HEIGHT - GRAPH_PADDING_TOP - GRAPH_PADDING_BOTTOM;
-  const scrollContentWidth = windowWidth * (viewWindowHours / HOURS_VISIBLE);
+  const PX_PER_HOUR = windowWidth / HOURS_VISIBLE;
+  const scrollContentWidth = viewWindowHours * PX_PER_HOUR;
   const chartWidth = scrollContentWidth;
   const [viewportX, setViewportX] = useState(0);
   const [viewportWidth, setViewportWidth] = useState(windowWidth);
@@ -277,13 +279,13 @@ export function CaffeineGraphNew({
   const bedtimeMs = useMemo(() => {
     return parseBedtimeToMs(bedtime, nowDate);
   }, [bedtime, nowMs]);
-
+  
   const timeToX = useCallback(
-    (ms: number): number => {
-      const ratio = (ms - startMs) / (endMs - startMs);
-      return ratio * chartWidth;
+    (ms: number) => {
+      const hoursFromStart = (ms - startMs) / 3600000;
+      return hoursFromStart * PX_PER_HOUR;
     },
-    [startMs, endMs, chartWidth]
+    [startMs, PX_PER_HOUR]
   );
 
   const mgToY = useCallback(
@@ -394,6 +396,8 @@ export function CaffeineGraphNew({
   const hasInitialScrolled = useRef<boolean>(false);
   const prevDayWindowStartRef = useRef<number>(dayWindowStart);
   const currentScrollXRef = useRef<number>(defaultScrollX);
+  const isUserDraggingRef = useRef(false);
+ 
 
   useEffect(() => {
     if (scrollViewRef?.current && !hasInitialScrolled.current) {
@@ -406,19 +410,27 @@ export function CaffeineGraphNew({
 
   useEffect(() => {
     if (!hasInitialScrolled.current) return;
-    
+
     const daysDelta = prevDayWindowStartRef.current - dayWindowStart;
-    if (daysDelta !== 0 && scrollViewRef?.current) {
-      const pixelsPerDay = (windowWidth * HOURS_PER_DAY) / HOURS_VISIBLE;
-      const offsetAdjustment = daysDelta * pixelsPerDay;
+    if (daysDelta === 0 || !scrollViewRef?.current) return;
+
+    // Calculate adjustment based on content that was ADDED, not current scroll
+    const pixelsPerDay = (windowWidth * HOURS_PER_DAY) / HOURS_VISIBLE;
+    const offsetAdjustment = Math.abs(daysDelta) * pixelsPerDay;
+
+    // Only adjust if extending LEFT (past)
+    if (daysDelta > 0 && !isUserDraggingRef.current) {
       const newScrollX = currentScrollXRef.current + offsetAdjustment;
+      // Use requestAnimationFrame for smoother update
+      requestAnimationFrame(() => {
+        scrollViewRef.current?.scrollTo({ x: newScrollX, animated: false });
+      });
       
-      setTimeout(() => {
-        scrollViewRef.current?.scrollTo({ x: Math.max(0, newScrollX), y: 0, animated: false });
-      }, 0);
     }
+    // NO adjustment needed for extending RIGHT (future)
+
     prevDayWindowStartRef.current = dayWindowStart;
-  }, [dayWindowStart, dayWindowEnd, windowWidth]);
+  }, [dayWindowStart]);
 
   useEffect(() => {
     if (resetKey > 0 && scrollViewRef?.current) {
@@ -432,6 +444,12 @@ export function CaffeineGraphNew({
   
 
   // REPLACE the entire handleScroll function with this:
+  const viewportXRef = useRef(0);
+  const viewportWidthRef = useRef(windowWidth);
+  const [viewportSnapshot, setViewportSnapshot] = useState({
+    x: 0,
+    width: windowWidth,
+  });
 
   const handleScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -446,8 +464,13 @@ export function CaffeineGraphNew({
       // Throttle viewport updates to every 100ms for performance
       if (now - lastScrollUpdate.current > 100) {
         lastScrollUpdate.current = now;
-        setViewportX(scrollX);
-        setViewportWidth(viewportWidthValue);
+        viewportXRef.current = scrollX;
+        viewportWidthRef.current = viewportWidthValue;
+
+        setViewportSnapshot({
+          x: scrollX,
+          width: viewportWidthValue,
+        });
       }
 
       if (onScrollOffsetChange) {
@@ -466,7 +489,7 @@ export function CaffeineGraphNew({
 
       if (onExtendDays) {
         // CRITICAL: Trigger 3 screens away (increased from 2) for earlier preloading
-        const preloadThreshold = viewportWidthValue * 3;
+        const preloadThreshold = viewportWidthValue * 5;
 
         // Extend right (future)
         if (scrollX >= maxScrollX - preloadThreshold) {
@@ -483,6 +506,12 @@ export function CaffeineGraphNew({
     },
     [onScrollOffsetChange, onExtendDays, nowMs, startMs, endMs, scrollContentWidth, windowWidth, dayWindowEnd, dayWindowStart]
   );
+  useEffect(() => {
+    setViewportSnapshot({
+      x: currentScrollXRef.current,
+      width: windowWidth,
+    });
+  }, [startMs, endMs]);
 
   const gradientId = isDark ? "curveGradientDark" : "curveGradientLight";
 
@@ -530,37 +559,72 @@ export function CaffeineGraphNew({
     return { visibleEvents, groups };
   }, [events, startMs, endMs, timeToX, mgToY, halfLifeHours]);
 
-  const visibleEventGroups = useMemo(() => {
-    const bufferZone = windowWidth * 0.5; // 50% buffer on each side
-    const visibleStart = viewportX - bufferZone;
-    const visibleEnd = viewportX + viewportWidth + bufferZone;
+  const bufferZone = viewportSnapshot.width * 2;
+  const visibleStart = viewportSnapshot.x - bufferZone;
+  const visibleEnd = viewportSnapshot.x + viewportSnapshot.width + bufferZone;
+  // const visibleEventGroups = useMemo(() => {
+  //   return eventGroups.groups.filter(group =>
+  //     group.x >= visibleStart && group.x <= visibleEnd
+  //   );
+  // }, [eventGroups.groups, visibleStart, visibleEnd]);
 
-    return eventGroups.groups.filter(group => 
-      group.x >= visibleStart && group.x <= visibleEnd
-    );
-  }, [eventGroups.groups, viewportX, viewportWidth, windowWidth]);
+  // const visibleXAxisTicks = useMemo(() => {
+  //   return xAxisTicks.filter(tickMs => {
+  //     const x = timeToX(tickMs);
+  //     return x >= visibleStart && x <= visibleEnd;
+  //   });
+  // }, [xAxisTicks, visibleStart, visibleEnd]);
 
-  const visibleXAxisTicks = useMemo(() => {
-    const bufferZone = windowWidth;
-    const visibleStart = viewportX - bufferZone;
-    const visibleEnd = viewportX + viewportWidth + bufferZone;
+  // const visibleDateMarkers = useMemo(() => {
+  //   return dateMarkers.filter(marker => {
+  //     const x = timeToX(marker.ms);
+  //     return x >= visibleStart && x <= visibleEnd;
+  //   });
+  // }, [dateMarkers, visibleStart, visibleEnd]);
 
-    return xAxisTicks.filter(tickMs => {
-      const x = timeToX(tickMs);
-      return x >= visibleStart && x <= visibleEnd;
-    });
-  }, [xAxisTicks, viewportX, viewportWidth, windowWidth, timeToX]);
 
-  const visibleDateMarkers = useMemo(() => {
-    const bufferZone = windowWidth;
-    const visibleStart = viewportX - bufferZone;
-    const visibleEnd = viewportX + viewportWidth + bufferZone;
+  const visibleEventGroups = eventGroups.groups.filter(group => 
+    group.x >= visibleStart && group.x <= visibleEnd
+  );
+  const visibleXAxisTicks =xAxisTicks.filter(tickMs => {
+          const x = timeToX(tickMs);
+          return x >= visibleStart && x <= visibleEnd;
+        });
+  const visibleDateMarkers = dateMarkers.filter(marker => {
+          const x = timeToX(marker.ms);
+          return x >= visibleStart && x <= visibleEnd;
+        });
+  // const visibleEventGroups = useMemo(() => {
+  //   const bufferZone = windowWidth * 0.5; // 50% buffer on each side
+  //   const visibleStart = viewportX - bufferZone;
+  //   const visibleEnd = viewportX + viewportWidth + bufferZone;
 
-    return dateMarkers.filter(marker => {
-      const x = timeToX(marker.ms);
-      return x >= visibleStart && x <= visibleEnd;
-    });
-  }, [dateMarkers, viewportX, viewportWidth, windowWidth, timeToX]);
+  //   return eventGroups.groups.filter(group => 
+  //     group.x >= visibleStart && group.x <= visibleEnd
+  //   );
+  // }, [eventGroups.groups, viewportX, viewportWidth, windowWidth]);
+
+  // const visibleXAxisTicks = useMemo(() => {
+  //   const bufferZone = windowWidth;
+  //   const visibleStart = viewportX - bufferZone;
+  //   const visibleEnd = viewportX + viewportWidth + bufferZone;
+
+  //   return xAxisTicks.filter(tickMs => {
+  //     const x = timeToX(tickMs);
+  //     return x >= visibleStart && x <= visibleEnd;
+  //   });
+  // }, [xAxisTicks, viewportX, viewportWidth, windowWidth, timeToX]);
+
+  // const visibleDateMarkers = useMemo(() => {
+  //   const bufferZone = windowWidth;
+  //   const visibleStart = viewportX - bufferZone;
+  //   const visibleEnd = viewportX + viewportWidth + bufferZone;
+
+  //   return dateMarkers.filter(marker => {
+  //     const x = timeToX(marker.ms);
+  //     return x >= visibleStart && x <= visibleEnd;
+  //   });
+  // }, [dateMarkers, viewportX, viewportWidth, windowWidth, timeToX]);
 
   const handleMarkerPress = useCallback((group: EventGroup, pageX: number, pageY: number) => {
     if (group.events.length === 1) {
@@ -619,6 +683,9 @@ export function CaffeineGraphNew({
         ref={scrollViewRef}
         horizontal
         showsHorizontalScrollIndicator={false}
+        onScrollBeginDrag={() => { isUserDraggingRef.current = true; }}
+        onScrollEndDrag={() => { isUserDraggingRef.current = false; }}
+        onMomentumScrollEnd={() => { isUserDraggingRef.current = false; }}
         onScroll={handleScroll}
         scrollEventThrottle={32}
         removeClippedSubviews={true}
@@ -670,7 +737,7 @@ export function CaffeineGraphNew({
             strokeDasharray="4,3"
           />
 
-          {dateMarkers.map((marker) => {
+          {visibleDateMarkers.map((marker) => {
             const x = timeToX(marker.ms);
             return (
               <G key={`date-${marker.ms}`}>
@@ -749,13 +816,13 @@ export function CaffeineGraphNew({
               fill={GRAPH_COLORS.accentGold}
             />
           ))}
-          {eventGroups.groups.map((group, idx) => {
+          {visibleEventGroups.map((group, idx) => {
             const { x, iconY, category, imageUri, events: groupEvents } = group;
             const clipId = `clip-${groupEvents[0].id}-${groupEvents[0].timestampISO}`;
             const count = groupEvents.length;
 
             return (
-              <G key={`group-${groupEvents[0].id}-${groupEvents[0].timestampISO}`}>
+              <G key={`group-${groupEvents.map(e => e.id).join('-')}`}>
                 <Defs>
                   <ClipPath id={clipId}>
                     <Circle cx={x} cy={iconY} r={MARKER_IMAGE_SIZE / 2} />
@@ -805,7 +872,7 @@ export function CaffeineGraphNew({
         </Svg>
 
         <View style={styles.markerOverlayContainer} pointerEvents="box-none">
-          {eventGroups.groups.map((group, idx) => {
+          {visibleEventGroups.map((group, idx) => {
             const { x, iconY } = group;
             const hitSize = MARKER_SIZE + 8;
             return (
@@ -830,7 +897,7 @@ export function CaffeineGraphNew({
         </View>
 
         <View style={[styles.xAxisContainer, { width: scrollContentWidth }]}>
-          {xAxisTicks.map((tickMs) => {
+          {visibleXAxisTicks.map((tickMs) => {
             const x = timeToX(tickMs);
             return (
               <View key={tickMs} style={[styles.xAxisTick, { left: x - 12 }]}>

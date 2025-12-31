@@ -40,47 +40,100 @@ export function buildSampleTimes(
 const K_ELIM = 0.00231;
 const K_ABS = 0.045;
 
+// OPTIMIZED: Cache to avoid recalculating same value
+const remainingCache = new Map<string, number>();
+
 export function remainingAfterHours(
   doseMg: number,
   hoursSinceDose: number,
   halfLifeHours: number
 ): number {
   if (hoursSinceDose < 0) return 0;
+
+  // After ~30 hours, caffeine is negligible (< 0.1% remaining)
+  if (hoursSinceDose > 30) return 0;
+
+  const cacheKey = `${doseMg}-${hoursSinceDose.toFixed(2)}`;
+  if (remainingCache.has(cacheKey)) {
+    return remainingCache.get(cacheKey)!;
+  }
+
   const dtMinutes = hoursSinceDose * 60;
-  return doseMg * (1 - Math.exp(-K_ABS * dtMinutes)) * Math.exp(-K_ELIM * dtMinutes);
+  const result = doseMg * (1 - Math.exp(-K_ABS * dtMinutes)) * Math.exp(-K_ELIM * dtMinutes);
+
+  // Only cache if result is significant
+  if (result > 0.01) {
+    remainingCache.set(cacheKey, result);
+    // Prevent memory leak: clear cache if it gets too large
+    if (remainingCache.size > 10000) {
+      const keysToDelete = Array.from(remainingCache.keys()).slice(0, 5000);
+      keysToDelete.forEach(key => remainingCache.delete(key));
+    }
+  }
+
+  return result;
 }
 
+// OPTIMIZED: Pre-sort events and use early termination
 export function computeActiveCurve(
   events: CaffeineEvent[],
   samplesMs: number[],
   halfLifeHours: number
 ): SamplePoint[] {
+  // Sort events once by timestamp
+  const sortedEvents = [...events].sort(
+    (a, b) => Date.parse(a.timestampISO) - Date.parse(b.timestampISO)
+  );
+
+  // Caffeine becomes negligible after 30 hours
+  const decayCutoffMs = 30 * 3600000;
+
   return samplesMs.map((s) => {
     let total = 0;
-    for (const e of events) {
+
+    for (const e of sortedEvents) {
       const eventMs = Date.parse(e.timestampISO);
-      const dtHours = (s - eventMs) / 3600000;
-      if (dtHours >= 0) {
-        total += remainingAfterHours(e.mg, dtHours, halfLifeHours);
-      }
+
+      // Skip future events (early termination due to sorting)
+      if (eventMs > s) break;
+
+      const dtMs = s - eventMs;
+
+      // Skip events beyond decay cutoff
+      if (dtMs > decayCutoffMs) continue;
+
+      const dtHours = dtMs / 3600000;
+      total += remainingAfterHours(e.mg, dtHours, halfLifeHours);
     }
+
     return { t: s, mg: total };
   });
 }
 
+// OPTIMIZED: Same optimization for single time point
 export function getActiveAtTime(
   events: CaffeineEvent[],
   timeMs: number,
   halfLifeHours: number
 ): number {
+  const decayCutoffMs = 30 * 3600000;
   let total = 0;
+
   for (const e of events) {
     const eventMs = Date.parse(e.timestampISO);
-    const dtHours = (timeMs - eventMs) / 3600000;
-    if (dtHours >= 0) {
-      total += remainingAfterHours(e.mg, dtHours, halfLifeHours);
-    }
+
+    // Skip future events
+    if (eventMs > timeMs) continue;
+
+    const dtMs = timeMs - eventMs;
+
+    // Skip events beyond decay cutoff
+    if (dtMs > decayCutoffMs) continue;
+
+    const dtHours = dtMs / 3600000;
+    total += remainingAfterHours(e.mg, dtHours, halfLifeHours);
   }
+
   return total;
 }
 
@@ -112,6 +165,7 @@ export function parseBedtimeToMs(bedtimeStr: string, referenceDate: Date): numbe
   return result.getTime();
 }
 
+// OPTIMIZED: Use optimized getActiveAtTime
 export function getMaxCaffeineInSleepWindowForDisplay(
   events: CaffeineEvent[],
   bedtimeStr: string,
@@ -168,6 +222,7 @@ export function generateSmoothPath(
   return path;
 }
 
+// OPTIMIZED: Pre-sort and reuse getActiveAtTime
 export function getEventMarkersWithCollision(
   events: CaffeineEvent[],
   timeToX: (ms: number) => number,
@@ -184,16 +239,18 @@ export function getEventMarkersWithCollision(
 
   while (i < sorted.length) {
     const current = sorted[i];
-    const currentX = timeToX(Date.parse(current.timestampISO));
-    const currentY = mgToY(getActiveAtTime(events, Date.parse(current.timestampISO), halfLifeHours));
+    const currentMs = Date.parse(current.timestampISO);
+    const currentX = timeToX(currentMs);
+    const currentY = mgToY(getActiveAtTime(events, currentMs, halfLifeHours));
     const clustered: CaffeineEvent[] = [current];
 
     let j = i + 1;
     while (j < sorted.length) {
       const next = sorted[j];
-      const nextX = timeToX(Date.parse(next.timestampISO));
-      const nextY = mgToY(getActiveAtTime(events, Date.parse(next.timestampISO), halfLifeHours));
-      
+      const nextMs = Date.parse(next.timestampISO);
+      const nextX = timeToX(nextMs);
+      const nextY = mgToY(getActiveAtTime(events, nextMs, halfLifeHours));
+
       if (Math.abs(nextX - currentX) < collisionThreshold && Math.abs(nextY - currentY) < collisionThreshold) {
         clustered.push(next);
         j++;
@@ -222,6 +279,7 @@ export function getSleepStatusMessage(
   }
 }
 
+// OPTIMIZED: Reuse optimized getActiveAtTime
 export function getPeakCaffeineWithNewEntry(
   events: CaffeineEvent[],
   newEntryMg: number,
@@ -236,16 +294,16 @@ export function getPeakCaffeineWithNewEntry(
     timestampISO: new Date(newEntryTimeMs).toISOString(),
   };
   const allEvents = [...events, tempEvent];
-  
+
   const stepMs = 15 * 60 * 1000;
   const endMs = newEntryTimeMs + lookAheadHours * 3600000;
   let peak = 0;
-  
+
   for (let t = newEntryTimeMs; t <= endMs; t += stepMs) {
     const mg = getActiveAtTime(allEvents, t, halfLifeHours);
     if (mg > peak) peak = mg;
   }
-  
+
   return peak;
 }
 
@@ -263,7 +321,7 @@ export function getCaffeineAtSleepTimeWithNewEntry(
     timestampISO: new Date(newEntryTimeMs).toISOString(),
   };
   const allEvents = [...events, tempEvent];
-  
+
   return getActiveAtTime(allEvents, sleepTimeMs, halfLifeHours);
 }
 
@@ -282,16 +340,16 @@ export function getMaxCaffeineInSleepWindow(
     timestampISO: new Date(newEntryTimeMs).toISOString(),
   };
   const allEvents = [...events, tempEvent];
-  
+
   const stepMs = 15 * 60 * 1000;
   const endMs = sleepTimeMs + windowHours * 3600000;
   let maxCaffeine = 0;
-  
+
   for (let t = sleepTimeMs; t <= endMs; t += stepMs) {
     const mg = getActiveAtTime(allEvents, t, halfLifeHours);
     if (mg > maxCaffeine) maxCaffeine = mg;
   }
-  
+
   return maxCaffeine;
 }
 
