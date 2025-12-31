@@ -780,8 +780,9 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   emptyContainer: {
+    flex: 1,
     alignItems: "center",
-    paddingVertical: Spacing["3xl"],
+    justifyContent: "center",
     gap: Spacing.sm,
     marginHorizontal: Spacing.lg,
   },
