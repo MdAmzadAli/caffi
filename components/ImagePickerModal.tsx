@@ -191,7 +191,7 @@ export function ImagePickerModal({ visible, onClose, onSelectImage }: ImagePicke
                   <Image 
                     source={preset.image} 
                     style={styles.presetImage}
-                    resizeMode="contain"
+                    resizeMode="cover"
                   />
                 </Pressable>
               ))}
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing.sm,
   },
   presetImage: {
-    width: "85%",
-    height: "85%",
+    width: "100%",
+    height: "100%",
   },
 });
