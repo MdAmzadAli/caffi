@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import caffeineDB from "./caffeineDB.json";
+import caffeineDB from "./newCaffeineDB.json";
 
 export interface DrinkEntry {
   id: string;

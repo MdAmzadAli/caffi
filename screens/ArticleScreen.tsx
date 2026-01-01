@@ -34,7 +34,7 @@ export default function ArticleScreen() {
 
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + Spacing.xl }]}
         showsVerticalScrollIndicator={false}
       >
         <Image source={{ uri: article.image }} style={styles.articleImage} />

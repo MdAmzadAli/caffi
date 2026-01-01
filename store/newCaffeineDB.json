@@ -1,0 +1,3162 @@
+    {
+      "Coffee": [
+        {
+          "name": "Costa Coffee",
+          "serving_size_ml": 257,
+          "caffeine_mg": 277,
+          "caffeine_mg_per_ml": 1.1
+        },
+        {
+          "name": "Coffee Friend Brewed Coffee",
+          "serving_size_ml": 250,
+          "caffeine_mg": 145,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Hell Energy Coffee",
+          "serving_size_ml": 250,
+          "caffeine_mg": 100,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Killer Coffee (AU)",
+          "serving_size_ml": 250,
+          "caffeine_mg": 430,
+          "caffeine_mg_per_ml": 1.7
+        },
+        {
+          "name": "Nescafe Gold",
+          "serving_size_ml": 250,
+          "caffeine_mg": 66,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Espresso Monster",
+          "serving_size_ml": 248,
+          "caffeine_mg": 160,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Dunkin Donuts Shot In The Dark",
+          "serving_size_ml": 240,
+          "caffeine_mg": 134,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Illy Issimo Cafe",
+          "serving_size_ml": 201,
+          "caffeine_mg": 155,
+          "caffeine_mg_per_ml": 0.8
+        },
+        {
+          "name": "Starbucks Doubleshot Espresso",
+          "serving_size_ml": 192,
+          "caffeine_mg": 120,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "TrueStart Performance Coffee",
+          "serving_size_ml": 151,
+          "caffeine_mg": 95,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Bizzy Cold Brew",
+          "serving_size_ml": 79,
+          "caffeine_mg": 125,
+          "caffeine_mg_per_ml": 1.6
+        },
+        {
+          "name": "Zola Coconut Water Espresso",
+          "serving_size_ml": 518,
+          "caffeine_mg": 125,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Barista Bros Iced Coffee",
+          "serving_size_ml": 500,
+          "caffeine_mg": 140,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Dare Iced Coffee",
+          "serving_size_ml": 500,
+          "caffeine_mg": 160,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "V Iced Coffee",
+          "serving_size_ml": 500,
+          "caffeine_mg": 155,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Bottled Iced Coffee Dunkin Donuts",
+          "serving_size_ml": 405,
+          "caffeine_mg": 171,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Starbucks Bottled Frappuccino",
+          "serving_size_ml": 405,
+          "caffeine_mg": 110,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Stok Cold Brew",
+          "serving_size_ml": 405,
+          "caffeine_mg": 145,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Wide Awake Iced Coffee Drinks",
+          "serving_size_ml": 405,
+          "caffeine_mg": 30,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Caribou Canned Cold Brew",
+          "serving_size_ml": 340,
+          "caffeine_mg": 177,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "McDonalds Iced Coffee",
+          "serving_size_ml": 340,
+          "caffeine_mg": 133,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Premier Protein Cafe Latte",
+          "serving_size_ml": 340,
+          "caffeine_mg": 120,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Stumptown Cold Brew Coffee",
+          "serving_size_ml": 311,
+          "caffeine_mg": 279,
+          "caffeine_mg_per_ml": 0.9
+        },
+        {
+          "name": "Espresso Shot",
+          "serving_size_ml": 44,
+          "caffeine_mg": 77,
+          "caffeine_mg_per_ml": 1.7
+        },
+        {
+          "name": "Peet's Coffee Espresso",
+          "serving_size_ml": 44,
+          "caffeine_mg": 70,
+          "caffeine_mg_per_ml": 1.6
+        },
+        {
+          "name": "Peet's Decaf Espresso",
+          "serving_size_ml": 44,
+          "caffeine_mg": 10,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Gourmesso Coffee Pods",
+          "serving_size_ml": 40,
+          "caffeine_mg": 65,
+          "caffeine_mg_per_ml": 1.6
+        },
+        {
+          "name": "Nespresso Coffee Capsules",
+          "serving_size_ml": 40,
+          "caffeine_mg": 60,
+          "caffeine_mg_per_ml": 1.5
+        },
+        {
+          "name": "Stok Coffee Shots",
+          "serving_size_ml": 13,
+          "caffeine_mg": 40,
+          "caffeine_mg_per_ml": 3.1
+        },
+        {
+          "name": "Starbucks Bottled Iced Coffee",
+          "serving_size_ml": 1420,
+          "caffeine_mg": 640,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "Baskin Robbins Cappuccino Blast",
+          "serving_size_ml": 710,
+          "caffeine_mg": 234,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Dunkin' Cold Brew",
+          "serving_size_ml": 710,
+          "caffeine_mg": 260,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Dunkin' Donuts Iced Coffee",
+          "serving_size_ml": 710,
+          "caffeine_mg": 297,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Dunkin' Donuts Iced Latte",
+          "serving_size_ml": 710,
+          "caffeine_mg": 166,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Dutch Bros Coffee (Classic)",
+          "serving_size_ml": 591,
+          "caffeine_mg": 187,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Tim Hortons Large Brewed Coffee",
+          "serving_size_ml": 591,
+          "caffeine_mg": 270,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "7 Eleven Brewed Coffee",
+          "serving_size_ml": 473,
+          "caffeine_mg": 280,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Arby's Jamocha Shake",
+          "serving_size_ml": 473,
+          "caffeine_mg": 12,
+          "caffeine_mg_per_ml": 0.0
+        },
+        {
+          "name": "Biggby Brewed Coffee",
+          "serving_size_ml": 473,
+          "caffeine_mg": 200,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Biggby Creamy Lattes",
+          "serving_size_ml": 473,
+          "caffeine_mg": 100,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Biggby Iced Coffee",
+          "serving_size_ml": 473,
+          "caffeine_mg": 155,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Caribou Brewed Coffee",
+          "serving_size_ml": 473,
+          "caffeine_mg": 305,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Coffee Bean & Tea leaf Coffee",
+          "serving_size_ml": 473,
+          "caffeine_mg": 333,
+          "caffeine_mg_per_ml": 0.7
+        },
+        {
+          "name": "Einstein Bros Coffee",
+          "serving_size_ml": 473,
+          "caffeine_mg": 206,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Latte",
+          "serving_size_ml": 473,
+          "caffeine_mg": 154,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "McDonalds (McCafe) Latte",
+          "serving_size_ml": 473,
+          "caffeine_mg": 142,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "McDonalds (McCafe) Mocha",
+          "serving_size_ml": 473,
+          "caffeine_mg": 167,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "McDonalds Coffee",
+          "serving_size_ml": 473,
+          "caffeine_mg": 145,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Panera Bread Coffee",
+          "serving_size_ml": 473,
+          "caffeine_mg": 189,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Peet's Brewed Coffee",
+          "serving_size_ml": 473,
+          "caffeine_mg": 267,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Peet's Caffe Americano",
+          "serving_size_ml": 473,
+          "caffeine_mg": 140,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Peet's Caffe Latte",
+          "serving_size_ml": 473,
+          "caffeine_mg": 140,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Peet's Caffe Mocha",
+          "serving_size_ml": 473,
+          "caffeine_mg": 165,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Peet's Cappuccino",
+          "serving_size_ml": 473,
+          "caffeine_mg": 140,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Peet's Iced Coffee",
+          "serving_size_ml": 473,
+          "caffeine_mg": 150,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Peet's Iced Latte",
+          "serving_size_ml": 473,
+          "caffeine_mg": 140,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Peet's Iced Mocha",
+          "serving_size_ml": 473,
+          "caffeine_mg": 165,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Starbucks Caramel Macchiato",
+          "serving_size_ml": 473,
+          "caffeine_mg": 150,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Starbucks Cold Brew Coffee",
+          "serving_size_ml": 473,
+          "caffeine_mg": 205,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Starbucks Decaf Coffee",
+          "serving_size_ml": 473,
+          "caffeine_mg": 25,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Starbucks Grande Caffe Americano",
+          "serving_size_ml": 473,
+          "caffeine_mg": 225,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "Starbucks Grande Caffe Latte",
+          "serving_size_ml": 473,
+          "caffeine_mg": 150,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Starbucks Grande Caffe Mocha",
+          "serving_size_ml": 473,
+          "caffeine_mg": 175,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Starbucks Grande Cappuccino",
+          "serving_size_ml": 473,
+          "caffeine_mg": 150,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Starbucks Grande Coffee",
+          "serving_size_ml": 473,
+          "caffeine_mg": 310,
+          "caffeine_mg_per_ml": 0.7
+        },
+        {
+          "name": "Starbucks Iced Americano",
+          "serving_size_ml": 473,
+          "caffeine_mg": 225,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "Starbucks Nitro Cold Brew Coffee",
+          "serving_size_ml": 473,
+          "caffeine_mg": 280,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Starbucks Pink Drink",
+          "serving_size_ml": 473,
+          "caffeine_mg": 45,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Starbucks Pumpkin Cream Cold Brew",
+          "serving_size_ml": 473,
+          "caffeine_mg": 185,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Starbucks Refreshers",
+          "serving_size_ml": 473,
+          "caffeine_mg": 45,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Wawa Coffee",
+          "serving_size_ml": 473,
+          "caffeine_mg": 290,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Private Selection Canned Espresso",
+          "serving_size_ml": 444,
+          "caffeine_mg": 145,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Starbucks Doubleshot Energy",
+          "serving_size_ml": 444,
+          "caffeine_mg": 135,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Wide Awak Energy Coffee",
+          "serving_size_ml": 444,
+          "caffeine_mg": 180,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Chick-fil-A Frosted Coffee",
+          "serving_size_ml": 414,
+          "caffeine_mg": 130,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Chick-fil-A Iced Coffee",
+          "serving_size_ml": 414,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Dunkin' Donuts Brewed Coffee",
+          "serving_size_ml": 414,
+          "caffeine_mg": 210,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "Dunkin' Donuts Dunkaccino",
+          "serving_size_ml": 414,
+          "caffeine_mg": 83,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Dunkin' Donuts Extra Charged Coffee",
+          "serving_size_ml": 414,
+          "caffeine_mg": 252,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Dunkin' Donuts Latte",
+          "serving_size_ml": 414,
+          "caffeine_mg": 166,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Americano Coffee",
+          "serving_size_ml": 355,
+          "caffeine_mg": 154,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Big Train Java Chip Ice Coffee",
+          "serving_size_ml": 355,
+          "caffeine_mg": 49,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Biohazard Coffee",
+          "serving_size_ml": 355,
+          "caffeine_mg": 928,
+          "caffeine_mg_per_ml": 2.6
+        },
+        {
+          "name": "Black Ink Coffee",
+          "serving_size_ml": 355,
+          "caffeine_mg": 144,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Black Insomnia Coffee",
+          "serving_size_ml": 355,
+          "caffeine_mg": 1105,
+          "caffeine_mg_per_ml": 3.1
+        },
+        {
+          "name": "Black Label Brewed Coffee",
+          "serving_size_ml": 355,
+          "caffeine_mg": 1555,
+          "caffeine_mg_per_ml": 4.4
+        },
+        {
+          "name": "Cafe Bustelo",
+          "serving_size_ml": 355,
+          "caffeine_mg": 150,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Caffe Mocha",
+          "serving_size_ml": 355,
+          "caffeine_mg": 152,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Caffe Nero Coffee",
+          "serving_size_ml": 355,
+          "caffeine_mg": 160,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "Cannonball Coffee Maximum Charge (UK)",
+          "serving_size_ml": 355,
+          "caffeine_mg": 1101,
+          "caffeine_mg_per_ml": 3.1
+        },
+        {
+          "name": "Cappuccino",
+          "serving_size_ml": 355,
+          "caffeine_mg": 154,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Death Wish Coffee",
+          "serving_size_ml": 355,
+          "caffeine_mg": 728,
+          "caffeine_mg_per_ml": 2.1
+        },
+        {
+          "name": "Devils Brew Extreme Caffeine Coffee",
+          "serving_size_ml": 355,
+          "caffeine_mg": 1325,
+          "caffeine_mg_per_ml": 3.7
+        },
+        {
+          "name": "Flat White",
+          "serving_size_ml": 355,
+          "caffeine_mg": 130,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "GymBrew Coffee",
+          "serving_size_ml": 355,
+          "caffeine_mg": 333,
+          "caffeine_mg_per_ml": 0.9
+        },
+        {
+          "name": "High Voltage Coffee (AU)",
+          "serving_size_ml": 355,
+          "caffeine_mg": 1150,
+          "caffeine_mg_per_ml": 3.2
+        },
+        {
+          "name": "International Delight Iced Coffee",
+          "serving_size_ml": 355,
+          "caffeine_mg": 88,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Seattle's Best Brewed Coffee",
+          "serving_size_ml": 355,
+          "caffeine_mg": 260,
+          "caffeine_mg_per_ml": 0.7
+        },
+        {
+          "name": "Starbucks Iced Espresso Classics",
+          "serving_size_ml": 355,
+          "caffeine_mg": 125,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Stipe Miocic Extra Strength Coffee",
+          "serving_size_ml": 355,
+          "caffeine_mg": 500,
+          "caffeine_mg_per_ml": 1.4
+        },
+        {
+          "name": "Sudden Instant Coffee",
+          "serving_size_ml": 355,
+          "caffeine_mg": 95,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Taft Coffee (EU)",
+          "serving_size_ml": 355,
+          "caffeine_mg": 1182,
+          "caffeine_mg_per_ml": 3.3
+        },
+        {
+          "name": "Very Strong Coffee",
+          "serving_size_ml": 355,
+          "caffeine_mg": 1350,
+          "caffeine_mg_per_ml": 3.8
+        },
+        {
+          "name": "Chameleon Cold Brew With Milk",
+          "serving_size_ml": 325,
+          "caffeine_mg": 100,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Muscle Milk Coffee House",
+          "serving_size_ml": 325,
+          "caffeine_mg": 120,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "SlimFast Shake - Cappuccino",
+          "serving_size_ml": 325,
+          "caffeine_mg": 100,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Starbucks Bottled Cold Brew",
+          "serving_size_ml": 325,
+          "caffeine_mg": 180,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Starbucks Canned Nitro Cold Brew",
+          "serving_size_ml": 325,
+          "caffeine_mg": 235,
+          "caffeine_mg_per_ml": 0.7
+        },
+        {
+          "name": "Starbucks Cold & Crafted",
+          "serving_size_ml": 325,
+          "caffeine_mg": 135,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Stumptown Nitro Cold Brew",
+          "serving_size_ml": 325,
+          "caffeine_mg": 330,
+          "caffeine_mg_per_ml": 1.0
+        },
+        {
+          "name": "Sunup Pure Green Coffee",
+          "serving_size_ml": 325,
+          "caffeine_mg": 200,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Wide Awake Coffee Cold Brew",
+          "serving_size_ml": 325,
+          "caffeine_mg": 120,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Chameleon Cold Brew RTD",
+          "serving_size_ml": 296,
+          "caffeine_mg": 230,
+          "caffeine_mg_per_ml": 0.8
+        },
+        {
+          "name": "Chick-fil-A Brewed Coffee",
+          "serving_size_ml": 296,
+          "caffeine_mg": 136,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "CoolBrew Coffee",
+          "serving_size_ml": 296,
+          "caffeine_mg": 60,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Tim Hortons Small French Vanilla Coffee",
+          "serving_size_ml": 296,
+          "caffeine_mg": 60,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "La Colombe Cold Brew",
+          "serving_size_ml": 266,
+          "caffeine_mg": 180,
+          "caffeine_mg_per_ml": 0.7
+        },
+        {
+          "name": "La Colombe Draft Latte",
+          "serving_size_ml": 266,
+          "caffeine_mg": 120,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "Alpine Start Instant Coffee",
+          "serving_size_ml": 237,
+          "caffeine_mg": 120,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "Bulletproof Coffee",
+          "serving_size_ml": 237,
+          "caffeine_mg": 145,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Califia Farms Cold Brew Coffee",
+          "serving_size_ml": 237,
+          "caffeine_mg": 180,
+          "caffeine_mg_per_ml": 0.8
+        },
+        {
+          "name": "CBD Coffee",
+          "serving_size_ml": 237,
+          "caffeine_mg": 100,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Chameleon Cold Brew Coffee",
+          "serving_size_ml": 237,
+          "caffeine_mg": 200,
+          "caffeine_mg_per_ml": 0.8
+        },
+        {
+          "name": "Coffee",
+          "serving_size_ml": 237,
+          "caffeine_mg": 163,
+          "caffeine_mg_per_ml": 0.7
+        },
+        {
+          "name": "Coffee (Instant)",
+          "serving_size_ml": 237,
+          "caffeine_mg": 57,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Coffee Leaf Tea",
+          "serving_size_ml": 237,
+          "caffeine_mg": 20,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Crio Bru Brewed Cacao",
+          "serving_size_ml": 237,
+          "caffeine_mg": 10,
+          "caffeine_mg_per_ml": 0.0
+        },
+        {
+          "name": "Death Wish Canned Cold Brew",
+          "serving_size_ml": 237,
+          "caffeine_mg": 300,
+          "caffeine_mg_per_ml": 1.3
+        },
+        {
+          "name": "Death Wish Latte",
+          "serving_size_ml": 237,
+          "caffeine_mg": 300,
+          "caffeine_mg_per_ml": 1.3
+        },
+        {
+          "name": "Driftaway Coffee",
+          "serving_size_ml": 237,
+          "caffeine_mg": 160,
+          "caffeine_mg_per_ml": 0.7
+        },
+        {
+          "name": "Eight O'Clock Coffee",
+          "serving_size_ml": 237,
+          "caffeine_mg": 112,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "Folgers Coffee",
+          "serving_size_ml": 237,
+          "caffeine_mg": 112,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "Gold Peak Coffee",
+          "serving_size_ml": 237,
+          "caffeine_mg": 126,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "Gothrider Gasoline Coffee",
+          "serving_size_ml": 237,
+          "caffeine_mg": 200,
+          "caffeine_mg_per_ml": 0.8
+        },
+        {
+          "name": "High Brew Coffee",
+          "serving_size_ml": 237,
+          "caffeine_mg": 140,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Indulgio Cappuccino",
+          "serving_size_ml": 237,
+          "caffeine_mg": 20,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "K-Cup Coffee",
+          "serving_size_ml": 237,
+          "caffeine_mg": 100,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Maxwell House Coffee",
+          "serving_size_ml": 237,
+          "caffeine_mg": 112,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "Maxwell House Max Boost Coffee",
+          "serving_size_ml": 237,
+          "caffeine_mg": 196,
+          "caffeine_mg_per_ml": 0.8
+        },
+        {
+          "name": "Nescafe Dolce Gusto",
+          "serving_size_ml": 237,
+          "caffeine_mg": 106,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Nescafe Ice Java",
+          "serving_size_ml": 237,
+          "caffeine_mg": 100,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Noocaf Smart Coffee",
+          "serving_size_ml": 237,
+          "caffeine_mg": 160,
+          "caffeine_mg_per_ml": 0.7
+        },
+        {
+          "name": "Ocean Spray Brew",
+          "serving_size_ml": 237,
+          "caffeine_mg": 40,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Purity Coffee",
+          "serving_size_ml": 237,
+          "caffeine_mg": 163,
+          "caffeine_mg_per_ml": 0.7
+        },
+        {
+          "name": "Revv Coffee Pods",
+          "serving_size_ml": 237,
+          "caffeine_mg": 127,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "Robusta Coffee",
+          "serving_size_ml": 237,
+          "caffeine_mg": 265,
+          "caffeine_mg_per_ml": 1.1
+        },
+        {
+          "name": "Starbucks 2X Coffee Pods",
+          "serving_size_ml": 237,
+          "caffeine_mg": 260,
+          "caffeine_mg_per_ml": 1.1
+        },
+        {
+          "name": "Starbucks Cordusio Mocha",
+          "serving_size_ml": 237,
+          "caffeine_mg": 155,
+          "caffeine_mg_per_ml": 0.7
+        },
+        {
+          "name": "Starbucks Verismo Coffee Pods",
+          "serving_size_ml": 237,
+          "caffeine_mg": 60,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Starbucks Via Ready Brew",
+          "serving_size_ml": 237,
+          "caffeine_mg": 135,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Steep 18 Cold Brew",
+          "serving_size_ml": 237,
+          "caffeine_mg": 90,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Taster's Choice Instant Coffee",
+          "serving_size_ml": 237,
+          "caffeine_mg": 98,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Voila Instant Coffee",
+          "serving_size_ml": 237,
+          "caffeine_mg": 100,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Waka Indian Instant Coffee",
+          "serving_size_ml": 237,
+          "caffeine_mg": 70,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Waka Instant Coffee",
+          "serving_size_ml": 237,
+          "caffeine_mg": 70,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Whipped (Dalgona) Coffee",
+          "serving_size_ml": 237,
+          "caffeine_mg": 105,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Mushroom Coffee",
+          "serving_size_ml": 207,
+          "caffeine_mg": 40,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Cafe Con Leche",
+          "serving_size_ml": 177,
+          "caffeine_mg": 154,
+          "caffeine_mg_per_ml": 0.9
+        },
+        {
+          "name": "Choffy (roasted cacao)",
+          "serving_size_ml": 177,
+          "caffeine_mg": 23,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "COGO Caffeinated Hot Chocolate",
+          "serving_size_ml": 177,
+          "caffeine_mg": 98,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Dripdash Kyoto Coffee",
+          "serving_size_ml": 177,
+          "caffeine_mg": 225,
+          "caffeine_mg_per_ml": 1.3
+        },
+        {
+          "name": "Long Black",
+          "serving_size_ml": 177,
+          "caffeine_mg": 154,
+          "caffeine_mg_per_ml": 0.9
+        },
+        {
+          "name": "Nescafe 3 in 1 Instant Coffee",
+          "serving_size_ml": 177,
+          "caffeine_mg": 50,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Gloria Jean's Coffee",
+          "serving_size_ml": 60,
+          "caffeine_mg": 67,
+          "caffeine_mg_per_ml": 1.1
+        },
+        {
+          "name": "Biggby Espresso",
+          "serving_size_ml": 59,
+          "caffeine_mg": 100,
+          "caffeine_mg_per_ml": 1.7
+        },
+        {
+          "name": "Greek Coffee (Metrios)",
+          "serving_size_ml": 59,
+          "caffeine_mg": 50,
+          "caffeine_mg_per_ml": 0.8
+        },
+        {
+          "name": "Turkish Coffee",
+          "serving_size_ml": 59,
+          "caffeine_mg": 50,
+          "caffeine_mg_per_ml": 0.8
+        }
+      ],
+      "Tea": [
+        {
+          "name": "PG Tips Black Tea",
+          "serving_size_ml": 201,
+          "caffeine_mg": 50,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Sencha Green Tea Shot",
+          "serving_size_ml": 189,
+          "caffeine_mg": 40,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Xingtea Iced Green Tea",
+          "serving_size_ml": 695,
+          "caffeine_mg": 110,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Gold Peak Tea",
+          "serving_size_ml": 547,
+          "caffeine_mg": 48,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Pure Leaf Iced Tea",
+          "serving_size_ml": 547,
+          "caffeine_mg": 69,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Honest Iced Tea",
+          "serving_size_ml": 500,
+          "caffeine_mg": 63,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Nestea Iced Tea",
+          "serving_size_ml": 500,
+          "caffeine_mg": 23,
+          "caffeine_mg_per_ml": 0.0
+        },
+        {
+          "name": "Oi Ocha Green Tea",
+          "serving_size_ml": 500,
+          "caffeine_mg": 60,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Teas' Tea Oolong",
+          "serving_size_ml": 500,
+          "caffeine_mg": 70,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Guayaki Canned Yerba Mate",
+          "serving_size_ml": 458,
+          "caffeine_mg": 150,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Inko's White Tea Energy",
+          "serving_size_ml": 458,
+          "caffeine_mg": 165,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Master Brew Kombucha",
+          "serving_size_ml": 450,
+          "caffeine_mg": 76,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "McDonalds Sweet Tea",
+          "serving_size_ml": 946,
+          "caffeine_mg": 100,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Dunkin' Donuts Iced Tea",
+          "serving_size_ml": 710,
+          "caffeine_mg": 63,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Fuze Iced Tea",
+          "serving_size_ml": 710,
+          "caffeine_mg": 24,
+          "caffeine_mg_per_ml": 0.0
+        },
+        {
+          "name": "Peace Tea",
+          "serving_size_ml": 680,
+          "caffeine_mg": 23,
+          "caffeine_mg_per_ml": 0.0
+        },
+        {
+          "name": "Lipton Iced Tea",
+          "serving_size_ml": 591,
+          "caffeine_mg": 25,
+          "caffeine_mg_per_ml": 0.0
+        },
+        {
+          "name": "Arizona Iced Tea",
+          "serving_size_ml": 473,
+          "caffeine_mg": 30,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Biggby Iced Tea",
+          "serving_size_ml": 473,
+          "caffeine_mg": 38,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Chick-fil-A Iced Tea",
+          "serving_size_ml": 473,
+          "caffeine_mg": 62,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Guayaki Yerba Mate Bottled Tea",
+          "serving_size_ml": 473,
+          "caffeine_mg": 140,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Snapple Tea",
+          "serving_size_ml": 473,
+          "caffeine_mg": 37,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Southern Sweet Tea",
+          "serving_size_ml": 473,
+          "caffeine_mg": 41,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Taiwanese Milk Tea",
+          "serving_size_ml": 473,
+          "caffeine_mg": 151,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Wendy's Iced Tea",
+          "serving_size_ml": 473,
+          "caffeine_mg": 32,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Xing Craft Brew",
+          "serving_size_ml": 473,
+          "caffeine_mg": 120,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Brew Dr Kombucha Uplift",
+          "serving_size_ml": 414,
+          "caffeine_mg": 130,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Brisk Iced Tea",
+          "serving_size_ml": 355,
+          "caffeine_mg": 11,
+          "caffeine_mg_per_ml": 0.0
+        },
+        {
+          "name": "KOE Kombucha",
+          "serving_size_ml": 355,
+          "caffeine_mg": 15,
+          "caffeine_mg_per_ml": 0.0
+        },
+        {
+          "name": "Tejava Iced Tea",
+          "serving_size_ml": 355,
+          "caffeine_mg": 50,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Turkey Hill Iced Tea",
+          "serving_size_ml": 355,
+          "caffeine_mg": 64,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Big Train Spiced Chai",
+          "serving_size_ml": 237,
+          "caffeine_mg": 65,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Bigelow Tea",
+          "serving_size_ml": 237,
+          "caffeine_mg": 45,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Chai Tea",
+          "serving_size_ml": 237,
+          "caffeine_mg": 50,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Cold Brew Tea",
+          "serving_size_ml": 237,
+          "caffeine_mg": 70,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Crystal Light Iced Tea",
+          "serving_size_ml": 237,
+          "caffeine_mg": 10,
+          "caffeine_mg_per_ml": 0.0
+        },
+        {
+          "name": "Fast Lane Black Tea",
+          "serving_size_ml": 237,
+          "caffeine_mg": 110,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "Guayusa Tea",
+          "serving_size_ml": 237,
+          "caffeine_mg": 41,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "HICAF Tea",
+          "serving_size_ml": 237,
+          "caffeine_mg": 110,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "K Cup Tea",
+          "serving_size_ml": 237,
+          "caffeine_mg": 41,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Kombucha Tea",
+          "serving_size_ml": 237,
+          "caffeine_mg": 24,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Lipton Natural Energy Tea",
+          "serving_size_ml": 237,
+          "caffeine_mg": 75,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Lipton Tea",
+          "serving_size_ml": 237,
+          "caffeine_mg": 55,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Matcha Tea",
+          "serving_size_ml": 237,
+          "caffeine_mg": 64,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Morning Thunder Tea",
+          "serving_size_ml": 237,
+          "caffeine_mg": 45,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Tazo Chai",
+          "serving_size_ml": 237,
+          "caffeine_mg": 47,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Tea (Black)",
+          "serving_size_ml": 237,
+          "caffeine_mg": 42,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Tea (Green)",
+          "serving_size_ml": 237,
+          "caffeine_mg": 18,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Tea (Iced)",
+          "serving_size_ml": 237,
+          "caffeine_mg": 47,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Tea (Instant)",
+          "serving_size_ml": 237,
+          "caffeine_mg": 40,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Tea (Jasmine)",
+          "serving_size_ml": 237,
+          "caffeine_mg": 25,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Tea (Oolong)",
+          "serving_size_ml": 237,
+          "caffeine_mg": 37,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Tea (White)",
+          "serving_size_ml": 237,
+          "caffeine_mg": 28,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Teavana Tea",
+          "serving_size_ml": 237,
+          "caffeine_mg": 41,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Twig Tea (Kukicha)",
+          "serving_size_ml": 237,
+          "caffeine_mg": 25,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Waka Instant Tea",
+          "serving_size_ml": 237,
+          "caffeine_mg": 30,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Yellow Tea",
+          "serving_size_ml": 237,
+          "caffeine_mg": 63,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Yerba Mate Tea",
+          "serving_size_ml": 237,
+          "caffeine_mg": 40,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "YMateina Yerba Mate",
+          "serving_size_ml": 237,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Zest Highly Caffeinated Tea",
+          "serving_size_ml": 237,
+          "caffeine_mg": 150,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Oregon Chai Tea",
+          "serving_size_ml": 177,
+          "caffeine_mg": 45,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Pacific Chai",
+          "serving_size_ml": 177,
+          "caffeine_mg": 29,
+          "caffeine_mg_per_ml": 0.2
+        }
+      ],
+      "Energy Drinks": [
+        {
+          "name": "28 Black Energy Drink",
+          "serving_size_ml": 250,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "4 Purpose Energy Drink",
+          "serving_size_ml": 250,
+          "caffeine_mg": 70,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "BEEBAD Energy Drink",
+          "serving_size_ml": 250,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Black Bruin Energy Drink",
+          "serving_size_ml": 250,
+          "caffeine_mg": 38,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Blu Frog Energy Drink",
+          "serving_size_ml": 250,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Blue Bolt (UK)",
+          "serving_size_ml": 250,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Blue Charge (UK)",
+          "serving_size_ml": 250,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Blue Spark (UK)",
+          "serving_size_ml": 250,
+          "caffeine_mg": 75,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Bomb Energy Drink",
+          "serving_size_ml": 250,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Boost Energy (UK)",
+          "serving_size_ml": 250,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Euro Shopper Energy Drink (EU)",
+          "serving_size_ml": 250,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Hell Energy Drink (EU)",
+          "serving_size_ml": 250,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Hype Energy Drink (EU)",
+          "serving_size_ml": 250,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "M-150 Energy Drink",
+          "serving_size_ml": 250,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Pure Cofain 699 (EU)",
+          "serving_size_ml": 250,
+          "caffeine_mg": 175,
+          "caffeine_mg_per_ml": 0.7
+        },
+        {
+          "name": "Red Bull",
+          "serving_size_ml": 250,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Red Bull Editions",
+          "serving_size_ml": 250,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Red Bull Sugarfree",
+          "serving_size_ml": 250,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Red Bull Zero",
+          "serving_size_ml": 250,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Scheckters Energy Drink",
+          "serving_size_ml": 250,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Slammers Energy Drink (EU)",
+          "serving_size_ml": 250,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Source 1899 (UK)",
+          "serving_size_ml": 250,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Taurus Energy Drink",
+          "serving_size_ml": 250,
+          "caffeine_mg": 50,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "TENZING Natural Energy",
+          "serving_size_ml": 250,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Tiger Energy Drink",
+          "serving_size_ml": 250,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Tweaker Energy Drink",
+          "serving_size_ml": 250,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Virtue Clean Energy Beverage",
+          "serving_size_ml": 250,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Wildcat Energy Drink (UK)",
+          "serving_size_ml": 250,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "X Ray Energy Drink",
+          "serving_size_ml": 250,
+          "caffeine_mg": 79,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "OK Energy Drink",
+          "serving_size_ml": 250,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Power Horse Energy Drink (EU)",
+          "serving_size_ml": 250,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "V Energy Drink",
+          "serving_size_ml": 250,
+          "caffeine_mg": 78,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "XL Energy Drink (EU)",
+          "serving_size_ml": 250,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Crave Energy Drink (UK)",
+          "serving_size_ml": 249,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Bomba (EU)",
+          "serving_size_ml": 248,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Cintron Energy Drink",
+          "serving_size_ml": 248,
+          "caffeine_mg": 85,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Dutch Bros Blue Rebel Energy Drink",
+          "serving_size_ml": 248,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "XS Energy Drink",
+          "serving_size_ml": 248,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Wild Tiger Energy Drink",
+          "serving_size_ml": 247,
+          "caffeine_mg": 75,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Liquid Ice Energy Drink",
+          "serving_size_ml": 245,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Rush! Energy Drink",
+          "serving_size_ml": 245,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Monster Hydro",
+          "serving_size_ml": 751,
+          "caffeine_mg": 188,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Monster Import",
+          "serving_size_ml": 550,
+          "caffeine_mg": 179,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Moose Juice Energy Drink",
+          "serving_size_ml": 501,
+          "caffeine_mg": 200,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Club Mate (EU)",
+          "serving_size_ml": 500,
+          "caffeine_mg": 100,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Demon Energy Drink",
+          "serving_size_ml": 500,
+          "caffeine_mg": 160,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "LevlUp Gaming Booster",
+          "serving_size_ml": 500,
+          "caffeine_mg": 250,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "Monster Ripper Energy Juice (UK)",
+          "serving_size_ml": 500,
+          "caffeine_mg": 160,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Monster The Doctor VR46 (UK)",
+          "serving_size_ml": 500,
+          "caffeine_mg": 160,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Mother Energy Drink",
+          "serving_size_ml": 500,
+          "caffeine_mg": 160,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Protein2O + Energy",
+          "serving_size_ml": 500,
+          "caffeine_mg": 125,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Strike Force Energy Drink Mix",
+          "serving_size_ml": 500,
+          "caffeine_mg": 160,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "4C Energy Drink Mix",
+          "serving_size_ml": 500,
+          "caffeine_mg": 170,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Arizona Arnold Palmer Half and Half",
+          "serving_size_ml": 500,
+          "caffeine_mg": 15,
+          "caffeine_mg_per_ml": 0.0
+        },
+        {
+          "name": "Gatorade Bolt 24 Energize",
+          "serving_size_ml": 500,
+          "caffeine_mg": 75,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Live+ Energy Drink",
+          "serving_size_ml": 500,
+          "caffeine_mg": 150,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Pure Kick Energy Drink Mix",
+          "serving_size_ml": 500,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Monster Dragon Tea",
+          "serving_size_ml": 458,
+          "caffeine_mg": 155,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Monster Rehab",
+          "serving_size_ml": 458,
+          "caffeine_mg": 170,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Neuro Sonic",
+          "serving_size_ml": 429,
+          "caffeine_mg": 100,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Lucozade",
+          "serving_size_ml": 380,
+          "caffeine_mg": 46,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Fakeer Energy Drink (EU)",
+          "serving_size_ml": 370,
+          "caffeine_mg": 118,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Arizona Energy Drink Rx",
+          "serving_size_ml": 340,
+          "caffeine_mg": 127,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Bai Boost",
+          "serving_size_ml": 339,
+          "caffeine_mg": 110,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "NOCCO Energy Drink (EU)",
+          "serving_size_ml": 330,
+          "caffeine_mg": 180,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "Carabao Energy Drink (UK)",
+          "serving_size_ml": 330,
+          "caffeine_mg": 106,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Irn Bru (UK)",
+          "serving_size_ml": 330,
+          "caffeine_mg": 30,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Soylent Stacked",
+          "serving_size_ml": 330,
+          "caffeine_mg": 100,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Red Eye Energy Drink",
+          "serving_size_ml": 328,
+          "caffeine_mg": 106,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Mega Monster Energy Drink",
+          "serving_size_ml": 710,
+          "caffeine_mg": 240,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Amino Force Energy Drink",
+          "serving_size_ml": 651,
+          "caffeine_mg": 200,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Bodyarmour Edge",
+          "serving_size_ml": 591,
+          "caffeine_mg": 100,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "SoBe Energy Citrus",
+          "serving_size_ml": 591,
+          "caffeine_mg": 81,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "ABB Turbo Tea Zero",
+          "serving_size_ml": 532,
+          "caffeine_mg": 120,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Bai Antioxidant Infusion",
+          "serving_size_ml": 532,
+          "caffeine_mg": 55,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Viso Energy Drink",
+          "serving_size_ml": 503,
+          "caffeine_mg": 300,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "3D Energy Drink",
+          "serving_size_ml": 473,
+          "caffeine_mg": 200,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Adrenaline Shoc",
+          "serving_size_ml": 473,
+          "caffeine_mg": 300,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Alsa Energy Drink Mix",
+          "serving_size_ml": 473,
+          "caffeine_mg": 100,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Bang Energy",
+          "serving_size_ml": 473,
+          "caffeine_mg": 300,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Bang Keto Coffee",
+          "serving_size_ml": 473,
+          "caffeine_mg": 300,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Bang Natural",
+          "serving_size_ml": 473,
+          "caffeine_mg": 250,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "Bang Sweet Tea",
+          "serving_size_ml": 473,
+          "caffeine_mg": 300,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Beaver Buzz Energy Drink",
+          "serving_size_ml": 473,
+          "caffeine_mg": 178,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Berzerk Energy Drink Mix",
+          "serving_size_ml": 473,
+          "caffeine_mg": 200,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "C4 Energy Drink",
+          "serving_size_ml": 473,
+          "caffeine_mg": 200,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "C4 Smart Energy Drink",
+          "serving_size_ml": 473,
+          "caffeine_mg": 200,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "C4 Ultimate Energy Drink",
+          "serving_size_ml": 473,
+          "caffeine_mg": 300,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Celsius Heat Energy Drink",
+          "serving_size_ml": 473,
+          "caffeine_mg": 300,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Crunk Energy Drink",
+          "serving_size_ml": 473,
+          "caffeine_mg": 192,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Crystal Light Energy Mix",
+          "serving_size_ml": 473,
+          "caffeine_mg": 60,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Electric Monkey Wild Energy Drink",
+          "serving_size_ml": 473,
+          "caffeine_mg": 160,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Full Throttle Energy Drink",
+          "serving_size_ml": 473,
+          "caffeine_mg": 160,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "GFuel Cans",
+          "serving_size_ml": 473,
+          "caffeine_mg": 300,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "GFuel Energy Drink Mix",
+          "serving_size_ml": 473,
+          "caffeine_mg": 140,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Go Fast Energy Drink",
+          "serving_size_ml": 473,
+          "caffeine_mg": 160,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Go Fast High Octane Energy Drink",
+          "serving_size_ml": 473,
+          "caffeine_mg": 300,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Great Value Energy Drink Mix",
+          "serving_size_ml": 473,
+          "caffeine_mg": 120,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Gridlock Energy Drink",
+          "serving_size_ml": 473,
+          "caffeine_mg": 140,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Hi Ball Energy Drink",
+          "serving_size_ml": 473,
+          "caffeine_mg": 160,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Joker Mad Energy",
+          "serving_size_ml": 473,
+          "caffeine_mg": 160,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Liquid Help Energy Drink",
+          "serving_size_ml": 473,
+          "caffeine_mg": 300,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Loud Energy Drink",
+          "serving_size_ml": 473,
+          "caffeine_mg": 320,
+          "caffeine_mg_per_ml": 0.7
+        },
+        {
+          "name": "Monster Assault",
+          "serving_size_ml": 473,
+          "caffeine_mg": 160,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Monster Energy",
+          "serving_size_ml": 473,
+          "caffeine_mg": 160,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Monster Juice",
+          "serving_size_ml": 473,
+          "caffeine_mg": 160,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Monster Lo-Carb",
+          "serving_size_ml": 473,
+          "caffeine_mg": 140,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Monster Mango Loco",
+          "serving_size_ml": 473,
+          "caffeine_mg": 152,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Monster Mule",
+          "serving_size_ml": 473,
+          "caffeine_mg": 160,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Monster Pipeline Punch",
+          "serving_size_ml": 473,
+          "caffeine_mg": 160,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Monster Ultra",
+          "serving_size_ml": 473,
+          "caffeine_mg": 150,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Monster Zero Sugar",
+          "serving_size_ml": 473,
+          "caffeine_mg": 140,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Mountain Dew Amp",
+          "serving_size_ml": 473,
+          "caffeine_mg": 142,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Mountain Dew Game Fuel",
+          "serving_size_ml": 473,
+          "caffeine_mg": 90,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Mountain Dew Rise",
+          "serving_size_ml": 473,
+          "caffeine_mg": 180,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "NOS Energy Drink",
+          "serving_size_ml": 473,
+          "caffeine_mg": 160,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Nuun Sport",
+          "serving_size_ml": 473,
+          "caffeine_mg": 40,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Pure Boost Energy Drink Mix",
+          "serving_size_ml": 473,
+          "caffeine_mg": 100,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Quake Energy Berry Blast Slurpee",
+          "serving_size_ml": 473,
+          "caffeine_mg": 92,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Quake Energy Drink",
+          "serving_size_ml": 473,
+          "caffeine_mg": 250,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "Raze Energy Drink",
+          "serving_size_ml": 473,
+          "caffeine_mg": 300,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Reign Total Body Fuel",
+          "serving_size_ml": 473,
+          "caffeine_mg": 300,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Rip It Energy Drink",
+          "serving_size_ml": 473,
+          "caffeine_mg": 160,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Rockstar Boom",
+          "serving_size_ml": 473,
+          "caffeine_mg": 160,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Rockstar Energy Drink (Original)",
+          "serving_size_ml": 473,
+          "caffeine_mg": 160,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Rockstar Halo Infinite",
+          "serving_size_ml": 473,
+          "caffeine_mg": 240,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "Rockstar Juiced",
+          "serving_size_ml": 473,
+          "caffeine_mg": 170,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Rockstar Punched",
+          "serving_size_ml": 473,
+          "caffeine_mg": 240,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "Rockstar Pure Zero",
+          "serving_size_ml": 473,
+          "caffeine_mg": 240,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "Rockstar Recovery",
+          "serving_size_ml": 473,
+          "caffeine_mg": 160,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Rockstar Sugar Free",
+          "serving_size_ml": 473,
+          "caffeine_mg": 160,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Rockstar Thermo",
+          "serving_size_ml": 473,
+          "caffeine_mg": 300,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Rockstar XDurance",
+          "serving_size_ml": 473,
+          "caffeine_mg": 300,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Rockstar Zero Carb",
+          "serving_size_ml": 473,
+          "caffeine_mg": 240,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "Rogue Energy Drink Mix",
+          "serving_size_ml": 473,
+          "caffeine_mg": 175,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Rowdy Energy Drink",
+          "serving_size_ml": 473,
+          "caffeine_mg": 160,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Sneak Energy Drink Mix",
+          "serving_size_ml": 473,
+          "caffeine_mg": 150,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Solimo Energy Drink",
+          "serving_size_ml": 473,
+          "caffeine_mg": 152,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Speed Energy Fuel",
+          "serving_size_ml": 473,
+          "caffeine_mg": 186,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Spider Energy Drink",
+          "serving_size_ml": 473,
+          "caffeine_mg": 240,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "Spike Hardcore Energy",
+          "serving_size_ml": 473,
+          "caffeine_mg": 350,
+          "caffeine_mg_per_ml": 0.7
+        },
+        {
+          "name": "Triton Energy Drink",
+          "serving_size_ml": 473,
+          "caffeine_mg": 200,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "True Lemon Energy Mix",
+          "serving_size_ml": 473,
+          "caffeine_mg": 120,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Ugly Energy Water",
+          "serving_size_ml": 473,
+          "caffeine_mg": 160,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Venom Death Adder",
+          "serving_size_ml": 473,
+          "caffeine_mg": 160,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Wired X 3000 Energy Drink",
+          "serving_size_ml": 473,
+          "caffeine_mg": 185,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Wired X Berry Rush",
+          "serving_size_ml": 473,
+          "caffeine_mg": 95,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Wired X344 Energy Drink",
+          "serving_size_ml": 473,
+          "caffeine_mg": 344,
+          "caffeine_mg_per_ml": 0.7
+        },
+        {
+          "name": "Xyience Energy Drink",
+          "serving_size_ml": 473,
+          "caffeine_mg": 160,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "ZipFizz Energy Drink Mix",
+          "serving_size_ml": 473,
+          "caffeine_mg": 100,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Zoa Energy Drink",
+          "serving_size_ml": 473,
+          "caffeine_mg": 160,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Java Monster",
+          "serving_size_ml": 444,
+          "caffeine_mg": 200,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "Java Monster 300",
+          "serving_size_ml": 444,
+          "caffeine_mg": 300,
+          "caffeine_mg_per_ml": 0.7
+        },
+        {
+          "name": "Muscle Monster",
+          "serving_size_ml": 444,
+          "caffeine_mg": 157,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Rockstar Organic Energy Drink",
+          "serving_size_ml": 444,
+          "caffeine_mg": 160,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Starbucks Triple Shot Energy",
+          "serving_size_ml": 444,
+          "caffeine_mg": 225,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "Alani Nu Energy Drink",
+          "serving_size_ml": 355,
+          "caffeine_mg": 200,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "ALL IN Energy Drink",
+          "serving_size_ml": 355,
+          "caffeine_mg": 75,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "AXIO Energy Drink Mix",
+          "serving_size_ml": 355,
+          "caffeine_mg": 100,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Bing Energy Drink",
+          "serving_size_ml": 355,
+          "caffeine_mg": 120,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "BreinFuel",
+          "serving_size_ml": 355,
+          "caffeine_mg": 360,
+          "caffeine_mg_per_ml": 1.0
+        },
+        {
+          "name": "Burn Energy Drink",
+          "serving_size_ml": 355,
+          "caffeine_mg": 112,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "C4 On The Go",
+          "serving_size_ml": 355,
+          "caffeine_mg": 200,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Celsius Energy Drink",
+          "serving_size_ml": 355,
+          "caffeine_mg": 200,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Celsius Stevia",
+          "serving_size_ml": 355,
+          "caffeine_mg": 200,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Coca-Cola Cherry Vanilla",
+          "serving_size_ml": 355,
+          "caffeine_mg": 34,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Coca-Cola Energy",
+          "serving_size_ml": 355,
+          "caffeine_mg": 114,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Cocaine Energy Drink",
+          "serving_size_ml": 355,
+          "caffeine_mg": 280,
+          "caffeine_mg_per_ml": 0.8
+        },
+        {
+          "name": "Dark Dog Organic Energy",
+          "serving_size_ml": 355,
+          "caffeine_mg": 114,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Duff Energy Drink",
+          "serving_size_ml": 355,
+          "caffeine_mg": 120,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "EBOOST Super Fuel",
+          "serving_size_ml": 355,
+          "caffeine_mg": 110,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "EnerBee Energy Drink",
+          "serving_size_ml": 355,
+          "caffeine_mg": 100,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Go Girl Energy Drink",
+          "serving_size_ml": 355,
+          "caffeine_mg": 100,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "GURU Energy Drink",
+          "serving_size_ml": 355,
+          "caffeine_mg": 140,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Hyde Xtreme",
+          "serving_size_ml": 355,
+          "caffeine_mg": 400,
+          "caffeine_mg_per_ml": 1.1
+        },
+        {
+          "name": "Java Kick Coffee Cola",
+          "serving_size_ml": 355,
+          "caffeine_mg": 100,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Kill Cliff Energy X Recover",
+          "serving_size_ml": 355,
+          "caffeine_mg": 25,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Kill Cliff Ignite",
+          "serving_size_ml": 355,
+          "caffeine_mg": 150,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Kona Gold Energy Drink",
+          "serving_size_ml": 355,
+          "caffeine_mg": 115,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Marquis Energy Drink",
+          "serving_size_ml": 355,
+          "caffeine_mg": 100,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "MATI Energy Drink",
+          "serving_size_ml": 355,
+          "caffeine_mg": 110,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Meltdown Ketone Drink",
+          "serving_size_ml": 355,
+          "caffeine_mg": 225,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Monster Maxx",
+          "serving_size_ml": 355,
+          "caffeine_mg": 200,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Nerd Focus",
+          "serving_size_ml": 355,
+          "caffeine_mg": 128,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Octane Energy Drink Mix",
+          "serving_size_ml": 355,
+          "caffeine_mg": 225,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Red Power Elixir",
+          "serving_size_ml": 355,
+          "caffeine_mg": 160,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "Red Thunder Energy Drink",
+          "serving_size_ml": 355,
+          "caffeine_mg": 120,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "RootJack Caffeinated Pirate Root Beer",
+          "serving_size_ml": 355,
+          "caffeine_mg": 120,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Runa",
+          "serving_size_ml": 355,
+          "caffeine_mg": 150,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Sambazon Amazon Energy Drink",
+          "serving_size_ml": 355,
+          "caffeine_mg": 120,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Spike Shooter",
+          "serving_size_ml": 355,
+          "caffeine_mg": 300,
+          "caffeine_mg_per_ml": 0.8
+        },
+        {
+          "name": "Steaz Energy",
+          "serving_size_ml": 355,
+          "caffeine_mg": 100,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "T-Virus Antidote",
+          "serving_size_ml": 355,
+          "caffeine_mg": 100,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Tru Energy Wakeup",
+          "serving_size_ml": 355,
+          "caffeine_mg": 100,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "UPTIME Energy Drink",
+          "serving_size_ml": 355,
+          "caffeine_mg": 142,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "USANA Rev3 Energy Drink",
+          "serving_size_ml": 355,
+          "caffeine_mg": 120,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Xtreme Shock Energy Drink",
+          "serving_size_ml": 355,
+          "caffeine_mg": 200,
+          "caffeine_mg_per_ml": 0.6
+        },
+        {
+          "name": "Zest Sparkling Tea",
+          "serving_size_ml": 355,
+          "caffeine_mg": 135,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Zevia Energy Drink",
+          "serving_size_ml": 355,
+          "caffeine_mg": 120,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Cran Energy Juice",
+          "serving_size_ml": 296,
+          "caffeine_mg": 70,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Mamma Chia Energy",
+          "serving_size_ml": 296,
+          "caffeine_mg": 90,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Oikos Pro Fuel",
+          "serving_size_ml": 296,
+          "caffeine_mg": 100,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Advocare Slim",
+          "serving_size_ml": 237,
+          "caffeine_mg": 120,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "Arbonne Energy Fizz Stck",
+          "serving_size_ml": 237,
+          "caffeine_mg": 55,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Berocca",
+          "serving_size_ml": 237,
+          "caffeine_mg": 90,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Best Choice Strawberry Energy Drink Mix",
+          "serving_size_ml": 237,
+          "caffeine_mg": 120,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "EBOOST Energy Drink Mix",
+          "serving_size_ml": 237,
+          "caffeine_mg": 110,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "EBOOST Workout Crusher Mix",
+          "serving_size_ml": 237,
+          "caffeine_mg": 175,
+          "caffeine_mg_per_ml": 0.7
+        },
+        {
+          "name": "Great Value Energy Drink Enhancers",
+          "serving_size_ml": 237,
+          "caffeine_mg": 50,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Kin Spritz",
+          "serving_size_ml": 237,
+          "caffeine_mg": 50,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "LYFT Energy Mix",
+          "serving_size_ml": 237,
+          "caffeine_mg": 125,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "PerformElite Pre-Workout",
+          "serving_size_ml": 237,
+          "caffeine_mg": 225,
+          "caffeine_mg_per_ml": 1.0
+        },
+        {
+          "name": "Perk Energy Beverage",
+          "serving_size_ml": 237,
+          "caffeine_mg": 100,
+          "caffeine_mg_per_ml": 0.4
+        },
+        {
+          "name": "Redline Princess",
+          "serving_size_ml": 237,
+          "caffeine_mg": 300,
+          "caffeine_mg_per_ml": 1.3
+        },
+        {
+          "name": "Redline Xtreme Energy Drink",
+          "serving_size_ml": 237,
+          "caffeine_mg": 316,
+          "caffeine_mg_per_ml": 1.3
+        },
+        {
+          "name": "Roaring Lion Energy Drink",
+          "serving_size_ml": 237,
+          "caffeine_mg": 77,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Spark Energy Drink Mix",
+          "serving_size_ml": 237,
+          "caffeine_mg": 120,
+          "caffeine_mg_per_ml": 0.5
+        },
+        {
+          "name": "V8 +Energy Drink",
+          "serving_size_ml": 237,
+          "caffeine_mg": 80,
+          "caffeine_mg_per_ml": 0.3
+        }
+      ],
+      "Soft Drinks": [
+        {
+          "name": "Red Bull Simply Cola",
+          "serving_size_ml": 250,
+          "caffeine_mg": 32,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Afri Cola",
+          "serving_size_ml": 330,
+          "caffeine_mg": 83,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Fritz Kola (EU)",
+          "serving_size_ml": 330,
+          "caffeine_mg": 83,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Pepsi Max (UK)",
+          "serving_size_ml": 330,
+          "caffeine_mg": 43,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Premium Cola (EU)",
+          "serving_size_ml": 330,
+          "caffeine_mg": 83,
+          "caffeine_mg_per_ml": 0.3
+        },
+        {
+          "name": "Bawls",
+          "serving_size_ml": 473,
+          "caffeine_mg": 102,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Mountain Dew Kickstart",
+          "serving_size_ml": 473,
+          "caffeine_mg": 90,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Ale 8 1",
+          "serving_size_ml": 355,
+          "caffeine_mg": 37,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Barqs Root Beer",
+          "serving_size_ml": 355,
+          "caffeine_mg": 22,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Big Red Soda",
+          "serving_size_ml": 355,
+          "caffeine_mg": 34,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Cheerwine",
+          "serving_size_ml": 355,
+          "caffeine_mg": 47,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Coca-Cola Cherry",
+          "serving_size_ml": 355,
+          "caffeine_mg": 34,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Coca-Cola Cherry Zero Sugar",
+          "serving_size_ml": 355,
+          "caffeine_mg": 34,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Coca-Cola Classic",
+          "serving_size_ml": 355,
+          "caffeine_mg": 34,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Coca-Cola Orange Vanilla",
+          "serving_size_ml": 355,
+          "caffeine_mg": 34,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Coca-Cola Vanilla",
+          "serving_size_ml": 355,
+          "caffeine_mg": 34,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Coca-Cola Vanilla Zero Sugar",
+          "serving_size_ml": 355,
+          "caffeine_mg": 34,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Coca-Cola With Coffee",
+          "serving_size_ml": 355,
+          "caffeine_mg": 69,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Coca-Cola Zero Sugar",
+          "serving_size_ml": 355,
+          "caffeine_mg": 34,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Diet Cheerwine",
+          "serving_size_ml": 355,
+          "caffeine_mg": 47,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Diet Coke",
+          "serving_size_ml": 355,
+          "caffeine_mg": 46,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Diet Coke with Splenda",
+          "serving_size_ml": 355,
+          "caffeine_mg": 46,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Diet Dr Pepper",
+          "serving_size_ml": 355,
+          "caffeine_mg": 41,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Diet Mountain Dew",
+          "serving_size_ml": 355,
+          "caffeine_mg": 54,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Diet Pepsi",
+          "serving_size_ml": 355,
+          "caffeine_mg": 35,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Diet RC Cola",
+          "serving_size_ml": 355,
+          "caffeine_mg": 48,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Diet Wild Cherry Pepsi",
+          "serving_size_ml": 355,
+          "caffeine_mg": 38,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "doc Soda",
+          "serving_size_ml": 355,
+          "caffeine_mg": 60,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Double Cola",
+          "serving_size_ml": 355,
+          "caffeine_mg": 36,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Dr Pepper",
+          "serving_size_ml": 355,
+          "caffeine_mg": 42,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Dr Pepper 10",
+          "serving_size_ml": 355,
+          "caffeine_mg": 51,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Dr Shasta Soda",
+          "serving_size_ml": 355,
+          "caffeine_mg": 29,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Faygo Cola",
+          "serving_size_ml": 355,
+          "caffeine_mg": 43,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Faygo Moon Mist",
+          "serving_size_ml": 355,
+          "caffeine_mg": 20,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Green Cola",
+          "serving_size_ml": 355,
+          "caffeine_mg": 37,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Inca Kola",
+          "serving_size_ml": 355,
+          "caffeine_mg": 38,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Kickapoo Soda: Joy Juice & Fruit Shine",
+          "serving_size_ml": 355,
+          "caffeine_mg": 40,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Mello Yello",
+          "serving_size_ml": 355,
+          "caffeine_mg": 51,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Mountain Dew",
+          "serving_size_ml": 355,
+          "caffeine_mg": 54,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Mountain Dew Baja Blast",
+          "serving_size_ml": 355,
+          "caffeine_mg": 54,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Mountain Dew Code Red",
+          "serving_size_ml": 355,
+          "caffeine_mg": 54,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Mountain Dew Live Wire",
+          "serving_size_ml": 355,
+          "caffeine_mg": 54,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Mountain Dew Major Melon",
+          "serving_size_ml": 355,
+          "caffeine_mg": 55,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Mountain Dew Voltage",
+          "serving_size_ml": 355,
+          "caffeine_mg": 55,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Mountain Dew Zero Sugar",
+          "serving_size_ml": 355,
+          "caffeine_mg": 68,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Moxie Soda",
+          "serving_size_ml": 355,
+          "caffeine_mg": 24,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "PC Cola",
+          "serving_size_ml": 355,
+          "caffeine_mg": 12,
+          "caffeine_mg_per_ml": 0.0
+        },
+        {
+          "name": "PC Cola Diet",
+          "serving_size_ml": 355,
+          "caffeine_mg": 13,
+          "caffeine_mg_per_ml": 0.0
+        },
+        {
+          "name": "Pepsi",
+          "serving_size_ml": 355,
+          "caffeine_mg": 38,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Pepsi Made With Sugar",
+          "serving_size_ml": 355,
+          "caffeine_mg": 38,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Pepsi Zero Sugar",
+          "serving_size_ml": 355,
+          "caffeine_mg": 69,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Pibb Xtra",
+          "serving_size_ml": 355,
+          "caffeine_mg": 40,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "RC (Royal Crown) Cola",
+          "serving_size_ml": 355,
+          "caffeine_mg": 43,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Ritz Cola",
+          "serving_size_ml": 355,
+          "caffeine_mg": 10,
+          "caffeine_mg_per_ml": 0.0
+        },
+        {
+          "name": "Ruby Red Squirt",
+          "serving_size_ml": 355,
+          "caffeine_mg": 39,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Shasta Cola",
+          "serving_size_ml": 355,
+          "caffeine_mg": 43,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Shasta Diet Cola",
+          "serving_size_ml": 355,
+          "caffeine_mg": 47,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Shasta Mountain Rush",
+          "serving_size_ml": 355,
+          "caffeine_mg": 54,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Ski Soda",
+          "serving_size_ml": 355,
+          "caffeine_mg": 69,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Slurpee",
+          "serving_size_ml": 355,
+          "caffeine_mg": 30,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Starbucks Refreshers Canned",
+          "serving_size_ml": 355,
+          "caffeine_mg": 50,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Sun Drop Soda",
+          "serving_size_ml": 355,
+          "caffeine_mg": 64,
+          "caffeine_mg_per_ml": 0.2
+        },
+        {
+          "name": "Sunkist Orange Soda",
+          "serving_size_ml": 355,
+          "caffeine_mg": 19,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Wave Soda",
+          "serving_size_ml": 355,
+          "caffeine_mg": 42,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Wild Cherry Pepsi",
+          "serving_size_ml": 355,
+          "caffeine_mg": 38,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Zevia Cola",
+          "serving_size_ml": 355,
+          "caffeine_mg": 45,
+          "caffeine_mg_per_ml": 0.1
+        },
+        {
+          "name": "Soda Stream",
+          "serving_size_ml": 237,
+          "caffeine_mg": 31,
+          "caffeine_mg_per_ml": 0.1
+        }
+      ],
+      "Chocolate": [
+        {
+          "name": "Dark Chocolate (60–69% cacao, 1 oz)",
+          "serving_size_ml": 28,
+          "caffeine_mg": 24,
+          "caffeine_mg_per_ml": 0.857
+        },
+        {
+          "name": "Dark Chocolate (70–85% cacao, 1 oz)",
+          "serving_size_ml": 28,
+          "caffeine_mg": 23,
+          "caffeine_mg_per_ml": 0.821
+        },
+        {
+          "name": "Crunch Bar (1.55 oz)",
+          "serving_size_ml": 44,
+          "caffeine_mg": 13,
+          "caffeine_mg_per_ml": 0.295
+        },
+        {
+          "name": "Baker's Unsweetened Chocolate (1 oz)",
+          "serving_size_ml": 28,
+          "caffeine_mg": 26,
+          "caffeine_mg_per_ml": 0.929
+        },
+        {
+          "name": "Cocoa Powder (1 tbsp)",
+          "serving_size_ml": 15,
+          "caffeine_mg": 12,
+          "caffeine_mg_per_ml": 0.8
+        },
+        {
+          "name": "Chocolate Shake (McD, 16 oz)",
+          "serving_size_ml": 473,
+          "caffeine_mg": 10,
+          "caffeine_mg_per_ml": 0.021
+        },
+        {
+          "name": "Clif Bar Chocolate Chip (68g)",
+          "serving_size_ml": 68,
+          "caffeine_mg": 25,
+          "caffeine_mg_per_ml": 0.368
+        },
+        {
+          "name": "Lindt Excellence 70% Dark (1 oz)",
+          "serving_size_ml": 28,
+          "caffeine_mg": 20,
+          "caffeine_mg_per_ml": 0.714
+        },
+        {
+          "name": "Chocolate Energy Bar (generic 1.76 oz)",
+          "serving_size_ml": 50,
+          "caffeine_mg": 50,
+          "caffeine_mg_per_ml": 1
+        },
+        {
+          "name": "Espresso Chocolate Beans (28 pieces)",
+          "serving_size_ml": 28,
+          "caffeine_mg": 336,
+          "caffeine_mg_per_ml": 12
+        },
+        {
+          "name": "Cocoa Tea (Caribbean, 8 oz)",
+          "serving_size_ml": 237,
+          "caffeine_mg": 10,
+          "caffeine_mg_per_ml": 0.042
+        }
+      ]
+    }

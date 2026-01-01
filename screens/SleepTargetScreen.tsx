@@ -304,7 +304,7 @@ export default function SleepTargetScreen() {
         </View>
 
         <Text style={[styles.summaryText, { color: theme.text }]}>
-          Days when caffeine intake was under 40 mg during your sleep window (from sleep time to 6 hours after).
+          Days when caffeine intake was under 40 mg during your sleep window.
         </Text>
 
         <View style={styles.streakSection}>
