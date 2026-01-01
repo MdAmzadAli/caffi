@@ -55,7 +55,7 @@ const SECTIONS: Section[] = [
         id: "caf-3",
         title: "Caffeine Withdrawal: Symptoms and Management",
         summary: "What happens when you suddenly stop consuming caffeine and how to cope.",
-        image: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&h=400&fit=crop&q=80",
+        image: "https://images.unsplash.com/photo-1518057111178-44a106bad636?w=400&h=400&fit=crop&q=80",
         content: "Caffeine withdrawal is a recognized medical condition that occurs when regular caffeine consumers suddenly reduce or stop their intake. Symptoms typically begin 12 to 24 hours after the last caffeine dose and can last anywhere from two to nine days. The severity of withdrawal depends on the amount typically consumed and individual sensitivity levels.\n\nThe most common withdrawal symptom is headache, which affects more than half of people who quit caffeine abruptly. These headaches occur because caffeine causes blood vessels in the brain to constrict, and when caffeine is removed, the vessels dilate, causing pain. Fatigue and drowsiness are also extremely common, as the body suddenly loses its artificial energy boost and must readjust to functioning without the stimulant.\n\nMood changes including irritability, difficulty concentrating, and even mild depression can occur during withdrawal. Some people experience flu-like symptoms such as nausea, muscle aches, and general malaise. These symptoms happen because the brain has adapted to the presence of caffeine and needs time to recalibrate its normal functioning without it.\n\nTo minimize withdrawal symptoms, experts recommend gradually reducing caffeine intake over one to two weeks rather than stopping abruptly. Cutting your daily intake by about 10 to 25 percent each week allows your body to adjust slowly. Staying well-hydrated, getting adequate sleep, and engaging in light exercise can also help ease the transition. Some people find that switching to lower-caffeine beverages like green tea can provide a gentler step-down approach.",
         references: [
           "https://www.ncbi.nlm.nih.gov/books/NBK430790/",
@@ -101,7 +101,6 @@ const SECTIONS: Section[] = [
         references: [
           "https://sca.coffee/research/botany",
           "https://www.ncausa.org/About-Coffee/Coffee-Roasts-Guide",
-          "https://www.sciencedirect.com/science/article/abs/pii/S0308814612001173",
         ],
       },
     ],
@@ -140,7 +139,6 @@ const SECTIONS: Section[] = [
         image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=400&fit=crop&q=80",
         content: "The American Academy of Pediatrics has taken a clear stance: energy drinks have no place in the diets of children and adolescents. This recommendation stems from growing evidence that young people are particularly vulnerable to the effects of these highly caffeinated beverages. Unlike coffee or tea, which teens might consume in moderate amounts, energy drinks are often marketed aggressively to young consumers and packaged in ways that encourage overconsumption.\n\nChildren and teenagers metabolize caffeine more slowly than adults, meaning its effects last longer in their systems. Their developing nervous systems are also more sensitive to stimulants. Research has linked energy drink consumption in adolescents to increased rates of anxiety, sleep disturbances, and behavioral problems. Sleep disruption is particularly concerning during adolescence, a period when adequate rest is crucial for physical and cognitive development.\n\nEmergency room visits related to energy drink consumption among young people have increased significantly over the past decade. Many of these visits involve heart palpitations, seizures, or severe anxiety. The high sugar content in many energy drinks also contributes to obesity risk and dental problems, issues already prevalent among youth.\n\nSeveral countries have implemented age restrictions on energy drink sales. Lithuania became the first European Union country to ban sales to minors under 18, followed by Latvia. Some regions require warning labels specifically mentioning risks for children. For parents concerned about their teenager's energy drink consumption, having open conversations about the risks and suggesting healthier alternatives like water, milk, or small amounts of regular coffee or tea can be helpful approaches.",
         references: [
-          "https://publications.aap.org/pediatrics/article/127/3/511/65072/Sports-Drinks-and-Energy-Drinks-for-Children-and",
           "https://www.cdc.gov/school-nutrition/energy-drinks/index.html",
           "https://pubmed.ncbi.nlm.nih.gov/21321035/",
         ],
@@ -171,7 +169,6 @@ const SECTIONS: Section[] = [
         references: [
           "https://academic.oup.com/sleep/article/48/4/zsae230/7815486",
           "https://jcsm.aasm.org/doi/10.5664/jcsm.9736",
-          "https://www.tandfonline.com/doi/full/10.1080/07420528.2020.1867157",
         ],
       },
       {
@@ -181,9 +178,7 @@ const SECTIONS: Section[] = [
         image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop&q=80",
         content: "While caffeine is effective for boosting alertness, relying on it too heavily can create dependency and disrupt natural energy regulation. Fortunately, research has identified several evidence-based alternatives that can provide sustained energy without the potential downsides of excessive caffeine consumption. Understanding these options allows for a more balanced approach to managing energy levels throughout the day.\n\nPhysical activity is one of the most powerful natural energy boosters. Even a brief 10-minute walk can increase alertness and improve mood for up to 2 hours afterward. Exercise increases blood flow to the brain, releases endorphins, and can be more effective than caffeine for combating afternoon fatigue. Regular exercise also improves sleep quality, creating a positive cycle of better rest and more natural daytime energy.\n\nHydration plays a surprisingly significant role in energy levels. Even mild dehydration of 1 to 2 percent of body weight can cause fatigue, difficulty concentrating, and reduced alertness. Many people mistake thirst for tiredness and reach for caffeine when water would be more helpful. Keeping a water bottle nearby and drinking consistently throughout the day can prevent these energy dips.\n\nExposure to natural light, particularly in the morning, helps regulate circadian rhythms and promotes daytime alertness. Light exposure suppresses melatonin production and signals to your body that it's time to be awake. Strategic napping, limited to 20 to 30 minutes before 3 PM, can restore alertness without interfering with nighttime sleep. Balanced meals that combine protein, complex carbohydrates, and healthy fats provide steady energy without the blood sugar spikes and crashes associated with sugary snacks and drinks.",
         references: [
-          "https://ijbnpa.biomedcentral.com/articles/10.1186/s12966-017-0525-8",
-          "https://www.nature.com/articles/ejcn2012184",
-          "https://onlinelibrary.wiley.com/doi/10.1111/jsr.12866",
+          "https://www.goodrx.com/well-being/alternative-treatments/how-to-stay-awake-without-caffeine",
         ],
       },
     ],
@@ -198,9 +193,8 @@ const SECTIONS: Section[] = [
         image: "https://images.unsplash.com/photo-1511920170033-f8396924c348?w=400&h=400&fit=crop&q=80",
         content: "Creating a sustainable caffeine routine involves more than just counting milligrams. A thoughtful approach considers timing, sources, and individual responses to optimize benefits while avoiding potential drawbacks. The goal is to use caffeine as a tool for enhanced performance and enjoyment rather than a crutch for getting through the day.\n\nStart by tracking your current consumption for a week, including all sources: coffee, tea, soft drinks, energy drinks, chocolate, and any medications containing caffeine. Many people are surprised to discover they consume significantly more than they realized. This baseline helps identify opportunities for adjustment if needed. Pay attention to how different amounts and timings affect your energy, mood, and sleep.\n\nConsider the quality of your caffeine sources. Coffee and tea offer additional health benefits from antioxidants and other plant compounds that energy drinks and soft drinks lack. If you drink multiple cups of coffee daily, try making your second or third cup a half-caf blend to reduce total intake while maintaining the ritual you enjoy. Green tea provides a gentler caffeine boost with L-theanine, an amino acid that promotes calm focus.\n\nBuild in caffeine-free days or periods to prevent tolerance from building up. Some people benefit from one caffeine-free day per week, while others do well with periodic week-long breaks. These breaks help reset your adenosine receptors so caffeine remains effective at lower doses. If you experience withdrawal symptoms during breaks, this indicates some level of dependence and suggests gradually reducing your baseline intake.",
         references: [
-          "https://nutritionsource.hsph.harvard.edu/caffeine/",
-          "https://www.eatright.org/food/nutrition/dietary-guidelines-and-myplate",
-          "https://www.sleepfoundation.org/nutrition/caffeine-and-sleep",
+          "https://uthealthaustin.org/blog/making-the-most-of-your-cup-of-joe",
+          "https://mydiso.com/blogs/articles/how-to-use-caffeine-effectively-for-energy-and-focus",
         ],
       },
       {
@@ -212,7 +206,7 @@ const SECTIONS: Section[] = [
         references: [
           "https://www.mayoclinic.org/healthy-lifestyle/nutrition-and-healthy-eating/in-depth/caffeine/art-20045678",
           "https://health.clevelandclinic.org/how-to-get-caffeine-out-of-your-system",
-          "https://www.liebertpub.com/doi/10.1089/jcr.2013.0016",
+         
         ],
       },
       {
@@ -223,8 +217,7 @@ const SECTIONS: Section[] = [
         content: "Different life circumstances and health conditions require modified approaches to caffeine consumption. What works well for one person may not be appropriate for another. Understanding these nuances helps ensure caffeine remains a positive part of life without creating unnecessary risks.\n\nPregnant women should limit caffeine to under 200 milligrams daily, approximately one 12-ounce cup of coffee. Caffeine crosses the placenta, and because the developing fetus cannot metabolize it efficiently, exposure lasts longer and can affect growth. Research has linked higher caffeine intake during pregnancy to increased risks of low birth weight and preterm delivery. Many women choose to further reduce or eliminate caffeine during pregnancy out of caution.\n\nAthletes can benefit from strategic caffeine use for performance enhancement, with research supporting doses of 3 to 6 milligrams per kilogram of body weight taken 30 to 60 minutes before exercise. However, regular high intake can diminish these performance benefits through tolerance. Some athletes periodically reduce caffeine to resensitize before important competitions. Caffeine also acts as a diuretic, so adequate hydration during exercise is especially important.\n\nPeople with anxiety disorders may find that caffeine worsens symptoms, as it activates the same fight-or-flight response that underlies anxiety. Those with heart arrhythmias, uncontrolled high blood pressure, or gastroesophageal reflux disease often benefit from significantly reducing or eliminating caffeine. Anyone taking medications should check for interactions, as caffeine can affect how certain drugs are metabolized, potentially increasing or decreasing their effectiveness.",
         references: [
           "https://www.acog.org/womens-health/experts-and-stories/ask-acog/how-much-coffee-can-i-drink-while-pregnant",
-          "https://jissn.biomedcentral.com/articles/10.1186/s12970-021-00420-6",
-          "https://adaa.org/understanding-anxiety/related-illnesses/other-related-conditions/stress/physical-activity-reduces-st",
+         "https://www.sciencedirect.com/science/article/pii/S0163834321001614",
         ],
       },
     ],
