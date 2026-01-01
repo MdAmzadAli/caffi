@@ -406,26 +406,33 @@ export function CaffeineGraphNew({
 
   useEffect(() => {
     if (!hasInitialScrolled.current) return;
-    
+
     const daysDelta = prevDayWindowStartRef.current - dayWindowStart;
     if (daysDelta !== 0 && scrollViewRef?.current) {
-      const pixelsPerDay = (windowWidth * HOURS_PER_DAY) / HOURS_VISIBLE;
+      // FIX: Use the actual scroll content width for precise calculation
+      const totalDays = dayWindowEnd - dayWindowStart + 1;
+      const pixelsPerDay = scrollContentWidth / totalDays;
+
       const offsetAdjustment = daysDelta * pixelsPerDay;
       const newScrollX = currentScrollXRef.current + offsetAdjustment;
-      
+
       setTimeout(() => {
-        scrollViewRef.current?.scrollTo({ x: Math.max(0, newScrollX), y: 0, animated: false });
+        scrollViewRef.current?.scrollTo({ 
+          x: Math.max(0, newScrollX), 
+          y: 0, 
+          animated: false 
+        });
       }, 0);
     }
     prevDayWindowStartRef.current = dayWindowStart;
-  }, [dayWindowStart, dayWindowEnd, windowWidth]);
+  }, [dayWindowStart, dayWindowEnd, scrollContentWidth]);
 
   useEffect(() => {
     if (resetKey > 0 && scrollViewRef?.current) {
       prevDayWindowStartRef.current = dayWindowStart;
       currentScrollXRef.current = defaultScrollX;
       setTimeout(() => {
-        scrollViewRef.current?.scrollTo({ x: defaultScrollX, y: 0, animated: true });
+        scrollViewRef.current?.scrollTo({ x: defaultScrollX, y: 0, animated: false });
       }, 50);
     }
   }, [resetKey]);
