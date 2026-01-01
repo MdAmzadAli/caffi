@@ -3,6 +3,7 @@ import { View, StyleSheet, Text, Pressable, ScrollView, Image } from "react-nati
 import { Feather } from "@expo/vector-icons";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import * as WebBrowser from "expo-web-browser";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { HistoryStackParamList } from "@/navigation/HistoryStackNavigator";
@@ -15,6 +16,17 @@ export default function ArticleScreen() {
   const route = useRoute<ArticleRouteProp>();
   const insets = useSafeAreaInsets();
   const { article } = route.params;
+
+  const handleOpenLink = async (url: string) => {
+    try {
+      // Basic check for URL
+      if (url.startsWith("http")) {
+        await WebBrowser.openBrowserAsync(url);
+      }
+    } catch (error) {
+      console.error("Error opening browser:", error);
+    }
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
@@ -47,9 +59,11 @@ export default function ArticleScreen() {
         <View style={[styles.referencesContainer, { backgroundColor: theme.backgroundSecondary }]}>
           <Text style={[styles.referencesTitle, { color: theme.text }]}>References</Text>
           {article.references.map((ref, idx) => (
-            <Text key={idx} style={[styles.referenceItem, { color: theme.mutedGrey }]}>
-              {idx + 1}. {ref}
-            </Text>
+            <Pressable key={idx} onPress={() => handleOpenLink(ref)}>
+              <Text style={[styles.referenceItem, { color: theme.mutedGrey, textDecorationLine: "underline" }]}>
+                {idx + 1}. {ref}
+              </Text>
+            </Pressable>
           ))}
         </View>
       </ScrollView>
