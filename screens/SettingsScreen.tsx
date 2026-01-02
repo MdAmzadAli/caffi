@@ -57,16 +57,16 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   };
 
   const settingsItems = [
-    { id: "pref", label: "User preferences", icon: "user", emoji: "👤" },
-    { id: "personalization", label: "Personalization", icon: "palette", emoji: "🎨" },
-    { id: "localization", label: "Localization", icon: "globe", emoji: "🌐" },
-    { id: "datetime", label: "Date & Time", icon: "clock", emoji: "⏰" },
-    { id: "notifications", label: "Notifications", icon: "bell", emoji: "🔔" },
-    { id: "integrations", label: "Integrations", icon: "heart", emoji: "❤️" },
-    { id: "data", label: "Your data", icon: "database", emoji: "📂" },
-    { id: "ads", label: "Disable ads / Support app", icon: "slash", emoji: "🚫" },
-    { id: "new", label: "What's new", icon: "gift", emoji: "🎁" },
-    { id: "feedback", label: "Feedback", icon: "message-square", emoji: "💬" },
+    { id: "pref", label: "User preferences", icon: "account-outline", emoji: "👤" },
+    { id: "personalization", label: "Personalization", icon: "palette-outline", emoji: "🎨" },
+    { id: "localization", label: "Localization", icon: "earth", emoji: "🌐" },
+    { id: "datetime", label: "Date & Time", icon: "clock-outline", emoji: "⏰" },
+    { id: "notifications", label: "Notifications", icon: "bell-outline", emoji: "🔔" },
+    { id: "integrations", label: "Integrations", icon: "heart-outline", emoji: "❤️" },
+    { id: "data", label: "Your data", icon: "database-outline", emoji: "📂" },
+    { id: "ads", label: "Disable ads / Support app", icon: "ads-light", emoji: "🚫" },
+    { id: "new", label: "What's new", icon: "gift-outline", emoji: "🎁" },
+    { id: "feedback", label: "Feedback", icon: "message-outline", emoji: "💬" },
   ];
 
   return (
@@ -101,7 +101,12 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
               }}
             >
               <View style={styles.itemLeft}>
-                <Feather name={item.icon as any} size={22} color={theme.text} style={styles.icon} />
+                <MaterialCommunityIcons 
+                  name={item.icon as any} 
+                  size={24} 
+                  color={theme.text} 
+                  style={styles.icon} 
+                />
                 <ThemedText type="body" style={styles.itemLabel}>{item.label}</ThemedText>
               </View>
               <Feather name="chevron-right" size={20} color={theme.textMuted} />
