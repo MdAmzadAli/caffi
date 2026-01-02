@@ -58,9 +58,14 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
   const settingsItems = [
     { id: "pref", label: "User preferences", icon: "user", emoji: "👤" },
+    { id: "personalization", label: "Personalization", icon: "palette", emoji: "🎨" },
+    { id: "localization", label: "Localization", icon: "globe", emoji: "🌐" },
     { id: "datetime", label: "Date & Time", icon: "clock", emoji: "⏰" },
     { id: "notifications", label: "Notifications", icon: "bell", emoji: "🔔" },
+    { id: "integrations", label: "Integrations", icon: "heart", emoji: "❤️" },
     { id: "data", label: "Your data", icon: "database", emoji: "📂" },
+    { id: "ads", label: "Disable ads / Support app", icon: "slash", emoji: "🚫" },
+    { id: "new", label: "What's new", icon: "gift", emoji: "🎁" },
     { id: "feedback", label: "Feedback", icon: "message-square", emoji: "💬" },
   ];
 
