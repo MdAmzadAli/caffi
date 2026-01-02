@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo,useCallback } from "react";
 import {
   View,
   StyleSheet,
@@ -59,11 +59,21 @@ export function TimePickerModal({ visible, onClose, onSelectTime, initialDate }:
   const translateY = useSharedValue(MODAL_HEIGHT);
   const startY = useSharedValue(0);
 
-  const calendarModalWidth = Math.min(windowWidth * 0.9, 400);
-  const calendarCellSize = calendarModalWidth / 7;
-  const calendarFixedHeight = (calendarCellSize * 6) + CALENDAR_HEADER_OFFSET;
+  const { calendarModalWidth, calendarCellSize, calendarFixedHeight } = useMemo(() => {
+    const modalWidth = Math.min(windowWidth * 0.9, 400);
+    const cellSize = modalWidth / 7;
+    const fixedHeight = (cellSize * 6) + CALENDAR_HEADER_OFFSET;
+    return {
+      calendarModalWidth: modalWidth,
+      calendarCellSize: cellSize,
+      calendarFixedHeight: fixedHeight,
+    };
+  }, [windowWidth]);
 
-  const accentColor = isDark ? Colors.dark.accent : Colors.light.accent;
+  const accentColor = useMemo(
+    () => (isDark ? Colors.dark.accent : Colors.light.accent),
+    [isDark]
+  );
   
   const paperTheme = useMemo(() => {
     const baseTheme = isDark ? MD3DarkTheme : MD3LightTheme;
@@ -163,6 +173,7 @@ export function TimePickerModal({ visible, onClose, onSelectTime, initialDate }:
       setCustomDate(newDate);
       setSelectedPreset("");
       onSelectTime(newDate, formatDateTime(newDate));
+      setSelectedCalendarDate(undefined); // Add this line
     }
   };
 
@@ -176,25 +187,25 @@ export function TimePickerModal({ visible, onClose, onSelectTime, initialDate }:
     onSelectTime(newDate, formatDateTime(newDate));
   };
 
-  const formatDate = (date: Date) => {
+  const formatDate = useCallback((date: Date) => {
     return date.toLocaleDateString("en-US", {
       month: "2-digit",
       day: "2-digit",
       year: "numeric",
     });
-  };
+  }, []);
 
-  const formatTime = (date: Date) => {
+  const formatTime = useCallback((date: Date) => {
     return date.toLocaleTimeString("en-US", {
       hour: "numeric",
       minute: "2-digit",
       hour12: true,
     });
-  };
+  }, []);
 
-  const formatDateTime = (date: Date) => {
+  const formatDateTime = useCallback((date: Date) => {
     return `${formatDate(date)} ${formatTime(date)}`;
-  };
+  }, [formatDate, formatTime]);
 
   if (!visible) return null;
 
@@ -282,14 +293,17 @@ export function TimePickerModal({ visible, onClose, onSelectTime, initialDate }:
             </Animated.View>
           </GestureDetector>
         </View>
-
+           </GestureHandlerRootView>
         {showDatePicker && (
           <Modal
             visible={showDatePicker}
             transparent
             statusBarTranslucent
             animationType="fade"
-            onRequestClose={() => setShowDatePicker(false)}
+            onRequestClose={() => {
+              setShowDatePicker(false);
+              setSelectedCalendarDate(undefined); // Add this line
+            }}
           >
             <View style={styles.centeredOverlay}>
               <Pressable style={styles.backdrop} onPress={() => setShowDatePicker(false)} />
@@ -299,6 +313,7 @@ export function TimePickerModal({ visible, onClose, onSelectTime, initialDate }:
                 </View>
                 <View style={[styles.calendarWrapper, { height: calendarFixedHeight }]}>
                   <Calendar
+                    key={showDatePicker ? 'calendar-visible' : 'calendar-hidden'}
                     locale="en"
                     mode="single"
                     date={selectedCalendarDate || customDate}
@@ -325,7 +340,7 @@ export function TimePickerModal({ visible, onClose, onSelectTime, initialDate }:
             </View>
           </Modal>
         )}
-        </GestureHandlerRootView>
+     
       </Modal>
 
       <Portal>
