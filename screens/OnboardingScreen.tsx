@@ -139,7 +139,7 @@ export default function OnboardingScreen() {
       sleepTime: sleepTimeOverride || data.sleepTime || "23:00",
       optimalCaffeine: optimal,
       safeCaffeine: safe,
-      dailyLimit: optimal,
+      dailyLimit: 300,
       hasCompletedOnboarding: true,
     });
   }, [data, updateProfile]);

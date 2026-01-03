@@ -198,7 +198,7 @@ const STORAGE_KEYS = {
 
 const DEFAULT_PROFILE: UserProfile = {
   name: "",
-  dailyLimit: 400,
+  dailyLimit: 300,
   optimalCaffeine: 200,
   safeCaffeine: 400,
   wakeTime: "07:00",
