@@ -63,132 +63,131 @@ export default function UserPreferencesScreen({ navigation }: UserPreferencesScr
   };
 
   const updateChartMax = (amount: number) => {
-    // Assuming we store chart max in profile, or default to some value
-    // Since it's not in the store yet, let's use a local state or add to profile
-    // For now, let's assume it's part of profile or we add it
     updateProfile({ dailyLimit: Math.max(0, profile.dailyLimit + amount) });
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
-      <View style={[styles.header, { paddingTop: insets.top + Spacing.sm }]}>
-        <Pressable onPress={handleBack} style={styles.backButton}>
-          <Feather name="arrow-left" size={24} color={theme.text} />
-        </Pressable>
-        <ThemedText style={styles.headerTitle}>User preferences</ThemedText>
-        <View style={styles.backButton} />
-      </View>
+        <View style={[styles.header, { paddingTop: insets.top + Spacing.sm }]}>
+          <Pressable onPress={handleBack} style={styles.backButton}>
+            <Feather name="arrow-left" size={24} color={theme.text} />
+          </Pressable>
+          <ThemedText style={styles.headerTitle}>User preferences</ThemedText>
+          <View style={styles.backButton} />
+        </View>
 
-      <ScreenScrollView
-        contentContainerStyle={{ paddingTop: 0 }}
-      >
-        <View style={styles.content}>
-          <Pressable style={styles.redoButton} onPress={handleRedoOnboarding}>
-            <View style={styles.redoIconContainer}>
-              <MaterialCommunityIcons name="refresh" size={24} color={theme.text} />
-            </View>
-            <View style={styles.redoTextContainer}>
-              <ThemedText type="h3">Redo onboarding</ThemedText>
-              <ThemedText type="caption" muted>
-                Retake the questionnaire to recalculate your caffeine profile based on your current situation.
+        <ScreenScrollView
+          contentContainerStyle={{ paddingTop: 0 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.content}>
+            <Pressable style={styles.redoButton} onPress={handleRedoOnboarding}>
+              <View style={styles.redoIconContainer}>
+                <MaterialCommunityIcons name="refresh" size={24} color={theme.text} />
+              </View>
+              <View style={styles.redoTextContainer}>
+                <ThemedText type="h3">Redo onboarding</ThemedText>
+                <ThemedText type="caption" muted>
+                  Retake the questionnaire to recalculate your caffeine profile based on your current situation.
+                </ThemedText>
+              </View>
+            </Pressable>
+
+            <View style={styles.section}>
+              <ThemedText type="h3" style={styles.sectionTitle}>Safe caffeine threshold</ThemedText>
+              <Pressable 
+                style={[styles.inputBox, { backgroundColor: theme.backgroundSecondary }]}
+                onPress={() => inputRef.current?.focus()}
+              >
+                <TextInput
+                  ref={inputRef}
+                  style={[styles.inputValue, { color: theme.text, fontSize: 24, fontWeight: "700" }]}
+                  value={localThreshold}
+                  onChangeText={(text) => {
+                    const numericText = text.replace(/[^0-9]/g, "");
+                    setLocalThreshold(numericText);
+                  }}
+                  onBlur={() => {
+                    let val = parseInt(localThreshold, 10);
+                    if (isNaN(val) || val < 50) {
+                      val = 50;
+                    }
+                    setLocalThreshold(String(val));
+                    updateProfile({ optimalCaffeine: val });
+                    Keyboard.dismiss();
+                  }}
+                  keyboardType="number-pad"
+                  maxLength={3}
+                />
+              </Pressable>
+              <ThemedText type="caption" muted style={styles.sectionFooter}>
+                This is the amount of caffeine you can have in your body without significantly disrupting sleep function. Average is around 100mg.
               </ThemedText>
             </View>
-          </Pressable>
 
-          <View style={styles.section}>
-            <ThemedText type="h3" style={styles.sectionTitle}>Safe caffeine threshold</ThemedText>
-            <Pressable 
-              style={[styles.inputBox, { backgroundColor: theme.backgroundSecondary }]}
-              onPress={() => inputRef.current?.focus()}
-            >
-              <TextInput
-                ref={inputRef}
-                style={[styles.inputValue, { color: theme.text, fontSize: 24, fontWeight: "700" }]}
-                value={localThreshold}
-                onChangeText={(text) => {
-                  const numericText = text.replace(/[^0-9]/g, "");
-                  setLocalThreshold(numericText);
-                }}
-                onBlur={() => {
-                  let val = parseInt(localThreshold, 10);
-                  if (isNaN(val) || val < 50) {
-                    val = 50;
-                  }
-                  setLocalThreshold(String(val));
-                  updateProfile({ optimalCaffeine: val });
-                  Keyboard.dismiss();
-                }}
-                keyboardType="number-pad"
-                maxLength={3}
-              />
-            </Pressable>
-            <ThemedText type="caption" muted style={styles.sectionFooter}>
-              This is the amount of caffeine you can have in your body without significantly disrupting sleep function. Average is around 100mg.
-            </ThemedText>
-          </View>
-
-          <View style={styles.section}>
-            <ThemedText type="h3" style={styles.sectionTitle}>Wake time</ThemedText>
-            <Pressable 
-              style={[styles.inputBox, { backgroundColor: theme.backgroundSecondary }]}
-              onPress={() => setShowWakePicker(true)}
-            >
-              <Feather name="sun" size={20} color={theme.textMuted} style={styles.inputIcon} />
-              <ThemedText type="h3" style={styles.inputValue}>{formatTime(profile.wakeTime)}</ThemedText>
-            </Pressable>
-          </View>
-
-          <View style={styles.section}>
-            <ThemedText type="h3" style={styles.sectionTitle}>Sleep time</ThemedText>
-            <Pressable 
-              style={[styles.inputBox, { backgroundColor: theme.backgroundSecondary }]}
-              onPress={() => setShowSleepPicker(true)}
-            >
-              <Feather name="moon" size={20} color={theme.textMuted} style={styles.inputIcon} />
-              <ThemedText type="h3" style={styles.inputValue}>{formatTime(profile.sleepTime)}</ThemedText>
-            </Pressable>
-            <ThemedText type="caption" muted style={styles.sectionFooter}>
-              Set your usual bed time to help track when caffeine might affect your sleep.
-            </ThemedText>
-          </View>
-
-          <View style={styles.section}>
-            <ThemedText type="h3" style={styles.sectionTitle}>Custom chart maximum (mg)</ThemedText>
-            <View style={[styles.inputBox, { backgroundColor: theme.backgroundSecondary }]}>
-              <Pressable onPress={() => updateChartMax(-50)} style={styles.inputAction}>
-                <Feather name="minus" size={20} color={theme.textMuted} />
-              </Pressable>
-              <ThemedText type="h2" style={styles.inputValue}>{profile.dailyLimit}</ThemedText>
-              <Pressable onPress={() => updateChartMax(50)} style={styles.inputAction}>
-                <Feather name="plus" size={20} color={theme.textMuted} />
+            <View style={styles.section}>
+              <ThemedText type="h3" style={styles.sectionTitle}>Wake time</ThemedText>
+              <Pressable 
+                style={[styles.inputBox, { backgroundColor: theme.backgroundSecondary }]}
+                onPress={() => setShowWakePicker(true)}
+              >
+                <Feather name="sun" size={20} color={theme.textMuted} style={styles.inputIcon} />
+                <ThemedText type="h3" style={styles.inputValue}>{formatTime(profile.wakeTime)}</ThemedText>
               </Pressable>
             </View>
+
+            <View style={styles.section}>
+              <ThemedText type="h3" style={styles.sectionTitle}>Sleep time</ThemedText>
+              <Pressable 
+                style={[styles.inputBox, { backgroundColor: theme.backgroundSecondary }]}
+                onPress={() => setShowSleepPicker(true)}
+              >
+                <Feather name="moon" size={20} color={theme.textMuted} style={styles.inputIcon} />
+                <ThemedText type="h3" style={styles.inputValue}>{formatTime(profile.sleepTime)}</ThemedText>
+              </Pressable>
+              <ThemedText type="caption" muted style={styles.sectionFooter}>
+                Set your usual bed time to help track when caffeine might affect your sleep.
+              </ThemedText>
+            </View>
+
+            <View style={styles.section}>
+              <ThemedText type="h3" style={styles.sectionTitle}>Custom chart maximum (mg)</ThemedText>
+              <View style={[styles.inputBox, { backgroundColor: theme.backgroundSecondary }]}>
+                <Pressable onPress={() => updateChartMax(-50)} style={styles.inputAction}>
+                  <Feather name="minus" size={20} color={theme.textMuted} />
+                </Pressable>
+                <ThemedText type="h2" style={styles.inputValue}>{profile.dailyLimit}</ThemedText>
+                <Pressable onPress={() => updateChartMax(50)} style={styles.inputAction}>
+                  <Feather name="plus" size={20} color={theme.textMuted} />
+                </Pressable>
+              </View>
+            </View>
           </View>
-        </View>
-      </ScreenScrollView>
+        </ScreenScrollView>
 
-      <TimePickerModal
-        visible={showWakePicker}
-        onDismiss={() => setShowWakePicker(false)}
-        onConfirm={({ hours, minutes }) => {
-          updateProfile({ wakeTime: `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}` });
-          setShowWakePicker(false);
-        }}
-        hours={Number(profile.wakeTime.split(":")[0])}
-        minutes={Number(profile.wakeTime.split(":")[1])}
-      />
+        <TimePickerModal
+          visible={showWakePicker}
+          onDismiss={() => setShowWakePicker(false)}
+          onConfirm={({ hours, minutes }) => {
+            updateProfile({ wakeTime: `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}` });
+            setShowWakePicker(false);
+          }}
+          hours={Number(profile.wakeTime.split(":")[0])}
+          minutes={Number(profile.wakeTime.split(":")[1])}
+        />
 
-      <TimePickerModal
-        visible={showSleepPicker}
-        onDismiss={() => setShowSleepPicker(false)}
-        onConfirm={({ hours, minutes }) => {
-          updateProfile({ sleepTime: `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}` });
-          setShowSleepPicker(false);
-        }}
-        hours={Number(profile.sleepTime.split(":")[0])}
-        minutes={Number(profile.sleepTime.split(":")[1])}
-      />
+        <TimePickerModal
+          visible={showSleepPicker}
+          onDismiss={() => setShowSleepPicker(false)}
+          onConfirm={({ hours, minutes }) => {
+            updateProfile({ sleepTime: `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}` });
+            setShowSleepPicker(false);
+          }}
+          hours={Number(profile.sleepTime.split(":")[0])}
+          minutes={Number(profile.sleepTime.split(":")[1])}
+        />
+      </View>
     </TouchableWithoutFeedback>
   );
 }
@@ -202,8 +201,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: Spacing.lg,
-     paddingBottom: Spacing.lg,
-    // backgroundColor:"red",
+    paddingBottom: Spacing.lg,
   },
   backButton: {
     width: 40,
