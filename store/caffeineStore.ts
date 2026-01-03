@@ -81,7 +81,12 @@ export function calculateOptimalCaffeine(inputs: CaffeineCalculationInputs): { o
         optimal *= 0.8;
         break;
       case "under_18":
-        optimal = 80;
+        if (inputs.weight) {
+          optimal = inputs.weight * 2.5;
+        } else {
+          optimal = 80;
+        }
+        optimal = Math.min(optimal, 100);
         safe = 100;
         break;
     }
