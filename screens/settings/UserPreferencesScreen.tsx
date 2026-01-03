@@ -40,7 +40,7 @@ export default function UserPreferencesScreen({ navigation }: UserPreferencesScr
         { 
           text: "Redo", 
           onPress: () => {
-            navigation.getParent()?.navigate("Onboarding");
+            updateProfile({ hasCompletedOnboarding: false });
           } 
         }
       ]
@@ -174,7 +174,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: Spacing.lg,
-    backgroundColor:"red",
+     paddingBottom: Spacing.lg,
+    // backgroundColor:"red",
   },
   backButton: {
     width: 40,
