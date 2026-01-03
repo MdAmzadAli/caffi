@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, StyleSheet, Pressable, Alert } from "react-native";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -28,10 +28,20 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
   const toggleValue = useSharedValue(isDark ? 1 : 0);
 
+  // Sync animated value with theme changes (including external changes)
+  useEffect(() => {
+    toggleValue.value = isDark ? 1 : 0;
+  }, [isDark]);
+
   const toggleTheme = () => {
     const nextMode = isDark ? "light" : "dark";
+    const targetValue = isDark ? 0 : 1;
+
+    // Animate first
+    toggleValue.value = withSpring(targetValue, { damping: 20, stiffness: 200 });
+
+    // Then change theme (will cause re-render but animated value already set)
     setThemeMode(nextMode);
-    toggleValue.value = withSpring(isDark ? 0 : 1, { damping: 15, stiffness: 150 });
   };
 
   const animatedToggleStyle = useAnimatedStyle(() => {
@@ -70,21 +80,22 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   ];
 
   return (
-    <ThemedView style={styles.container}>
-      <View style={[styles.header, { paddingTop: insets.top + Spacing.md }]}>
-        <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Feather name="arrow-left" size={24} color={theme.text} />
-        </Pressable>
-        <ThemedText type="h3" style={styles.headerTitle}>Settings</ThemedText>
+    <View style={styles.container}>
+      <View style={[styles.header, { paddingTop: insets.top + Spacing.sm }]}>
+        <View style={styles.backButton} />
+        <ThemedText style={styles.headerTitle}>Settings</ThemedText>
         <Pressable onPress={toggleTheme} style={styles.themeToggleContainer}>
           <View style={[styles.toggleTrack, { backgroundColor: theme.backgroundSecondary }]}>
-            <Animated.View style={[styles.toggleKnob, { backgroundColor: theme.backgroundRoot }, animatedToggleStyle]}>
-               <MaterialCommunityIcons 
+            {/* Opposite icon - shows what theme you'll get when you tap */}
+            <View style={[styles.oppositeIcon, isDark ? styles.oppositeIconLeft : styles.oppositeIconRight]}>
+              <MaterialCommunityIcons 
                 name={isDark ? "weather-sunny" : "weather-night"} 
                 size={16} 
-                color={theme.accent} 
+                color={theme.textMuted} 
               />
-            </Animated.View>
+            </View>
+            {/* Current theme icon inside the knob */}
+            <Animated.View style={[styles.toggleKnob, { backgroundColor: theme.backgroundRoot }, animatedToggleStyle]} />
           </View>
         </Pressable>
       </View>
@@ -94,7 +105,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           {settingsItems.map((item) => (
             <Pressable 
               key={item.id} 
-              style={[styles.item, { borderBottomColor: theme.divider }]}
+              style={styles.item}
               onPress={() => {
                 if (item.id === "data") handleReset();
                 else Alert.alert(item.label, "This section is coming soon!");
@@ -114,7 +125,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           ))}
         </View>
       </ScreenScrollView>
-    </ThemedView>
+    </View>
   );
 }
 
@@ -127,7 +138,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: Spacing.lg,
-    paddingBottom: Spacing.md,
+    // paddingBottom: Spacing.md,
   },
   backButton: {
     width: 40,
@@ -137,7 +148,9 @@ const styles = StyleSheet.create({
   headerTitle: {
     flex: 1,
     textAlign: "center",
-    fontWeight: "600",
+    // fontWeight: "600",
+    fontSize: 22,
+      fontWeight: "700",
   },
   themeToggleContainer: {
     width: 60,
@@ -151,6 +164,13 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 2,
     justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "rgba(0, 0, 0, 0.1)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
   },
   toggleKnob: {
     width: 24,
@@ -164,16 +184,28 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 2,
   },
+  oppositeIcon: {
+    position: "absolute",
+    width: 24,
+    height: 24,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  oppositeIconLeft: {
+    left: 2,
+  },
+  oppositeIconRight: {
+    right: 2,
+  },
   list: {
     paddingHorizontal: Spacing.lg,
-    marginTop: Spacing.lg,
+    // marginTop: Spacing.sm,
   },
   item: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingVertical: Spacing.lg,
-    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   itemLeft: {
     flexDirection: "row",
@@ -184,6 +216,6 @@ const styles = StyleSheet.create({
     width: 24,
   },
   itemLabel: {
-    fontSize: 17,
+    fontSize: 20,
   },
 });
