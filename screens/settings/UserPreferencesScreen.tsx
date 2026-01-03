@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { View, StyleSheet, Pressable, TextInput, Alert } from "react-native";
+import { View, StyleSheet, Pressable, TextInput, Alert, Keyboard, TouchableWithoutFeedback } from "react-native";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -70,7 +70,8 @@ export default function UserPreferencesScreen({ navigation }: UserPreferencesScr
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
       <View style={[styles.header, { paddingTop: insets.top + Spacing.sm }]}>
         <Pressable onPress={handleBack} style={styles.backButton}>
           <Feather name="arrow-left" size={24} color={theme.text} />
@@ -116,6 +117,7 @@ export default function UserPreferencesScreen({ navigation }: UserPreferencesScr
                   }
                   setLocalThreshold(String(val));
                   updateProfile({ optimalCaffeine: val });
+                  Keyboard.dismiss();
                 }}
                 keyboardType="number-pad"
                 maxLength={3}
@@ -187,7 +189,7 @@ export default function UserPreferencesScreen({ navigation }: UserPreferencesScr
         hours={Number(profile.sleepTime.split(":")[0])}
         minutes={Number(profile.sleepTime.split(":")[1])}
       />
-    </View>
+    </TouchableWithoutFeedback>
   );
 }
 
