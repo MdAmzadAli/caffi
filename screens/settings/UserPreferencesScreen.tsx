@@ -68,7 +68,9 @@ export default function UserPreferencesScreen({ navigation }: UserPreferencesScr
         <View style={styles.backButton} />
       </View>
 
-      <ScreenScrollView>
+      <ScreenScrollView
+        contentContainerStyle={{ paddingTop: 0 }}
+      >
         <View style={styles.content}>
           <Pressable style={styles.redoButton} onPress={handleRedoOnboarding}>
             <View style={styles.redoIconContainer}>
@@ -172,7 +174,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: Spacing.lg,
-    paddingBottom: Spacing.md,
+    backgroundColor:"red",
   },
   backButton: {
     width: 40,
@@ -187,7 +189,6 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.md,
   },
   redoButton: {
     flexDirection: "row",
