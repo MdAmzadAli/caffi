@@ -97,8 +97,13 @@ export default function UserPreferencesScreen({ navigation }: UserPreferencesScr
                 defaultValue={String(profile.optimalCaffeine)}
                 onChangeText={(text) => {
                   const val = parseInt(text.replace(/[^0-9]/g, ""), 10);
-                  if (!isNaN(val)) updateProfile({ optimalCaffeine: val });
-                  else if (text === "") updateProfile({ optimalCaffeine: 0 });
+                  if (!isNaN(val)) {
+                    // Update profile immediately but apply lower bound check on blur/submit if needed
+                    // For now, simple check within update logic
+                    updateProfile({ optimalCaffeine: Math.max(50, val) });
+                  } else if (text === "") {
+                    updateProfile({ optimalCaffeine: 50 });
+                  }
                 }}
                 keyboardType="number-pad"
                 maxLength={3}
