@@ -31,7 +31,7 @@ export function ScreenScrollView({
         style={[
           styles.safeArea,
           {
-            paddingTop: insets.top,
+            // paddingTop: insets.top,
             paddingBottom: insets.bottom,
           },
         ]}

@@ -9,6 +9,7 @@ import { useCaffeineStore } from "@/store/caffeineStore";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import type { StatsStackParamList } from "@/navigation/StatsStackNavigator";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type StatsNavigationProp = NativeStackNavigationProp<StatsStackParamList>;
 
@@ -16,7 +17,7 @@ export default function StatisticsScreen() {
   const { theme } = useTheme();
   const { entries } = useCaffeineStore();
   const navigation = useNavigation<StatsNavigationProp>();
-
+  const insets = useSafeAreaInsets();
   const weeklyData = useMemo(() => {
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const now = new Date();
@@ -44,8 +45,11 @@ export default function StatisticsScreen() {
   const maxValue = Math.max(...weeklyData.map((d) => d.value), 1);
 
   return (
-    <ScreenScrollView header={<ScreenHeader title="Analytics" />}>
-      <Text style={[styles.subtitle, { color: theme.text }]}>Spotlight</Text>
+    <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
+      <View style={[styles.header, { paddingTop: insets.top + Spacing.md }]}>
+        <Text style={[styles.headerTitle, { color: theme.text }]}>Analytics</Text>
+      </View>
+      {/* <Text style={[styles.subtitle, { color: theme.text }]}>Spotlight</Text> */}
 
       <Pressable
         style={[styles.card, { backgroundColor: theme.backgroundSecondary }]}
@@ -116,7 +120,7 @@ export default function StatisticsScreen() {
         theme={theme}
         onPress={() => navigation.navigate("ConsumptionByTime")}
       />
-    </ScreenScrollView>
+    </View>
   );
 }
 
@@ -146,6 +150,18 @@ function MenuItem({
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  header: {
+    paddingHorizontal: Spacing.lg,
+    paddingBottom: Spacing.lg,
+    alignItems: "center",
+  },
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: "700",
+  },
   subtitle: {
     fontSize: 18,
     fontWeight: "600",
