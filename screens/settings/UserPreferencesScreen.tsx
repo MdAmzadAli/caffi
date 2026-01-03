@@ -23,7 +23,9 @@ export default function UserPreferencesScreen({ navigation }: UserPreferencesScr
   const [showWakePicker, setShowWakePicker] = useState(false);
   const [showSleepPicker, setShowSleepPicker] = useState(false);
   const [localThreshold, setLocalThreshold] = useState(String(profile.optimalCaffeine));
-  const inputRef = useRef<TextInput>(null);
+  const [localChartMax, setLocalChartMax] = useState(String(profile.dailyLimit));
+  const thresholdInputRef = useRef<TextInput>(null);
+  const chartMaxInputRef = useRef<TextInput>(null);
 
   const formatTime = (time: string) => {
     const [hours, minutes] = time.split(":").map(Number);
@@ -34,11 +36,20 @@ export default function UserPreferencesScreen({ navigation }: UserPreferencesScr
   };
 
   const handleBack = () => {
-    let finalValue = parseInt(localThreshold, 10);
-    if (isNaN(finalValue) || finalValue < 50) {
-      finalValue = 50;
+    let finalThreshold = parseInt(localThreshold, 10);
+    if (isNaN(finalThreshold) || finalThreshold < 50) {
+      finalThreshold = 50;
     }
-    updateProfile({ optimalCaffeine: finalValue });
+
+    let finalChartMax = parseInt(localChartMax, 10);
+    if (isNaN(finalChartMax) || finalChartMax < 200) {
+      finalChartMax = 300;
+    }
+
+    updateProfile({ 
+      optimalCaffeine: finalThreshold,
+      dailyLimit: finalChartMax 
+    });
     navigation.goBack();
   };
 
@@ -56,14 +67,6 @@ export default function UserPreferencesScreen({ navigation }: UserPreferencesScr
         }
       ]
     );
-  };
-
-  const updateThreshold = (amount: number) => {
-    updateProfile({ optimalCaffeine: Math.max(0, profile.optimalCaffeine + amount) });
-  };
-
-  const updateChartMax = (amount: number) => {
-    updateProfile({ dailyLimit: Math.max(0, profile.dailyLimit + amount) });
   };
 
   return (
@@ -87,7 +90,7 @@ export default function UserPreferencesScreen({ navigation }: UserPreferencesScr
                 <MaterialCommunityIcons name="refresh" size={24} color={theme.text} />
               </View>
               <View style={styles.redoTextContainer}>
-                <ThemedText type="h3">Redo onboarding</ThemedText>
+                <ThemedText type="h4">Redo onboarding</ThemedText>
                 <ThemedText type="caption" muted>
                   Retake the questionnaire to recalculate your caffeine profile based on your current situation.
                 </ThemedText>
@@ -95,13 +98,13 @@ export default function UserPreferencesScreen({ navigation }: UserPreferencesScr
             </Pressable>
 
             <View style={styles.section}>
-              <ThemedText type="h3" style={styles.sectionTitle}>Safe caffeine threshold</ThemedText>
+              <ThemedText type="h3" style={styles.sectionTitle}>Safe Caffeine Threshold</ThemedText>
               <Pressable 
                 style={[styles.inputBox, { backgroundColor: theme.backgroundSecondary }]}
-                onPress={() => inputRef.current?.focus()}
+                onPress={() => thresholdInputRef.current?.focus()}
               >
                 <TextInput
-                  ref={inputRef}
+                  ref={thresholdInputRef}
                   style={[styles.inputValue, { color: theme.text, fontSize: 24, fontWeight: "700" }]}
                   value={localThreshold}
                   onChangeText={(text) => {
@@ -122,12 +125,12 @@ export default function UserPreferencesScreen({ navigation }: UserPreferencesScr
                 />
               </Pressable>
               <ThemedText type="caption" muted style={styles.sectionFooter}>
-                This is the amount of caffeine you can have in your body without significantly disrupting sleep function. Average is around 100mg.
+                This is the amount of caffeine your body can handle without triggering anxiety, jitters, or restlessness. Minimum is 50mg.
               </ThemedText>
             </View>
 
             <View style={styles.section}>
-              <ThemedText type="h3" style={styles.sectionTitle}>Wake time</ThemedText>
+              <ThemedText type="h3" style={styles.sectionTitle}>Wake Time</ThemedText>
               <Pressable 
                 style={[styles.inputBox, { backgroundColor: theme.backgroundSecondary }]}
                 onPress={() => setShowWakePicker(true)}
@@ -135,10 +138,14 @@ export default function UserPreferencesScreen({ navigation }: UserPreferencesScr
                 <Feather name="sun" size={20} color={theme.textMuted} style={styles.inputIcon} />
                 <ThemedText type="h3" style={styles.inputValue}>{formatTime(profile.wakeTime)}</ThemedText>
               </Pressable>
+
+              <ThemedText type="caption" muted style={styles.sectionFooter}>
+                Set your usual wake time to help give you accurate recommendations.
+              </ThemedText>
             </View>
 
             <View style={styles.section}>
-              <ThemedText type="h3" style={styles.sectionTitle}>Sleep time</ThemedText>
+              <ThemedText type="h3" style={styles.sectionTitle}>Sleep Time</ThemedText>
               <Pressable 
                 style={[styles.inputBox, { backgroundColor: theme.backgroundSecondary }]}
                 onPress={() => setShowSleepPicker(true)}
@@ -152,16 +159,35 @@ export default function UserPreferencesScreen({ navigation }: UserPreferencesScr
             </View>
 
             <View style={styles.section}>
-              <ThemedText type="h3" style={styles.sectionTitle}>Custom chart maximum (mg)</ThemedText>
-              <View style={[styles.inputBox, { backgroundColor: theme.backgroundSecondary }]}>
-                <Pressable onPress={() => updateChartMax(-50)} style={styles.inputAction}>
-                  <Feather name="minus" size={20} color={theme.textMuted} />
-                </Pressable>
-                <ThemedText type="h2" style={styles.inputValue}>{profile.dailyLimit}</ThemedText>
-                <Pressable onPress={() => updateChartMax(50)} style={styles.inputAction}>
-                  <Feather name="plus" size={20} color={theme.textMuted} />
-                </Pressable>
-              </View>
+              <ThemedText type="h3" style={styles.sectionTitle}>Custom Chart Maximum (mg)</ThemedText>
+              <Pressable 
+                style={[styles.inputBox, { backgroundColor: theme.backgroundSecondary }]}
+                onPress={() => chartMaxInputRef.current?.focus()}
+              >
+                <TextInput
+                  ref={chartMaxInputRef}
+                  style={[styles.inputValue, { color: theme.text, fontSize: 24, fontWeight: "700" }]}
+                  value={localChartMax}
+                  onChangeText={(text) => {
+                    const numericText = text.replace(/[^0-9]/g, "");
+                    setLocalChartMax(numericText);
+                  }}
+                  onBlur={() => {
+                    let val = parseInt(localChartMax, 10);
+                    if (isNaN(val) || val < 200) {
+                      val = 300;
+                    }
+                    setLocalChartMax(String(val));
+                    updateProfile({ dailyLimit: val });
+                    Keyboard.dismiss();
+                  }}
+                  keyboardType="number-pad"
+                  maxLength={4}
+                />
+              </Pressable>
+              <ThemedText type="caption" muted style={styles.sectionFooter}>
+                Set the maximum value displayed on your caffeine tracking chart. Minimum is 200mg.
+              </ThemedText>
             </View>
           </View>
         </ScreenScrollView>
@@ -235,6 +261,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     marginBottom: Spacing.md,
     fontSize: 18,
+     fontWeight: "400",
   },
   inputBox: {
     flexDirection: "row",
