@@ -38,7 +38,6 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 type OnboardingStep =
-  | "name"
   | "age"
   | "weight"
   | "sensitivity"
@@ -48,7 +47,6 @@ type OnboardingStep =
   | "summary";
 
 const STEPS: OnboardingStep[] = [
-  "name",
   "age",
   "weight",
   "sensitivity",
@@ -58,7 +56,6 @@ const STEPS: OnboardingStep[] = [
 ];
 
 interface OnboardingData {
-  name?: string;
   ageRange?: AgeRange;
   weight?: number;
   caffeineSensitivity?: CaffeineSensitivity;
@@ -114,7 +111,7 @@ export default function OnboardingScreen() {
     const { optimal, safe } = calculateOptimalCaffeine(calculationInputs);
 
     updateProfile({
-      name: data.name || "",
+      name: "",
       ageRange: data.ageRange,
       weight: data.weight,
       isPregnant: false,
@@ -142,15 +139,6 @@ export default function OnboardingScreen() {
 
   const renderStep = () => {
     switch (STEPS[currentStep]) {
-      case "name":
-        return (
-          <NameStep
-            value={data.name}
-            onChange={(v) => updateData("name", v)}
-            onNext={handleNext}
-            onSkip={handleSkip}
-          />
-        );
       case "age":
         return (
           <AgeStep
@@ -260,47 +248,6 @@ interface StepProps<T> {
   onChange: (value: T) => void;
   onNext: () => void;
   onSkip: () => void;
-}
-
-function NameStep({ value, onChange, onNext, onSkip }: StepProps<string>) {
-  const { theme } = useTheme();
-  const [localValue, setLocalValue] = useState(value || "");
-
-  const handleConfirm = () => {
-    onChange(localValue);
-    onNext();
-  };
-
-  return (
-    <StepContainer icon="user" title="What's your name?" onSkip={onSkip}>
-      <View style={styles.inputContainer}>
-        <ThemedText type="body" muted style={styles.inputLabel}>
-          We'll use this to personalize your experience
-        </ThemedText>
-        <View
-          style={[
-            styles.textInputContainer,
-            { backgroundColor: theme.backgroundSecondary },
-          ]}
-        >
-          <Feather name="user" size={20} color={theme.textMuted} />
-          <View style={styles.textInputWrapper}>
-            <TextInput
-              style={[styles.textInput, { color: theme.text }]}
-              value={localValue}
-              onChangeText={setLocalValue}
-              placeholder="Enter your name"
-              placeholderTextColor={theme.textMuted}
-              autoFocus
-              returnKeyType="done"
-              onSubmitEditing={handleConfirm}
-            />
-          </View>
-        </View>
-      </View>
-      <ContinueButton onPress={handleConfirm} disabled={!localValue.trim()} />
-    </StepContainer>
-  );
 }
 
 function AgeStep({ value, onChange, onNext, onSkip }: StepProps<AgeRange>) {
