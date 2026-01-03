@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { View, StyleSheet, Pressable, TextInput, Alert } from "react-native";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -22,6 +22,7 @@ export default function UserPreferencesScreen({ navigation }: UserPreferencesScr
 
   const [showWakePicker, setShowWakePicker] = useState(false);
   const [showSleepPicker, setShowSleepPicker] = useState(false);
+  const inputRef = useRef<TextInput>(null);
 
   const formatTime = (time: string) => {
     const [hours, minutes] = time.split(":").map(Number);
@@ -86,10 +87,14 @@ export default function UserPreferencesScreen({ navigation }: UserPreferencesScr
 
           <View style={styles.section}>
             <ThemedText type="h3" style={styles.sectionTitle}>Safe caffeine threshold</ThemedText>
-            <View style={[styles.inputBox, { backgroundColor: theme.backgroundSecondary }]}>
+            <Pressable 
+              style={[styles.inputBox, { backgroundColor: theme.backgroundSecondary }]}
+              onPress={() => inputRef.current?.focus()}
+            >
               <TextInput
+                ref={inputRef}
                 style={[styles.inputValue, { color: theme.text, fontSize: 24, fontWeight: "700" }]}
-                value={String(profile.optimalCaffeine)}
+                defaultValue={String(profile.optimalCaffeine)}
                 onChangeText={(text) => {
                   const val = parseInt(text.replace(/[^0-9]/g, ""), 10);
                   if (!isNaN(val)) updateProfile({ optimalCaffeine: val });
@@ -98,7 +103,7 @@ export default function UserPreferencesScreen({ navigation }: UserPreferencesScr
                 keyboardType="number-pad"
                 maxLength={3}
               />
-            </View>
+            </Pressable>
             <ThemedText type="caption" muted style={styles.sectionFooter}>
               This is the amount of caffeine you can have in your body without significantly disrupting sleep function. Average is around 100mg.
             </ThemedText>
