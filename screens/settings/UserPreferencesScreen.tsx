@@ -23,7 +23,7 @@ export default function UserPreferencesScreen({ navigation }: UserPreferencesScr
   const [showWakePicker, setShowWakePicker] = useState(false);
   const [showSleepPicker, setShowSleepPicker] = useState(false);
   const [localThreshold, setLocalThreshold] = useState(String(profile.optimalCaffeine));
-  const [localChartMax, setLocalChartMax] = useState(String(profile.dailyLimit));
+  const [localChartMax, setLocalChartMax] = useState(String(profile.graphYAxisLimit));
   const thresholdInputRef = useRef<TextInput>(null);
   const chartMaxInputRef = useRef<TextInput>(null);
 
@@ -48,7 +48,7 @@ export default function UserPreferencesScreen({ navigation }: UserPreferencesScr
 
     updateProfile({ 
       optimalCaffeine: finalThreshold,
-      dailyLimit: finalChartMax 
+      graphYAxisLimit: finalChartMax 
     });
     navigation.goBack();
   };
@@ -178,7 +178,7 @@ export default function UserPreferencesScreen({ navigation }: UserPreferencesScr
                       val = 300;
                     }
                     setLocalChartMax(String(val));
-                    updateProfile({ dailyLimit: val });
+                    updateProfile({ graphYAxisLimit: val });
                     Keyboard.dismiss();
                   }}
                   keyboardType="number-pad"

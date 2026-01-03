@@ -595,7 +595,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             bedtime={profile.sleepTime}
             sleepThresholdMg={40}
             optimalCaffeineMg={profile.optimalCaffeine}
-            yMax={profile.dailyLimit}
+            yMax={profile.graphYAxisLimit}
             halfLifeHours={5.5}
             isDark={isDark}
             onHeight={setGraphHeight}

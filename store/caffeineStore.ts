@@ -46,6 +46,7 @@ export interface UserProfile {
   dailyLimit: number;
   optimalCaffeine: number;
   safeCaffeine: number;
+  graphYAxisLimit: number;
   isPregnant: boolean;
   hasHeartCondition: boolean;
   hasCompletedOnboarding: boolean;
@@ -198,7 +199,8 @@ const STORAGE_KEYS = {
 
 const DEFAULT_PROFILE: UserProfile = {
   name: "",
-  dailyLimit: 300,
+  dailyLimit: 400,
+  graphYAxisLimit: 300,
   optimalCaffeine: 200,
   safeCaffeine: 400,
   wakeTime: "07:00",
