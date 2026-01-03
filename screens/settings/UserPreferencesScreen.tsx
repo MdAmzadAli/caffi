@@ -22,6 +22,7 @@ export default function UserPreferencesScreen({ navigation }: UserPreferencesScr
 
   const [showWakePicker, setShowWakePicker] = useState(false);
   const [showSleepPicker, setShowSleepPicker] = useState(false);
+  const [localThreshold, setLocalThreshold] = useState(String(profile.optimalCaffeine));
   const inputRef = useRef<TextInput>(null);
 
   const formatTime = (time: string) => {
@@ -30,6 +31,15 @@ export default function UserPreferencesScreen({ navigation }: UserPreferencesScr
     let h12 = hours % 12;
     if (h12 === 0) h12 = 12;
     return `${h12}:${String(minutes).padStart(2, "0")} ${period}`;
+  };
+
+  const handleBack = () => {
+    let finalValue = parseInt(localThreshold, 10);
+    if (isNaN(finalValue) || finalValue < 50) {
+      finalValue = 50;
+    }
+    updateProfile({ optimalCaffeine: finalValue });
+    navigation.goBack();
   };
 
   const handleRedoOnboarding = () => {
@@ -62,7 +72,7 @@ export default function UserPreferencesScreen({ navigation }: UserPreferencesScr
   return (
     <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
       <View style={[styles.header, { paddingTop: insets.top + Spacing.sm }]}>
-        <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
+        <Pressable onPress={handleBack} style={styles.backButton}>
           <Feather name="arrow-left" size={24} color={theme.text} />
         </Pressable>
         <ThemedText style={styles.headerTitle}>User preferences</ThemedText>
@@ -94,16 +104,18 @@ export default function UserPreferencesScreen({ navigation }: UserPreferencesScr
               <TextInput
                 ref={inputRef}
                 style={[styles.inputValue, { color: theme.text, fontSize: 24, fontWeight: "700" }]}
-                defaultValue={String(profile.optimalCaffeine)}
+                value={localThreshold}
                 onChangeText={(text) => {
-                  const val = parseInt(text.replace(/[^0-9]/g, ""), 10);
-                  if (!isNaN(val)) {
-                    // Update profile immediately but apply lower bound check on blur/submit if needed
-                    // For now, simple check within update logic
-                    updateProfile({ optimalCaffeine: Math.max(50, val) });
-                  } else if (text === "") {
-                    updateProfile({ optimalCaffeine: 50 });
+                  const numericText = text.replace(/[^0-9]/g, "");
+                  setLocalThreshold(numericText);
+                }}
+                onBlur={() => {
+                  let val = parseInt(localThreshold, 10);
+                  if (isNaN(val) || val < 50) {
+                    val = 50;
                   }
+                  setLocalThreshold(String(val));
+                  updateProfile({ optimalCaffeine: val });
                 }}
                 keyboardType="number-pad"
                 maxLength={3}
