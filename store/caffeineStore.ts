@@ -86,7 +86,7 @@ export function calculateOptimalCaffeine(inputs: CaffeineCalculationInputs): { o
         } else {
           optimal = 80;
         }
-        optimal = Math.min(optimal, 100);
+        optimal = Math.min(optimal, 80);
         safe = 100;
         break;
     }

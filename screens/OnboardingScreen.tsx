@@ -38,6 +38,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 type OnboardingStep =
+  | "special_condition"
   | "age"
   | "weight"
   | "sensitivity"
@@ -47,6 +48,7 @@ type OnboardingStep =
   | "summary";
 
 const STEPS: OnboardingStep[] = [
+  "special_condition",
   "age",
   "weight",
   "sensitivity",
@@ -56,6 +58,7 @@ const STEPS: OnboardingStep[] = [
 ];
 
 interface OnboardingData {
+  specialCondition?: "none" | "pregnancy_breastfeeding";
   ageRange?: AgeRange;
   weight?: number;
   caffeineSensitivity?: CaffeineSensitivity;
@@ -91,30 +94,43 @@ export default function OnboardingScreen() {
 
   const handleBack = useCallback(() => {
     if (currentStep > 0) {
-      animateToStep(currentStep - 1);
+      // If going back from schedule and pregnant, go back to special_condition
+      if (STEPS[currentStep] === "schedule" && data.specialCondition === "pregnancy_breastfeeding") {
+        animateToStep(0);
+      } else {
+        animateToStep(currentStep - 1);
+      }
     }
-  }, [currentStep, animateToStep]);
+  }, [currentStep, animateToStep, data.specialCondition]);
 
   const handleSkip = useCallback(() => {
     handleNext();
   }, [handleNext]);
 
   const handleFinish = useCallback((wakeTimeOverride?: string, sleepTimeOverride?: string) => {
+    const isPregnant = data.specialCondition === "pregnancy_breastfeeding";
+    
     const calculationInputs = {
       ageRange: data.ageRange,
       weight: data.weight,
       caffeineSensitivity: data.caffeineSensitivity,
       alcoholIntake: data.alcoholIntake,
       medications: data.medications,
+      isPregnant,
     };
 
-    const { optimal, safe } = calculateOptimalCaffeine(calculationInputs);
+    let { optimal, safe } = calculateOptimalCaffeine(calculationInputs);
+
+    if (isPregnant) {
+      optimal = 100;
+      safe = 200;
+    }
 
     updateProfile({
       name: "",
       ageRange: data.ageRange,
       weight: data.weight,
-      isPregnant: false,
+      isPregnant,
       hasHeartCondition: false,
       caffeineSensitivity: data.caffeineSensitivity,
       alcoholIntake: data.alcoholIntake,
@@ -139,6 +155,23 @@ export default function OnboardingScreen() {
 
   const renderStep = () => {
     switch (STEPS[currentStep]) {
+      case "special_condition":
+        return (
+          <SpecialConditionStep
+            value={data.specialCondition}
+            onChange={(v) => {
+              updateData("specialCondition", v);
+              if (v === "pregnancy_breastfeeding") {
+                // Skip to schedule
+                animateToStep(STEPS.indexOf("schedule"));
+              } else {
+                handleNext();
+              }
+            }}
+            onNext={handleNext}
+            onSkip={handleSkip}
+          />
+        );
       case "age":
         return (
           <AgeStep
@@ -248,6 +281,33 @@ interface StepProps<T> {
   onChange: (value: T) => void;
   onNext: () => void;
   onSkip: () => void;
+}
+
+function SpecialConditionStep({ value, onChange, onNext, onSkip }: StepProps<"none" | "pregnancy_breastfeeding">) {
+  const options: { key: "none" | "pregnancy_breastfeeding"; label: string; icon: keyof typeof Feather.glyphMap }[] = [
+    { key: "none", label: "None", icon: "check" },
+    { key: "pregnancy_breastfeeding", label: "Pregnancy / Breastfeeding", icon: "heart" },
+  ];
+
+  return (
+    <StepContainer
+      icon="shield"
+      title="Special Condition"
+      onSkip={onSkip}
+    >
+      <View style={styles.optionsContainer}>
+        {options.map((option) => (
+          <OptionButton
+            key={option.key}
+            label={option.label}
+            icon={option.icon}
+            isSelected={value === option.key}
+            onPress={() => onChange(option.key)}
+          />
+        ))}
+      </View>
+    </StepContainer>
+  );
 }
 
 function AgeStep({ value, onChange, onNext, onSkip }: StepProps<AgeRange>) {
