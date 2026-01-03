@@ -87,13 +87,17 @@ export default function UserPreferencesScreen({ navigation }: UserPreferencesScr
           <View style={styles.section}>
             <ThemedText type="h3" style={styles.sectionTitle}>Safe caffeine threshold</ThemedText>
             <View style={[styles.inputBox, { backgroundColor: theme.backgroundSecondary }]}>
-              <Pressable onPress={() => updateThreshold(-5)} style={styles.inputAction}>
-                <Feather name="minus" size={20} color={theme.textMuted} />
-              </Pressable>
-              <ThemedText type="h2" style={styles.inputValue}>{profile.optimalCaffeine}</ThemedText>
-              <Pressable onPress={() => updateThreshold(5)} style={styles.inputAction}>
-                <Feather name="plus" size={20} color={theme.textMuted} />
-              </Pressable>
+              <TextInput
+                style={[styles.inputValue, { color: theme.text, fontSize: 24, fontWeight: "700" }]}
+                value={String(profile.optimalCaffeine)}
+                onChangeText={(text) => {
+                  const val = parseInt(text.replace(/[^0-9]/g, ""), 10);
+                  if (!isNaN(val)) updateProfile({ optimalCaffeine: val });
+                  else if (text === "") updateProfile({ optimalCaffeine: 0 });
+                }}
+                keyboardType="number-pad"
+                maxLength={3}
+              />
             </View>
             <ThemedText type="caption" muted style={styles.sectionFooter}>
               This is the amount of caffeine you can have in your body without significantly disrupting sleep function. Average is around 100mg.
