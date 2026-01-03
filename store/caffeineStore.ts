@@ -147,7 +147,7 @@ export function calculateOptimalCaffeine(inputs: CaffeineCalculationInputs): { o
   }
 
   optimal = Math.round(optimal);
-  optimal = Math.max(optimal, 50);
+  optimal = Math.max(optimal, 70);
   optimal = Math.min(optimal, 200);
   safe = Math.round(safe);
 
