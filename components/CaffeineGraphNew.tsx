@@ -317,12 +317,12 @@ export function CaffeineGraphNew({
   }, [curvePoints, curvePath, mgToY]);
 
   const yAxisTicks = useMemo(() => {
-    const ticks = [50];
-    const step = 50;
-    for (let mg = step; mg <= yMax; mg += step) {
-      if (mg !== 50) ticks.push(mg);
+    const ticks = [];
+    const step = yMax / 6;
+    for (let i = 1; i <= 6; i++) {
+      ticks.push(Math.round(i * step));
     }
-    return ticks.sort((a, b) => a - b);
+    return ticks;
   }, [yMax]);
 
   const xAxisTicks = useMemo(() => {
