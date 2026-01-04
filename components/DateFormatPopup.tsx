@@ -1,0 +1,187 @@
+import React, { useEffect } from "react";
+import {
+  Modal,
+  View,
+  StyleSheet,
+  Pressable,
+  Text,
+  Dimensions,
+} from "react-native";
+import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
+  runOnJS,
+} from "react-native-reanimated";
+import { Feather } from "@expo/vector-icons";
+import { Spacing, BorderRadius } from "@/constants/theme";
+import { useTheme } from "@/hooks/useTheme";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+const SCREEN_HEIGHT = Dimensions.get("window").height;
+
+export type DateFormat = "DD/MM/YYYY" | "MM/DD/YYYY" | "YYYY-MM-DD" | "DD.MM.YYYY" | "DD MMM YYYY";
+
+type DateFormatPopupProps = {
+  visible: boolean;
+  selectedFormat: string;
+  onClose: () => void;
+  onSelect: (format: DateFormat) => void;
+};
+
+const FORMAT_OPTIONS: { label: string; value: DateFormat }[] = [
+  { label: "31/12/2025", value: "DD/MM/YYYY" },
+  { label: "12/31/2025", value: "MM/DD/YYYY" },
+  { label: "2025-12-31", value: "YYYY-MM-DD" },
+  { label: "31. 12. 2025", value: "DD.MM.YYYY" },
+  { label: "31 Dec 2025", value: "DD MMM YYYY" },
+];
+
+export function DateFormatPopup({
+  visible,
+  selectedFormat,
+  onClose,
+  onSelect,
+}: DateFormatPopupProps) {
+  const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
+  const sheetHeight = 450;
+  const translateY = useSharedValue(sheetHeight);
+
+  useEffect(() => {
+    if (visible) {
+      translateY.value = withSpring(0, { damping: 20, stiffness: 150 });
+    } else {
+      translateY.value = sheetHeight;
+    }
+  }, [visible, translateY, sheetHeight]);
+
+  const panGesture = Gesture.Pan()
+    .onUpdate((event) => {
+      translateY.value = Math.max(0, event.translationY);
+    })
+    .onEnd((event) => {
+      if (translateY.value > sheetHeight * 0.4 || event.velocityY > 1000) {
+        translateY.value = withTiming(sheetHeight, { duration: 200 }, () => {
+          runOnJS(onClose)();
+        });
+      } else {
+        translateY.value = withSpring(0);
+      }
+    });
+
+  const sheetStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  if (!visible) return null;
+
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      statusBarTranslucent
+      onRequestClose={onClose}
+    >
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <View style={styles.overlay}>
+          <Pressable style={styles.backdrop} onPress={onClose} />
+          <GestureDetector gesture={panGesture}>
+            <Animated.View 
+              style={[
+                styles.sheet, 
+                { 
+                  backgroundColor: theme.backgroundRoot,
+                  paddingBottom: insets.bottom + Spacing.xl
+                }, 
+                sheetStyle
+              ]}
+            >
+              <View style={[styles.handle, { backgroundColor: theme.divider }]} />
+              
+              <Text style={[styles.title, { color: theme.text }]}>Choose date format</Text>
+              
+              <View style={styles.optionsContainer}>
+                {FORMAT_OPTIONS.map((option) => {
+                  const isSelected = selectedFormat === option.value;
+                  return (
+                    <Pressable
+                      key={option.value}
+                      style={[
+                        styles.option,
+                        isSelected && [styles.selectedOption, { borderColor: "#C9A36A" }]
+                      ]}
+                      onPress={() => {
+                        onSelect(option.value);
+                        onClose();
+                      }}
+                    >
+                      <Text style={[styles.optionText, { color: theme.text }]}>
+                        {option.label}
+                      </Text>
+                      {isSelected && (
+                        <Feather name="check" size={20} color="#C9A36A" />
+                      )}
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </Animated.View>
+          </GestureDetector>
+        </View>
+      </GestureHandlerRootView>
+    </Modal>
+  );
+}
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.4)",
+  },
+  sheet: {
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.sm,
+  },
+  handle: {
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    alignSelf: "center",
+    marginBottom: Spacing.lg,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "700",
+    marginBottom: Spacing.xl,
+  },
+  optionsContainer: {
+    gap: Spacing.xs,
+  },
+  option: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    height: 56,
+    paddingHorizontal: Spacing.md,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    borderColor: "transparent",
+  },
+  selectedOption: {
+    borderWidth: 1,
+  },
+  optionText: {
+    fontSize: 18,
+    fontWeight: "600",
+  },
+});

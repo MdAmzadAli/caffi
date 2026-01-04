@@ -9,6 +9,7 @@ import { ScreenScrollView } from "@/components/ScreenScrollView";
 import { SettingsHeader } from "@/components/SettingsHeader";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { SettingsStackParamList } from "@/navigation/SettingsStackNavigator";
+import { DateFormatPopup, DateFormat } from "@/components/DateFormatPopup";
 
 type DateTimeSettingsScreenProps = {
   navigation: NativeStackNavigationProp<SettingsStackParamList>;
@@ -18,12 +19,26 @@ export default function DateTimeSettingsScreen({ navigation }: DateTimeSettingsS
   const { theme } = useTheme();
   const { profile, updateProfile } = useCaffeineStore();
   const [useDeviceTimezone, setUseDeviceTimezone] = useState(true);
+  const [showDateFormatPopup, setShowDateFormatPopup] = useState(false);
 
   const accentColor = "#C9A36A"; // Matches the + icon background
 
   const timeFormat = profile.timeFormat || "AM/PM";
   const setTimeFormat = (format: "AM/PM" | "24-hour") => {
     updateProfile({ timeFormat: format });
+  };
+
+  const currentDateFormat = profile.dateFormat || "DD/MM/YYYY";
+  
+  const getDateFormatLabel = (format: string) => {
+    switch (format) {
+      case "DD/MM/YYYY": return "31/12/2025";
+      case "MM/DD/YYYY": return "12/31/2025";
+      case "YYYY-MM-DD": return "2025-12-31";
+      case "DD.MM.YYYY": return "31. 12. 2025";
+      case "DD MMM YYYY": return "31 Dec 2025";
+      default: return "31/12/2025";
+    }
   };
 
   return (
@@ -60,9 +75,12 @@ export default function DateTimeSettingsScreen({ navigation }: DateTimeSettingsS
 
         <View style={styles.section}>
           <ThemedText type="h3" style={styles.sectionTitle}>Date format</ThemedText>
-          <Pressable style={[styles.dropdown, { backgroundColor: theme.backgroundSecondary }]}>
+          <Pressable 
+            style={[styles.dropdown, { backgroundColor: theme.backgroundSecondary }]}
+            onPress={() => setShowDateFormatPopup(true)}
+          >
             <Feather name="calendar" size={20} color={accentColor} style={styles.dropdownIcon} />
-            <ThemedText style={styles.dropdownText}>31/12/2025</ThemedText>
+            <ThemedText style={styles.dropdownText}>{getDateFormatLabel(currentDateFormat)}</ThemedText>
             <Feather name="chevron-down" size={20} color={theme.textMuted} />
           </Pressable>
           <ThemedText type="caption" muted style={styles.sectionFooter}>
@@ -91,6 +109,13 @@ export default function DateTimeSettingsScreen({ navigation }: DateTimeSettingsS
           </ThemedText>
         </View>
       </ScreenScrollView>
+
+      <DateFormatPopup
+        visible={showDateFormatPopup}
+        selectedFormat={currentDateFormat}
+        onClose={() => setShowDateFormatPopup(false)}
+        onSelect={(format) => updateProfile({ dateFormat: format })}
+      />
     </View>
   );
 }
