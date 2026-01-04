@@ -8,10 +8,11 @@ import {
   Modal,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
+import { Spacing, BorderRadius } from "@/constants/theme";
 import { RecommendationResult } from "@/utils/recommendationEngine";
 import { InfoCardResult } from "@/utils/infocardLogic";
 import { useTheme } from "@/hooks/useTheme";
+import { useFormattedTime } from "@/hooks/useFormattedTime";
 
 interface RecommendationCardsProps {
   recommendations?: RecommendationResult;
@@ -33,21 +34,12 @@ export function RecommendationCards({
   infoCard,
 }: RecommendationCardsProps) {
   const { theme, isDark } = useTheme();
+  const { formatTime } = useFormattedTime();
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedCard, setSelectedCard] = useState<CardData | null>(null);
 
   const accentColor = theme.accentGold;
 
-  // Format time helper
-  const formatTime = (date: Date): string => {
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
-    const ampm = hours >= 12 ? "PM" : "AM";
-    const hour12 = hours % 12 || 12;
-    const minStr = minutes.toString().padStart(2, "0");
-    return `${hour12}:${minStr} ${ampm}`;
-  };
-  
   // Use new infoCard if available, otherwise fall back to old recommendations
   const cards: CardData[] = infoCard
     ? [
@@ -111,7 +103,7 @@ export function RecommendationCards({
           value:
             recommendations.noSafeDose
               ? "N/A"
-              : `${recommendations.bestWindowStart} – ${recommendations.bestWindowEnd}`,
+              : `${formatTime(recommendations.bestWindowStart)} – ${formatTime(recommendations.bestWindowEnd)}`,
           subtitle: "Your ideal caffeine window",
           accentColor,
           reasoning: recommendations.bestTimeReasoning,
@@ -120,7 +112,7 @@ export function RecommendationCards({
           id: "cutoff",
           icon: "alert-circle",
           title: "Cutoff Time",
-          value: `After ${recommendations.cutoffTime}`,
+          value: `After ${formatTime(recommendations.cutoffTime)}`,
           subtitle: "Avoid for best sleep",
           accentColor,
           reasoning: recommendations.cutoffReasoning,
