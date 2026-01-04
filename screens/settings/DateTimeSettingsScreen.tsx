@@ -110,6 +110,8 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: BorderRadius.md,
     padding: 4,
+    borderWidth: 1,
+    borderColor: "rgba(128,128,128,0.2)",
   },
   segment: {
     flex: 1,
