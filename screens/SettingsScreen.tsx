@@ -103,6 +103,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
               style={styles.item}
               onPress={() => {
                 if (item.id === "pref") navigation.navigate("UserPreferences");
+                else if (item.id === "datetime") navigation.navigate("DateTimeSettings");
                 else if (item.id === "data") handleReset();
                 else Alert.alert(item.label, "This section is coming soon!");
               }}

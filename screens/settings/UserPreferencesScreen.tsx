@@ -9,6 +9,7 @@ import { Spacing, Colors, BorderRadius } from "@/constants/theme";
 import { ThemedText } from "@/components/ThemedText";
 import { ScreenScrollView } from "@/components/ScreenScrollView";
 import { TimePickerModal } from "react-native-paper-dates";
+import { SettingsHeader } from "@/components/SettingsHeader";
 import type { SettingsStackParamList } from "@/navigation/SettingsStackNavigator";
 
 type UserPreferencesScreenProps = {
@@ -42,7 +43,7 @@ export default function UserPreferencesScreen({ navigation }: UserPreferencesScr
     }
 
     let finalChartMax = parseInt(localChartMax, 10);
-    if (isNaN(finalChartMax) || finalChartMax < 200) {
+    if (isNaN(finalChartMax) || finalChartMax < 100) {
       finalChartMax = 300;
     }
 
@@ -72,13 +73,7 @@ export default function UserPreferencesScreen({ navigation }: UserPreferencesScr
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
-        <View style={[styles.header, { paddingTop: insets.top + Spacing.sm }]}>
-          <Pressable onPress={handleBack} style={styles.backButton}>
-            <Feather name="arrow-left" size={24} color={theme.text} />
-          </Pressable>
-          <ThemedText style={styles.headerTitle}>User preferences</ThemedText>
-          <View style={styles.backButton} />
-        </View>
+        <SettingsHeader title="User preferences" onBack={handleBack} />
 
         <ScreenScrollView
           contentContainerStyle={{ paddingTop: 0 }}
@@ -125,7 +120,7 @@ export default function UserPreferencesScreen({ navigation }: UserPreferencesScr
                 />
               </Pressable>
               <ThemedText type="caption" muted style={styles.sectionFooter}>
-                This is the amount of caffeine your body can handle without triggering anxiety, jitters, or restlessness. Minimum is 50mg.
+                This is the amount of caffeine your body can handle without triggering anxiety, jitters, or restlessness. Minimum is 50 mg.
               </ThemedText>
             </View>
 
@@ -174,7 +169,7 @@ export default function UserPreferencesScreen({ navigation }: UserPreferencesScr
                   }}
                   onBlur={() => {
                     let val = parseInt(localChartMax, 10);
-                    if (isNaN(val) || val < 200) {
+                    if (isNaN(val) || val < 100) {
                       val = 300;
                     }
                     setLocalChartMax(String(val));
@@ -186,7 +181,7 @@ export default function UserPreferencesScreen({ navigation }: UserPreferencesScr
                 />
               </Pressable>
               <ThemedText type="caption" muted style={styles.sectionFooter}>
-                Set the maximum value displayed on your caffeine tracking chart. Minimum is 200mg.
+                Set the maximum value displayed on your caffeine tracking chart. Minimum is 100 mg.
               </ThemedText>
             </View>
           </View>
@@ -221,24 +216,6 @@ export default function UserPreferencesScreen({ navigation }: UserPreferencesScr
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: Spacing.lg,
-    paddingBottom: Spacing.lg,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    justifyContent: "center",
-  },
-  headerTitle: {
-    flex: 1,
-    textAlign: "center",
-    fontSize: 22,
-    fontWeight: "700",
   },
   content: {
     paddingHorizontal: Spacing.lg,
