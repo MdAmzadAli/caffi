@@ -284,7 +284,7 @@ export function CaffeineLogPopup({
     <Modal
       visible={visible}
       transparent
-      animationType="fade"
+      animationType="none"
       statusBarTranslucent
       onRequestClose={onClose}
     >
