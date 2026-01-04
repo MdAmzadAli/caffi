@@ -123,7 +123,7 @@ export function CaffeineLogPopup({ visible, entry, onClose, onEdit, onDuplicate,
 
   useEffect(() => {
     if (visible) {
-      const timer = setTimeout(() => setShouldRenderGraph(true), 50);
+      const timer = setTimeout(() => setShouldRenderGraph(true), 150);
       return () => clearTimeout(timer);
     } else {
       setShouldRenderGraph(false);
