@@ -84,18 +84,28 @@ export function getActiveAtTime(
   return total;
 }
 
-export function formatTimeLabel(ms: number): string {
+export function formatTimeLabel(ms: number, format: "AM/PM" | "24-hour" = "AM/PM"): string {
   const date = new Date(ms);
   const hours = date.getHours();
+  
+  if (format === "24-hour") {
+    return `${String(hours).padStart(2, "0")}:00`;
+  }
+  
   const ampm = hours >= 12 ? "PM" : "AM";
   const hour12 = hours % 12 || 12;
   return `${hour12}${ampm}`;
 }
 
-export function formatCurrentTime(ms: number): string {
+export function formatCurrentTime(ms: number, format: "AM/PM" | "24-hour" = "AM/PM"): string {
   const date = new Date(ms);
   const hours = date.getHours();
   const minutes = date.getMinutes();
+  
+  if (format === "24-hour") {
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+  }
+  
   const ampm = hours >= 12 ? "PM" : "AM";
   const hour12 = hours % 12 || 12;
   const minStr = minutes.toString().padStart(2, "0");

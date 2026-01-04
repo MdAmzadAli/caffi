@@ -141,6 +141,7 @@ export default function OnboardingScreen() {
       safeCaffeine: safe,
       dailyLimit: optimal,
       graphYAxisLimit: 300,
+      timeFormat: "AM/PM",
       hasCompletedOnboarding: true,
     });
   }, [data, updateProfile]);
