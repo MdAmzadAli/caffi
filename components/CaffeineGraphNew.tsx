@@ -103,7 +103,7 @@ interface CaffeineGraphProps {
 const Y_AXIS_WIDTH = 24;
 const LEFT_PADDING = 0;
 const RIGHT_PADDING = 0;
-const X_AXIS_HEIGHT = 17;
+const X_AXIS_HEIGHT = 20;
 const GRAPH_PADDING_TOP = 8;
 const GRAPH_PADDING_BOTTOM = 8;
 const MARKER_SIZE = 18;
