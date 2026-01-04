@@ -63,58 +63,60 @@ export function TimeZoneModal({
 
   return (
     <BottomSheetModal visible={visible} onClose={onClose} maxHeight={600}>
-      <Text style={[styles.title, { color: theme.text }]}>Select Timezone</Text>
-      
-      <View style={[styles.searchContainer, { backgroundColor: theme.backgroundSecondary }]}>
-        <Feather name="search" size={20} color={theme.textMuted} />
-        <TextInput
-          style={[styles.searchInput, { color: theme.text }]}
-          placeholder="Search timezone..."
-          placeholderTextColor={theme.textMuted}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          autoCorrect={false}
-        />
-        {searchQuery.length > 0 && (
-          <Pressable onPress={() => setSearchQuery("")}>
-            <Feather name="x" size={20} color={theme.textMuted} />
-          </Pressable>
-        )}
-      </View>
-
-      <FlatList
-        data={filteredTimeZones}
-        keyExtractor={(item) => item}
-        renderItem={({ item }) => {
-          const isSelected = item === selectedTimeZone;
-          return (
-            <Pressable
-              style={[
-                styles.option,
-                isSelected && { backgroundColor: accentColor + "20" }
-              ]}
-              onPress={() => {
-                onSelect(item);
-                onClose();
-              }}
-            >
-              <Text style={[
-                styles.optionText, 
-                { color: theme.text },
-                isSelected && { color: accentColor, fontWeight: "700" }
-              ]}>
-                {item}
-              </Text>
-              {isSelected && (
-                <Feather name="check" size={20} color={accentColor} />
-              )}
+      <View style={{ flex: 1 }}>
+        <Text style={[styles.title, { color: theme.text }]}>Select Timezone</Text>
+        
+        <View style={[styles.searchContainer, { backgroundColor: theme.backgroundSecondary }]}>
+          <Feather name="search" size={20} color={theme.textMuted} />
+          <TextInput
+            style={[styles.searchInput, { color: theme.text }]}
+            placeholder="Search timezone..."
+            placeholderTextColor={theme.textMuted}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            autoCorrect={false}
+          />
+          {searchQuery.length > 0 && (
+            <Pressable onPress={() => setSearchQuery("")}>
+              <Feather name="x" size={20} color={theme.textMuted} />
             </Pressable>
-          );
-        }}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={true}
-        style={{ flex: 1 }}
-      />
+          )}
+        </View>
+
+        <FlatList
+          data={filteredTimeZones}
+          keyExtractor={(item) => item}
+          renderItem={({ item }) => {
+            const isSelected = item === selectedTimeZone;
+            return (
+              <Pressable
+                style={[
+                  styles.option,
+                  isSelected && { backgroundColor: accentColor + "20" }
+                ]}
+                onPress={() => {
+                  onSelect(item);
+                  onClose();
+                }}
+              >
+                <Text style={[
+                  styles.optionText, 
+                  { color: theme.text },
+                  isSelected && { color: accentColor, fontWeight: "700" }
+                ]}>
+                  {item}
+                </Text>
+                {isSelected && (
+                  <Feather name="check" size={20} color={accentColor} />
+                )}
+              </Pressable>
+            );
+          }}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={true}
+          style={{ flex: 1 }}
+        />
+      </View>
     </BottomSheetModal>
   );
 }

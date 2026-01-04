@@ -104,7 +104,7 @@ export function BottomSheetModal({
               { 
                 backgroundColor: theme.backgroundRoot,
                 paddingBottom: insets.bottom + Spacing.xl,
-                maxHeight,
+                height: maxHeight,
               }, 
               sheetStyle
             ]}
