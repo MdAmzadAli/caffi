@@ -843,8 +843,8 @@ export function CaffeineGraphNew({
             if (index % 2 !== 0) return null;
             const x = timeToX(tickMs);
             return (
-              <View key={tickMs} style={[styles.xAxisTick, { left: x - 12 }]}>
-                <Text style={[styles.xAxisLabel, { color: GRAPH_COLORS.mutedGrey }]}>
+              <View key={tickMs} style={[styles.xAxisTick, { left: x - 30 }]}>
+                <Text numberOfLines={1} adjustsFontSizeToFit style={[styles.xAxisLabel, { color: GRAPH_COLORS.mutedGrey }]}>
                   {formatTimeHook(tickMs)}
                 </Text>
               </View>
@@ -922,12 +922,12 @@ const styles = StyleSheet.create({
   },
   xAxisTick: {
     position: "absolute",
-    width: 24,
+    width: 60,
     alignItems: "center",
     top: 0,
   },
   xAxisLabel: {
-    fontSize: 7,
+    fontSize: 9,
     fontWeight: "500",
   },
   currentTimeLabel: {
