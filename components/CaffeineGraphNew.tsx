@@ -839,7 +839,8 @@ export function CaffeineGraphNew({
         </View>
 
         <View style={[styles.xAxisContainer, { width: scrollContentWidth }]}>
-          {xAxisTicks.map((tickMs) => {
+          {xAxisTicks.map((tickMs, index) => {
+            if (index % 2 !== 0) return null;
             const x = timeToX(tickMs);
             return (
               <View key={tickMs} style={[styles.xAxisTick, { left: x - 12 }]}>
