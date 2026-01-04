@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     padding: 4,
     borderWidth: 1,
-    borderColor: "rgba(128,128,128,0.2)",
+      borderColor: "rgba(128,128,128,0.2)",
   },
   segment: {
     flex: 1,
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
   timezoneToggleRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-start",
     marginBottom: Spacing.md,
   },
   sectionFooter: {
