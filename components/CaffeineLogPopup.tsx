@@ -30,6 +30,7 @@ import { generateSmoothPath, remainingAfterHours } from "@/utils/graphUtils";
 import { useRealTimeNow } from "@/hooks/useRealTimeNow";
 
 import { useCaffeineStore } from "@/store/caffeineStore";
+import { useFormattedTime } from "@/hooks/useFormattedTime";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const SHEET_MAX_HEIGHT = SCREEN_HEIGHT * 0.9;
@@ -67,59 +68,16 @@ function formatRelativeDate(date: Date) {
   }
 }
 
-function calculateCaffeineStats(entry: DrinkEntry | null, nowMs: number) {
-  if (!entry) {
-    return {
-      peakMg: 0,
-      currentMg: 0,
-      totalMg: 0,
-      peakTimeLabel: "",
-      peakDateLabel: "",
-      currentTimeLabel: "",
-      hoursElapsed: 0,
-    };
-  }
-
-  const now = new Date(nowMs);
-  const entryTime = new Date(entry.timestamp);
-  const hoursElapsed = (now.getTime() - entryTime.getTime()) / (1000 * 60 * 60);
-  
-  const totalMg = entry.caffeineAmount;
-  const currentMg = remainingAfterHours(totalMg, hoursElapsed, CAFFEINE_HALF_LIFE_HOURS);
-  
-  // Calculate actual peak from decay curve
-  const samples = calculateSingleEntryCurve(entry, 5, CAFFEINE_HALF_LIFE_HOURS);
-  let peakMg = 0;
-  let peakIdx = 0;
-  for (let i = 0; i < samples.length; i++) {
-    if (samples[i].mg > peakMg) {
-      peakMg = samples[i].mg;
-      peakIdx = i;
-    }
-  }
-  
-  const peakTime = new Date(samples[peakIdx].t);
-  const peakTimeLabel = peakTime.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  });
-  
-  const peakPassed = peakTime.getTime() < now.getTime();
-  const peakDateLabel = peakPassed ? formatRelativeDate(peakTime) : "";
-  
-  const currentTimeLabel = now.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  });
-
+function calculateCaffeineStats() {
+  // This function is now inlined in useDecayPath to use the useFormattedTime hook
   return {
-    peakMg: Math.round(peakMg * 10) / 10,
-    currentMg: Math.round(currentMg * 10) / 10,
-    totalMg: Math.round(totalMg * 10) / 10,
-    peakTimeLabel,
-    peakDateLabel,
-    currentTimeLabel,
-    hoursElapsed,
+    peakMg: 0,
+    currentMg: 0,
+    totalMg: 0,
+    peakTimeLabel: "",
+    peakDateLabel: "",
+    currentTimeLabel: "",
+    hoursElapsed: 0,
   };
 }
 
@@ -130,8 +88,57 @@ function useDecayPath(entry: DrinkEntry | null, curveColor: string) {
   const minY = 10;
 
   const realTimeNow = useRealTimeNow();
+  const { formatTime } = useFormattedTime();
 
-  const caffeineStats = useMemo(() => calculateCaffeineStats(entry, realTimeNow), [entry, realTimeNow]);
+  const caffeineStats = useMemo(() => {
+    if (!entry) {
+      return {
+        peakMg: 0,
+        currentMg: 0,
+        totalMg: 0,
+        peakTimeLabel: "",
+        peakDateLabel: "",
+        currentTimeLabel: "",
+        hoursElapsed: 0,
+      };
+    }
+
+    const now = new Date(realTimeNow);
+    const entryTime = new Date(entry.timestamp);
+    const hoursElapsed = (now.getTime() - entryTime.getTime()) / (1000 * 60 * 60);
+    
+    const totalMg = entry.caffeineAmount;
+    const currentMg = remainingAfterHours(totalMg, hoursElapsed, CAFFEINE_HALF_LIFE_HOURS);
+    
+    // Calculate actual peak from decay curve
+    const samples = calculateSingleEntryCurve(entry, 5, CAFFEINE_HALF_LIFE_HOURS);
+    let peakMg = 0;
+    let peakIdx = 0;
+    for (let i = 0; i < samples.length; i++) {
+      if (samples[i].mg > peakMg) {
+        peakMg = samples[i].mg;
+        peakIdx = i;
+      }
+    }
+    
+    const peakTime = new Date(samples[peakIdx].t);
+    const peakTimeLabel = formatTime(peakTime);
+    
+    const peakPassed = peakTime.getTime() < now.getTime();
+    const peakDateLabel = peakPassed ? formatRelativeDate(peakTime) : "";
+    
+    const currentTimeLabel = formatTime(now);
+
+    return {
+      peakMg: Math.round(peakMg * 10) / 10,
+      currentMg: Math.round(currentMg * 10) / 10,
+      totalMg: Math.round(totalMg * 10) / 10,
+      peakTimeLabel,
+      peakDateLabel,
+      currentTimeLabel,
+      hoursElapsed,
+    };
+  }, [entry, realTimeNow, formatTime]);
 
   const { path, area, peak, peakTimeLabel, peakDateLabel, timeLabels } = useMemo(() => {
     if (!entry) {
@@ -177,21 +184,18 @@ function useDecayPath(entry: DrinkEntry | null, curveColor: string) {
     const now = new Date();
     const peakPassed = peakTime.getTime() < now.getTime();
     
-    const peakTimeLabel = peakTime.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-    });
+    const peakTimeLabel = formatTime(peakTime);
     
     const peakDateLabel = peakPassed ? formatRelativeDate(peakTime) : "";
 
-    const startLabel = date.toLocaleTimeString("en-US", { hour: "numeric" });
-    const endLabel = new Date(endMs).toLocaleTimeString("en-US", { hour: "numeric" });
+    const startLabel = formatTime(date);
+    const endLabel = formatTime(new Date(endMs));
 
     const timeLabels = [
       { x: 0, label: startLabel },
-      { x: width * 0.25, label: new Date(entryMs + 3 * 3600000).toLocaleTimeString("en-US", { hour: "numeric" }) },
-      { x: width * 0.5, label: new Date(entryMs + 6 * 3600000).toLocaleTimeString("en-US", { hour: "numeric" }) },
-      { x: width * 0.75, label: new Date(entryMs + 9 * 3600000).toLocaleTimeString("en-US", { hour: "numeric" }) },
+      { x: width * 0.25, label: formatTime(new Date(entryMs + 3 * 3600000)) },
+      { x: width * 0.5, label: formatTime(new Date(entryMs + 6 * 3600000)) },
+      { x: width * 0.75, label: formatTime(new Date(entryMs + 9 * 3600000)) },
       { x: width, label: endLabel },
     ];
 
@@ -244,6 +248,7 @@ export function CaffeineLogPopup({
     shouldRenderGraph ? entry : null, 
     curveColor
   );
+  const { formatTime } = useFormattedTime();
   const startY = useSharedValue(0);
 
   useEffect(() => {
@@ -409,10 +414,7 @@ export function CaffeineLogPopup({
                   {/* Start time label (Extreme Left) */}
                   <View style={styles.graphTimeRow}>
                     <Text style={[styles.graphTimeLabel, { color: theme.mutedGrey }]}>
-                      {new Date(entry.timestamp).toLocaleTimeString("en-US", {
-                        hour: "numeric",
-                        minute: "2-digit",
-                      })}
+                      {formatTime(new Date(entry.timestamp))}
                     </Text>
                     <View />
                   </View>
