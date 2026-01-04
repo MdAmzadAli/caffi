@@ -47,7 +47,6 @@ export interface UserProfile {
   optimalCaffeine: number;
   safeCaffeine: number;
   graphYAxisLimit: number;
-  timeFormat: "AM/PM" | "24-hour";
   isPregnant: boolean;
   hasHeartCondition: boolean;
   hasCompletedOnboarding: boolean;
@@ -202,7 +201,6 @@ const DEFAULT_PROFILE: UserProfile = {
   name: "",
   dailyLimit: 400,
   graphYAxisLimit: 300,
-  timeFormat: "AM/PM",
   optimalCaffeine: 200,
   safeCaffeine: 400,
   wakeTime: "07:00",

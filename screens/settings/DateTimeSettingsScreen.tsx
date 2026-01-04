@@ -16,7 +16,7 @@ type DateTimeSettingsScreenProps = {
 
 export default function DateTimeSettingsScreen({ navigation }: DateTimeSettingsScreenProps) {
   const { theme } = useTheme();
-  const { profile, updateProfile } = useCaffeineStore();
+  const [timeFormat, setTimeFormat] = useState<"AM/PM" | "24-hour">("24-hour");
   const [useDeviceTimezone, setUseDeviceTimezone] = useState(true);
 
   const accentColor = "#C9A36A"; // Matches the + icon background
@@ -32,20 +32,20 @@ export default function DateTimeSettingsScreen({ navigation }: DateTimeSettingsS
             <Pressable 
               style={[
                 styles.segment, 
-                profile.timeFormat === "AM/PM" && { backgroundColor: accentColor }
+                timeFormat === "AM/PM" && { backgroundColor: accentColor }
               ]} 
-              onPress={() => updateProfile({ timeFormat: "AM/PM" })}
+              onPress={() => setTimeFormat("AM/PM")}
             >
-              <ThemedText style={[styles.segmentText, profile.timeFormat === "AM/PM" && { color: "#FFF" }]}>AM/PM</ThemedText>
+              <ThemedText style={[styles.segmentText, timeFormat === "AM/PM" && { color: "#FFF" }]}>AM/PM</ThemedText>
             </Pressable>
             <Pressable 
               style={[
                 styles.segment, 
-                profile.timeFormat === "24-hour" && { backgroundColor: accentColor }
+                timeFormat === "24-hour" && { backgroundColor: accentColor }
               ]} 
-              onPress={() => updateProfile({ timeFormat: "24-hour" })}
+              onPress={() => setTimeFormat("24-hour")}
             >
-              <ThemedText style={[styles.segmentText, profile.timeFormat === "24-hour" && { color: "#FFF" }]}>24-hour</ThemedText>
+              <ThemedText style={[styles.segmentText, timeFormat === "24-hour" && { color: "#FFF" }]}>24-hour</ThemedText>
             </Pressable>
           </View>
           <ThemedText type="caption" muted style={styles.sectionFooter}>
@@ -141,9 +141,8 @@ const styles = StyleSheet.create({
   timezoneToggleRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-start",
     marginBottom: Spacing.md,
-    marginTop:-16,
   },
   sectionFooter: {
     marginTop: Spacing.sm,
