@@ -35,6 +35,7 @@ import {
   parseBedtimeToMs,
 } from "@/utils/graphUtils";
 import { useRealTimeNow } from "@/hooks/useRealTimeNow";
+import { useFormattedTime } from "@/hooks/useFormattedTime";
 import { Spacing } from "@/constants/theme";
 
 interface GraphColors {
@@ -222,6 +223,7 @@ export function CaffeineGraphNew({
   onEventClick,
   onStackedEventsClick,
 }: CaffeineGraphProps) {
+  const { formatTime: formatTimeHook } = useFormattedTime();
   const GRAPH_COLORS = isDark ? DARK_GRAPH_COLORS : LIGHT_GRAPH_COLORS;
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   
@@ -841,14 +843,16 @@ export function CaffeineGraphNew({
             const x = timeToX(tickMs);
             return (
               <View key={tickMs} style={[styles.xAxisTick, { left: x - 12 }]}>
-                <Text style={[styles.xAxisLabel, { color: GRAPH_COLORS.mutedGrey }]}>{formatTimeLabel(tickMs)}</Text>
+                <Text style={[styles.xAxisLabel, { color: GRAPH_COLORS.mutedGrey }]}>
+                  {formatTimeHook(tickMs)}
+                </Text>
               </View>
             );
           })}
           {nowMs >= startMs && nowMs <= endMs && (
             <View style={[styles.currentTimeLabel, { left: nowX - 18 }]}>
               <Text style={[styles.currentTimeLabelText, { color: GRAPH_COLORS.darkBrown2 }]}>
-                {formatCurrentTime(nowMs)}
+                {formatTimeHook(nowMs)}
               </Text>
             </View>
           )}

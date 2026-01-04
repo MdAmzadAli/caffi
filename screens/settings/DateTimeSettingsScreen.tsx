@@ -16,10 +16,15 @@ type DateTimeSettingsScreenProps = {
 
 export default function DateTimeSettingsScreen({ navigation }: DateTimeSettingsScreenProps) {
   const { theme } = useTheme();
-  const [timeFormat, setTimeFormat] = useState<"AM/PM" | "24-hour">("24-hour");
+  const { profile, updateProfile } = useCaffeineStore();
   const [useDeviceTimezone, setUseDeviceTimezone] = useState(true);
 
   const accentColor = "#C9A36A"; // Matches the + icon background
+
+  const timeFormat = profile.timeFormat || "AM/PM";
+  const setTimeFormat = (format: "AM/PM" | "24-hour") => {
+    updateProfile({ timeFormat: format });
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
