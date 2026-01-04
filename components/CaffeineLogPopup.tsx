@@ -123,7 +123,7 @@ export function CaffeineLogPopup({ visible, entry, onClose, onEdit, onDuplicate,
 
   useEffect(() => {
     if (visible) {
-      const timer = setTimeout(() => setShouldRenderGraph(true), 150);
+      const timer = setTimeout(() => setShouldRenderGraph(true), 300);
       return () => clearTimeout(timer);
     } else {
       setShouldRenderGraph(false);
@@ -174,8 +174,9 @@ export function CaffeineLogPopup({ visible, entry, onClose, onEdit, onDuplicate,
         </View>
 
         <View style={styles.graphWrap}>
-          {shouldRenderGraph ? (
-            <Svg width={width} height={height + 30}>
+          <View style={{ width, height: height + 30 }}>
+            {shouldRenderGraph && (
+              <Svg width={width} height={height + 30}>
               <Defs>
                 <LinearGradient id="decayArea" x1="0" y1="0" x2="0" y2="1">
                   <Stop offset="0" stopColor={areaStart} stopOpacity="0.6" />
@@ -194,10 +195,9 @@ export function CaffeineLogPopup({ visible, entry, onClose, onEdit, onDuplicate,
                   {item.label}
                 </SvgText>
               ))}
-            </Svg>
-          ) : (
-            <View style={{ width, height: height + 30 }} />
-          )}
+               </Svg>
+                )}
+              </View>
           <View style={styles.graphRightText}>
             <Text style={[styles.addsText, { color: theme.darkBrown }]}>adds {parseFloat(caffeineStats.currentMg.toFixed(1))} mg</Text>
             <Text style={[styles.nowText, { color: theme.mutedGrey }]}>now</Text>
