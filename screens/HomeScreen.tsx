@@ -29,6 +29,7 @@ import { CaffeineEvent } from "@/utils/graphUtils";
 import { calculateInfoCard, InfoCardResult } from "@/utils/infocardLogic";
 import { Spacing, Colors } from "@/constants/theme";
 import { useTheme } from "@/hooks/useTheme";
+import { useFormattedTime } from "@/hooks/useFormattedTime";
 import type { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import { DUMMY_ENTRIES } from "@/utils/dummy_logs";
 
@@ -68,6 +69,7 @@ function formatDateHeader(date: Date): string {
 }
 
 function formatTime(timestamp: Date): string {
+  // This local function is now unused in favor of useFormattedTime hook
   const date = new Date(timestamp);
   return date.toLocaleTimeString("en-US", {
     hour: "numeric",
@@ -117,6 +119,7 @@ function getEntryIcon(category: string): string {
 export default function HomeScreen({ navigation }: HomeScreenProps) {
   const insets = useSafeAreaInsets();
   const { theme, isDark } = useTheme();
+  const { formatTime } = useFormattedTime();
   const {
     profile,
     entries,
