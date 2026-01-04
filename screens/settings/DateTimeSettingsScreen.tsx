@@ -3,13 +3,14 @@ import { View, StyleSheet, Pressable, Switch } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useTheme } from "@/hooks/useTheme";
 import { useCaffeineStore } from "@/store/caffeineStore";
-import { Spacing, BorderRadius, Colors } from "@/constants/theme";
+import { Spacing, BorderRadius } from "@/constants/theme";
 import { ThemedText } from "@/components/ThemedText";
 import { ScreenScrollView } from "@/components/ScreenScrollView";
 import { SettingsHeader } from "@/components/SettingsHeader";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { SettingsStackParamList } from "@/navigation/SettingsStackNavigator";
-import { DateFormatPopup, DateFormat } from "@/components/DateFormatPopup";
+import { DateFormatPopup } from "@/components/DateFormatPopup";
+import { TimeZoneModal } from "@/components/TimeZoneModal";
 
 type DateTimeSettingsScreenProps = {
   navigation: NativeStackNavigationProp<SettingsStackParamList>;
@@ -20,6 +21,7 @@ export default function DateTimeSettingsScreen({ navigation }: DateTimeSettingsS
   const { profile, updateProfile } = useCaffeineStore();
   const [useDeviceTimezone, setUseDeviceTimezone] = useState(true);
   const [showDateFormatPopup, setShowDateFormatPopup] = useState(false);
+  const [showTimeZoneModal, setShowTimeZoneModal] = useState(false);
 
   const accentColor = "#C9A36A"; // Matches the + icon background
 
@@ -29,6 +31,7 @@ export default function DateTimeSettingsScreen({ navigation }: DateTimeSettingsS
   };
 
   const currentDateFormat = profile.dateFormat || "DD/MM/YYYY";
+  const currentTimeZone = (profile as any).timezone || "Asia/Calcutta";
   
   const getDateFormatLabel = (format: string) => {
     switch (format) {
@@ -99,9 +102,13 @@ export default function DateTimeSettingsScreen({ navigation }: DateTimeSettingsS
               thumbColor="#FFF"
             />
           </View>
-          <Pressable style={[styles.dropdown, { backgroundColor: theme.backgroundSecondary, opacity: useDeviceTimezone ? 0.6 : 1 }]}>
+          <Pressable 
+            style={[styles.dropdown, { backgroundColor: theme.backgroundSecondary, opacity: useDeviceTimezone ? 0.6 : 1 }]}
+            disabled={useDeviceTimezone}
+            onPress={() => setShowTimeZoneModal(true)}
+          >
             <Feather name="globe" size={20} color={accentColor} style={styles.dropdownIcon} />
-            <ThemedText style={styles.dropdownText}>Asia/Calcutta (GMT+5:30)</ThemedText>
+            <ThemedText style={styles.dropdownText}>{currentTimeZone}</ThemedText>
             <Feather name="chevron-down" size={20} color={theme.textMuted} />
           </Pressable>
           <ThemedText type="caption" muted style={styles.sectionFooter}>
@@ -115,6 +122,13 @@ export default function DateTimeSettingsScreen({ navigation }: DateTimeSettingsS
         selectedFormat={currentDateFormat}
         onClose={() => setShowDateFormatPopup(false)}
         onSelect={(format) => updateProfile({ dateFormat: format })}
+      />
+
+      <TimeZoneModal
+        visible={showTimeZoneModal}
+        selectedTimeZone={currentTimeZone}
+        onClose={() => setShowTimeZoneModal(false)}
+        onSelect={(tz) => updateProfile({ timezone: tz } as any)}
       />
     </View>
   );
@@ -141,7 +155,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     padding: 4,
     borderWidth: 1,
-      borderColor: "rgba(128,128,128,0.2)",
+    borderColor: "rgba(128,128,128,0.2)",
   },
   segment: {
     flex: 1,
@@ -171,7 +185,7 @@ const styles = StyleSheet.create({
   timezoneToggleRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-start",
+    alignItems: "center",
     marginBottom: Spacing.md,
   },
   sectionFooter: {
