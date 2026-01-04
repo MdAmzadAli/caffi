@@ -1,25 +1,35 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
+  Modal,
   View,
   StyleSheet,
   Pressable,
+  Dimensions,
   Image,
   Text,
   ScrollView,
-  Dimensions,
 } from "react-native";
+import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
+  runOnJS,
+} from "react-native-reanimated";
 import Svg, { Defs, LinearGradient, Stop, Path, Circle, Text as SvgText } from "react-native-svg";
 import { Feather } from "@expo/vector-icons";
 import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/useTheme";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { DrinkEntry } from "@/store/caffeineStore";
 import { getCaffeineSourceImage, resolveImageSource } from "@/utils/getCaffeineSourceImage";
 import { getServingLabel } from "@/utils/getServingLabel";
 import { calculateSingleEntryCurve } from "@/utils/singleEntryCurve";
 import { generateSmoothPath, remainingAfterHours } from "@/utils/graphUtils";
 import { useRealTimeNow } from "@/hooks/useRealTimeNow";
+
 import { useCaffeineStore } from "@/store/caffeineStore";
-import { BottomSheetModal } from "./BottomSheetModal";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const SHEET_MAX_HEIGHT = SCREEN_HEIGHT * 0.9;
@@ -208,6 +218,10 @@ export function CaffeineLogPopup({
 }: CaffeineLogPopupProps) {
   const { theme, isDark } = useTheme();
   const { addEntry } = useCaffeineStore();
+  const insets = useSafeAreaInsets();
+  const sheetHeight = Math.min(SHEET_MAX_HEIGHT, SCREEN_HEIGHT - 40);
+  const translateY = useSharedValue(sheetHeight);
+
   const curveColor = theme.darkBrown2; // matches home graph stroke color
   const areaStart = isDark ? theme.backgroundTertiary : theme.accentGold + "1A";
   const areaEnd = isDark ? theme.backgroundSecondary : theme.accentGold + "0D";
@@ -230,191 +244,254 @@ export function CaffeineLogPopup({
     shouldRenderGraph ? entry : null, 
     curveColor
   );
+  const startY = useSharedValue(0);
+
+  useEffect(() => {
+    if (visible) {
+      // Start animation immediately with faster spring config
+      translateY.value = withSpring(0);
+    } else {
+      translateY.value = sheetHeight;
+    }
+  }, [visible, translateY, sheetHeight]);
+
+  const panGesture = Gesture.Pan()
+    .onStart(() => {
+      startY.value = translateY.value;
+    })
+    .onUpdate((event) => {
+      const next = startY.value + event.translationY;
+      translateY.value = Math.min(Math.max(0, next), sheetHeight);
+    })
+    .onEnd((event) => {
+      const shouldClose = translateY.value > sheetHeight * 0.5 || event.velocityY > 1200;
+      if (shouldClose) {
+        translateY.value = withTiming(sheetHeight, { duration: 180 }, () => {
+          runOnJS(onClose)();
+        });
+      } else {
+        translateY.value = withSpring(0, { damping: 16, stiffness: 200 });
+      }
+    });
+
+  const sheetStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+  }));
 
   if (!visible || !entry) return null;
 
   return (
-    <BottomSheetModal
+    <Modal
       visible={visible}
-      onClose={onClose}
-      maxHeight={SHEET_MAX_HEIGHT}
+      transparent
+      animationType="fade"
+      statusBarTranslucent
+      onRequestClose={onClose}
     >
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: Spacing.lg }}
-      >
-        {/* Header */}
-        <View style={styles.headerRow}>
-          <View style={[styles.iconWrap, { backgroundColor: theme.backgroundSecondary }]}>
-            {entry.imageUri && resolveImageSource(entry.imageUri) ? (
-              <Image
-                source={resolveImageSource(entry.imageUri)}
-                style={styles.icon}
-                resizeMode="cover"
-              />
-            ) : getCaffeineSourceImage(entry.category) ? (
-              <Image
-                source={getCaffeineSourceImage(entry.category)}
-                style={styles.icon}
-                resizeMode="cover"
-              />
-            ) : (
-              <Text style={styles.iconEmoji}>☕</Text>
-            )}
-          </View>
-          <View style={styles.headerTextWrap}>
-            {(() => {
-              const INBUILT_CATEGORIES = ["coffee", "tea", "energy", "soda", "chocolate"];
-              const isCustom = entry.category === "custom" || !INBUILT_CATEGORIES.includes(entry.category);
-              
-              const drink = !isCustom ? require("@/store/caffeineStore").DRINK_DATABASE.find((d: any) => d.id === entry.drinkId && d.category === entry.category) : null;
-              
-              const label = getServingLabel(entry.servingSize, entry.unit, drink?.defaultServingMl, isCustom);
-              return (
-                <Text style={[styles.mutedText, { color: theme.mutedGrey }]}>
-                  You {entry.category === "chocolate" ? "ate" : "drank"} {label.quantity} {label.unit} of
-                </Text>
-              );
-            })()}
-            <Text style={[styles.title, { color: theme.text }]}>{entry.name}</Text>
-          </View>
-        </View>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+      <View style={styles.overlay}>
+        <Pressable style={styles.backdrop} onPress={onClose} />
 
-        {/* Graph */}
-        <View style={styles.graphWrap}>
-          {shouldRenderGraph ? (
-            <Svg width={width} height={height + 30}>
-              <Defs>
-                <LinearGradient id="decayArea" x1="0" y1="0" x2="0" y2="1">
-                  <Stop offset="0" stopColor={areaStart} stopOpacity="0.6" />
-                  <Stop offset="1" stopColor={areaEnd} stopOpacity="0.1" />
-                </LinearGradient>
-              </Defs>
-              <Path d={area} fill="url(#decayArea)" />
-              <Path d={path} stroke={curveColor} strokeWidth={3} fill="none" />
+        <GestureDetector gesture={panGesture}>
+          <Animated.View style={[styles.sheetContainer, sheetStyle]}>
+            <Animated.View
+              style={[
+                styles.sheet,
+                {
+                  backgroundColor: theme.backgroundRoot,
+                  maxHeight: sheetHeight,
+                  paddingBottom: Spacing["2xl"] + insets.bottom,
+                },
+              ]}
+            >
+              <View style={styles.handle} />
 
-              {/* Peak marker */}
-              <Circle cx={peak.x} cy={peak.y} r={6} fill={theme.danger} />
-              {peakDateLabel && (
-                <SvgText
-                  x={peak.x}
-                  y={peak.y - 25}
-                  fontSize={11}
-                  fill={theme.danger}
-                  textAnchor="middle"
-                >
-                  {peakDateLabel}
-                </SvgText>
-              )}
-              <SvgText
-                x={peak.x}
-                y={peak.y - (peakDateLabel ? 12 : 10)}
-                fontSize={12}
-                fill={theme.danger}
-                textAnchor="middle"
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: Spacing.lg }}
               >
-                {peakTimeLabel}
-              </SvgText>
+                {/* Header */}
+                <View style={styles.headerRow}>
+                  <View style={[styles.iconWrap, { backgroundColor: theme.backgroundSecondary }]}>
+                    {entry.imageUri && resolveImageSource(entry.imageUri) ? (
+                      <Image
+                        source={resolveImageSource(entry.imageUri)}
+                        style={styles.icon}
+                        resizeMode="cover"
+                      />
+                    ) : getCaffeineSourceImage(entry.category) ? (
+                      <Image
+                        source={getCaffeineSourceImage(entry.category)}
+                        style={styles.icon}
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <Text style={styles.iconEmoji}>☕</Text>
+                    )}
+                  </View>
+                  <View style={styles.headerTextWrap}>
+                    {(() => {
+                      const INBUILT_CATEGORIES = ["coffee", "tea", "energy", "soda", "chocolate"];
+                      const isCustom = entry.category === "custom" || !INBUILT_CATEGORIES.includes(entry.category);
+                      
+                      // For inbuilt sources, we need to find the original drink to get its defaultServingMl
+                      // We use drinkId + category for accurate lookup (since name might be edited)
+                      const drink = !isCustom ? require("@/store/caffeineStore").DRINK_DATABASE.find((d: any) => d.id === entry.drinkId && d.category === entry.category) : null;
+                      
+                      const label = getServingLabel(entry.servingSize, entry.unit, drink?.defaultServingMl, isCustom);
+                      return (
+                        <Text style={[styles.mutedText, { color: theme.mutedGrey }]}>
+                          You {entry.category === "chocolate" ? "ate" : "drank"} {label.quantity} {label.unit} of
+                        </Text>
+                      );
+                    })()}
+                    <Text style={[styles.title, { color: theme.text }]}>{entry.name}</Text>
+                  </View>
+                </View>
 
-              {/* X-axis time labels */}
-              {timeLabels.map((item, idx) => (
-                <SvgText
-                  key={idx}
-                  x={item.x}
-                  y={height + 20}
-                  fontSize={11}
-                  fill={theme.mutedGrey}
-                  textAnchor={idx === 0 ? "start" : idx === timeLabels.length - 1 ? "end" : "middle"}
-                >
-                  {item.label}
-                </SvgText>
-              ))}
-            </Svg>
-          ) : (
-            <View style={{ width, height: height + 30 }} />
-          )}
-          <View style={styles.graphRightText}>
-            <Text style={[styles.addsText, { color: theme.darkBrown }]}>adds {parseFloat(caffeineStats.currentMg.toFixed(1))} mg</Text>
-            <Text style={[styles.nowText, { color: theme.mutedGrey }]}>now</Text>
-          </View>
-          {/* Start time label (Extreme Left) */}
-          <View style={styles.graphTimeRow}>
-            <Text style={[styles.graphTimeLabel, { color: theme.mutedGrey }]}>
-              {new Date(entry.timestamp).toLocaleTimeString("en-US", {
-                hour: "numeric",
-                minute: "2-digit",
-              })}
-            </Text>
-            <View />
-          </View>
-        </View>
+                {/* Graph */}
+                <View style={styles.graphWrap}>
+                  {shouldRenderGraph ? (
+                    <Svg width={width} height={height + 30}>
+                      <Defs>
+                        <LinearGradient id="decayArea" x1="0" y1="0" x2="0" y2="1">
+                          <Stop offset="0" stopColor={areaStart} stopOpacity="0.6" />
+                          <Stop offset="1" stopColor={areaEnd} stopOpacity="0.1" />
+                        </LinearGradient>
+                      </Defs>
+                      <Path d={area} fill="url(#decayArea)" />
+                      <Path d={path} stroke={curveColor} strokeWidth={3} fill="none" />
 
-        {/* Breakdown */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.text }]}>
-            Drink contribution to caffeine levels
-          </Text>
-          <View style={[styles.divider, { borderBottomColor: theme.divider }]} />
-          <Row label={`At peak (${caffeineStats.peakTimeLabel}${caffeineStats.peakDateLabel ? `, ${caffeineStats.peakDateLabel}` : ""})`} value={`${parseFloat(caffeineStats.peakMg.toFixed(1))} mg`} themeColor={theme} />
-          <Row label="Now" value={`${parseFloat(caffeineStats.currentMg.toFixed(1))} mg`} themeColor={theme} />
-          <Row label="In total (over time)" value={`${parseFloat(caffeineStats.totalMg.toFixed(1))} mg`} themeColor={theme} />
-        </View>
+                      {/* Peak marker */}
+                      <Circle cx={peak.x} cy={peak.y} r={6} fill={theme.danger} />
+                      {peakDateLabel && (
+                        <SvgText
+                          x={peak.x}
+                          y={peak.y - 25}
+                          fontSize={11}
+                          fill={theme.danger}
+                          textAnchor="middle"
+                        >
+                          {peakDateLabel}
+                        </SvgText>
+                      )}
+                      <SvgText
+                        x={peak.x}
+                        y={peak.y - (peakDateLabel ? 12 : 10)}
+                        fontSize={12}
+                        fill={theme.danger}
+                        textAnchor="middle"
+                      >
+                        {peakTimeLabel}
+                      </SvgText>
 
-        {/* Actions */}
-        <View style={styles.actionsRow}>
-          <ActionButton
-            label="Edit"
-            icon="edit-3"
-            onPress={() => onEdit?.(entry)}
-            themeColor={theme.text}
-            bg={theme.backgroundSecondary}
-          />
-          <ActionButton
-            label="Duplicate"
-            icon="copy"
-            onPress={() => {
-              if (entry) {
-                const INBUILT_CATEGORIES = ["coffee", "tea", "energy", "soda", "chocolate"];
-                const isCustom = entry.category === "custom" || !INBUILT_CATEGORIES.includes(entry.category);
-                
-                const drinkSnapshot = {
-                  id: entry.drinkId,
-                  name: entry.name,
-                  category: entry.category as any,
-                  caffeinePer100ml: isCustom 
-                    ? entry.caffeineAmount / entry.servingSize 
-                    : (entry.caffeineAmount / entry.servingSize) * 100,
-                  defaultServingMl: entry.servingSize,
-                  icon: "coffee" as const,
-                  sizes: [],
-                  imageUri: entry.imageUri,
-                };
+                      {/* X-axis time labels */}
+                      {timeLabels.map((item, idx) => (
+                        <SvgText
+                          key={idx}
+                          x={item.x}
+                          y={height + 20}
+                          fontSize={11}
+                          fill={theme.mutedGrey}
+                          textAnchor={idx === 0 ? "start" : idx === timeLabels.length - 1 ? "end" : "middle"}
+                        >
+                          {item.label}
+                        </SvgText>
+                      ))}
+                    </Svg>
+                  ) : (
+                    <View style={{ width, height: height + 30 }} />
+                  )}
+                  <View style={styles.graphRightText}>
+                    <Text style={[styles.addsText, { color: theme.darkBrown }]}>adds {parseFloat(caffeineStats.currentMg.toFixed(1))} mg</Text>
+                    <Text style={[styles.nowText, { color: theme.mutedGrey }]}>now</Text>
+                  </View>
+                  {/* Start time label (Extreme Left) */}
+                  <View style={styles.graphTimeRow}>
+                    <Text style={[styles.graphTimeLabel, { color: theme.mutedGrey }]}>
+                      {new Date(entry.timestamp).toLocaleTimeString("en-US", {
+                        hour: "numeric",
+                        minute: "2-digit",
+                      })}
+                    </Text>
+                    <View />
+                  </View>
+                </View>
 
-                addEntry(
-                  drinkSnapshot,
-                  entry.servingSize,
-                  entry.notes,
-                  entry.isFavorite,
-                  new Date(),
-                  entry.unit,
-                  entry.imageUri
-                );
-                onClose();
-              }
-            }}
-            themeColor={theme.text}
-            bg={theme.backgroundSecondary}
-          />
-          <ActionButton
-            label="Delete"
-            icon="trash"
-            onPress={() => onDelete?.(entry)}
-            themeColor={theme.danger}
-            bg={theme.backgroundSecondary}
-          />
-        </View>
-      </ScrollView>
-    </BottomSheetModal>
+                {/* Breakdown */}
+                <View style={styles.section}>
+                  <Text style={[styles.sectionTitle, { color: theme.text }]}>
+                    Drink contribution to caffeine levels
+                  </Text>
+                  <View style={[styles.divider, { borderBottomColor: theme.divider }]} />
+                  <Row label={`At peak (${caffeineStats.peakTimeLabel}${caffeineStats.peakDateLabel ? `, ${caffeineStats.peakDateLabel}` : ""})`} value={`${parseFloat(caffeineStats.peakMg.toFixed(1))} mg`} themeColor={theme} />
+                  <Row label="Now" value={`${parseFloat(caffeineStats.currentMg.toFixed(1))} mg`} themeColor={theme} />
+                  <Row label="In total (over time)" value={`${parseFloat(caffeineStats.totalMg.toFixed(1))} mg`} themeColor={theme} />
+                </View>
+
+                {/* Actions */}
+                <View style={styles.actionsRow}>
+                  <ActionButton
+                    label="Edit"
+                    icon="edit-3"
+                    onPress={() => onEdit?.(entry)}
+                    themeColor={theme.text}
+                    bg={theme.backgroundSecondary}
+                  />
+                  <ActionButton
+                    label="Duplicate"
+                    icon="copy"
+                    onPress={() => {
+                      if (entry) {
+                        const INBUILT_CATEGORIES = ["coffee", "tea", "energy", "soda", "chocolate"];
+                        const isCustom = entry.category === "custom" || !INBUILT_CATEGORIES.includes(entry.category);
+                        
+                        // Create a snapshot of the historical entry to preserve its exact state
+                        const drinkSnapshot = {
+                          id: entry.drinkId,
+                          name: entry.name,
+                          category: entry.category as any,
+                          // Use the exact caffeine concentration from the historical log
+                          caffeinePer100ml: isCustom 
+                            ? entry.caffeineAmount / entry.servingSize 
+                            : (entry.caffeineAmount / entry.servingSize) * 100,
+                          defaultServingMl: entry.servingSize,
+                          icon: "coffee" as const,
+                          sizes: [],
+                          imageUri: entry.imageUri,
+                        };
+
+                        // Use the store's addEntry with the historical snapshot
+                        addEntry(
+                          drinkSnapshot,
+                          entry.servingSize,
+                          entry.notes,
+                          entry.isFavorite,
+                          new Date(),
+                          entry.unit,
+                          entry.imageUri
+                        );
+                        onClose();
+                      }
+                    }}
+                    themeColor={theme.text}
+                    bg={theme.backgroundSecondary}
+                  />
+                  <ActionButton
+                    label="Delete"
+                    icon="trash"
+                    onPress={() => onDelete?.(entry)}
+                    themeColor={theme.danger}
+                    bg={theme.backgroundSecondary}
+                  />
+                </View>
+              </ScrollView>
+            </Animated.View>
+          </Animated.View>
+        </GestureDetector>
+      </View>
+      </GestureHandlerRootView>
+    </Modal>
   );
 }
 
@@ -451,6 +528,35 @@ function ActionButton({ label, icon, onPress, themeColor, bg }: ActionButtonProp
 }
 
 const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.35)",
+  },
+  sheetContainer: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  sheet: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: Spacing.lg,
+    paddingBottom: Spacing["3xl"],
+    paddingTop: Spacing.lg,
+  },
+  handle: {
+    alignSelf: "center",
+    width: 42,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "rgba(255,255,255,0.35)",
+    marginBottom: Spacing.lg,
+  },
   headerRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -554,3 +660,4 @@ const styles = StyleSheet.create({
     fontSize: 11,
   },
 });
+
