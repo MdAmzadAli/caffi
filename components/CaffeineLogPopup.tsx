@@ -23,7 +23,7 @@ import { useCaffeineStore } from "@/store/caffeineStore";
 import { BottomSheetModal } from "./BottomSheetModal";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
-const SHEET_MAX_HEIGHT = SCREEN_HEIGHT * 0.9;
+const SHEET_MAX_HEIGHT = SCREEN_HEIGHT * 0.63;
 const CAFFEINE_HALF_LIFE_HOURS = 5;
 
 type CaffeineLogPopupProps = {
