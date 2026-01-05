@@ -22,11 +22,18 @@ export default function DateTimeSettingsScreen({ navigation }: DateTimeSettingsS
   
   const deviceTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const currentTimeZone = (profile as any).timezone || deviceTimezone;
+  const timeFormat = profile.timeFormat || "AM/PM";
+  const currentDateFormat = profile.dateFormat || "DD/MM/YYYY";
+  const accentColor = "#C9A36A"; 
   
   // Initialize toggle state based on whether a manual timezone exists in profile
   const [useDeviceTimezone, setUseDeviceTimezone] = useState(!(profile as any).timezone);
   const [showDateFormatPopup, setShowDateFormatPopup] = useState(false);
   const [showTimeZoneModal, setShowTimeZoneModal] = useState(false);
+
+  const setTimeFormat = (format: "AM/PM" | "24-hour") => {
+    updateProfile({ timeFormat: format });
+  };
 
   const handleToggleDeviceTimezone = (value: boolean) => {
     setUseDeviceTimezone(value);
