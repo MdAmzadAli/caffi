@@ -106,7 +106,7 @@ export function parseBedtimeToMs(bedtimeStr: string, referenceDate: Date, timeZo
   const [hours, minutes] = bedtimeStr.split(":").map(Number);
   const tz = timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone;
   
-  // Use Intl to get the target date parts
+  // Get date parts in target timezone
   const fmt = new Intl.DateTimeFormat("en-US", {
     timeZone: tz,
     year: "numeric",
@@ -114,23 +114,45 @@ export function parseBedtimeToMs(bedtimeStr: string, referenceDate: Date, timeZo
     day: "numeric",
   });
   const parts = fmt.formatToParts(referenceDate);
-  const year = parseInt(parts.find(p => p.type === "year")?.value || "0");
-  const month = parseInt(parts.find(p => p.type === "month")?.value || "0") - 1;
-  const day = parseInt(parts.find(p => p.type === "day")?.value || "0");
+  const year = parts.find(p => p.type === "year")?.value;
+  const month = parts.find(p => p.type === "month")?.value;
+  const day = parts.find(p => p.type === "day")?.value;
 
-  // Create a local date string in the target timezone for parsing
-  // This is a reliable way to get the exact UTC ms for a local time in a specific timezone
-  const dateStr = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}T${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
+  // Construct an ISO-like string that is interpreted as LOCAL time in target timezone
+  // format: YYYY-MM-DDTHH:mm:ss
+  const localIso = `${year}-${month?.padStart(2, '0')}-${day?.padStart(2, '0')}T${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
   
-  // We need to use a formatter that can give us the offset or parse specifically
-  // Since we can't easily parse with offset without a library, we use a trick:
-  // Create a Date and adjust based on the difference between target and local
-  const temp = new Date(dateStr);
-  const targetTime = temp.getTime();
+  // This creates a Date object. To get the correct UTC ms for the target timezone:
+  // We use the fact that new Date(string) without a timezone offset is treated as local.
+  // Then we can use the "Intl offset trick" or simply use the string with timezone.
+  // The most reliable way in JS without a library is to construct the full string with the timezone name
+  // but Date() doesn't support timezone names in the string. 
+  // However, we can use the property that Intl.DateTimeFormat().format() can be compared to local.
   
-  // Refine to handle wrap-around if bedtime is "before" current time in that zone
-  // but for graph purposes, the component logic handles the relative placement.
-  return targetTime;
+  const date = new Date(localIso);
+  const localOffset = date.getTimezoneOffset() * 60000;
+  
+  // Get the target timezone offset for this specific date
+  const targetFmt = new Intl.DateTimeFormat("en-US", {
+    timeZone: tz,
+    timeZoneName: "shortOffset"
+  });
+  const tzPart = targetFmt.formatToParts(date).find(p => p.type === "timeZoneName")?.value || "";
+  // tzPart is like "GMT+5:30" or "GMT-8"
+  const match = tzPart.match(/GMT([+-])(\d+):?(\d+)?/);
+  let targetOffsetMs = 0;
+  if (match) {
+    const sign = match[1] === "+" ? 1 : -1;
+    const h = parseInt(match[2]);
+    const m = parseInt(match[3] || "0");
+    targetOffsetMs = sign * (h * 3600000 + m * 60000);
+  }
+
+  // To get UTC: LocalTimeMs - TargetOffset
+  // Since new Date(localIso) is "System Local", we adjust:
+  const utcMs = date.getTime() + localOffset - targetOffsetMs;
+  
+  return utcMs;
 }
 
 export function getMaxCaffeineInSleepWindowForDisplay(
