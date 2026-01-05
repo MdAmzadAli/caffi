@@ -223,6 +223,8 @@ export function CaffeineGraphNew({
   onEventClick,
   onStackedEventsClick,
 }: CaffeineGraphProps) {
+  const { theme } = useTheme();
+  const { profile } = useCaffeineStore();
   const { formatTime: formatTimeHook } = useFormattedTime();
   const GRAPH_COLORS = isDark ? DARK_GRAPH_COLORS : LIGHT_GRAPH_COLORS;
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
