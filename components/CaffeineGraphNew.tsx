@@ -36,6 +36,8 @@ import {
 } from "@/utils/graphUtils";
 import { useRealTimeNow } from "@/hooks/useRealTimeNow";
 import { useFormattedTime } from "@/hooks/useFormattedTime";
+import { useTheme } from "@/hooks/useTheme";
+import { useCaffeineStore } from "@/store/caffeineStore";
 import { Spacing } from "@/constants/theme";
 
 interface GraphColors {
