@@ -281,8 +281,9 @@ export function CaffeineGraphNew({
   }, [events, nowMs, halfLifeHours]);
 
   const bedtimeMs = useMemo(() => {
-    return parseBedtimeToMs(bedtime, nowDate);
-  }, [bedtime, nowMs]);
+    const tz = (profile as any).timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return parseBedtimeToMs(bedtime, nowDate, tz);
+  }, [bedtime, nowMs, profile]);
 
   const timeToX = useCallback(
     (ms: number): number => {
