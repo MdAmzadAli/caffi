@@ -102,6 +102,11 @@ export function formatCurrentTime(ms: number): string {
   return `${hour12}:${minStr}${ampm}`;
 }
 
+export function getStartOfDay(date: Date, timeZone?: string): number {
+  const tz = timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+  return parseBedtimeToMs("00:00", date, tz);
+}
+
 export function parseBedtimeToMs(bedtimeStr: string, referenceDate: Date, timeZone?: string): number {
   const [hours, minutes] = bedtimeStr.split(":").map(Number);
   const tz = timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone;
