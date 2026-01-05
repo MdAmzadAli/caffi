@@ -106,7 +106,7 @@ export function parseBedtimeToMs(bedtimeStr: string, referenceDate: Date, timeZo
   const [hours, minutes] = bedtimeStr.split(":").map(Number);
   const tz = timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone;
   
-  // Get date parts in target timezone
+  // 1. Get the current year/month/day in the TARGET timezone
   const fmt = new Intl.DateTimeFormat("en-US", {
     timeZone: tz,
     year: "numeric",
@@ -118,41 +118,29 @@ export function parseBedtimeToMs(bedtimeStr: string, referenceDate: Date, timeZo
   const month = parts.find(p => p.type === "month")?.value;
   const day = parts.find(p => p.type === "day")?.value;
 
-  // Construct an ISO-like string that is interpreted as LOCAL time in target timezone
-  // format: YYYY-MM-DDTHH:mm:ss
-  const localIso = `${year}-${month?.padStart(2, '0')}-${day?.padStart(2, '0')}T${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
-  
-  // This creates a Date object. To get the correct UTC ms for the target timezone:
-  // We use the fact that new Date(string) without a timezone offset is treated as local.
-  // Then we can use the "Intl offset trick" or simply use the string with timezone.
-  // The most reliable way in JS without a library is to construct the full string with the timezone name
-  // but Date() doesn't support timezone names in the string. 
-  // However, we can use the property that Intl.DateTimeFormat().format() can be compared to local.
-  
-  const date = new Date(localIso);
-  const localOffset = date.getTimezoneOffset() * 60000;
-  
-  // Get the target timezone offset for this specific date
-  const targetFmt = new Intl.DateTimeFormat("en-US", {
+  // 2. Create an ISO string for that date/time, but explicitly in UTC
+  // We'll then shift it by the target timezone's offset.
+  const isoStr = `${year}-${month?.padStart(2, '0')}-${day?.padStart(2, '0')}T${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00Z`;
+  let timestamp = new Date(isoStr).getTime();
+
+  // 3. Subtract the timezone offset to get the real UTC timestamp
+  // Example: If target is GMT+5:30, 11PM local is actually 11PM UTC minus 5:30.
+  const offsetFmt = new Intl.DateTimeFormat("en-US", {
     timeZone: tz,
     timeZoneName: "shortOffset"
   });
-  const tzPart = targetFmt.formatToParts(date).find(p => p.type === "timeZoneName")?.value || "";
-  // tzPart is like "GMT+5:30" or "GMT-8"
-  const match = tzPart.match(/GMT([+-])(\d+):?(\d+)?/);
-  let targetOffsetMs = 0;
+  const offsetPart = offsetFmt.formatToParts(referenceDate).find(p => p.type === "timeZoneName")?.value || "";
+  const match = offsetPart.match(/GMT([+-])(\d+):?(\d+)?/);
+  
   if (match) {
     const sign = match[1] === "+" ? 1 : -1;
     const h = parseInt(match[2]);
     const m = parseInt(match[3] || "0");
-    targetOffsetMs = sign * (h * 3600000 + m * 60000);
+    const offsetMs = sign * (h * 3600000 + m * 60000);
+    timestamp -= offsetMs;
   }
-
-  // To get UTC: LocalTimeMs - TargetOffset
-  // Since new Date(localIso) is "System Local", we adjust:
-  const utcMs = date.getTime() + localOffset - targetOffsetMs;
   
-  return utcMs;
+  return timestamp;
 }
 
 export function getMaxCaffeineInSleepWindowForDisplay(
