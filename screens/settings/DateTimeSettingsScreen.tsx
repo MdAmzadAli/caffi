@@ -31,7 +31,7 @@ export default function DateTimeSettingsScreen({ navigation }: DateTimeSettingsS
   };
 
   const currentDateFormat = profile.dateFormat || "DD/MM/YYYY";
-  const currentTimeZone = (profile as any).timezone || "Asia/Calcutta";
+  const currentTimeZone = (profile as any).timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
   
   const getDateFormatLabel = (format: string) => {
     switch (format) {

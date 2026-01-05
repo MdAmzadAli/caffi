@@ -8,7 +8,7 @@ import { useCallback } from "react";
 export function useFormattedDate() {
   const { profile } = useCaffeineStore();
   const format = profile.dateFormat || "DD/MM/YYYY";
-  const timezone = (profile as any).timezone || "Asia/Calcutta";
+  const timezone = (profile as any).timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   const formatDate = useCallback((date: Date | string | number | undefined | null) => {
     if (!date) return "";

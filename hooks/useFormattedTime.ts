@@ -3,7 +3,7 @@ import { useCallback } from "react";
 
 export function useFormattedTime() {
   const { profile } = useCaffeineStore();
-  const timezone = (profile as any).timezone || "Asia/Calcutta";
+  const timezone = (profile as any).timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
   
   const formatTime = useCallback((date: Date | string | number) => {
     const d = new Date(date);
