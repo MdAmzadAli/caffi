@@ -21,6 +21,7 @@ import { Button, Provider as PaperProvider, MD3DarkTheme, MD3LightTheme } from "
 
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
+import { useFormattedDate } from "@/hooks/useFormattedDate";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 
 registerTranslation('en', en);
@@ -101,6 +102,7 @@ export function DateRangePickerModal({
   customRange 
 }: DateRangePickerModalProps) {
   const { theme, isDark } = useTheme();
+  const { formatDate: formatDateHook } = useFormattedDate();
   const insets = useSafeAreaInsets();
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
 
@@ -261,14 +263,6 @@ export function DateRangePickerModal({
     closeModal();
   };
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString("en-US", {
-      month: "2-digit",
-      day: "2-digit",
-      year: "numeric",
-    });
-  };
-
   if (!visible) return null;
 
   return (
@@ -337,7 +331,7 @@ export function DateRangePickerModal({
                     style={[styles.dateButton, { borderColor: theme.divider }]}
                   >
                     <Feather name="calendar" size={18} color={theme.textMuted} />
-                    <ThemedText type="body">{formatDate(fromDate)}</ThemedText>
+                    <ThemedText type="body">{formatDateHook(fromDate)}</ThemedText>
                   </Pressable>
 
                   <ThemedText type="caption" muted style={styles.fieldLabel}>To</ThemedText>
@@ -346,7 +340,7 @@ export function DateRangePickerModal({
                     style={[styles.dateButton, { borderColor: theme.divider }]}
                   >
                     <Feather name="calendar" size={18} color={theme.textMuted} />
-                    <ThemedText type="body">{formatDate(toDate)}</ThemedText>
+                    <ThemedText type="body">{formatDateHook(toDate)}</ThemedText>
                   </Pressable>
 
                   <Pressable
