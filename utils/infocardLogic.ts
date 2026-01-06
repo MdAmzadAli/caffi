@@ -3,14 +3,14 @@ import { CaffeineEvent, getActiveAtTime, getMaxCaffeineInSleepWindow } from './g
 export interface InfoCardResult {
   status: 'RECOMMENDED' | 'NO_MORE_CAFFEINE_TODAY';
   focusDose?: number;
-  bestTimeStart?: Date;
-  bestTimeEnd?: Date;
+  bestTimeStartMs?: number; // Changed to milliseconds
+  bestTimeEndMs?: number;   // Changed to milliseconds
 }
 
 interface InfoCardInputs {
-  now: Date;
-  wakeTime: Date;
-  sleepTime: Date;
+  nowMs: number;              // Changed to milliseconds
+  wakeTimeMs: number;         // Changed to milliseconds
+  sleepTimeMs: number;        // Changed to milliseconds
   optimalDailyCaffeine: number;
   totalConsumedCaffeine: number;
   caffeineEntries: CaffeineEvent[];
@@ -20,30 +20,33 @@ interface InfoCardInputs {
 // Constants
 const MIN_DOSE = 30;
 const MAX_DOSE = 75;
-const MIN_GAP_BETWEEN_DOSES = 90; // minutes
-const SIMULATION_STEP = 15; // minutes
+const MIN_GAP_BETWEEN_DOSES_MS = 90 * 60 * 1000; // 90 minutes in ms
+const SIMULATION_STEP_MS = 15 * 60 * 1000; // 15 minutes in ms
 const SLEEP_UNDISRUPTED_THRESHOLD = 30; // mg
 const MAX_SAFE_MULTIPLIER = 0.6;
+const ONE_HOUR_MS = 60 * 60 * 1000;
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+const SIX_HOURS_MS = 6 * 60 * 60 * 1000;
 
 /**
  * Helper: Convert hours to milliseconds
  */
 function hoursToMs(hours: number): number {
-  return hours * 60 * 60 * 1000;
+  return hours * ONE_HOUR_MS;
 }
 
 /**
- * Helper: Get hours between two dates
+ * Helper: Get hours between two timestamps (in ms)
  */
-function hoursBetween(startDate: Date, endDate: Date): number {
-  return (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60);
+function hoursBetween(startMs: number, endMs: number): number {
+  return (endMs - startMs) / ONE_HOUR_MS;
 }
 
 /**
- * Helper: Add minutes to a date
+ * Helper: Add minutes to a timestamp
  */
-function addMinutes(date: Date, minutes: number): Date {
-  return new Date(date.getTime() + minutes * 60 * 1000);
+function addMinutes(timestampMs: number, minutes: number): number {
+  return timestampMs + minutes * 60 * 1000;
 }
 
 /**
@@ -51,15 +54,15 @@ function addMinutes(date: Date, minutes: number): Date {
  */
 function getLastDoseTimeInWindow(
   caffeineEntries: CaffeineEvent[],
-  wakeTime: Date,
-  sleepTime: Date
-): Date|null {
+  wakeTimeMs: number,
+  sleepTimeMs: number
+): number | null {
   // Window is 24-hour cycle from last sleep to next sleep
-  const lastSleepTime = new Date(sleepTime.getTime() - 24 * 3600000);
-  
+  const lastSleepTimeMs = sleepTimeMs - ONE_DAY_MS;
+
   const windowEntries = caffeineEntries.filter((entry) => {
-    const entryTime = Date.parse(entry.timestampISO);
-    return entryTime >= lastSleepTime.getTime() && entryTime < sleepTime.getTime();
+    const entryTimeMs = Date.parse(entry.timestampISO);
+    return entryTimeMs >= lastSleepTimeMs && entryTimeMs < sleepTimeMs;
   });
 
   if (windowEntries.length === 0) {
@@ -70,7 +73,7 @@ function getLastDoseTimeInWindow(
     (a, b) => Date.parse(b.timestampISO) - Date.parse(a.timestampISO)
   );
 
-  return new Date(Date.parse(sorted[0].timestampISO));
+  return Date.parse(sorted[0].timestampISO);
 }
 
 /**
@@ -105,7 +108,7 @@ function isPeakSafe(
   maxSafeCaffeineCap: number,
   halfLifeHours: number
 ): boolean {
-  // Simulate peak with new dose using the same logic as getPeakCaffeineWithNewEntry
+  // Simulate peak with new dose
   const tempEvent: CaffeineEvent = {
     id: 'temp',
     name: 'temp',
@@ -114,11 +117,10 @@ function isPeakSafe(
   };
 
   const allEvents = [...caffeineEntries, tempEvent];
-  const stepMs = SIMULATION_STEP * 60 * 1000;
-  const endMs = doseTimeMs + 24 * 3600000;
+  const endMs = doseTimeMs + ONE_DAY_MS;
   let peak = 0;
 
-  for (let t = doseTimeMs; t <= endMs; t += stepMs) {
+  for (let t = doseTimeMs; t <= endMs; t += SIMULATION_STEP_MS) {
     const mg = getActiveAtTime(allEvents, t, halfLifeHours);
     if (mg > peak) peak = mg;
   }
@@ -131,18 +133,16 @@ function isPeakSafe(
  */
 function findBestTime(
   caffeineEntries: CaffeineEvent[],
-  earliestCandidateTime: Date,
-  cutoffTime: Date,
+  earliestCandidateTimeMs: number,
+  cutoffTimeMs: number,
   targetDose: number,
   maxSafeCaffeineCap: number,
   halfLifeHours: number
-): Date | null {
-  const stepMs = SIMULATION_STEP * 60 * 1000;
-
+): number | null {
   for (
-    let t = earliestCandidateTime.getTime();
-    t <= cutoffTime.getTime();
-    t += stepMs
+    let t = earliestCandidateTimeMs;
+    t <= cutoffTimeMs;
+    t += SIMULATION_STEP_MS
   ) {
     const isPeakOk = isPeakSafe(
       caffeineEntries,
@@ -156,12 +156,12 @@ function findBestTime(
       caffeineEntries,
       targetDose,
       t,
-      cutoffTime.getTime() + 6 * 3600000,
+      cutoffTimeMs + SIX_HOURS_MS,
       halfLifeHours
     );
 
     if (isPeakOk && isSleepOk) {
-      return new Date(t);
+      return t;
     }
   }
 
@@ -175,9 +175,9 @@ export function calculateInfoCard(
   inputs: InfoCardInputs
 ): InfoCardResult {
   const {
-    now,
-    wakeTime,
-    sleepTime,
+    nowMs,
+    wakeTimeMs,
+    sleepTimeMs,
     optimalDailyCaffeine,
     totalConsumedCaffeine,
     caffeineEntries,
@@ -185,79 +185,73 @@ export function calculateInfoCard(
   } = inputs;
 
   const maxSafeCaffeineCap = MAX_SAFE_MULTIPLIER * optimalDailyCaffeine;
-  
-  // RESET LOGIC: Check if we've passed sleep time (fresh day)
-  console.log('sleepTime',sleepTime);
-  const hasPassed = wakeTime.getTime() < sleepTime.getTime();
+
+  console.log('sleepTimeMs', sleepTimeMs);
+
   let effectiveEntries = caffeineEntries;
   let effectiveConsumed = totalConsumedCaffeine;
-  let effectiveWakeTime = wakeTime;
-  console.log('effectiveWakeTime',effectiveWakeTime);
-  if(sleepTime.getTime()<wakeTime.getTime()){
-    effectiveWakeTime=new Date(wakeTime.getTime()-24*3600000);
-  }
-  console.log('effectiveWakeTime',effectiveWakeTime);
-  let effectiveSleepTime = sleepTime;
-  
-  // if (hasPassed) {
-  //   // Past sleep time - use current sleep window boundary
-  //   const lastSleepTime = new Date(sleepTime.getTime() - 24 * 3600000);;
-  //   const nextSleepTime = sleepTime;
-  //   console.log('lastSleepTime', lastSleepTime, 'nextSleepTime', nextSleepTime);
-  //   // Count entries within 24-hour window: last sleep to next sleep
-  //   effectiveEntries = caffeineEntries.filter((entry) => {
-  //     const entryTime = Date.parse(entry.timestampISO);
-  //     return entryTime >= lastSleepTime.getTime() && entryTime < nextSleepTime.getTime();
-  //   });
-  //   effectiveConsumed = effectiveEntries.reduce((sum, e) => sum + e.mg, 0);
-  //   effectiveSleepTime = nextSleepTime;
-  // }
+  let effectiveWakeTimeMs = wakeTimeMs;
 
-  const cutoffTime = new Date(
-    sleepTime.getTime() - 6 * 3600000
-  );
+  console.log('effectiveWakeTimeMs (initial)', effectiveWakeTimeMs);
+
+  // Adjust wake time if it's after sleep time (crosses midnight)
+  if (sleepTimeMs < wakeTimeMs) {
+    effectiveWakeTimeMs = wakeTimeMs - ONE_DAY_MS;
+  }
+
+  console.log('effectiveWakeTimeMs (adjusted)', effectiveWakeTimeMs);
+
+  let effectiveSleepTimeMs = sleepTimeMs;
+
+  // Calculate cutoff time (6 hours before sleep)
+  const cutoffTimeMs = sleepTimeMs - SIX_HOURS_MS;
 
   // Step 1: Find last relevant dose time within the sleep window
-  const lastDoseTime = getLastDoseTimeInWindow(
+  const lastDoseTimeMs = getLastDoseTimeInWindow(
     effectiveEntries,
-    effectiveWakeTime,
-    effectiveSleepTime
+    effectiveWakeTimeMs,
+    effectiveSleepTimeMs
   );
 
-  // Step 2: Recommendation window always starts 60 minutes after actual wake time
-  const recommendationStartTime = addMinutes(effectiveWakeTime, 60);
-  
+  // Step 2: Recommendation window always starts 60 minutes after wake time
+  const recommendationStartTimeMs = addMinutes(effectiveWakeTimeMs, 60);
+
   // Step 3: Enforce minimum spacing (only if there are previous doses)
   const hasPreviousDose = effectiveEntries.length > 0;
-  console.log('hasPreviousDose', hasPreviousDose, 'lastDoseTime', lastDoseTime, "now", now);
-  const earliestCandidateTime = new Date(
-    Math.max(
-      now.getTime(),
-      lastDoseTime
-        ? lastDoseTime.getTime() + MIN_GAP_BETWEEN_DOSES * 60 * 1000
-        : recommendationStartTime.getTime()
-    )
+  console.log('hasPreviousDose', hasPreviousDose, 'lastDoseTimeMs', lastDoseTimeMs, 'nowMs', nowMs);
+
+  const earliestCandidateTimeMs = Math.max(
+    nowMs,
+    lastDoseTimeMs !== null
+      ? lastDoseTimeMs + MIN_GAP_BETWEEN_DOSES_MS
+      : recommendationStartTimeMs
   );
- console.log('earliestCandidateTime',earliestCandidateTime);
-  // Step 3: Hard stop conditions
+
+  console.log('earliestCandidateTimeMs', earliestCandidateTimeMs);
+
+  // Step 4: Hard stop conditions
   const remainingSafeMg = optimalDailyCaffeine - effectiveConsumed;
 
   if (
-    earliestCandidateTime.getTime() > cutoffTime.getTime() ||
+    earliestCandidateTimeMs > cutoffTimeMs ||
     remainingSafeMg < MIN_DOSE
   ) {
     return { status: 'NO_MORE_CAFFEINE_TODAY' };
   }
 
-  // Step 4: Calculate dose distribution
-  const X = lastDoseTime
-  ? lastDoseTime
-  : new Date(Math.max(now.getTime(), effectiveWakeTime.getTime()));
-  console.log('X',X);
-  const availableHours = hoursBetween(X, cutoffTime);
+  // Step 5: Calculate dose distribution
+  const X = lastDoseTimeMs !== null
+    ? lastDoseTimeMs
+    : Math.max(nowMs, effectiveWakeTimeMs);
+
+  console.log('X', X);
+
+  const availableHours = hoursBetween(X, cutoffTimeMs);
   const doseSlots = Math.max(1, Math.floor(availableHours / 3));
-  console.log('doseSlots',doseSlots);
-  console.log('remainingSafeMg',remainingSafeMg);
+
+  console.log('doseSlots', doseSlots);
+  console.log('remainingSafeMg', remainingSafeMg);
+
   const nextDose = Math.max(
     MIN_DOSE,
     Math.min(
@@ -266,23 +260,23 @@ export function calculateInfoCard(
     )
   );
 
-  // Step 5: Find best time using peak-aware simulation
+  // Step 6: Find best time using peak-aware simulation
   for (let dose = nextDose; dose >= MIN_DOSE; dose -= 5) {
-    const bestTime = findBestTime(
+    const bestTimeMs = findBestTime(
       effectiveEntries,
-      earliestCandidateTime,
-      cutoffTime,
+      earliestCandidateTimeMs,
+      cutoffTimeMs,
       dose,
       maxSafeCaffeineCap,
       halfLifeHours
     );
 
-    if (bestTime) {
+    if (bestTimeMs !== null) {
       return {
         status: 'RECOMMENDED',
         focusDose: Math.round(dose),
-        bestTimeStart: bestTime,
-        bestTimeEnd: cutoffTime,
+        bestTimeStartMs: bestTimeMs,
+        bestTimeEndMs: cutoffTimeMs,
       };
     }
   }

@@ -68,7 +68,7 @@ export function RecommendationCards({
           value:
             infoCard.status === "NO_MORE_CAFFEINE_TODAY"
               ? "Oops ☺️"
-              : `${formatTime(infoCard.bestTimeStart || new Date())} – ${formatTime(infoCard.bestTimeEnd || new Date())}`,
+              : `${formatTime(infoCard.bestTimeStartMs || new Date().getTime())} – ${formatTime(infoCard.bestTimeEndMs || new Date().getTime())}`,
           subtitle:
             infoCard.status === "NO_MORE_CAFFEINE_TODAY"
               ? "No safe window today"
