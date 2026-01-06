@@ -177,7 +177,7 @@ export function TimePickerModal({ visible, onClose, onSelectTime, initialDate }:
       setCustomDate(newDate);
       setSelectedPreset("");
       onSelectTime(newDate, formatDateTime(newDate));
-      setSelectedCalendarDate(undefined); // Add this line
+      setSelectedCalendarDate(undefined);
     }
   };
 
@@ -191,25 +191,9 @@ export function TimePickerModal({ visible, onClose, onSelectTime, initialDate }:
     onSelectTime(newDate, formatDateTime(newDate));
   };
 
-  const formatDate = useCallback((date: Date) => {
-    return date.toLocaleDateString("en-US", {
-      month: "2-digit",
-      day: "2-digit",
-      year: "numeric",
-    });
-  }, []);
-
-  const formatTime = useCallback((date: Date) => {
-    return date.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
-  }, []);
-
   const formatDateTime = useCallback((date: Date) => {
-    return `${formatDate(date)} ${formatTime(date)}`;
-  }, [formatDate, formatTime]);
+    return `${formatDateHook(date)} ${formatTimeHook(date)}`;
+  }, [formatDateHook, formatTimeHook]);
 
   if (!visible) return null;
 
