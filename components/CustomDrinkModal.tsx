@@ -78,6 +78,27 @@ const getInbuiltDrinkCaffeinePer100ml = (id: string, category: string): number |
   return drink ? drink.caffeinePer100ml : null;
 };
 
+const formatDateWithTime = (date: Date): string => {
+  const now = new Date();
+  const entryDate = new Date(date);
+  entryDate.setHours(0, 0, 0, 0);
+  now.setHours(0, 0, 0, 0);
+  
+  const timePart = new Date(date).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  
+  if (entryDate.getTime() === now.getTime()) {
+    return `Today, ${timePart}`;
+  }
+  
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (entryDate.getTime() === yesterday.getTime()) {
+    return `Yesterday, ${timePart}`;
+  }
+  
+  const datePart = new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return `${datePart}, ${timePart}`;
+};
 
 const UNITS = ["cup", "shot", "ml", "oz", "teaspoon", "tablespoon", "glass", "can", "bottle", "scoop", "pint", "liter", "fl oz", "mug", "bar"];
 const INBUILT_CATEGORIES = ["coffee", "tea", "energy", "soda", "chocolate"];
@@ -393,28 +414,6 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
     
     return `${formatDate(startTime)}, ${timeStr}`;
   }, [startTime, formatDate, formatTime]);
-
-  const formatDateWithTime = (date: Date) => {
-    const now = new Date();
-    const entryDate = new Date(date);
-    entryDate.setHours(0, 0, 0, 0);
-    now.setHours(0, 0, 0, 0);
-    
-    const timePart = formatTime(date);
-    
-    if (entryDate.getTime() === now.getTime()) {
-      return `Today, ${timePart}`;
-    }
-    
-    const yesterday = new Date(now);
-    yesterday.setDate(yesterday.getDate() - 1);
-    if (entryDate.getTime() === yesterday.getTime()) {
-      return `Yesterday, ${timePart}`;
-    }
-    
-    const datePart = formatDate(date);
-    return `${datePart}, ${timePart}`;
-  };
 
   return (
     <Modal
