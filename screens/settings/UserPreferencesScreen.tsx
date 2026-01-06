@@ -10,6 +10,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ScreenScrollView } from "@/components/ScreenScrollView";
 import { TimePickerModal } from "react-native-paper-dates";
 import { SettingsHeader } from "@/components/SettingsHeader";
+import { useFormattedTime } from "@/hooks/useFormattedTime";
 import type { SettingsStackParamList } from "@/navigation/SettingsStackNavigator";
 
 type UserPreferencesScreenProps = {
@@ -18,6 +19,7 @@ type UserPreferencesScreenProps = {
 
 export default function UserPreferencesScreen({ navigation }: UserPreferencesScreenProps) {
   const { theme } = useTheme();
+  const { formatTime } = useFormattedTime();
   const insets = useSafeAreaInsets();
   const { profile, updateProfile } = useCaffeineStore();
 
@@ -27,14 +29,6 @@ export default function UserPreferencesScreen({ navigation }: UserPreferencesScr
   const [localChartMax, setLocalChartMax] = useState(String(profile.graphYAxisLimit));
   const thresholdInputRef = useRef<TextInput>(null);
   const chartMaxInputRef = useRef<TextInput>(null);
-
-  const formatTime = (time: string) => {
-    const [hours, minutes] = time.split(":").map(Number);
-    const period = hours >= 12 ? "PM" : "AM";
-    let h12 = hours % 12;
-    if (h12 === 0) h12 = 12;
-    return `${h12}:${String(minutes).padStart(2, "0")} ${period}`;
-  };
 
   const handleBack = () => {
     let finalThreshold = parseInt(localThreshold, 10);
