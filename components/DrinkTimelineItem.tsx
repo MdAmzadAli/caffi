@@ -4,7 +4,8 @@ import { Feather } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
-import type { DrinkEntry } from "@/store/caffeineStore";
+import { DrinkEntry } from "@/store/caffeineStore";
+import { useFormattedTime } from "@/hooks/useFormattedTime";
 
 interface DrinkTimelineItemProps {
   entry: DrinkEntry;
@@ -20,15 +21,7 @@ export function DrinkTimelineItem({
   showDate = false,
 }: DrinkTimelineItemProps) {
   const { theme } = useTheme();
-
-  const formatTime = () => {
-    const date = new Date(entry.timestamp);
-    return date.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
-  };
+  const { formatTime } = useFormattedTime();
 
   const handleDelete = () => {
     Alert.alert(
@@ -73,7 +66,7 @@ export function DrinkTimelineItem({
       >
         <View style={styles.timeColumn}>
           <ThemedText type="small" muted>
-            {formatTime()}
+            {formatTime(entry.timestamp)}
           </ThemedText>
         </View>
         <View style={styles.iconContainer}>

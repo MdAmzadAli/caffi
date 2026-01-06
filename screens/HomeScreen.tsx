@@ -21,6 +21,7 @@ import { CustomDrinkModal } from "@/components/CustomDrinkModal";
 import { StackedEntriesModal } from "@/components/StackedEntriesModal";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { useCaffeineStore, DrinkEntry } from "@/store/caffeineStore";
+import { DrinkTimelineItem } from "@/components/DrinkTimelineItem";
 import {
   calculateRecommendations,
   getHoursUntilBedtime,
@@ -30,6 +31,7 @@ import { calculateInfoCard, InfoCardResult } from "@/utils/infocardLogic";
 import { Spacing, Colors } from "@/constants/theme";
 import { useTheme } from "@/hooks/useTheme";
 import { useFormattedTime } from "@/hooks/useFormattedTime";
+import { useFormattedDate } from "@/hooks/useFormattedDate";
 import type { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import { DUMMY_ENTRIES } from "@/utils/dummy_logs";
 
@@ -120,6 +122,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const insets = useSafeAreaInsets();
   const { theme, isDark } = useTheme();
   const { formatTime } = useFormattedTime();
+  const { formatDate } = useFormattedDate();
   const {
     profile,
     entries,
@@ -218,7 +221,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     });
   }, [todayCaffeine, activeCaffeine, profile]);
 
-  // Calculate info card recommendations using new logic
   useEffect(() => {
     const result = calculateInfoCard({
       now: new Date(),
@@ -257,7 +259,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
         );
         return {
-          title: formatDateHeader(new Date(dateKey)),
+          title: formatDate(new Date(dateKey)),
           data: sortedData,
           dateKey,
         };
@@ -442,44 +444,11 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 
   const renderItem = ({ item }: { item: DrinkEntry }) => {
     return (
-      <Pressable
-        style={({ pressed }) => [
-          styles.entryRow,
-          {
-            // backgroundColor: theme.backgroundSecondary,
-          },
-          pressed && { backgroundColor: theme.backgroundTertiary },
-        ]}
-        onPress={() => handleSelectEntry(item)}
-      >
-        <View style={[styles.iconContainer, { backgroundColor: theme.backgroundTertiary }]}>
-          {(() => {
-            const imageSource = getDrinkImageSource(item);
-            if (imageSource.source || imageSource.uri) {
-              return (
-                <Image
-                  source={imageSource.source || { uri: imageSource.uri }}
-                  style={styles.entryImage}
-                />
-              );
-            }
-            return <Text style={styles.entryEmoji}>{getEntryIcon(item.category)}</Text>;
-          })()}
-        </View>
-
-        <View style={styles.entryInfo}>
-          <Text style={[styles.entryName, { color: theme.darkBrown }]}>
-            {item.name}
-          </Text>
-          <Text style={[styles.entryTime, { color: theme.mutedGrey }]}>
-            {formatTime(item.timestamp)}
-          </Text>
-        </View>
-
-        <Text style={[styles.entryMg, { color: theme.darkBrown }]}>
-          {Math.round(item.caffeineAmount)} mg
-        </Text>
-      </Pressable>
+      <DrinkTimelineItem
+        entry={item}
+        onDelete={() => handleDeleteEntry(item)}
+        onEdit={() => handleEditEntry(item)}
+      />
     );
   };
 
