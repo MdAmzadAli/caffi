@@ -22,6 +22,8 @@ import { Button, Provider as PaperProvider, MD3DarkTheme, MD3LightTheme, Portal 
 
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
+import { useFormattedDate } from "@/hooks/useFormattedDate";
+import { useFormattedTime } from "@/hooks/useFormattedTime";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 
 registerTranslation('en', en);
@@ -47,6 +49,8 @@ const PRESET_OPTIONS = [
 
 export function TimePickerModal({ visible, onClose, onSelectTime, initialDate }: TimePickerModalProps) {
   const { theme, isDark } = useTheme();
+  const { formatDate: formatDateHook } = useFormattedDate();
+  const { formatTime: formatTimeHook } = useFormattedTime();
   const insets = useSafeAreaInsets();
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
 
@@ -278,7 +282,7 @@ export function TimePickerModal({ visible, onClose, onSelectTime, initialDate }:
                     style={[styles.customButton, { backgroundColor: theme.backgroundSecondary }]}
                   >
                     <Feather name="calendar" size={20} color={theme.accent} />
-                    <ThemedText type="body">{formatDate(customDate)}</ThemedText>
+                    <ThemedText type="body">{formatDateHook(customDate)}</ThemedText>
                   </Pressable>
 
                   <Pressable
@@ -286,7 +290,7 @@ export function TimePickerModal({ visible, onClose, onSelectTime, initialDate }:
                     style={[styles.customButton, { backgroundColor: theme.backgroundSecondary }]}
                   >
                     <Feather name="clock" size={20} color={theme.accent} />
-                    <ThemedText type="body">{formatTime(customDate)}</ThemedText>
+                    <ThemedText type="body">{formatTimeHook(customDate)}</ThemedText>
                   </Pressable>
                 </View>
               </View>
