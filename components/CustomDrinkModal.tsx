@@ -248,8 +248,22 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
     if (sleepDate.getTime() <= startTime.getTime()) {
       sleepDate.setDate(sleepDate.getDate() + 1);
     }
-    return sleepDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  }, [startTime, profile.sleepTime]);
+    
+    const d = new Date(sleepDate);
+    d.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    if (d.getTime() === today.getTime()) return "Today";
+    if (d.getTime() === yesterday.getTime()) return "Yesterday";
+    if (d.getTime() === tomorrow.getTime()) return "Tomorrow";
+
+    return formatDate(sleepDate);
+  }, [startTime, profile.sleepTime, formatDate]);
 
   const sleepImpactStatus = useMemo(() => {
     if (!totalCaffeine || totalCaffeine <= 0) return "safe" as const;
