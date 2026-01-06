@@ -146,9 +146,8 @@ export function CaffeineLogPopup({ visible, entry, onClose, onEdit, onDuplicate,
       onClose={onClose}
       maxHeight={sheetHeight}
     >
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: Spacing.lg }}
+      <View
+        style={{ paddingBottom: Spacing.lg }}
       >
         <View style={styles.headerRow}>
           <View style={[styles.iconWrap, { backgroundColor: theme.backgroundSecondary }]}>
@@ -190,9 +189,9 @@ export function CaffeineLogPopup({ visible, entry, onClose, onEdit, onDuplicate,
               <Path d={path} stroke={curveColor} strokeWidth={3} fill="none" />
               <Circle cx={peak.x} cy={peak.y} r={6} fill={theme.danger} />
               {peakDateLabel && (
-                <SvgText x={peak.x} y={peak.y - 25} fontSize={11} fill={theme.danger} textAnchor="middle">{peakDateLabel}</SvgText>
+                <SvgText x={peak.x} y={peak.y - 25} fontSize={11} fontWeight={500} fill={theme.danger} textAnchor="middle">{peakDateLabel}</SvgText>
               )}
-              <SvgText x={peak.x} y={peak.y - (peakDateLabel ? 12 : 10)} fontSize={12} fill={theme.danger} textAnchor="middle">{peakTimeLabel}</SvgText>
+              <SvgText x={peak.x} y={peak.y - (peakDateLabel ? 12 : 10)} fontWeight={500}  fontSize={12} fill={theme.danger} textAnchor="middle">{peakTimeLabel}</SvgText>
               {timeLabels.map((item, idx) => (
                 <SvgText key={idx} x={item.x} y={height + 20} fontSize={11} fill={theme.mutedGrey} textAnchor={idx === 0 ? "start" : idx === timeLabels.length - 1 ? "end" : "middle"}>
                   {item.label}
@@ -242,7 +241,7 @@ export function CaffeineLogPopup({ visible, entry, onClose, onEdit, onDuplicate,
           }} themeColor={theme.text} bg={theme.backgroundSecondary} />
           <ActionButton label="Delete" icon="trash" onPress={() => onDelete?.(entry)} themeColor={theme.danger} bg={theme.backgroundSecondary} />
         </View>
-      </ScrollView>
+      </View>
     </BottomSheetModal>
   );
 }

@@ -26,6 +26,8 @@ import { TimePickerModal } from "@/components/TimePickerModal";
 import { GlowIndicator } from "@/components/GlowIndicator";
 import { useCaffeineStore, DrinkEntry, DRINK_DATABASE } from "@/store/caffeineStore";
 import { useTheme } from "@/hooks/useTheme";
+import { useFormattedTime } from "@/hooks/useFormattedTime";
+import { useFormattedDate } from "@/hooks/useFormattedDate";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import {
   CaffeineEvent,
@@ -103,6 +105,8 @@ const INBUILT_CATEGORIES = ["coffee", "tea", "energy", "soda", "chocolate"];
 
 export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDrink, editCustomDrink, onSaveCustomDrink, isLoggingMode, initialQuantityAfterEdit, preserveCustomDrinkQuantities }: CustomDrinkModalProps) {
   const { theme } = useTheme();
+  const { formatTime } = useFormattedTime();
+  const { formatDate } = useFormattedDate();
   const insets = useSafeAreaInsets();
   const { addEntry, updateEntry, addCustomDrink, updateCustomDrink, profile, entries, customDrinks } = useCaffeineStore();
   const { height: windowHeight } = useWindowDimensions();
@@ -392,7 +396,24 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
   const incrementQuantity = () => setQuantity((q) => q + 1);
   const decrementQuantity = () => setQuantity((q) => Math.max(q - 1, 1));
 
-  if (!visible) return null;
+  const startTimeLabelDisplay = useMemo(() => {
+    const now = new Date();
+    const timeDiff = Math.abs(now.getTime() - startTime.getTime());
+    if (timeDiff < 60000) return "now";
+    
+    const d = new Date(startTime);
+    d.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    const timeStr = formatTime(startTime);
+    if (d.getTime() === today.getTime()) return `Today, ${timeStr}`;
+    if (d.getTime() === yesterday.getTime()) return `Yesterday, ${timeStr}`;
+    
+    return `${formatDate(startTime)}, ${timeStr}`;
+  }, [startTime, formatDate, formatTime]);
 
   return (
     <Modal
@@ -621,7 +642,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
                   style={[styles.timeChip, { borderColor: Colors.light.accent }]}
                 >
                   <Feather name="calendar" size={14} color={Colors.light.accent} />
-                  <ThemedText type="small" style={{ color: Colors.light.accent }}>{startTimeLabel}</ThemedText>
+                  <ThemedText type="small" style={{ color: Colors.light.accent }}>{startTimeLabelDisplay}</ThemedText>
                 </Pressable>
               </View>
 
