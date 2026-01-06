@@ -20,6 +20,7 @@ import { calculateSingleEntryCurve } from "@/utils/singleEntryCurve";
 import { generateSmoothPath, remainingAfterHours } from "@/utils/graphUtils";
 import { useRealTimeNow } from "@/hooks/useRealTimeNow";
 import { useCaffeineStore } from "@/store/caffeineStore";
+import { useFormattedDate } from "@/hooks/useFormattedDate";
 import { BottomSheetModal } from "./BottomSheetModal";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
@@ -35,7 +36,7 @@ type CaffeineLogPopupProps = {
   onDelete?: (entry: DrinkEntry) => void;
 };
 
-function formatRelativeDate(date: Date) {
+function formatRelativeDate(date: Date, formatDate: (d: Date) => string) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const yesterday = new Date(today);
@@ -44,10 +45,10 @@ function formatRelativeDate(date: Date) {
   d.setHours(0, 0, 0, 0);
   if (d.getTime() === today.getTime()) return "Today";
   if (d.getTime() === yesterday.getTime()) return "Yesterday";
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return formatDate(date);
 }
 
-function calculateCaffeineStats(entry: DrinkEntry | null, nowMs: number) {
+function calculateCaffeineStats(entry: DrinkEntry | null, nowMs: number, formatDate: (d: Date) => string) {
   if (!entry) return { peakMg: 0, currentMg: 0, totalMg: 0, peakTimeLabel: "", peakDateLabel: "", currentTimeLabel: "", hoursElapsed: 0 };
   const now = new Date(nowMs);
   const entryTime = new Date(entry.timestamp);
@@ -62,18 +63,18 @@ function calculateCaffeineStats(entry: DrinkEntry | null, nowMs: number) {
   const peakTime = new Date(samples[peakIdx].t);
   const peakTimeLabel = peakTime.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
   const peakPassed = peakTime.getTime() < now.getTime();
-  const peakDateLabel = peakPassed ? formatRelativeDate(peakTime) : "";
+  const peakDateLabel = peakPassed ? formatRelativeDate(peakTime, formatDate) : "";
   const currentTimeLabel = now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
   return { peakMg: Math.round(peakMg * 10) / 10, currentMg: Math.round(currentMg * 10) / 10, totalMg: Math.round(totalMg * 10) / 10, peakTimeLabel, peakDateLabel, currentTimeLabel, hoursElapsed };
 }
 
-function useDecayPath(entry: DrinkEntry | null, curveColor: string) {
+function useDecayPath(entry: DrinkEntry | null, curveColor: string, formatDate: (d: Date) => string) {
   const width = Dimensions.get("window").width - Spacing.lg * 2;
   const height = 160;
   const maxY = height - 10;
   const minY = 10;
   const realTimeNow = useRealTimeNow();
-  const caffeineStats = useMemo(() => calculateCaffeineStats(entry, realTimeNow), [entry, realTimeNow]);
+  const caffeineStats = useMemo(() => calculateCaffeineStats(entry, realTimeNow, formatDate), [entry, realTimeNow, formatDate]);
   const data = useMemo(() => {
     if (!entry) return { path: "", area: "", peak: { x: 0, y: height }, peakTimeLabel: "", peakDateLabel: "", timeLabels: [] };
     const samples = calculateSingleEntryCurve(entry, 5, CAFFEINE_HALF_LIFE_HOURS);
@@ -98,7 +99,7 @@ function useDecayPath(entry: DrinkEntry | null, curveColor: string) {
     const now = new Date();
     const peakPassed = peakTime.getTime() < now.getTime();
     const peakTimeLabel = peakTime.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
-    const peakDateLabel = peakPassed ? formatRelativeDate(peakTime) : "";
+    const peakDateLabel = peakPassed ? formatRelativeDate(peakTime, formatDate) : "";
     const timeLabels = [
       { x: 0, label: new Date(entry.timestamp).toLocaleTimeString("en-US", { hour: "numeric" }) },
       { x: width * 0.25, label: new Date(entryMs + 3 * 3600000).toLocaleTimeString("en-US", { hour: "numeric" }) },
@@ -107,13 +108,14 @@ function useDecayPath(entry: DrinkEntry | null, curveColor: string) {
       { x: width, label: new Date(endMs).toLocaleTimeString("en-US", { hour: "numeric" }) },
     ];
     return { path: pathStr, area: areaStr, peak, peakTimeLabel, peakDateLabel, timeLabels };
-  }, [entry, height, width, maxY, minY]);
+  }, [entry, height, width, maxY, minY, formatDate]);
   return { width, height, ...data, curveColor, caffeineStats };
 }
 
 export function CaffeineLogPopup({ visible, entry, onClose, onEdit, onDuplicate, onDelete }: CaffeineLogPopupProps) {
   const { theme, isDark } = useTheme();
   const { addEntry } = useCaffeineStore();
+  const { formatDate } = useFormattedDate();
   const insets = useSafeAreaInsets();
   const sheetHeight = Math.min(SHEET_MAX_HEIGHT, SCREEN_HEIGHT - 40);
   const curveColor = theme.darkBrown2;
@@ -132,7 +134,8 @@ export function CaffeineLogPopup({ visible, entry, onClose, onEdit, onDuplicate,
 
   const { width, height, path, area, peak, peakTimeLabel, peakDateLabel, caffeineStats, timeLabels } = useDecayPath(
     shouldRenderGraph ? entry : null, 
-    curveColor
+    curveColor,
+    formatDate
   );
 
   if (!entry) return null;
@@ -212,7 +215,7 @@ export function CaffeineLogPopup({ visible, entry, onClose, onEdit, onDuplicate,
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: theme.text }]}>Drink contribution to caffeine levels</Text>
           <View style={[styles.divider, { borderBottomColor: theme.divider }]} />
-          <Row label={`At peak (${caffeineStats.peakTimeLabel}${caffeineStats.peakDateLabel ? `, ${caffeineStats.peakDateLabel}` : ""})`} value={`${parseFloat(caffeineStats.peakMg.toFixed(1))} mg`} themeColor={theme} />
+          <Row label={`At peak (${caffeineStats.peakTimeLabel})`} value={`${parseFloat(caffeineStats.peakMg.toFixed(1))} mg`} themeColor={theme} />
           <Row label="Now" value={`${parseFloat(caffeineStats.currentMg.toFixed(1))} mg`} themeColor={theme} />
           <Row label="In total (over time)" value={`${parseFloat(caffeineStats.totalMg.toFixed(1))} mg`} themeColor={theme} />
         </View>
