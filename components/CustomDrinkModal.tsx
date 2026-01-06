@@ -415,28 +415,6 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
     return `${formatDate(startTime)}, ${timeStr}`;
   }, [startTime, formatDate, formatTime]);
 
-  const formatDateWithTime = (date: Date): string => {
-    const now = new Date();
-    const entryDate = new Date(date);
-    entryDate.setHours(0, 0, 0, 0);
-    now.setHours(0, 0, 0, 0);
-    
-    const timePart = formatTime(date);
-    
-    if (entryDate.getTime() === now.getTime()) {
-      return `Today, ${timePart}`;
-    }
-    
-    const yesterday = new Date(now);
-    yesterday.setDate(yesterday.getDate() - 1);
-    if (entryDate.getTime() === yesterday.getTime()) {
-      return `Yesterday, ${timePart}`;
-    }
-    
-    const datePart = formatDate(date);
-    return `${datePart}, ${timePart}`;
-  };
-
   return (
     <Modal
       visible={visible}
