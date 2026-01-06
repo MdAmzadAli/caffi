@@ -5,6 +5,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCaffeineStore } from "@/store/caffeineStore";
 import { useTheme } from "@/hooks/useTheme";
+import { useFormattedTime } from "@/hooks/useFormattedTime";
 import { Spacing, BorderRadius } from "@/constants/theme";
 
 type ViewMode = "Week" | "Month" | "Year";
@@ -33,6 +34,7 @@ const BAR_COLORS = [
 
 export default function ConsumptionByTimeScreen() {
   const { theme } = useTheme();
+  const { formatTime } = useFormattedTime();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { entries } = useCaffeineStore();
@@ -89,9 +91,15 @@ export default function ConsumptionByTimeScreen() {
         })
         .reduce((sum, entry) => sum + entry.caffeineAmount, 0);
 
-      return { ...period, total: Math.round(total) };
+      const s = new Date();
+      s.setHours(period.startHour, 0, 0, 0);
+      const e = new Date();
+      e.setHours(period.endHour, 0, 0, 0);
+      const label = `${formatTime(s)} - ${formatTime(e)}`;
+
+      return { ...period, total: Math.round(total), displayLabel: label };
     });
-  }, [entries, getDateRange]);
+  }, [entries, getDateRange, formatTime]);
 
   const maxTotal = Math.max(...periodData.map((p) => p.total), 1);
 
@@ -237,7 +245,7 @@ export default function ConsumptionByTimeScreen() {
                           { color: leftTextOnBar && isDarkBar ? "#FFFFFF" : theme.text },
                         ]}
                       >
-                        {period.label}
+                        {period.displayLabel}
                       </Text>
                     </View>
                     <Text
