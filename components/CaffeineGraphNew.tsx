@@ -493,6 +493,14 @@ export function CaffeineGraphNew({
     [onScrollOffsetChange, onExtendDays, nowMs, startMs, endMs, scrollContentWidth, windowWidth, dayWindowEnd, dayWindowStart]
   );
 
+  const formatTimeXAxis = useCallback((ms: number) => {
+    const timeStr = formatTimeHook(new Date(ms));
+    // If it ends with :00 AM or :00 PM, or just :00 in 24h, remove the :00
+    // 8:00 AM -> 8 AM
+    // 08:00 -> 08
+    return timeStr.replace(/:00/g, "");
+  }, [formatTimeHook]);
+
   const gradientId = isDark ? "curveGradientDark" : "curveGradientLight";
 
   const eventGroups = useMemo(() => {
@@ -845,7 +853,7 @@ export function CaffeineGraphNew({
             return (
               <View key={tickMs} style={[styles.xAxisTick, { left: x - 30 }]}>
                 <Text numberOfLines={1} adjustsFontSizeToFit style={[styles.xAxisLabel, { color: GRAPH_COLORS.mutedGrey }]}>
-                  {formatTimeHook(tickMs)}
+                  {formatTimeXAxis(tickMs)}
                 </Text>
               </View>
             );
