@@ -4,7 +4,14 @@ export function useFormattedTime() {
   const { profile } = useCaffeineStore();
   
   const formatTime = (date: Date | string | number) => {
-    const d = new Date(date);
+    let d: Date;
+    if (typeof date === "string" && date.includes(":") && !date.includes("T")) {
+      const [h, m] = date.split(":").map(Number);
+      d = new Date();
+      d.setHours(h, m, 0, 0);
+    } else {
+      d = new Date(date);
+    }
     const hours = d.getHours();
     const minutes = d.getMinutes();
     
