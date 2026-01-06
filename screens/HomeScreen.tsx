@@ -220,6 +220,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   // Calculate info card recommendations using new logic
   useEffect(() => {
     const result = calculateInfoCard({
+      now: new Date(),
       wakeTime,
       sleepTime,
       optimalDailyCaffeine: profile.optimalCaffeine,
@@ -266,7 +267,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       });
 
     return sectionsArray;
-  }, [allEntries]);
+  }, [allEntries, formatDate]);
 
   // Initialize and update current sticky date when sections change
   useEffect(() => {
