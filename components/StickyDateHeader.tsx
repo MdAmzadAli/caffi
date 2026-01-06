@@ -4,13 +4,12 @@ import Animated, {
   useAnimatedStyle,
   interpolate,
   Extrapolation,
-  SharedValue,
 } from "react-native-reanimated";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing } from "@/constants/theme";
 
 interface StickyDateHeaderProps {
-  scrollY: SharedValue<number>;
+  scrollY: Animated.SharedValue<number>;
   collapseThreshold: number;
   stickyOffset: number;
   currentDate: string;
