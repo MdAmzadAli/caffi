@@ -36,8 +36,6 @@ import {
 } from "@/utils/graphUtils";
 import { useRealTimeNow } from "@/hooks/useRealTimeNow";
 import { useFormattedTime } from "@/hooks/useFormattedTime";
-import { useTheme } from "@/hooks/useTheme";
-import { useCaffeineStore } from "@/store/caffeineStore";
 import { Spacing } from "@/constants/theme";
 
 interface GraphColors {
@@ -225,8 +223,6 @@ export function CaffeineGraphNew({
   onEventClick,
   onStackedEventsClick,
 }: CaffeineGraphProps) {
-  const { theme } = useTheme();
-  const { profile } = useCaffeineStore();
   const { formatTime: formatTimeHook } = useFormattedTime();
   const GRAPH_COLORS = isDark ? DARK_GRAPH_COLORS : LIGHT_GRAPH_COLORS;
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
@@ -281,9 +277,8 @@ export function CaffeineGraphNew({
   }, [events, nowMs, halfLifeHours]);
 
   const bedtimeMs = useMemo(() => {
-    const tz = (profile as any).timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
-    return parseBedtimeToMs(bedtime, nowDate, tz);
-  }, [bedtime, nowMs, profile]);
+    return parseBedtimeToMs(bedtime, nowDate);
+  }, [bedtime, nowMs]);
 
   const timeToX = useCallback(
     (ms: number): number => {
@@ -334,81 +329,37 @@ export function CaffeineGraphNew({
 
   const xAxisTicks = useMemo(() => {
     const ticks = [];
-    // Use the selected timezone to calculate "start of hour"
-    const tz = (profile as any).timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
-    
-    // Create a formatter to get the local time components in the target timezone
-    const fmt = new Intl.DateTimeFormat("en-US", {
-      timeZone: tz,
-      year: "numeric",
-      month: "numeric",
-      day: "numeric",
-      hour: "numeric",
-      minute: "numeric",
-      second: "numeric",
-      hour12: false,
-    });
-
-    const parts = fmt.formatToParts(new Date(startMs));
-    const getPart = (type: string) => parts.find(p => p.type === type)?.value;
-    
-    // Construct a date string that Date() can parse as local time in that timezone
-    // but we want to "snap" it to the start of the hour
-    const year = getPart("year");
-    const month = getPart("month");
-    const day = getPart("day");
-    const hour = getPart("hour");
-
-    // We need to find the UTC timestamp that corresponds to this local hour in the target timezone
-    // The easiest way is to use a date library, but we can't add one easily.
-    // Instead, we can adjust the startMs by the timezone offset at that time.
-    
-    let currentMs = startMs;
-    // Snap to hour by checking the minutes in the target timezone
-    const initialMinutes = parseInt(fmt.formatToParts(new Date(currentMs)).find(p => p.type === "minute")?.value || "0");
-    if (initialMinutes !== 0) {
-      currentMs += (60 - initialMinutes) * 60000;
+    const startHour = new Date(startMs);
+    startHour.setMinutes(0, 0, 0);
+    let currentMs = startHour.getTime();
+    if (currentMs < startMs) {
+      currentMs += 3600000;
     }
-
     while (currentMs <= endMs) {
       ticks.push(currentMs);
       currentMs += 3600000;
     }
     return ticks;
-  }, [startMs, endMs, profile]);
+  }, [startMs, endMs]);
 
   const dateMarkers = useMemo(() => {
     const markers: { ms: number; label: string }[] = [];
-    const tz = (profile as any).timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const fmt = new Intl.DateTimeFormat("en-US", {
-      timeZone: tz,
-      hour: "numeric",
-      minute: "numeric",
-      hour12: false,
-    });
-
-    let currentMs = startMs;
-    // Snap to midnight in target timezone
-    const parts = fmt.formatToParts(new Date(currentMs));
-    const hour = parseInt(parts.find(p => p.type === "hour")?.value || "0");
-    const minute = parseInt(parts.find(p => p.type === "minute")?.value || "0");
-    
-    // Calculate how many ms to add to reach next midnight
-    const msSinceMidnight = (hour * 3600000) + (minute * 60000);
-    if (msSinceMidnight !== 0) {
-      currentMs += (24 * 3600000) - msSinceMidnight;
+    const startDate = new Date(startMs);
+    startDate.setHours(0, 0, 0, 0);
+    let currentMs = startDate.getTime();
+    if (currentMs < startMs) {
+      currentMs += 24 * 3600000;
     }
-
     while (currentMs <= endMs) {
       const date = new Date(currentMs);
-      const day = new Intl.DateTimeFormat("en-US", { day: "numeric", timeZone: tz }).format(date);
-      const month = new Intl.DateTimeFormat("en-US", { month: "short", timeZone: tz }).format(date);
-      const year = new Intl.DateTimeFormat("en-US", { year: "2-digit", timeZone: tz }).format(date);
+      const day = date.getDate();
+      const month = date.toLocaleDateString("en-US", { month: "short" });
+      const year = date.getFullYear().toString().slice(-2);
       markers.push({ ms: currentMs, label: `${day} ${month}, ${year}` });
       currentMs += 24 * 3600000;
     }
     return markers;
-  }, [startMs, endMs, profile]);
+  }, [startMs, endMs]);
 
 
   const nowX = timeToX(nowMs);

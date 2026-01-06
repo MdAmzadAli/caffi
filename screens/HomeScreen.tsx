@@ -221,9 +221,9 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   // Calculate info card recommendations using new logic
   useEffect(() => {
     const result = calculateInfoCard({
-      nowMs: new Date().getTime(),
-      wakeTimeMs: wakeTime.getTime(),
-      sleepTimeMs: sleepTime.getTime(),
+      now: new Date(),
+      wakeTime,
+      sleepTime,
       optimalDailyCaffeine: profile.optimalCaffeine,
       totalConsumedCaffeine: todayCaffeine,
       caffeineEntries: caffeineEvents,

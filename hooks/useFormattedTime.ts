@@ -1,41 +1,24 @@
 import { useCaffeineStore } from "@/store/caffeineStore";
-import { useCallback } from "react";
 
 export function useFormattedTime() {
   const { profile } = useCaffeineStore();
-  const timezone = (profile as any).timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
   
-  const formatTime = useCallback((date: Date | string | number) => {
+  const formatTime = (date: Date | string | number) => {
     const d = new Date(date);
-    if (isNaN(d.getTime())) return "";
-
-    // Format time in the selected timezone
-    const formatter = new Intl.DateTimeFormat('en-US', {
-      timeZone: timezone,
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: profile.timeFormat !== "24-hour",
-    });
-
-    // We can directly use the formatter or formatToParts if we need more control
+    const hours = d.getHours();
+    const minutes = d.getMinutes();
+    
     if (profile.timeFormat === "24-hour") {
-      const parts = formatter.formatToParts(d);
-      const hours = parts.find(p => p.type === 'hour')?.value || '0';
-      const minutes = parts.find(p => p.type === 'minute')?.value || '00';
-      
-      if (minutes === "00") return `${hours}`;
-      return `${String(hours).padStart(2, "0")}:${minutes}`;
+      if (minutes === 0) return `${hours}`;
+      return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
     } else {
-      // For AM/PM, let Intl handle it but keep the custom logic for "no minutes" if requested
-      const parts = formatter.formatToParts(d);
-      const hours = parts.find(p => p.type === 'hour')?.value || '12';
-      const minutes = parts.find(p => p.type === 'minute')?.value || '00';
-      const period = parts.find(p => p.type === 'dayPeriod')?.value || '';
-      
-      if (minutes === "00") return `${hours}${period}`;
-      return `${hours}:${minutes} ${period}`;
+      const period = hours >= 12 ? "PM" : "AM";
+      let h12 = hours % 12;
+      if (h12 === 0) h12 = 12;
+      if (minutes === 0) return `${h12}${period}`;
+      return `${h12}:${String(minutes).padStart(2, "0")} ${period}`;
     }
-  }, [profile.timeFormat, timezone]);
+  };
 
   return { formatTime, timeFormat: profile.timeFormat };
 }

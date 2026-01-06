@@ -102,45 +102,14 @@ export function formatCurrentTime(ms: number): string {
   return `${hour12}:${minStr}${ampm}`;
 }
 
-export function parseBedtimeToMs(bedtimeStr: string, referenceDate: Date, timeZone?: string): number {
+export function parseBedtimeToMs(bedtimeStr: string, referenceDate: Date): number {
   const [hours, minutes] = bedtimeStr.split(":").map(Number);
-  const tz = timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone;
-  
-  // 1. Get the current year/month/day in the TARGET timezone
-  const fmt = new Intl.DateTimeFormat("en-US", {
-    timeZone: tz,
-    year: "numeric",
-    month: "numeric",
-    day: "numeric",
-  });
-  const parts = fmt.formatToParts(referenceDate);
-  const year = parts.find(p => p.type === "year")?.value;
-  const month = parts.find(p => p.type === "month")?.value;
-  const day = parts.find(p => p.type === "day")?.value;
-
-  // 2. Create an ISO string for that date/time, but explicitly in UTC
-  // We'll then shift it by the target timezone's offset.
-  const isoStr = `${year}-${month?.padStart(2, '0')}-${day?.padStart(2, '0')}T${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00Z`;
-  let timestamp = new Date(isoStr).getTime();
-
-  // 3. Subtract the timezone offset to get the real UTC timestamp
-  // Example: If target is GMT+5:30, 11PM local is actually 11PM UTC minus 5:30.
-  const offsetFmt = new Intl.DateTimeFormat("en-US", {
-    timeZone: tz,
-    timeZoneName: "shortOffset"
-  });
-  const offsetPart = offsetFmt.formatToParts(referenceDate).find(p => p.type === "timeZoneName")?.value || "";
-  const match = offsetPart.match(/GMT([+-])(\d+):?(\d+)?/);
-  
-  if (match) {
-    const sign = match[1] === "+" ? 1 : -1;
-    const h = parseInt(match[2]);
-    const m = parseInt(match[3] || "0");
-    const offsetMs = sign * (h * 3600000 + m * 60000);
-    timestamp -= offsetMs;
+  const result = new Date(referenceDate);
+  result.setHours(hours, minutes, 0, 0);
+  if (result.getTime() < referenceDate.getTime()) {
+    result.setDate(result.getDate() + 1);
   }
-  
-  return timestamp;
+  return result.getTime();
 }
 
 export function getMaxCaffeineInSleepWindowForDisplay(

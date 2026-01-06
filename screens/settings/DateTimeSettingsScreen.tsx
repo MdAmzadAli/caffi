@@ -19,34 +19,19 @@ type DateTimeSettingsScreenProps = {
 export default function DateTimeSettingsScreen({ navigation }: DateTimeSettingsScreenProps) {
   const { theme } = useTheme();
   const { profile, updateProfile } = useCaffeineStore();
-  
-  const deviceTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const currentTimeZone = (profile as any).timezone || deviceTimezone;
-  const timeFormat = profile.timeFormat || "AM/PM";
-  const currentDateFormat = profile.dateFormat || "DD/MM/YYYY";
-  const accentColor = "#C9A36A"; 
-  
-  // Initialize toggle state based on whether a manual timezone exists in profile
-  const [useDeviceTimezone, setUseDeviceTimezone] = useState(!(profile as any).timezone);
+  const [useDeviceTimezone, setUseDeviceTimezone] = useState(true);
   const [showDateFormatPopup, setShowDateFormatPopup] = useState(false);
   const [showTimeZoneModal, setShowTimeZoneModal] = useState(false);
 
+  const accentColor = "#C9A36A"; // Matches the + icon background
+
+  const timeFormat = profile.timeFormat || "AM/PM";
   const setTimeFormat = (format: "AM/PM" | "24-hour") => {
     updateProfile({ timeFormat: format });
   };
 
-  const handleToggleDeviceTimezone = (value: boolean) => {
-    setUseDeviceTimezone(value);
-    if (value) {
-      // Switch back to device timezone
-      updateProfile({ timezone: undefined } as any);
-    }
-  };
-
-  const handleSelectTimeZone = (tz: string) => {
-    updateProfile({ timezone: tz } as any);
-    setUseDeviceTimezone(false);
-  };
+  const currentDateFormat = profile.dateFormat || "DD/MM/YYYY";
+  const currentTimeZone = (profile as any).timezone || "Asia/Calcutta";
   
   const getDateFormatLabel = (format: string) => {
     switch (format) {
@@ -112,7 +97,7 @@ export default function DateTimeSettingsScreen({ navigation }: DateTimeSettingsS
             <ThemedText>Use device timezone</ThemedText>
             <Switch 
               value={useDeviceTimezone} 
-              onValueChange={handleToggleDeviceTimezone}
+              onValueChange={setUseDeviceTimezone}
               trackColor={{ false: theme.backgroundSecondary, true: accentColor }}
               thumbColor="#FFF"
             />
@@ -143,7 +128,7 @@ export default function DateTimeSettingsScreen({ navigation }: DateTimeSettingsS
         visible={showTimeZoneModal}
         selectedTimeZone={currentTimeZone}
         onClose={() => setShowTimeZoneModal(false)}
-        onSelect={handleSelectTimeZone}
+        onSelect={(tz) => updateProfile({ timezone: tz } as any)}
       />
     </View>
   );
