@@ -33,7 +33,6 @@ import {
   getMaxCaffeineInSleepWindowForDisplay,
   getSleepWindowStatusMessage,
   parseBedtimeToMs,
-  getStartOfDay,
 } from "@/utils/graphUtils";
 import { useRealTimeNow } from "@/hooks/useRealTimeNow";
 import { useFormattedTime } from "@/hooks/useFormattedTime";
@@ -203,6 +202,7 @@ const MarkerImage = React.memo(({ x, y, size, imageUri, category, clipId, fallba
       href={resolvedImage}
       clipPath={`url(#${clipId})`}
       preserveAspectRatio="xMidYMid slice"
+      onError={() => setImageError(true)}
     />
   );
 });
@@ -228,7 +228,6 @@ export function CaffeineGraphNew({
   const { theme } = useTheme();
   const { profile } = useCaffeineStore();
   const { formatTime: formatTimeHook } = useFormattedTime();
-  const tz = useMemo(() => (profile as any).timezone || Intl.DateTimeFormat().resolvedOptions().timeZone, [profile]);
   const GRAPH_COLORS = isDark ? DARK_GRAPH_COLORS : LIGHT_GRAPH_COLORS;
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   
@@ -246,10 +245,12 @@ export function CaffeineGraphNew({
   const nowDate = new Date(nowMs);
 
   const { startMs, endMs } = useMemo(() => {
-    const start = getStartOfDay(nowDate, tz) + dayWindowStart * HOURS_PER_DAY * 3600000;
-    const end = getStartOfDay(nowDate, tz) + (dayWindowEnd + 1) * HOURS_PER_DAY * 3600000;
+    const todayStart = new Date(nowMs);
+    todayStart.setHours(0, 0, 0, 0);
+    const start = todayStart.getTime() + dayWindowStart * HOURS_PER_DAY * 3600000;
+    const end = todayStart.getTime() + (dayWindowEnd + 1) * HOURS_PER_DAY * 3600000;
     return { startMs: start, endMs: end };
-  }, [nowMs, dayWindowStart, dayWindowEnd, tz]);
+  }, [nowMs, dayWindowStart, dayWindowEnd]);
 
   const sampleTimesMs = useMemo(() => {
     const samples: number[] = [];
@@ -280,8 +281,9 @@ export function CaffeineGraphNew({
   }, [events, nowMs, halfLifeHours]);
 
   const bedtimeMs = useMemo(() => {
+    const tz = (profile as any).timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
     return parseBedtimeToMs(bedtime, nowDate, tz);
-  }, [bedtime, nowDate, tz]);
+  }, [bedtime, nowMs, profile]);
 
   const timeToX = useCallback(
     (ms: number): number => {
@@ -807,12 +809,11 @@ export function CaffeineGraphNew({
           ))}
           {eventGroups.groups.map((group, idx) => {
             const { x, iconY, category, imageUri, events: groupEvents } = group;
-            const groupFirstEvent = groupEvents[0];
-            const clipId = `clip-${groupFirstEvent.id}-${groupFirstEvent.timestampISO}-${idx}`;
+            const clipId = `clip-${groupEvents[0].id}-${groupEvents[0].timestampISO}`;
             const count = groupEvents.length;
 
             return (
-              <G key={`group-${groupFirstEvent.id}-${idx}`}>
+              <G key={`group-${groupEvents[0].id}-${groupEvents[0].timestampISO}`}>
                 <Defs>
                   <ClipPath id={clipId}>
                     <Circle cx={x} cy={iconY} r={MARKER_IMAGE_SIZE / 2} />
@@ -837,7 +838,7 @@ export function CaffeineGraphNew({
                   fallbackColor={GRAPH_COLORS.darkBrown}
                 />
                 {count > 1 && (
-                  <G key={`count-${groupFirstEvent.id}-${idx}`}>
+                  <>
                     <Circle
                       cx={x + MARKER_IMAGE_SIZE / 2}
                       cy={iconY - MARKER_IMAGE_SIZE / 2}
@@ -854,7 +855,7 @@ export function CaffeineGraphNew({
                     >
                       {count}
                     </SvgText>
-                  </G>
+                  </>
                 )}
               </G>
             );
