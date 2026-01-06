@@ -30,6 +30,7 @@ import { calculateInfoCard, InfoCardResult } from "@/utils/infocardLogic";
 import { Spacing, Colors } from "@/constants/theme";
 import { useTheme } from "@/hooks/useTheme";
 import { useFormattedTime } from "@/hooks/useFormattedTime";
+import { useFormattedDate } from "@/hooks/useFormattedDate";
 import type { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import { DUMMY_ENTRIES } from "@/utils/dummy_logs";
 
@@ -45,7 +46,7 @@ interface SectionData {
 
 const AnimatedSectionList = Animated.createAnimatedComponent(SectionList<DrinkEntry, SectionData>);
 
-function formatDateHeader(date: Date): string {
+function formatDateHeader(date: Date, formatDate: (d: Date) => string): string {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const yesterday = new Date(today);
@@ -61,10 +62,7 @@ function formatDateHeader(date: Date): string {
   } else {
     const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     const dayName = days[entryDate.getDay()];
-    const day = entryDate.getDate().toString().padStart(2, "0");
-    const month = (entryDate.getMonth() + 1).toString().padStart(2, "0");
-    const year = entryDate.getFullYear();
-    return `${dayName.toUpperCase()}, ${day}/${month}/${year}`;
+    return `${dayName.toUpperCase()}, ${formatDate(entryDate)}`;
   }
 }
 
@@ -120,6 +118,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const insets = useSafeAreaInsets();
   const { theme, isDark } = useTheme();
   const { formatTime } = useFormattedTime();
+  const { formatDate } = useFormattedDate();
   const {
     profile,
     entries,
@@ -221,7 +220,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   // Calculate info card recommendations using new logic
   useEffect(() => {
     const result = calculateInfoCard({
-      now: new Date(),
       wakeTime,
       sleepTime,
       optimalDailyCaffeine: profile.optimalCaffeine,
@@ -257,7 +255,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
         );
         return {
-          title: formatDateHeader(new Date(dateKey)),
+          title: formatDateHeader(new Date(dateKey), formatDate),
           data: sortedData,
           dateKey,
         };
