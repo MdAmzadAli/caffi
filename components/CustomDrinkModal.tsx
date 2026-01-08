@@ -2,14 +2,25 @@ import React, { useState, useMemo, useEffect } from "react";
 import {
   View,
   StyleSheet,
+  Modal,
   TextInput,
   Pressable,
+  ScrollView,
   useWindowDimensions,
   Image,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+  runOnJS,
+} from "react-native-reanimated";
+import { Gesture, GestureDetector,GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
 import { ImagePickerModal, PRESET_IMAGES } from "@/components/ImagePickerModal";
 import { TimePickerModal } from "@/components/TimePickerModal";
 import { GlowIndicator } from "@/components/GlowIndicator";
@@ -18,7 +29,6 @@ import { useTheme } from "@/hooks/useTheme";
 import { useFormattedTime } from "@/hooks/useFormattedTime";
 import { useFormattedDate } from "@/hooks/useFormattedDate";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
-import { BottomSheetModal } from "@/components/BottomSheetModal";
 import {
   CaffeineEvent,
   getPeakCaffeineWithNewEntry,
@@ -73,23 +83,24 @@ const formatDateWithTime = (date: Date): string => {
   const entryDate = new Date(date);
   entryDate.setHours(0, 0, 0, 0);
   now.setHours(0, 0, 0, 0);
-  
+
   const timePart = new Date(date).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
-  
+
   if (entryDate.getTime() === now.getTime()) {
     return `Today, ${timePart}`;
   }
-  
+
   const yesterday = new Date(now);
   yesterday.setDate(yesterday.getDate() - 1);
   if (entryDate.getTime() === yesterday.getTime()) {
     return `Yesterday, ${timePart}`;
   }
-  
+
   const datePart = new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric" });
   return `${datePart}, ${timePart}`;
 };
 
+const UNITS = ["cup", "shot", "ml", "oz", "teaspoon", "tablespoon", "glass", "can", "bottle", "scoop", "pint", "liter", "fl oz", "mug", "bar"];
 const INBUILT_CATEGORIES = ["coffee", "tea", "energy", "soda", "chocolate"];
 
 export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDrink, editCustomDrink, onSaveCustomDrink, isLoggingMode, initialQuantityAfterEdit, preserveCustomDrinkQuantities }: CustomDrinkModalProps) {
@@ -100,10 +111,12 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
   const { addEntry, updateEntry, addCustomDrink, updateCustomDrink, profile, entries, customDrinks } = useCaffeineStore();
   const { height: windowHeight } = useWindowDimensions();
   const HALF_LIFE_HOURS = 5;
-  
+
+  const MODAL_HEIGHT = windowHeight * 0.75;
   const isEditMode = !!editEntry;
   const isEditingCustomDrink = !!editCustomDrink;
   const isEditingInbuiltSource = isEditMode && editEntry && INBUILT_CATEGORIES.includes(editEntry.category);
+  const isLoggingInbuiltSource = prefillDrink?.id && !prefillDrink.id.startsWith('custom-') && !editEntry;
 
   const [drinkName, setDrinkName] = useState("");
   const [quantity, setQuantity] = useState(1);
@@ -121,7 +134,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
       setDrinkName(editEntry.name || "");
       setStartTime(new Date(editEntry.timestamp));
       setSelectedImage(editEntry.imageUri || null);
-      
+
       if (isEditingInbuiltSource) {
         const drink = DRINK_DATABASE.find(d => d.id === editEntry.drinkId && d.category === editEntry.category);
         if (drink) {
@@ -164,14 +177,15 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
       setQuantity(initialQuantityAfterEdit ?? 1);
       const bestUnit = getUnitForDrink(prefillDrink.name, prefillDrink.category, prefillDrink.sizes);
       setSelectedUnit(bestUnit);
-      
+
       let caffeine = 0;
       if (prefillDrink.category === "custom") {
+        // For custom drinks, prefillDrink.caffeinePer100ml actually stores the total mg per quantity
         caffeine = prefillDrink.caffeinePer100ml;
       } else {
         caffeine = (prefillDrink.caffeinePer100ml * prefillDrink.defaultServingMl) / 100;
       }
-      
+
       setCaffeineMg(caffeine.toString());
       setStartTime(new Date());
       setStartTimeLabel("now");
@@ -183,6 +197,9 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
       }
     }
   }, [editEntry, prefillDrink, editCustomDrink, visible, initialQuantityAfterEdit]);
+
+  const translateY = useSharedValue(MODAL_HEIGHT);
+  const startY = useSharedValue(0);
 
   const totalCaffeine = useMemo(() => {
     if (selectedUnit === "ml") {
@@ -196,6 +213,10 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
     const mg = parseFloat(caffeineMg) || 0;
     return mg * quantity;
   }, [caffeineMg, quantity, selectedUnit, prefillDrink, isEditingInbuiltSource, editEntry]);
+
+  const formatCaffeine = (value: number) => {
+    return parseFloat(value.toFixed(1).replace(/\.?0+$/, '')) || 0;
+  };
 
   const caffeineEvents: CaffeineEvent[] = useMemo(() => {
     const filteredEntries = isEditMode && editEntry 
@@ -227,7 +248,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
     if (sleepDate.getTime() <= startTime.getTime()) {
       sleepDate.setDate(sleepDate.getDate() + 1);
     }
-    
+
     const d = new Date(sleepDate);
     d.setHours(0, 0, 0, 0);
     const today = new Date();
@@ -270,6 +291,60 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
     setStartTimeLabel("now");
   };
 
+  const handleSelectImage = (imageUri: string) => {
+    setSelectedImage(imageUri);
+  };
+
+  const handleSelectStartTime = (date: Date, label: string) => {
+    setStartTime(date);
+    setStartTimeLabel(label);
+  };
+
+  useEffect(() => {
+    if (visible) {
+      translateY.value = MODAL_HEIGHT;
+      translateY.value = withSpring(0);
+    } else {
+      translateY.value = MODAL_HEIGHT;
+    }
+  }, [visible, translateY]);
+
+  const closeModal = () => {
+    translateY.value = withTiming(MODAL_HEIGHT, { duration: 200 }, () => {
+      runOnJS(resetState)();
+      runOnJS(onClose)();
+    });
+  };
+
+  const panGesture = Gesture.Pan()
+  .simultaneousWithExternalGesture(Gesture.Native())
+  .onStart(() => {
+    startY.value = translateY.value;
+  })
+  .onUpdate((event) => {
+    const nextY = Math.max(0, startY.value + event.translationY);
+    translateY.value = nextY;
+  })
+  .onEnd((event) => {
+    const shouldClose =
+      translateY.value > MODAL_HEIGHT * 0.35 ||
+      event.velocityY > 800;
+
+    if (shouldClose) {
+      translateY.value = withTiming(MODAL_HEIGHT, { duration: 200 }, () => {
+        runOnJS(resetState)();
+        runOnJS(onClose)();
+      });
+    } else {
+      translateY.value = withSpring(0, { damping: 16, stiffness: 200 });
+    }
+  });
+
+
+  const sheetStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+  }));
+
   const handleAdd = () => {
     if (drinkName.trim() && totalCaffeine > 0) {
       if (isEditMode && editEntry) {
@@ -289,8 +364,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
           }
         }
         updateEntry(editEntry.id, updates);
-        onClose();
-        resetState();
+        closeModal();
         onAdd?.();
       } else if (isEditingCustomDrink && editCustomDrink) {
         updateCustomDrink(editCustomDrink.id, {
@@ -313,8 +387,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
         const drinkToLog = { ...prefillDrink, name: drinkName.trim() };
         const finalImage = selectedImage || (prefillDrink.category ? `category:${prefillDrink.category}` : undefined);
         addEntry(drinkToLog as any, servingSize, undefined, false, startTime, selectedUnit, finalImage);
-        onClose();
-        resetState();
+        closeModal();
         onAdd?.();
       } else {
         const savedDrink = addCustomDrink({
@@ -328,316 +401,491 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
         }, quantity);
         addEntry(savedDrink, quantity, undefined, false, startTime, selectedUnit);
         onSaveCustomDrink?.(savedDrink && { ...savedDrink, quantity });
-        onClose();
-        resetState();
+        closeModal();
         onAdd?.();
       }
     }
   };
 
+  const incrementQuantity = () => setQuantity((q) => q + 1);
+  const decrementQuantity = () => setQuantity((q) => Math.max(q - 1, 1));
+
   const startTimeLabelDisplay = useMemo(() => {
     const now = new Date();
     const timeDiff = Math.abs(now.getTime() - startTime.getTime());
     if (timeDiff < 60000) return "now";
-    
+
     const d = new Date(startTime);
     d.setHours(0, 0, 0, 0);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
-    
+
     const timeStr = formatTime(startTime);
     if (d.getTime() === today.getTime()) return `Today, ${timeStr}`;
     if (d.getTime() === yesterday.getTime()) return `Yesterday, ${timeStr}`;
-    
+
     return `${formatDate(startTime)}, ${timeStr}`;
   }, [startTime, formatDate, formatTime]);
 
   return (
-    <BottomSheetModal visible={visible} onClose={onClose}>
-      <View style={styles.scrollContent}>
-        <View style={styles.topSection}>
-          <Pressable 
-            onPress={() => !isLoggingMode && setShowImagePicker(true)}
-            disabled={isLoggingMode}
-            style={[styles.chooseIconBox, { backgroundColor: theme.backgroundSecondary }]}
+    <Modal
+      visible={visible}
+      transparent
+      statusBarTranslucent
+      animationType="fade"
+      onRequestClose={closeModal}
+    >
+      <GestureHandlerRootView style={{ flex: 1 }}>
+
+      <View style={styles.overlay}>
+        <Pressable style={styles.backdrop} onPress={closeModal} />
+
+        <GestureDetector gesture={panGesture}>
+          <Animated.View
+            style={[
+              styles.modalContent,
+              sheetStyle,
+              {
+                backgroundColor: theme.backgroundRoot,
+                paddingBottom: insets.bottom + Spacing.lg,
+                maxHeight: MODAL_HEIGHT,
+              },
+            ]}
           >
-            {selectedImage ? (
-              selectedImage.startsWith("category:") ? (
-                <Image 
-                  source={getCategoryImageSource(selectedImage.replace("category:", ""))} 
-                  style={styles.selectedImage} 
-                  resizeMode="cover" 
-                />
-              ) : selectedImage.startsWith("preset:") ? (
-                (() => {
-                  const preset = PRESET_IMAGES.find(p => p.id === selectedImage.replace("preset:", ""));
-                  return preset ? (
-                    <Image source={preset.image} style={styles.selectedImage} resizeMode="cover" />
-                  ) : (
-                    <Feather name="coffee" size={32} color={Colors.light.accent} />
-                  );
-                })()
-              ) : (
-                <Image source={{ uri: selectedImage }} style={styles.selectedImage} />
-              )
-            ) : (
-              <>
-                <Feather name="plus" size={28} color={theme.textMuted} />
-                <ThemedText type="caption" muted>Choose</ThemedText>
-              </>
-            )}
-          </Pressable>
+            <View style={styles.handleContainer}>
+              <View style={[styles.handle, { backgroundColor: Colors.light.accent }]} />
+            </View>
 
-          <View style={styles.nameInputSection}>
-            <ThemedText type="caption" muted>
-              You are {(prefillDrink?.category === "chocolate" || editEntry?.category === "chocolate") ? "eating" : "drinking"} {quantity} {selectedUnit} of
-            </ThemedText>
-            <TextInput
-              style={[styles.nameInput, { color: !isLoggingMode ? theme.text : theme.textMuted, borderBottomColor: theme.divider }]}
-              placeholder="Enter name"
-              placeholderTextColor={theme.textMuted}
-              value={drinkName}
-              onChangeText={setDrinkName}
-              editable={!isLoggingMode}
-            />
-          </View>
-        </View>
-
-        <View style={[styles.divider, { backgroundColor: theme.divider }]} />
-
-        <View style={styles.quantityRow}>
-          <ThemedText type="h1" style={styles.quantityNumber}>{quantity}</ThemedText>
-          <View style={styles.quantityButtons}>
-            <Pressable
-              onPress={() => setQuantity(q => q + 1)}
-              style={[styles.quantityBtn, { borderColor: theme.textMuted }]}
-            >
-              <Feather name="plus" size={20} color={theme.textMuted} />
-            </Pressable>
-            <Pressable
-              onPress={() => setQuantity(q => Math.max(q - 1, 1))}
-              style={[styles.quantityBtn, { borderColor: theme.textMuted }]}
-            >
-              <Feather name="minus" size={20} color={theme.textMuted} />
-            </Pressable>
-          </View>
-        </View>
-
-        <View style={[styles.divider, { backgroundColor: theme.divider }]} />
-
-        {prefillDrink ? (
-          <View style={styles.prefillUnitSection}>
-            <Pressable
-              onPress={() => setSelectedUnit(getUnitForDrink(prefillDrink.name, prefillDrink.category, prefillDrink.sizes))}
-              style={styles.radioRow}
-            >
-              <View style={[styles.radioCircle, (selectedUnit !== "ml" || prefillDrink.category === "custom") && styles.radioCircleActive]}>
-                {(selectedUnit !== "ml" || prefillDrink.category === "custom") && <View style={styles.radioInner} />}
-              </View>
-              <ThemedText type="body" style={{ flex: 1 }}>
-                {getUnitForDrink(prefillDrink.name, prefillDrink.category, prefillDrink.sizes)}
-              </ThemedText>
-              <View style={styles.caffeineInputWrapper}>
-                <ThemedText type="body" style={{ color: theme.text }}>
-                  {Math.round((parseFloat(caffeineMg) || 0) * quantity)}
-                </ThemedText>
-                <ThemedText type="body" muted> mg</ThemedText>
-              </View>
-            </Pressable>
-            {prefillDrink.category !== "custom" && prefillDrink.category !== "chocolate" && (
-              <Pressable
-                onPress={() => setSelectedUnit("ml")}
-                style={styles.radioRow}
+            {/* <ScrollView
+              style={styles.scrollContent}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              bounces={false}
+              overScrollMode="never"
+              scrollEventThrottle={16}
+            > */}
+            <View
+              style={styles.scrollContent}
               >
-                <View style={[styles.radioCircle, selectedUnit === "ml" && styles.radioCircleActive]}>
-                  {selectedUnit === "ml" && <View style={styles.radioInner} />}
-                </View>
-                <ThemedText type="body" style={{ flex: 1 }}>ml</ThemedText>
-                <View style={styles.caffeineInputWrapper}>
-                  <ThemedText type="body" style={{ color: theme.text }}>
-                    {Math.round(totalCaffeine)}
-                  </ThemedText>
-                  <ThemedText type="body" muted> mg</ThemedText>
-                </View>
-              </Pressable>
-            )}
-          </View>
-        ) : (
-          <View style={styles.unitAndCaffeineRow}>
-            <Pressable 
-              onPress={() => setShowUnitPicker(true)}
-              style={[styles.unitSelector, { backgroundColor: theme.backgroundSecondary }]}
-            >
-              <ThemedText type="body">{selectedUnit}</ThemedText>
-              <Feather name="chevron-down" size={16} color={theme.textMuted} />
-            </Pressable>
+              <View style={styles.topSection}>
+                <Pressable 
+                  onPress={() => !isLoggingMode && setShowImagePicker(true)}
+                  disabled={isLoggingMode}
+                  style={[styles.chooseIconBox, { backgroundColor: theme.backgroundSecondary }]}
+                >
+                  {selectedImage ? (
+                    selectedImage.startsWith("category:") ? (
+                      <Image 
+                        source={getCategoryImageSource(selectedImage.replace("category:", ""))} 
+                        style={styles.selectedImage} 
+                        resizeMode="cover" 
+                      />
+                    ) : selectedImage.startsWith("preset:") ? (
+                      (() => {
+                        const preset = PRESET_IMAGES.find(p => p.id === selectedImage.replace("preset:", ""));
+                        return preset ? (
+                          <Image source={preset.image} style={styles.selectedImage} resizeMode="cover" />
+                        ) : (
+                          <Feather name="coffee" size={32} color={Colors.light.accent} />
+                        );
+                      })()
+                    ) : (
+                      <Image source={{ uri: selectedImage }} style={styles.selectedImage} />
+                    )
+                  ) : (
+                    <>
+                      <Feather name="plus" size={28} color={theme.textMuted} />
+                      <ThemedText type="caption" muted>Choose</ThemedText>
+                    </>
+                  )}
+                </Pressable>
 
-            <View style={styles.mgInputWrapper}>
-              <TextInput
-                style={[styles.mgInput, { color: theme.text }]}
-                value={caffeineMg}
-                onChangeText={setCaffeineMg}
-                keyboardType="numeric"
-              />
-              <ThemedText type="body" muted>mg / {selectedUnit}</ThemedText>
+                <View style={styles.nameInputSection}>
+                  <ThemedText type="caption" muted>
+                    You are {(prefillDrink?.category === "chocolate" || editEntry?.category === "chocolate") ? "eating" : "drinking"} {quantity} {selectedUnit} of
+                  </ThemedText>
+                  <TextInput
+                    style={[styles.nameInput, { color: !isLoggingMode ? theme.text : theme.textMuted, borderBottomColor: theme.divider }]}
+                    placeholder="Enter name"
+                    placeholderTextColor={theme.textMuted}
+                    value={drinkName}
+                    onChangeText={setDrinkName}
+                    editable={!isLoggingMode}
+                  />
+                </View>
+              </View>
+
+              <View style={[styles.divider, { backgroundColor: theme.divider }]} />
+
+              <View style={styles.quantityRow}>
+                <ThemedText type="h1" style={styles.quantityNumber}>{quantity}</ThemedText>
+                <View style={styles.quantityButtons}>
+                  <Pressable
+                    onPress={incrementQuantity}
+                    style={[styles.quantityBtn, { borderColor: theme.textMuted }]}
+                  >
+                    <Feather name="plus" size={20} color={theme.textMuted} />
+                  </Pressable>
+                  <Pressable
+                    onPress={decrementQuantity}
+                    style={[styles.quantityBtn, { borderColor: theme.textMuted }]}
+                  >
+                    <Feather name="minus" size={20} color={theme.textMuted} />
+                  </Pressable>
+                </View>
+              </View>
+
+              <View style={[styles.divider, { backgroundColor: theme.divider }]} />
+
+              {prefillDrink ? (
+                <View style={styles.prefillUnitSection}>
+                  <Pressable
+                    onPress={() => setSelectedUnit(getUnitForDrink(prefillDrink.name, prefillDrink.category, prefillDrink.sizes))}
+                    style={styles.radioRow}
+                  >
+                    <View style={[styles.radioCircle, (selectedUnit !== "ml" || prefillDrink.category === "custom") && styles.radioCircleActive]}>
+                      {(selectedUnit !== "ml" || prefillDrink.category === "custom") && <View style={styles.radioInner} />}
+                    </View>
+                    <ThemedText type="body" style={{ flex: 1 }}>
+                      {getUnitForDrink(prefillDrink.name, prefillDrink.category, prefillDrink.sizes)}
+                    </ThemedText>
+                    <View style={styles.caffeineInputWrapper}>
+                      <ThemedText type="body" style={{ color: theme.text }}>
+                        {Math.round((parseFloat(caffeineMg) || 0) * quantity)}
+                      </ThemedText>
+                      <ThemedText type="body" muted> mg</ThemedText>
+                    </View>
+                  </Pressable>
+                  {prefillDrink.category !== "custom" && prefillDrink.category !== "chocolate" && (
+                    <Pressable
+                      onPress={() => setSelectedUnit("ml")}
+                      style={styles.radioRow}
+                    >
+                      <View style={[styles.radioCircle, selectedUnit === "ml" && styles.radioCircleActive]}>
+                        {selectedUnit === "ml" && <View style={styles.radioInner} />}
+                      </View>
+                      <ThemedText type="body" style={{ flex: 1 }}>ml</ThemedText>
+                      <View style={styles.caffeineInputWrapper}>
+                        <ThemedText type="body" style={{ color: theme.text }}>
+                          {formatCaffeine((prefillDrink.caffeinePer100ml / 100) * quantity)}
+                        </ThemedText>
+                        <ThemedText type="body" muted> mg</ThemedText>
+                      </View>
+                    </Pressable>
+                  )}
+                </View>
+              ) : isEditingInbuiltSource ? (
+                <View style={styles.prefillUnitSection}>
+                  {(() => {
+                    const drinkUnit = getUnitForDrink(editEntry.name, editEntry.category);
+                    return (
+                      <Pressable
+                        onPress={() => setSelectedUnit(drinkUnit)}
+                        style={styles.radioRow}
+                      >
+                        <View style={[styles.radioCircle, selectedUnit !== "ml" && styles.radioCircleActive]}>
+                          {selectedUnit !== "ml" && <View style={styles.radioInner} />}
+                        </View>
+                    <ThemedText type="body" style={{ flex: 1 }}>
+                          {drinkUnit}
+                        </ThemedText>
+                        <View style={styles.caffeineInputWrapper}>
+                          <ThemedText type="body" style={{ color: theme.text }}>
+                            {Math.round((parseFloat(caffeineMg) || 0) * quantity)}
+                          </ThemedText>
+                          <ThemedText type="body" muted> mg</ThemedText>
+                        </View>
+                      </Pressable>
+                    );
+                  })()}
+                  <Pressable
+                    onPress={() => setSelectedUnit("ml")}
+                    style={styles.radioRow}
+                  >
+                    <View style={[styles.radioCircle, selectedUnit === "ml" && styles.radioCircleActive]}>
+                      {selectedUnit === "ml" && <View style={styles.radioInner} />}
+                    </View>
+                    <ThemedText type="body" style={{ flex: 1 }}>ml</ThemedText>
+                    <View style={styles.caffeineInputWrapper}>
+                      <ThemedText type="body" style={{ color: theme.text }}>
+                        {(() => {
+                          const cpml = getInbuiltDrinkCaffeinePer100ml(editEntry.drinkId, editEntry.category);
+                          return cpml ? formatCaffeine((cpml / 100) * quantity) : "-";
+                        })()}
+                      </ThemedText>
+                      <ThemedText type="body" muted> mg</ThemedText>
+                    </View>
+                  </Pressable>
+                </View>
+              ) : (
+                <View style={styles.unitCaffeineRow}>
+                  <View style={styles.unitSelectorContainer}>
+                    <Pressable
+                      onPress={() => !isLoggingMode && setShowUnitPicker(!showUnitPicker)}
+                      disabled={isLoggingMode}
+                      style={[styles.unitSelector, { opacity: isLoggingMode ? 0.5 : 1 }]}
+                    >
+                      <Feather name="chevron-down" size={16} color={theme.textMuted} />
+                      <ThemedText type="body">{selectedUnit}</ThemedText>
+                    </Pressable>
+
+                  </View>
+
+                  <View style={styles.caffeineInputWrapper}>
+                    <TextInput
+                      style={[styles.caffeineInput, { color: theme.text, opacity: isLoggingMode ? 0.6 : 1 }]}
+                      value={caffeineMg}
+                      onChangeText={setCaffeineMg}
+                      keyboardType="numeric"
+                      maxLength={4}
+                      editable={!isLoggingMode}
+                    />
+                    <ThemedText type="body" muted> mg</ThemedText>
+                  </View>
+                </View>
+              )}
+
+              <View style={[styles.divider, { backgroundColor: theme.divider }]} />
+
+              <View style={styles.timeRow}>
+                <ThemedText type="body">Finished Drinking:</ThemedText>
+                <Pressable 
+                  onPress={() => setShowStartTimePicker(true)}
+                  style={[styles.timeChip, { borderColor: Colors.light.accent }]}
+                >
+                  <Feather name="calendar" size={14} color={Colors.light.accent} />
+                  <ThemedText type="small" style={{ color: Colors.light.accent }}>{startTimeLabelDisplay}</ThemedText>
+                </Pressable>
+              </View>
+
+              <View style={[styles.divider, { backgroundColor: theme.divider }]} />
+
+              <View style={styles.indicatorsRow}>
+                <View style={styles.indicatorWithText}>
+                  <GlowIndicator
+                    icon="coffee"
+                    label="Caffeine Limit"
+                    status={caffeineLimitStatus}
+                  />
+                  <View style={[styles.indicatorTextCard, { backgroundColor: theme.backgroundSecondary }]}>
+                    <ThemedText type="caption" muted style={styles.indicatorExplanation} numberOfLines={3}>
+                      {caffeineLimitStatus === "safe"
+                        ? "Supports alertness and focus."
+                        : caffeineLimitStatus === "warning"
+                        ? "May cause mild restlessness or less stable focus."
+                        : "Side effects like anxiety, jitters, or energy crashes become more likely."}
+                    </ThemedText>
+                  </View>
+                </View>
+                <View style={styles.indicatorWithText}>
+                  <GlowIndicator
+                    icon="moon"
+                    label="Sleep Impact"
+                    status={sleepImpactStatus}
+                  />
+                  <ThemedText type="caption" style={styles.sleepDateLabel}>{sleepDateLabel}</ThemedText>
+                  <View style={[styles.indicatorTextCard, { backgroundColor: theme.backgroundSecondary }]}>
+                    <ThemedText type="caption" muted style={styles.indicatorExplanation} numberOfLines={3}>
+                      {sleepImpactStatus === "safe"
+                        ? "Unlikely to disrupt sleep."
+                        : sleepImpactStatus === "warning"
+                        ? "May disrupt sleep for some people."
+                        : "More likely to disrupt sleep."}
+                    </ThemedText>
+                  </View>
+                </View>
+              </View>
+
+              <Pressable
+                onPress={handleAdd}
+                style={[
+                  styles.addButton,
+                  { opacity: drinkName.trim() && totalCaffeine > 0 ? 1 : 0.5 },
+                ]}
+                disabled={!drinkName.trim() || totalCaffeine <= 0}
+              >
+                <ThemedText type="body" style={styles.addButtonText}>{isEditMode || isEditingCustomDrink ? "Save" : "Add"}</ThemedText>
+              </Pressable>
+              </View>
+            {/* </ScrollView> */}
+            {/* <View style={{ height: insets.bottom }} /> */}
+          </Animated.View>
+        </GestureDetector>
+
+        {showUnitPicker && (
+          <View style={styles.unitPickerOverlay}>
+            <Pressable 
+              style={StyleSheet.absoluteFillObject} 
+              onPress={() => setShowUnitPicker(false)} 
+            />
+            <View style={[styles.unitPickerDropdown, { backgroundColor: theme.backgroundSecondary }]}>
+              <ScrollView style={{ maxHeight: 250 }} showsVerticalScrollIndicator={true}>
+                {UNITS.map((unit) => (
+                  <Pressable
+                    key={unit}
+                    onPress={() => {
+                      setSelectedUnit(unit);
+                      setShowUnitPicker(false);
+                    }}
+                    style={[
+                      styles.pickerItem,
+                      selectedUnit === unit && { backgroundColor: `${Colors.light.accent}20` },
+                    ]}
+                  >
+                    <ThemedText type="body">{unit}</ThemedText>
+                  </Pressable>
+                ))}
+              </ScrollView>
             </View>
           </View>
         )}
-
-        <View style={[styles.divider, { backgroundColor: theme.divider }]} />
-
-        <View style={styles.timeSection}>
-          <Pressable 
-            onPress={() => setShowStartTimePicker(true)}
-            style={styles.timeSelector}
-          >
-            <Feather name="clock" size={18} color={theme.textMuted} />
-            <ThemedText type="body" style={styles.timeLabel}>Started at {startTimeLabelDisplay}</ThemedText>
-            <Feather name="chevron-right" size={18} color={theme.textMuted} />
-          </Pressable>
-        </View>
-
-        <View style={styles.indicatorsGrid}>
-          <View style={[styles.indicatorCard, { backgroundColor: theme.backgroundSecondary }]}>
-            <View style={styles.indicatorHeader}>
-              <ThemedText type="small" muted>CAFFEINE LIMIT</ThemedText>
-              <GlowIndicator status={caffeineLimitStatus} icon="coffee" label="Limit" />
-            </View>
-            <ThemedText type="body" style={styles.indicatorValue}>
-              {Math.round(totalCaffeine)} mg
-            </ThemedText>
-          </View>
-
-          <View style={[styles.indicatorCard, { backgroundColor: theme.backgroundSecondary }]}>
-            <View style={styles.indicatorHeader}>
-              <ThemedText type="small" muted>SLEEP IMPACT</ThemedText>
-              <GlowIndicator status={sleepImpactStatus} icon="moon" label="Sleep" />
-            </View>
-            <ThemedText type="body" style={styles.indicatorValue}>
-              {sleepDateLabel}
-            </ThemedText>
-          </View>
-        </View>
-
-        <Pressable
-          onPress={handleAdd}
-          style={({ pressed }) => [
-            styles.addButton,
-            { backgroundColor: Colors.light.accent, opacity: pressed ? 0.9 : 1 }
-          ]}
-        >
-          <ThemedText style={styles.addButtonText}>
-            {isEditMode ? "Save Changes" : (isEditingCustomDrink ? "Save Drink" : "Log Drink")}
-          </ThemedText>
-        </Pressable>
       </View>
-
-      <TimePickerModal
-        visible={showStartTimePicker}
-        onClose={() => setShowStartTimePicker(false)}
-        onSelectTime={(date, label) => {
-          setStartTime(date);
-          setStartTimeLabel(label);
-          setShowStartTimePicker(false);
-        }}
-        initialDate={startTime}
-      />
 
       <ImagePickerModal
         visible={showImagePicker}
         onClose={() => setShowImagePicker(false)}
-        onSelectImage={(uri) => {
-          setSelectedImage(uri);
-          setShowImagePicker(false);
-        }}
+        onSelectImage={handleSelectImage}
       />
-    </BottomSheetModal>
+
+      <TimePickerModal
+        visible={showStartTimePicker}
+        onClose={() => setShowStartTimePicker(false)}
+        onSelectTime={handleSelectStartTime}
+        initialDate={startTime}
+      />
+        </GestureHandlerRootView>
+    </Modal>
   );
 }
 
 const styles = StyleSheet.create({
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.35)",
+  },
+  modalContent: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    borderTopLeftRadius: BorderRadius.xl,
+    borderTopRightRadius: BorderRadius.xl,
+  },
+  handleContainer: {
+    alignItems: "center",
+    paddingVertical: Spacing.md,
+  },
+  handle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+  },
   scrollContent: {
-    paddingTop: Spacing.md,
+    paddingHorizontal: Spacing.xl,
   },
   topSection: {
     flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.md,
+    alignItems: "flex-start",
+    gap: Spacing.lg,
     marginBottom: Spacing.lg,
   },
   chooseIconBox: {
-    width: 64,
-    height: 64,
-    borderRadius: 16,
+    width: 72,
+    height: 72,
+    borderRadius: BorderRadius.md,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.05)",
     overflow: "hidden",
   },
   selectedImage: {
     width: "100%",
     height: "100%",
+    borderRadius: BorderRadius.md,
+  },
+  selectedPresetIcon: {
+    width: "100%",
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 4,
   },
   nameInputSection: {
     flex: 1,
+    paddingTop: Spacing.xs,
   },
   nameInput: {
     fontSize: 20,
     fontWeight: "600",
-    paddingVertical: Spacing.xs,
+    paddingVertical: Spacing.sm,
     borderBottomWidth: 1,
   },
   divider: {
     height: 1,
-    width: "100%",
-    opacity: 0.5,
+    marginVertical: Spacing.md,
   },
   quantityRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: Spacing.xl,
+    paddingVertical: Spacing.sm,
   },
   quantityNumber: {
     fontSize: 48,
-    fontWeight: "700",
+    fontWeight: "300",
   },
   quantityButtons: {
     flexDirection: "row",
-    gap: Spacing.md,
+    gap: Spacing.sm,
   },
   quantityBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    borderWidth: 1,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1.5,
     alignItems: "center",
     justifyContent: "center",
   },
+  unitCaffeineRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: Spacing.sm,
+    zIndex: 10,
+  },
+  unitSelectorContainer: {
+    position: "relative",
+    zIndex: 10,
+  },
+  unitSelector: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.xs,
+  },
   prefillUnitSection: {
-    paddingVertical: Spacing.md,
+    gap: Spacing.sm,
   },
   radioRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: Spacing.md,
-    gap: Spacing.md,
+    gap: Spacing.sm,
+    paddingVertical: Spacing.xs,
   },
   radioCircle: {
     width: 20,
     height: 20,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: Colors.light.accent,
+    borderColor: "#ccc",
     alignItems: "center",
     justifyContent: "center",
-    opacity: 0.3,
   },
   radioCircleActive: {
-    opacity: 1,
+    borderColor: Colors.light.accent,
   },
   radioInner: {
     width: 10,
@@ -645,71 +893,99 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: Colors.light.accent,
   },
+  unitPickerOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 100,
+    justifyContent: "flex-end",
+    paddingBottom: 280,
+    paddingHorizontal: Spacing.xl,
+  },
+  unitPickerDropdown: {
+    width: 120,
+    borderRadius: BorderRadius.md,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 10,
+  },
   caffeineInputWrapper: {
     flexDirection: "row",
-    alignItems: "baseline",
-  },
-  unitAndCaffeineRow: {
-    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: Spacing.lg,
   },
-  unitSelector: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.xs,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.sm,
-  },
-  mgInputWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.xs,
-  },
-  mgInput: {
-    fontSize: 20,
+  caffeineInput: {
+    fontSize: 18,
     fontWeight: "600",
-    textAlign: "right",
     minWidth: 50,
+    textAlign: "right",
   },
-  timeSection: {
-    paddingVertical: Spacing.lg,
+  pickerDropdown: {
+    borderRadius: BorderRadius.sm,
+    marginTop: Spacing.xs,
+    overflow: "hidden",
   },
-  timeSelector: {
+  pickerItem: {
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+  },
+  timeRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: Spacing.sm,
-  },
-  timeLabel: {
-    flex: 1,
-  },
-  indicatorsGrid: {
-    flexDirection: "row",
-    gap: Spacing.md,
-    marginVertical: Spacing.lg,
-  },
-  indicatorCard: {
-    flex: 1,
-    padding: Spacing.md,
-    borderRadius: BorderRadius.md,
-  },
-  indicatorHeader: {
-    flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: Spacing.xs,
+    paddingVertical: Spacing.sm,
   },
-  indicatorValue: {
-    fontWeight: "700",
-    marginTop: 2,
+  timeChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.xs,
+    paddingVertical: Spacing.xs,
+    paddingHorizontal: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+  },
+  indicatorsRow: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "flex-start",
+    paddingVertical: Spacing.md,
+    marginBottom: Spacing.md,
+    gap: Spacing.md,
+  },
+  indicatorWithText: {
+    flex: 1,
+    alignItems: "center",
+    gap: Spacing.xs,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.1)",
+    borderRadius: BorderRadius.md,
+    padding: Spacing.sm,
+  },
+  indicatorTextCard: {
+    borderRadius: BorderRadius.sm,
+    paddingVertical: Spacing.xs,
+    paddingHorizontal: Spacing.sm,
+    width: "100%",
+    minHeight: 56,
+    justifyContent: "center",
+  },
+  sleepDateLabel: {
+    position: "absolute",
+    top: Spacing.xs,
+    right: Spacing.sm,
+    color: Colors.light.accent,
+    fontWeight: "500",
+  },
+  indicatorExplanation: {
+    textAlign: "center",
+    lineHeight: 16,
   },
   addButton: {
-    paddingVertical: Spacing.lg,
-    borderRadius: BorderRadius.sm,
+    backgroundColor: "#4CAF50",
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
     alignItems: "center",
-    marginTop: Spacing.md,
+    marginBottom: Spacing.lg,
   },
   addButtonText: {
     color: "#FFFFFF",
