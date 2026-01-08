@@ -109,6 +109,7 @@ export function BottomSheetModal({
                 }, 
                 sheetStyle
               ]}
+              collapsable={false}
             >
               <View style={styles.handleContainer}>
                 <View style={[styles.handle, { backgroundColor: theme.divider }]} />
