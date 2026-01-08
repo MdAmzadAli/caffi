@@ -98,24 +98,24 @@ export function BottomSheetModal({
           <Animated.View style={[styles.backdrop, backdropStyle]}>
             <Pressable style={StyleSheet.absoluteFillObject} onPress={onClose} />
           </Animated.View>
-          <Animated.View 
-            style={[
-              styles.sheet, 
-              { 
-                backgroundColor: theme.backgroundRoot,
-                paddingBottom: insets.bottom + Spacing.xl,
-                height: maxHeight,
-              }, 
-              sheetStyle
-            ]}
-          >
-            <GestureDetector gesture={panGesture}>
+          <GestureDetector gesture={panGesture}>
+            <Animated.View 
+              style={[
+                styles.sheet, 
+                { 
+                  backgroundColor: theme.backgroundRoot,
+                  paddingBottom: insets.bottom + Spacing.xl,
+                  height: maxHeight,
+                }, 
+                sheetStyle
+              ]}
+            >
               <View style={styles.handleContainer}>
                 <View style={[styles.handle, { backgroundColor: theme.divider }]} />
               </View>
-            </GestureDetector>
-            {children}
-          </Animated.View>
+              {children}
+            </Animated.View>
+          </GestureDetector>
         </View>
       </GestureHandlerRootView>
     </Modal>
