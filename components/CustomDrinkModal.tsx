@@ -503,7 +503,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
           <View style={[styles.indicatorCard, { backgroundColor: theme.backgroundSecondary }]}>
             <View style={styles.indicatorHeader}>
               <ThemedText type="small" muted>CAFFEINE LIMIT</ThemedText>
-              <GlowIndicator status={caffeineLimitStatus} />
+              <GlowIndicator status={caffeineLimitStatus} icon="coffee" label="Limit" />
             </View>
             <ThemedText type="body" style={styles.indicatorValue}>
               {Math.round(totalCaffeine)} mg
@@ -513,7 +513,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
           <View style={[styles.indicatorCard, { backgroundColor: theme.backgroundSecondary }]}>
             <View style={styles.indicatorHeader}>
               <ThemedText type="small" muted>SLEEP IMPACT</ThemedText>
-              <GlowIndicator status={sleepImpactStatus} />
+              <GlowIndicator status={sleepImpactStatus} icon="moon" label="Sleep" />
             </View>
             <ThemedText type="body" style={styles.indicatorValue}>
               {sleepDateLabel}
@@ -537,7 +537,7 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
       <TimePickerModal
         visible={showStartTimePicker}
         onClose={() => setShowStartTimePicker(false)}
-        onConfirm={(date, label) => {
+        onSelectTime={(date, label) => {
           setStartTime(date);
           setStartTimeLabel(label);
           setShowStartTimePicker(false);
@@ -552,37 +552,12 @@ export function CustomDrinkModal({ visible, onClose, onAdd, editEntry, prefillDr
           setSelectedImage(uri);
           setShowImagePicker(false);
         }}
-        currentImage={selectedImage}
       />
     </BottomSheetModal>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: "flex-end",
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.4)",
-  },
-  modalContent: {
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.sm,
-  },
-  handleContainer: {
-    paddingVertical: Spacing.sm,
-    width: "100%",
-    alignItems: "center",
-  },
-  handle: {
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-  },
   scrollContent: {
     paddingTop: Spacing.md,
   },
